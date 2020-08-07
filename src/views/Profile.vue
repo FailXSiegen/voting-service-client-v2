@@ -1,6 +1,6 @@
 <template>
   <div class="profil-container">
-    <div class="row" style="min-height: 100vh;">
+    <div class="row">
       <div class="col-3 bg-dark text-white py-3">
         <app-navigation></app-navigation>
       </div>
