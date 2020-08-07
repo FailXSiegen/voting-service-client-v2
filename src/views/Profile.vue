@@ -1,5 +1,5 @@
 <template>
-  <div class="profil-container">
+  <div class="profile-container">
     <div class="row">
       <div class="col-3 bg-dark text-white py-3">
         <app-navigation></app-navigation>
