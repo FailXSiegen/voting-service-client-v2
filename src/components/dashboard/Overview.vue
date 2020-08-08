@@ -2,18 +2,18 @@
   <div class="dashboard-overview-container">
     <div class="row">
       <div class="col-4">
-        <app-event-overview></app-event-overview>
+        <app-event-listing></app-event-listing>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import AppEventOverview from './../Events/Overview'
+import AppEventListing from '../events/Listing'
 
 export default {
   components: {
-    AppEventOverview
+    AppEventListing
   },
   data () {
     return {

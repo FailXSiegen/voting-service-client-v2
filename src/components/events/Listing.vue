@@ -5,12 +5,5 @@
 </template>
 
 <script>
-
-export default {
-  data () {
-    return {
-      headline: 'Events'
-    }
-  }
-}
+export default {}
 </script>

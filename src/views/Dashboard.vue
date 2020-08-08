@@ -15,7 +15,7 @@
 <script>
 
 import AppNavigation from './../components/Navigation'
-import AppOverview from './../components/Dashboard/Overview'
+import AppOverview from '../components/dashboard/Overview'
 
 export default {
   components: {
