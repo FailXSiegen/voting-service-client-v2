@@ -1,5 +1,5 @@
 <template>
-  <h1>MEMBERLIST</h1>
+  <h1>Memberlisting to be defined.</h1>
 </template>
 
 <script>

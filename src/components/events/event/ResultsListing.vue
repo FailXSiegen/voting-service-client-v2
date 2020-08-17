@@ -1,5 +1,5 @@
 <template>
-  <h1>WAITINGROOM</h1>
+  <h1>Resultslisting to be defined.</h1>
 </template>
 
 <script>

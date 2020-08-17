@@ -1,5 +1,5 @@
 <template>
-  <h1>POLLS</h1>
+  <h1>Pollsisting to be defined.</h1>
 </template>
 
 <script>

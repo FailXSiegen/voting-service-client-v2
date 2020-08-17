@@ -4,6 +4,10 @@ import AppLogin from '@/views/Login'
 import AppDashboard from '@/views/admin/Dashboard'
 import AppEvents from '@/views/admin/Events'
 import AppProfile from '@/views/admin/Profile'
+import AppMemberlist from '@/views/event/Memberlist'
+import AppPolls from '@/views/event/Polls'
+import AppWaitingroom from '@/views/event/Waitingroom'
+import AppResults from '@/views/event/Results'
 import AppUser from '@/views/User'
 // import store from '@/store'
 
@@ -32,6 +36,30 @@ const routes = [
     path: '/admin/profile',
     name: 'Profile',
     component: AppProfile
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/event',
+    name: 'Memberlist',
+    component: AppMemberlist
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/event/polls',
+    name: 'Polls',
+    component: AppPolls
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/event/waitingroom',
+    name: 'Waitingroom',
+    component: AppWaitingroom
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/event/results',
+    name: 'Results',
+    component: AppResults
     // meta: { requiresAuth: true }
   },
   {
