@@ -1,29 +1,43 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import AppDashboard from './../views/Dashboard'
-import AppEvents from './../views/Events'
-import AppProfile from './../views/Profile'
-// import store from '../store'
+import AppLogin from '@/views/Login'
+import AppDashboard from '@/views/admin/Dashboard'
+import AppEvents from '@/views/admin/Events'
+import AppProfile from '@/views/admin/Profile'
+import AppUser from '@/views/User'
+// import store from '@/store'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '/',
-    name: 'Dashboard',
+    name: 'Login',
+    component: AppLogin
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
     component: AppDashboard
     // meta: { requiresAuth: true }
   },
   {
-    path: '/events',
+    path: '/admin/events',
     name: 'Events',
     component: AppEvents
     // meta: { requiresAuth: true }
   },
   {
-    path: '/profile',
+    path: '/admin/profile',
     name: 'Profile',
     component: AppProfile
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/user',
+    name: 'User',
+    component: AppUser
     // meta: { requiresAuth: true }
   }
 ]

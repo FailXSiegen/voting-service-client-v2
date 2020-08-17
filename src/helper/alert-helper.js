@@ -1,5 +1,5 @@
 import JQuery from 'jquery'
-import store from '../store'
+import store from '@/store'
 
 export function addMessage (type, headline, message, persistent) {
   JQuery('.toast:not([data-autohide="false"])').remove()

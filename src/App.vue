@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="container-fluid">
+  <div id="app">
     <router-view>
       <div slot="alerts" class="toast-container">
         <div :data-index="index"  v-for="(alert, index) in alerts" :key="index" class="toast float-right" role="alert" aria-live="assertive" aria-atomic="true" :data-autohide="alert.persistent ? 'false' : 'true'" data-delay="3500">
