@@ -20,6 +20,7 @@
 
 import AppNavigation from '@/components/events/event/Navigation'
 import AppPendingUsers from '@/components/events/event/PendingUsers'
+import { localize } from '@/helper/localization-helper'
 
 export default {
   components: {
@@ -29,6 +30,11 @@ export default {
   data () {
     return {
       headline: 'Waitingroom'
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
     }
   }
 }

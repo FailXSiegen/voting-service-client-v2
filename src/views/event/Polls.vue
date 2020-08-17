@@ -20,6 +20,7 @@
 
 import AppNavigation from '@/components/events/event/Navigation'
 import AppPollsListing from '@/components/events/event/PollsListing'
+import { localize } from '@/helper/localization-helper'
 
 export default {
   components: {
@@ -29,6 +30,11 @@ export default {
   data () {
     return {
       headline: 'Polls'
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
     }
   }
 }

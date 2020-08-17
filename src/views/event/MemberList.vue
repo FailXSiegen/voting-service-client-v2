@@ -20,6 +20,7 @@
 
 import AppNavigation from '@/components/events/event/Navigation'
 import AppAllowedUsers from '@/components/events/event/AllowedUsers'
+import { localize } from '@/helper/localization-helper'
 
 export default {
   components: {
@@ -28,7 +29,12 @@ export default {
   },
   data () {
     return {
-      headline: 'Memberlisting'
+      headline: 'Allowed Members'
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
     }
   }
 }
