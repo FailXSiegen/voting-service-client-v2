@@ -6,7 +6,7 @@
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         Memberlist
         <span class="badge badge-success badge-pill">
-          {{ acceptedMembers.length }}
+          {{ verifiedUsers }}
         </span>
       </router-link>
       <router-link
@@ -14,7 +14,7 @@
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         Waitingroom
         <span class="badge badge-warning badge-pill">
-          {{ pendingMembers.length }}
+          {{ pendingUsers }}
         </span>
       </router-link>
       <router-link
@@ -36,61 +36,18 @@
 import { localize } from '@/helper/localization-helper'
 
 export default {
-  data () {
-    return {
-      acceptedMembers: [
-        {
-          userName: 'testName',
-          clearName: 'Moritz Preuss',
-          votes: 2,
-          isAllowedToVote: true
-        },
-        {
-          userName: 'testName2',
-          clearName: 'Moritz Preuss',
-          votes: 1,
-          isAllowedToVote: false
-        }
-      ],
-      pendingMembers: [
-        {
-          userName: 'testName',
-          clearName: 'Moritz Preuss',
-          votes: 2,
-          isAllowedToVote: true
-        },
-        {
-          userName: 'testName2',
-          clearName: 'Moritz Preuss',
-          votes: 1,
-          isAllowedToVote: false
-        },
-        {
-          userName: 'testName',
-          clearName: 'Moritz Preuss',
-          votes: 2,
-          isAllowedToVote: true
-        },
-        {
-          userName: 'testName2',
-          clearName: 'Moritz Preuss',
-          votes: 1,
-          isAllowedToVote: false
-        },
-        {
-          userName: 'testName',
-          clearName: 'Moritz Preuss',
-          votes: 2,
-          isAllowedToVote: true
-        },
-        {
-          userName: 'testName2',
-          clearName: 'Moritz Preuss',
-          votes: 1,
-          isAllowedToVote: false
-        }
-      ]
+  props: {
+    verifiedUsers: {
+      type: Number,
+      required: true
+    },
+    pendingUsers: {
+      type: Number,
+      required: true
     }
+  },
+  data () {
+    return {}
   },
   methods: {
     localize (path) {

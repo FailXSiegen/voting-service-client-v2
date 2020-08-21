@@ -27,6 +27,13 @@ const localizations = {
           fullName: 'Full Name',
           submit: 'submit'
         }
+      },
+      event: {
+        user: {
+          verifyAs: 'Verify as',
+          member: 'Member',
+          visitor: 'Visitor'
+        }
       }
     },
     pagination: {
