@@ -18,7 +18,7 @@
           <td v-if="eventsDetail">
             <button @click="onEdit" class="btn btn-primary btn-block mx-1 my-2">Edit</button>
             <button @click="onInviteLink" class="btn btn-primary btn-block mx-1 my-2">Copy Invite Link</button>
-            <button @click="onNewTab" class="btn btn-primary btn-block mx-1 my-2">Open in new Tab</button>
+            <router-link to="/event" target="_blank" class="btn btn-primary btn-block mx-1 my-2">Open in new Tab</router-link>
             <button @click="onClose" class="btn btn-primary btn-block mx-1 my-2">Close</button>
           </td>
       </tr>
@@ -48,9 +48,6 @@ export default {
     },
     onInviteLink () {
       alert('Copy invite link')
-    },
-    onNewTab () {
-      alert('Opens new Tab')
     },
     onClose () {
       alert('Close Event')
