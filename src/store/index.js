@@ -59,7 +59,7 @@ export default new Vuex.Store({
         publicName: 'Pending Test Visitor',
         allowToVote: false,
         online: true,
-        verified: false,
+        verified: true,
         eventCoOrganizer: false
       },
       {

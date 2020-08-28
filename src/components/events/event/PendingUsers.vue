@@ -7,8 +7,9 @@
         <span class="badge badge-danger badge-pill status-indicator" v-else>offline</span>
       </div>
 
-      <button class="btn btn-primary" v-if="user.allowToVote">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.member') }}</button>
-      <button class="btn btn-primary" v-else>{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.visitor') }}</button>
+      <button class="btn btn-primary mr-2">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.member') }}</button>
+      <button class="btn btn-primary mr-2">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.visitor') }}</button>
+      <button class="btn btn-danger mr-2">{{ localize('view.event.user.block') }}</button>
     </li>
   </ul>
 </template>
