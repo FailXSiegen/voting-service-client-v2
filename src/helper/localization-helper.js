@@ -31,6 +31,8 @@ const localizations = {
       event: {
         user: {
           verifyAs: 'Verify as',
+          setTo: 'Set to',
+          block: 'Block this user',
           member: 'Member',
           visitor: 'Visitor'
         }
