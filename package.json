@@ -9,12 +9,16 @@
   },
   "dependencies": {
     "bootstrap": "^4.5.0",
+    "bootstrap-icons": "^1.0.0",
+    "bootstrap-icons-font": "^2.0.3",
+    "chart.js": "^2.9.3",
     "core-js": "^3.6.5",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
     "ramda": "^0.27.1",
     "vue": "^2.6.11",
     "vue-apollo": "^3.0.0-beta.11",
+    "vue-chartjs": "^3.5.1",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"
   },
