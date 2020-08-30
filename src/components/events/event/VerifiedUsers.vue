@@ -19,18 +19,17 @@
 import { localize } from '@/helper/localization-helper'
 
 export default {
-  props: {
-    verifiedUsers: {
-      type: Array,
-      required: true
-    }
-  },
   data () {
     return {}
   },
   methods: {
     localize (path) {
       return localize(path, this.$store.state.language)
+    }
+  },
+  computed: {
+    verifiedUsers () {
+      return this.$store.getters.verifiedUsers
     }
   }
 }

@@ -6,7 +6,7 @@
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         Memberlist
         <span class="badge badge-success badge-pill">
-          {{ verifiedUsers }}
+          {{ verifiedUsersCount }}
         </span>
       </router-link>
       <router-link
@@ -14,7 +14,7 @@
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         Waitingroom
         <span class="badge badge-warning badge-pill">
-          {{ pendingUsers }}
+          {{ pendingUsersCount }}
         </span>
       </router-link>
       <router-link
@@ -36,22 +36,20 @@
 import { localize } from '@/helper/localization-helper'
 
 export default {
-  props: {
-    verifiedUsers: {
-      type: Number,
-      required: true
-    },
-    pendingUsers: {
-      type: Number,
-      required: true
-    }
-  },
   data () {
     return {}
   },
   methods: {
     localize (path) {
       return localize(path, this.$store.state.language)
+    }
+  },
+  computed: {
+    pendingUsersCount () {
+      return this.$store.getters.pendingUsers.length
+    },
+    verifiedUsersCount () {
+      return this.$store.getters.verifiedUsers.length
     }
   }
 }

@@ -74,7 +74,14 @@ export default new Vuex.Store({
       }
     ]
   },
-  getters: {},
+  getters: {
+    verifiedUsers: state => {
+      return state.users.filter(user => user.verified)
+    },
+    pendingUsers: state => {
+      return state.users.filter(user => !user.verified)
+    }
+  },
   mutations: {},
   actions: {}
 })

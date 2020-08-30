@@ -19,18 +19,17 @@
 import { localize } from '@/helper/localization-helper'
 
 export default {
-  props: {
-    pendingUsers: {
-      type: Array,
-      required: true
-    }
-  },
   data () {
     return {}
   },
   methods: {
     localize (path) {
       return localize(path, this.$store.state.language)
+    }
+  },
+  computed: {
+    pendingUsers () {
+      return this.$store.getters.pendingUsers
     }
   }
 }
