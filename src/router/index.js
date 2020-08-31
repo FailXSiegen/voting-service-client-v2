@@ -4,6 +4,7 @@ import AppLogin from '@/views/Login'
 import AppDashboard from '@/views/admin/Dashboard'
 import AppEvents from '@/views/admin/Events'
 import AppProfile from '@/views/admin/Profile'
+import AppCreateEvent from '@/views/admin/CreateEvent'
 import AppMemberList from '@/views/admin/event/MemberList'
 import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
@@ -36,6 +37,12 @@ const routes = [
     path: '/admin/profile',
     name: 'Profile',
     component: AppProfile
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/events/new',
+    name: 'Create Event',
+    component: AppCreateEvent
     // meta: { requiresAuth: true }
   },
   {

@@ -4,7 +4,7 @@
       <router-link
         to="/event"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
-        Memberlist
+        {{ localize('view.event.navigation.members') }}
         <span class="badge badge-success badge-pill">
           {{ verifiedUsersCount }}
         </span>
@@ -12,7 +12,7 @@
       <router-link
         to="/event/waitingroom"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
-        Waitingroom
+        {{ localize('view.event.navigation.waitingRoom') }}
         <span class="badge badge-warning badge-pill">
           {{ pendingUsersCount }}
         </span>
@@ -20,12 +20,12 @@
       <router-link
         to="/event/polls"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
-        Polls
+        {{ localize('view.event.navigation.polls') }}
       </router-link>
       <router-link
         to="/event/results"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
-        Results
+        {{ localize('view.event.navigation.results') }}
       </router-link>
     </div>
   </nav>

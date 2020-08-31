@@ -6,6 +6,10 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
+        <router-link to="/admin/events/new" class="btn btn-success btn-lg my-3">
+          <i class="bi-plus bi--2xl align-middle"></i>
+          <span class="align-middle">{{ localize('view.event.create.createNew') }}</span>
+        </router-link>
         <app-event-listing
           :headline="'Upcoming Events'"
           :events-detail="true"
@@ -24,6 +28,7 @@
 <script>
 import AppNavigation from '@/components/Navigation'
 import AppEventListing from '@/components/events/Listing'
+import { localize } from '@/helper/localization-helper'
 
 export default {
   components: {
@@ -67,6 +72,11 @@ export default {
           finished: true
         }
       ]
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
     }
   }
 }

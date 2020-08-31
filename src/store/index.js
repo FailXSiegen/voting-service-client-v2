@@ -8,11 +8,11 @@ export default new Vuex.Store({
     language: 'de_DE',
     views: [
       {
-        title: 'Dashboard',
+        title: 'Übersicht',
         route: '/admin'
       },
       {
-        title: 'Events',
+        title: 'Veranstaltungen',
         route: '/admin/events'
       }
     ],

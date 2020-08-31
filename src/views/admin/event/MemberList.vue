@@ -6,11 +6,8 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
-        <div class="row mt-5">
-          <div class="col-12">
-            <app-verified-users />
-          </div>
-        </div>
+        <hr>
+        <app-verified-users />
       </div>
     </div>
   </div>
@@ -29,7 +26,7 @@ export default {
   },
   data () {
     return {
-      headline: 'Verified Members'
+      headline: 'Teilnehmerliste'
     }
   },
   methods: {

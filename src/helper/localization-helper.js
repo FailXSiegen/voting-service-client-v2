@@ -6,35 +6,83 @@ const localizations = {
       login: {
         label: {
           email: 'E-Mail',
-          password: 'Password',
-          eventIdent: 'Enter Event ID'
+          password: 'Passwort',
+          eventIdent: 'Event-ID eingeben'
         },
         headline: {
           title: 'Voting Service',
-          userLogin: 'Login as User',
-          eventIdent: 'Login by ID'
+          userLogin: 'Als Besucher einloggen',
+          eventIdent: 'Mit Event-ID einloggen'
         },
         submit: 'Login',
-        submitToEvent: 'Login to Event'
+        submitToEvent: 'In Event einloggen'
       },
       profile: {
         headline: '',
         label: {
-          currentPassword: 'Current Password',
-          newPassword: 'New Password',
-          repeatPassword: 'Repeat Password',
-          email: 'Email',
-          fullName: 'Full Name',
-          submit: 'submit'
+          currentPassword: 'Aktuelles Passwort',
+          newPassword: 'Neues Passwort',
+          repeatPassword: 'Neues Passwort erneut eingeben',
+          email: 'E-Mail',
+          fullName: 'Voller Name',
+          submit: 'Speichern'
         }
       },
       event: {
+        navigation: {
+          members: 'Teilnehmer',
+          waitingRoom: 'Warteraum',
+          polls: 'Abstimmungen',
+          results: 'Ergebnisse'
+        },
         user: {
-          verifyAs: 'Verify as',
-          setTo: 'Set to',
-          block: 'Block this user',
-          member: 'Member',
-          visitor: 'Visitor'
+          verifyAs: 'Verifizieren als:',
+          setTo: 'Setzen auf:',
+          block: 'Benutzer blockieren',
+          member: 'Teilnehmer',
+          visitor: 'Besucher'
+        },
+        create: {
+          createNew: 'Neues Event erstellen',
+          labels: {
+            title: 'Event-Titel',
+            description: 'Event-Beschreibung',
+            date: 'Start-Datum',
+            activateLobby: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
+            submit: 'Dieses Event erstellen'
+          }
+        }
+      },
+      polls: {
+        headlines: {
+          createTitle: 'Neue Abstimmung erstellen',
+          answerOptionsTitle: 'Antwortoptionen für Abstimmung',
+          listingTitle: 'Vorgefertigte Umfragen'
+        },
+        create: {
+          labels: {
+            title: 'Was soll abgestimmt werden?',
+            yesNo: 'Ja/Nein',
+            yesNoAbstain: 'Ja/Nein/Enthalten',
+            custom: 'Individuelle Antwortoptionen',
+            listOfAnswerOptions: 'Liste der Antwortoptionen',
+            listOfAnswerOptionsInfo: 'Ein Eintrag pro Zeile entspricht einer Auswahlmöglichkeit',
+            maxVotes: 'Maximal auszuwählen',
+            maxVotesInfo: '0 = alle auswählbar',
+            minVotes: 'Minimal auszuwählen',
+            minVotesInfo: '0 = leere Abstimmung möglich',
+            abstention: 'Enthaltungsfeld anzeigen',
+            openPoll: 'Offene Abstimmung',
+            secretPoll: 'Geheime Abstimmung',
+            saveOnly: 'Abstimmung speichern',
+            saveAndStart: 'Abstimmung speichern & sofort starten'
+          }
+        },
+        listing: {
+          start: 'Abstimmung starten',
+          startConfirm: 'Möchtest du die Abstimmung starten?',
+          delete: 'Abstimmung löschen',
+          deleteConfirm: 'Möchtest du die Abstimmung wirklich löschen?'
         }
       }
     },

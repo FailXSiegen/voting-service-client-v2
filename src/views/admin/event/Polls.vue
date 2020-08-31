@@ -6,11 +6,8 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
-        <div class="row">
-          <div class="col-12 col-md-6">
-            <app-polls-listing />
-          </div>
-        </div>
+        <hr>
+        <app-polls />
       </div>
     </div>
   </div>
@@ -19,17 +16,17 @@
 <script>
 
 import AppNavigation from '@/components/events/event/Navigation'
-import AppPollsListing from '@/components/events/event/PollsListing'
+import AppPolls from '@/components/events/event/Polls'
 import { localize } from '@/helper/localization-helper'
 
 export default {
   components: {
     AppNavigation,
-    AppPollsListing
+    AppPolls
   },
   data () {
     return {
-      headline: 'Polls'
+      headline: 'Umfragen'
     }
   },
   methods: {
