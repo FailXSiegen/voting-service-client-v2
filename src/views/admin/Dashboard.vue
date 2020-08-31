@@ -7,7 +7,7 @@
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
           <app-event-listing
-            :headline="'Upcoming Events'"
+            :headline="localize('view.event.upcoming')"
             :events-detail="false"
             :events="upcomingEvents"
           />
@@ -20,6 +20,7 @@
 
 import AppNavigation from '@/components/Navigation'
 import AppEventListing from '@/components/events/Listing'
+import { localize } from '@/helper/localization-helper'
 
 export default {
   components: {
@@ -46,6 +47,11 @@ export default {
           finished: true
         }
       ]
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
     }
   }
 }

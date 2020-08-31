@@ -1,7 +1,7 @@
 <template>
   <nav id="mainNavigation">
     <div class="mb-5">
-      <router-link to="/admin/profile" class="btn btn-primary btn-block py-3">Mein Profil</router-link>
+      <router-link to="/admin/profile" class="btn btn-primary btn-block py-3">{{ localize('navigation.myProfile') }}</router-link>
     </div>
     <div class="list-group">
       <router-link v-for="(view, index) in views" :key="index" :to="view.route"
@@ -13,8 +13,14 @@
 </template>
 
 <script>
+import { localize } from '@/helper/localization-helper'
 
 export default {
+  methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
+    }
+  },
   data () {
     return {
       views: this.$store.state.views

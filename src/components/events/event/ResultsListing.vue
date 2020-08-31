@@ -1,39 +1,45 @@
 <template>
   <div class="results-listing">
-    <h1>Resultslisting to be defined.</h1>
     <h2>Vergangene Abstimmungen</h2>
     <ul class="created-polls list-group">
       <li class="list-group-item">
         <div class="border p-3">
           <h5 class="mb-1">Titel der Abstimmung (offen)</h5>
-          <p class="small text-muted">Anzahl abgegebener Stimmen: 52 | Stimmberechtigte: 51</p>
+          <p class="small text-muted">
+            {{ localize('view.results.givenVotes') }} 52 | {{ localize('view.results.voters') }} 51
+          </p>
           <bar-chart></bar-chart>
           <hr class="divider my-2" />
           <div class="row">
             <div class="col-12 col-md-6">
-              <p>Gesamtergebnis</p>
+              <p>{{ localize('view.results.mainResult') }}</p>
               <div class="result-list">
                 <ul class="list-group">
                   <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Ja
+                    {{ localize('general.yes') }}
                     <span class="badge badge-pill" style="background-color: green;color: white;">40</span>
                   </li>
                   <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Nein
+                    {{ localize('general.no') }}
                     <span class="badge badge-pill" style="background-color: red; color: white;">10</span>
                   </li>
                   <li class="list-group-item d-flex justify-content-between align-items-center">
-                    Enthaltung
+                    {{ localize('general.abstention') }}
                     <span class="badge badge-primary badge-pill" style="background-color: grey">2</span>
                   </li>
                 </ul>
               </div>
             </div>
             <div class="col-12 col-md-6">
-              <p>Teilnehmer</p>
-              <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#poll-ID-ResultVoters"
-                      aria-expanded="false" aria-controls="poll-ID-ResultVoters">
-                <i class="bi bi-caret-right-fill"></i>&nbsp;Teilnehmerliste anzeigen
+              <p>{{ localize('general.member') }}</p>
+              <button class="btn btn-primary"
+                      type="button"
+                      data-toggle="collapse"
+                      data-target="#poll-ID-ResultVoters"
+                      aria-expanded="false"
+                      aria-controls="poll-ID-ResultVoters">
+                <i class="bi bi-caret-right-fill"></i>
+                {{ localize('view.results.showMemberList') }}
               </button>
               <div class="collapse" id="poll-ID-ResultVoters">
                 <div class="card card-body">
@@ -51,10 +57,11 @@
                 </div>
               </div>
               <hr class="divider mx-2" />
-              <p>Detailergebnis</p>
+              <p>{{ localize('view.results.detailResult') }}</p>
               <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#poll-ID-ResultDetails"
                       aria-expanded="false" aria-controls="poll-ID-ResultDetails">
-                <i class="bi bi-caret-right-fill"></i>&nbsp;Ergebnisliste anzeigen
+                <i class="bi bi-caret-right-fill"></i>
+                {{ localize('view.results.showDetailResult') }}
               </button>
               <div class="collapse" id="poll-ID-ResultDetails">
                 <div class="card card-body">

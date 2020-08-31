@@ -2,6 +2,12 @@ import * as R from 'ramda'
 
 const localizations = {
   de_DE: {
+    general: {
+      yes: 'Ja',
+      no: 'Nein',
+      abstention: 'Enthaltung',
+      member: 'Teilnehmer'
+    },
     view: {
       login: {
         label: {
@@ -51,7 +57,21 @@ const localizations = {
             activateLobby: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
             submit: 'Dieses Event erstellen'
           }
-        }
+        },
+        listing: {
+          name: 'Name',
+          created: 'Erstellt am',
+          finished: 'Beendet',
+          actions: {
+            label: 'Aktionen',
+            edit: 'Bearbeiten',
+            inviteLink: 'Einladungs-Link kopieren',
+            newTab: 'Event in neuem Tab öffnen',
+            close: 'Event beenden'
+          }
+        },
+        upcoming: 'Bevorstehende Events',
+        latest: 'Letzte Events'
       },
       polls: {
         headlines: {
@@ -84,11 +104,22 @@ const localizations = {
           delete: 'Abstimmung löschen',
           deleteConfirm: 'Möchtest du die Abstimmung wirklich löschen?'
         }
+      },
+      results: {
+        givenVotes: 'Anzahl abgegebener Stimmen:',
+        voters: 'Stimmberechtigte:',
+        mainResult: 'Gesamtergebnis',
+        showMemberList: 'Teilnehmerliste Anzeigen',
+        detailResult: 'Detailergebnis',
+        showDetailResult: 'Ergebnisliste anzeigen'
       }
     },
     pagination: {
       next: '>',
       previous: '<'
+    },
+    navigation: {
+      myProfile: 'Mein Profil'
     }
   }
 }

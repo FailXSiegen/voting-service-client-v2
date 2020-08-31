@@ -11,12 +11,12 @@
           <span class="align-middle">{{ localize('view.event.create.createNew') }}</span>
         </router-link>
         <app-event-listing
-          :headline="'Upcoming Events'"
+          :headline="localize('view.event.upcoming')"
           :events-detail="true"
           :events="upcomingEvents"
         />
         <app-event-listing
-          :headline="'Lastest Events'"
+          :headline="localize('view.event.latest')"
           :events-detail="false"
           :events="lastEvents"
         />
