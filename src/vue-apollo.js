@@ -1,6 +1,13 @@
 import Vue from 'vue'
 import VueApollo from 'vue-apollo'
 import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client'
+import { TokenRefreshLink } from 'apollo-link-token-refresh'
+import { ApolloLink } from 'apollo-link'
+import { getCurrentUnixTimeStamp } from '@/lib/time-stamp'
+import { jwtDecode } from '@/lib/jwt-util'
+import router from '@/router'
+import { refreshLogin } from '@/graphql/auth'
+import { apolloProvider } from '@/main'
 
 // Install the vue plugin
 Vue.use(VueApollo)
@@ -8,55 +15,57 @@ Vue.use(VueApollo)
 // Name of the localStorage item
 const AUTH_TOKEN = 'apollo-token'
 
-// Http endpoint
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'https://hartmann-api.psv-dev.de/graphql?debug=1'
+// Http endpoint (use httpsEndpoint in production)
+const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost/graphql?debug=1'
+
+const link = ApolloLink.from([
+  new TokenRefreshLink({
+    isTokenValidOrUndefined: () => {
+      const token = localStorage.getItem(AUTH_TOKEN)
+      if (token === null) {
+        router.push('/')
+      }
+      const decodedToken = jwtDecode(token)
+      return decodedToken.payload.exp > getCurrentUnixTimeStamp()
+    },
+    fetchAccessToken: () => {
+      return refreshLogin()
+    },
+    handleFetch: async accessToken => {
+      console.info('silent refresh!')
+      localStorage.setItem(AUTH_TOKEN, accessToken)
+      await apolloProvider.defaultClient.cache.reset()
+    },
+    handleResponse: (operation, accessTokenField) => async response => {
+      return {
+        access_token: response.token
+      }
+    },
+    handleError: err => {
+      console.error(err)
+    }
+  })
+])
 
 // Config
 const defaultOptions = {
-  // You can use `https` for secure connection (recommended in production)
   httpEndpoint,
-  // You can use `wss` for secure connection (recommended in production)
-  // Use `null` to disable subscriptions
   wsEndpoint: null,
-  // LocalStorage token
   tokenName: AUTH_TOKEN,
-  // Enable Automatic Query persisting with Apollo Engine
   persisting: false,
-  // Use websockets for everything (no HTTP)
-  // You need to pass a `wsEndpoint` for this to work
   websocketsOnly: false,
-  // Is being rendered on the server?
-  ssr: false
-
-  // Override default apollo link
-  // note: don't override httpLink here, specify httpLink options in the
-  // httpLinkOptions property of defaultOptions.
-  // link: myLink
-
-  // Override default cache
-  // cache: myCache
-
-  // Override the way the Authorization header is set
-  // getAuth: (tokenName) => ...
-
-  // Additional ApolloClient options
-  // apollo: { ... }
-
-  // Client local data (see apollo-link-state)
-  // clientState: { resolvers: { ... }, defaults: { ... } }
+  ssr: false,
+  link
 }
 
-// Call this in the Vue app file
 export function createProvider (options = {}) {
-  // Create apollo client
   const { apolloClient, wsClient } = createApolloClient({
     ...defaultOptions,
     ...options
   })
   apolloClient.wsClient = wsClient
 
-  // Create vue apollo provider
-  const apolloProvider = new VueApollo({
+  return new VueApollo({
     defaultClient: apolloClient,
     defaultOptions: {
       $query: {
@@ -68,11 +77,8 @@ export function createProvider (options = {}) {
       console.log('%cError', 'background: red; color: white; padding: 2px 4px; border-radius: 3px; font-weight: bold;', error.message)
     }
   })
-
-  return apolloProvider
 }
 
-// Manually call this when user log in
 export async function onLogin (apolloClient, token) {
   if (typeof localStorage !== 'undefined' && token) {
     localStorage.setItem(AUTH_TOKEN, token)
@@ -86,7 +92,6 @@ export async function onLogin (apolloClient, token) {
   }
 }
 
-// Manually call this when user log out
 export async function onLogout (apolloClient) {
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN)

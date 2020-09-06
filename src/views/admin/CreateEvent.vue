@@ -65,7 +65,7 @@ export default {
       alert('Event wurde erstellt.')
     },
     localize (path) {
-      return localize(path, this.$store.state.language)
+      return localize(path)
     }
   }
 }

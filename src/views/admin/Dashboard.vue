@@ -17,7 +17,6 @@
 </template>
 
 <script>
-
 import AppNavigation from '@/components/Navigation'
 import AppEventListing from '@/components/events/Listing'
 import { localize } from '@/helper/localization-helper'
@@ -51,7 +50,7 @@ export default {
   },
   methods: {
     localize (path) {
-      return localize(path, this.$store.state.language)
+      return localize(path)
     }
   }
 }

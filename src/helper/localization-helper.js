@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import store from '@/store'
 
 const localizations = {
   de_DE: {
@@ -21,7 +22,8 @@ const localizations = {
           eventIdent: 'Mit Event-ID einloggen'
         },
         submit: 'Login',
-        submitToEvent: 'In Event einloggen'
+        submitToEvent: 'In Event einloggen',
+        invalidCredentials: 'Invalid credentials'
       },
       profile: {
         headline: '',
@@ -120,11 +122,17 @@ const localizations = {
     },
     navigation: {
       myProfile: 'Mein Profil'
+    },
+    error: {
+      network: {
+        internalServerError: 'Internal server error'
+      }
     }
   }
 }
 
-export function localize (path, language) {
+export function localize (path) {
+  const language = store.state.language
   path = language + '.' + path
   const pathParts = path.split('.')
   const value = R.path(pathParts, localizations)

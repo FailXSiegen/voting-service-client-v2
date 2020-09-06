@@ -20,7 +20,9 @@
     "vue-apollo": "^3.0.0-beta.11",
     "vue-chartjs": "^3.5.1",
     "vue-router": "^3.2.0",
-    "vuex": "^3.4.0"
+    "vuex": "^3.4.0",
+    "apollo-link-token-refresh": "^0.3.2",
+    "@vue/apollo-util": "^4.0.0-alpha.6"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",

@@ -61,7 +61,7 @@ export default {
       return confirm('ADD ANOTHER CONFIRM MESSAGE')
     },
     localize (path) {
-      return localize(path, this.$store.state.language)
+      return localize(path)
     }
   }
 }
