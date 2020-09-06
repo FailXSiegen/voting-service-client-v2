@@ -30,7 +30,7 @@ export default new Vuex.Store({
         allowToVote: true,
         online: true,
         verified: true,
-        eventCoOrganizer: false
+        eventCoOrganisator: false
       },
       {
         uid: 23456,
@@ -40,7 +40,7 @@ export default new Vuex.Store({
         allowToVote: false,
         online: false,
         verified: true,
-        eventCoOrganizer: false
+        eventCoOrganisator: false
       },
       {
         uid: 34567,
@@ -50,7 +50,7 @@ export default new Vuex.Store({
         allowToVote: true,
         online: true,
         verified: true,
-        eventCoOrganizer: true
+        eventCoOrganisator: true
       },
       {
         uid: 45678,
@@ -60,7 +60,7 @@ export default new Vuex.Store({
         allowToVote: false,
         online: true,
         verified: true,
-        eventCoOrganizer: false
+        eventCoOrganisator: false
       },
       {
         uid: 45678,
@@ -70,7 +70,7 @@ export default new Vuex.Store({
         allowToVote: true,
         online: true,
         verified: false,
-        eventCoOrganizer: false
+        eventCoOrganisator: false
       }
     ]
   },

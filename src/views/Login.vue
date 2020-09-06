@@ -9,7 +9,7 @@
               <h2 class="mb-4">{{ localize('view.login.headline.eventIdent') }}</h2>
               <div class="form-group">
                 <label for="eventIdent">{{ localize('view.login.label.eventIdent') }}</label>
-                <input id="eventIdent" class="form-control" type="text">
+                <input id="eventIdent" class="form-control" type="text" required="required">
               </div>
               <button type="submit" class="btn btn-primary btn-block">{{ localize('view.login.submitToEvent') }}
               </button>
@@ -17,14 +17,14 @@
           </div>
           <div class="mb-5 col-md-5 order-1 order-md-2 border py-3">
             <form @submit.prevent="onLoginUser">
-              <h2 class="mb-4">{{ localize('view.login.headline.userLogin') }}</h2>
+              <h2 class="mb-4">{{ localize('view.login.headline.orgaLogin') }}</h2>
               <div class="form-group">
                 <label for="email">{{ localize('view.login.label.email') }}</label>
-                <input v-model="user.email" type="text" name="email" id="email" class="form-control">
+                <input type="email" name="email" id="email" class="form-control" required="required">
               </div>
               <div class="form-group">
                 <label for="password">{{ localize('view.login.label.password') }}</label>
-                <input v-model="user.password" type="password" name="password" id="password" class="form-control">
+                <input type="password" name="password" id="password" class="form-control" required="required">
               </div>
               <div class="form-group">
                 <button class="btn btn-primary btn-block float-right">{{ localize('view.login.submit') }}</button>
@@ -48,8 +48,8 @@ export default {
     return {
       user: {
         displayName: '',
-        email: 'example@domain.tld',
-        password: '12345678'
+        email: '',
+        password: ''
       }
     }
   },

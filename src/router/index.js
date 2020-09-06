@@ -10,6 +10,8 @@ import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
 import AppResults from '@/views/admin/event/Results'
 import AppUser from '@/views/User'
+import AppUserLogin from '@/views/user/Login'
+import AppUserDashboard from '@/views/user/Dashboard'
 // import store from '@/store'
 
 Vue.use(VueRouter)
@@ -43,6 +45,18 @@ const routes = [
     path: '/admin/events/new',
     name: 'Create Event',
     component: AppCreateEvent
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/user/login',
+    name: 'User Login',
+    component: AppUserLogin
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/user/dashboard',
+    name: 'User Dashboard',
+    component: AppUserDashboard
     // meta: { requiresAuth: true }
   },
   {
