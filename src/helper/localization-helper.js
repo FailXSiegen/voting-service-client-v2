@@ -136,7 +136,8 @@ const localizations = {
       previous: '<'
     },
     navigation: {
-      myProfile: 'Mein Profil'
+      myProfile: 'Mein Profil',
+      logOut: 'Ausloggen'
     },
     error: {
       network: {

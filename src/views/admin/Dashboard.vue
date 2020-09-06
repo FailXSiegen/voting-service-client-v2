@@ -1,10 +1,10 @@
 <template>
   <div class="dashboard-container container-fluid">
     <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
+      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
         <app-navigation />
       </div>
-      <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
+      <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
           <app-event-listing
             :headline="localize('view.event.upcoming')"

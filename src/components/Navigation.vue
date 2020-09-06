@@ -1,13 +1,20 @@
 <template>
   <nav id="mainNavigation">
     <div class="mb-5">
-      <router-link to="/admin/profile" class="btn btn-primary btn-block py-3">{{ localize('navigation.myProfile') }}</router-link>
+      <router-link to="/admin/profile" class="btn btn-primary btn-block py-3">
+        {{ localize('navigation.myProfile') }}
+      </router-link>
     </div>
     <div class="list-group">
       <router-link v-for="(view, index) in views" :key="index" :to="view.route"
                    class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         {{ view.title }}
       </router-link>
+    </div>
+    <div class="mt-5">
+      <button class="logout btn btn-danger py-3 d-flex align-items-center">
+        <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
+      </button>
     </div>
   </nav>
 </template>
@@ -30,9 +37,22 @@ export default {
 </script>
 
 <style scoped>
+
+.logout {
+  width: 100%;
+}
+
 @media screen AND (min-width: 991px) {
   #mainNavigation {
     min-height: 100vh;
+    position: relative;
+  }
+
+  .logout {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    width: auto;
   }
 }
 
