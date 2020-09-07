@@ -31,7 +31,7 @@ export default {
   },
   methods: {
     localize (path) {
-      return localize(path, this.$store.state.language)
+      return localize(path)
     }
   }
 }

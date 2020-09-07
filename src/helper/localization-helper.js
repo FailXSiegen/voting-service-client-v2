@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import store from '@/store'
 
 const localizations = {
   de_DE: {
@@ -11,17 +12,24 @@ const localizations = {
     view: {
       login: {
         label: {
-          email: 'E-Mail',
-          password: 'Passwort',
-          eventIdent: 'Event-ID eingeben'
+          email: 'E-Mail*',
+          emailHelp: 'Als Benutzername dient Ihre Mitgliedsnummer oder Ihre E-Mail Adresse. Die Informationen dienen zur Akkredetierung.',
+          password: 'Passwort*',
+          passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zum Event benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',
+          displayName: 'Anzeige-Name*',
+          displayNameHelp: 'Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die unteren Felder.',
+          eventIdent: 'Event-ID eingeben*'
         },
         headline: {
           title: 'Voting Service',
+          orgaLogin: 'Als Organisator einloggen',
           userLogin: 'Als Besucher einloggen',
-          eventIdent: 'Mit Event-ID einloggen'
+          eventIdent: 'Mit Event-ID einloggen',
+          userWelcomeTo: 'Herzlich willkommen, bitte loggen Sie sich ein.'
         },
         submit: 'Login',
-        submitToEvent: 'In Event einloggen'
+        submitToEvent: 'In Event einloggen',
+        invalidCredentials: 'Invalid credentials'
       },
       profile: {
         headline: '',
@@ -112,6 +120,15 @@ const localizations = {
         showMemberList: 'Teilnehmerliste Anzeigen',
         detailResult: 'Detailergebnis',
         showDetailResult: 'Ergebnisliste anzeigen'
+      },
+      user: {
+        pending: {
+          tankYou: 'Vielen Dank für Ihren Login.',
+          bodyText: 'Ihr Login wird nun überprüft. Sobald sich Ihr Status ändert wird sich diese Ansicht automatisch aktualisieren.'
+        },
+        verified: {
+          welcome: 'Willkommen.'
+        }
       }
     },
     pagination: {
@@ -119,12 +136,19 @@ const localizations = {
       previous: '<'
     },
     navigation: {
-      myProfile: 'Mein Profil'
+      myProfile: 'Mein Profil',
+      logOut: 'Ausloggen'
+    },
+    error: {
+      network: {
+        internalServerError: 'Internal server error'
+      }
     }
   }
 }
 
-export function localize (path, language) {
+export function localize (path) {
+  const language = store.state.language
   path = language + '.' + path
   const pathParts = path.split('.')
   const value = R.path(pathParts, localizations)
