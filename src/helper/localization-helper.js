@@ -60,9 +60,10 @@ const localizations = {
           createNew: 'Neues Event erstellen',
           labels: {
             title: 'Event-Titel',
+            slug: 'Slug',
             description: 'Event-Beschreibung',
-            date: 'Start-Datum',
-            activateLobby: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
+            scheduledDatetime: 'Start-Datum',
+            lobbyOpen: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
             submit: 'Dieses Event erstellen'
           }
         },

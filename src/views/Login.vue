@@ -20,11 +20,11 @@
               <h2 class="mb-4">{{ localize('view.login.headline.orgaLogin') }}</h2>
               <div class="form-group">
                 <label for="email">{{ localize('view.login.label.email') }}</label>
-                <input type="email" name="email" id="email" class="form-control" required="required">
+                <input v-model="user.email" type="email" name="email" id="email" class="form-control" required="required">
               </div>
               <div class="form-group">
                 <label for="password">{{ localize('view.login.label.password') }}</label>
-                <input type="password" name="password" id="password" class="form-control" required="required">
+                <input v-model="user.password" type="password" name="password" id="password" class="form-control" required="required">
               </div>
               <div class="form-group">
                 <button class="btn btn-primary btn-block float-right">{{ localize('view.login.submit') }}</button>

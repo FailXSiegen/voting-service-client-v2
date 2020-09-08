@@ -9,24 +9,28 @@
         <form @submit.prevent="createEvent">
           <div class="form-group">
             <label for="eventTitle">{{ localize('view.event.create.labels.title') }}</label>
-            <input v-model="newEvent.title" type="text" class="form-control" id="eventTitle" required="required" :placeholder="localize('view.event.create.labels.title')">
+            <input v-model="event.title" type="text" class="form-control" id="eventTitle" required="required" :placeholder="localize('view.event.create.labels.title')">
+          </div>
+          <div class="form-group">
+            <label for="eventSlug">{{ localize('view.event.create.labels.slug') }}</label>
+            <input v-model="event.slug" type="text" class="form-control" id="eventSlug" required="required" :placeholder="localize('view.event.create.labels.slug')">
           </div>
           <div class="form-group">
             <label for="eventDescription">{{ localize('view.event.create.labels.description') }}</label>
-            <textarea v-model="newEvent.description" class="form-control" id="eventDescription" rows="3"
+            <textarea v-model="event.description" class="form-control" id="eventDescription" rows="3"
                       aria-describedby="eventDescriptionHelpBlock"></textarea>
             <small id="eventDescriptionHelpBlock" class="form-text text-muted">
               Eine kurze Beschreibung des Events
             </small>
           </div>
           <div class="form-group">
-          <label for="eventStart">{{ localize('view.event.create.labels.date') }}</label>
-          <input v-model="newEvent.startDate" class="form-control" type="date" id="eventStart" name="trip-start" required="required">
+          <label for="scheduledDatetime">{{ localize('view.event.create.labels.scheduledDatetime') }}</label>
+          <input v-model="event.scheduledDatetime" class="form-control" type="date" id="scheduledDatetime" required="required">
           </div>
           <div class="form-check">
-            <input v-model="newEvent.activateLobby" class="form-check-input" type="checkbox" id="activateLobby">
-            <label class="form-check-label" for="activateLobby">
-              {{ localize('view.event.create.labels.activateLobby') }}
+            <input v-model="event.lobbyOpen" class="form-check-input" type="checkbox" id="lobbyOpen">
+            <label class="form-check-label" for="lobbyOpen">
+              {{ localize('view.event.create.labels.lobbyOpen') }}
             </label>
           </div>
           <button class="btn btn-primary mt-5 mb-3">
@@ -43,6 +47,7 @@
 
 import AppNavigation from '@/components/Navigation'
 import { localize } from '@/helper/localization-helper'
+import { createEventMutation } from '@/graphql/views/event'
 
 export default {
   components: {
@@ -51,18 +56,35 @@ export default {
   data () {
     return {
       headline: 'Neues Event erstellen',
-      newEvent: {
+      event: {
         title: '',
+        slug: '',
         description: '',
-        startDate: '',
-        activateLobby: false,
-        finished: false
+        scheduledDatetime: '',
+        lobbyOpen: false,
+        active: true,
+        organizerId: 17
       }
     }
   },
   methods: {
     createEvent () {
-      alert('Event wurde erstellt.')
+      this.event.scheduledDatetime = this.convertScheduledDatetime()
+      this.$apollo.mutate({
+        mutation: createEventMutation(),
+        variables: { input: this.event }
+      }).then(() => {
+        this.$router.push('/admin/events')
+      }).catch((error) => {
+        console.error(error)
+        this.event.scheduledDatetime = null
+      })
+    },
+    convertScheduledDatetime () {
+      if (this.event.scheduledDatetime) {
+        return Math.round(new Date(this.event.scheduledDatetime).getTime() / 1000)
+      }
+      return 0
     },
     localize (path) {
       return localize(path)

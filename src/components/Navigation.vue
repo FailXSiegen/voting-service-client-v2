@@ -12,7 +12,7 @@
       </router-link>
     </div>
     <div class="mt-5">
-      <button class="logout btn btn-danger py-3 d-flex align-items-center">
+      <button @click="onLogout" class="logout btn btn-danger py-3 d-flex align-items-center">
         <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
       </button>
     </div>
@@ -21,16 +21,21 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
+import { onLogout as apolloOnLogout } from '@/vue-apollo.js'
 
 export default {
-  methods: {
-    localize (path) {
-      return localize(path)
-    }
-  },
   data () {
     return {
       views: this.$store.state.views
+    }
+  },
+  methods: {
+    async onLogout () {
+      await apolloOnLogout(this.$apollo.provider.defaultClient)
+      await this.$router.push('/')
+    },
+    localize (path) {
+      return localize(path)
     }
   }
 }
@@ -41,13 +46,11 @@ export default {
 .logout {
   width: 100%;
 }
-
 @media screen AND (min-width: 991px) {
   #mainNavigation {
     min-height: 100vh;
     position: relative;
   }
-
   .logout {
     position: fixed;
     bottom: 1.5rem;
@@ -55,12 +58,10 @@ export default {
     width: auto;
   }
 }
-
 .list-group-item {
   border-color: transparent;
   border-width: 3px;
 }
-
 .list-group-item.list-group-item-dark.router-link-exact-active,
 .list-group-item.list-group-item-dark:active,
 .list-group-item.list-group-item-dark:focus {
@@ -68,13 +69,11 @@ export default {
   border-color: var(--primary);
   border-width: 3px;
 }
-
 .list-group-item.list-group-item-dark:hover {
   border-color: transparent;
   background-color: var(--primary);
   color: white;
 }
-
 .list-group-item + .list-group-item {
   border-top-width: initial;
 }
