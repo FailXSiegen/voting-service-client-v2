@@ -17,10 +17,23 @@
           <td v-if="event.finished">{{ localize('general.yes') }}</td>
           <td v-else>{{ localize('general.no') }}</td>
           <td v-if="eventsDetail">
-            <button @click="onEdit" class="btn btn-primary btn-block mx-1 my-2">{{ localize('view.event.listing.actions.edit') }}</button>
-            <button @click="onInviteLink" class="btn btn-primary btn-block mx-1 my-2">{{ localize('view.event.listing.actions.inviteLink') }}</button>
-            <router-link to="/event" target="_blank" class="btn btn-primary btn-block mx-1 my-2">{{ localize('view.event.listing.actions.newTab') }}</router-link>
-            <button @click="onClose" class="btn btn-primary btn-block mx-1 my-2">{{ localize('view.event.listing.actions.close') }}</button>
+            <button @click="onEdit" class="btn btn-primary mx-1 my-2"
+                    :title="localize('view.event.listing.actions.edit')">
+              <i class="bi-pencil-square bi--2xl"></i>
+            </button>
+            <button @click="onInviteLink" class="btn btn-secondary mx-1 my-2"
+                    :title="localize('view.event.listing.actions.inviteLink')">
+              <i class="bi-files bi--2xl"></i>
+            </button>
+            <router-link to="/event" target="_blank" class="btn btn-info mx-1 my-2"
+                         :title="localize('view.event.listing.actions.newTab')">
+              <i class="bi-eye-fill bi--2xl"></i>
+            </router-link>
+            <button @click="onClose"
+                    class="btn btn-danger mx-1 my-2"
+                    :title="localize('view.event.listing.actions.close')">
+              <i class="bi-shield-fill-exclamation bi--2xl"></i>
+            </button>
           </td>
       </tr>
       </tbody>
@@ -56,7 +69,9 @@ export default {
       alert('Copy invite link')
     },
     onClose () {
-      alert('Close Event')
+      if (confirm('Event schließen?')) {
+        alert('Close Event')
+      }
     }
   }
 }
