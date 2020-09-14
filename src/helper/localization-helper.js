@@ -62,6 +62,7 @@ const localizations = {
             title: 'Event-Titel',
             slug: 'Slug',
             description: 'Event-Beschreibung',
+            descriptionHelp: 'Event-Beschreibung',
             scheduledDatetime: 'Start-Datum',
             lobbyOpen: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
             submit: 'Dieses Event erstellen'
@@ -70,7 +71,9 @@ const localizations = {
         listing: {
           name: 'Name',
           created: 'Erstellt am',
-          finished: 'Beendet',
+          state: 'Status',
+          stateActive: 'laufend',
+          stateLocked: 'verschlossen',
           actions: {
             label: 'Aktionen',
             edit: 'Bearbeiten',

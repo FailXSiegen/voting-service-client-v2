@@ -9,7 +9,6 @@ import AppMemberList from '@/views/admin/event/MemberList'
 import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
 import AppResults from '@/views/admin/event/Results'
-import AppUser from '@/views/User'
 import AppUserLogin from '@/views/user/Login'
 import AppUserDashboard from '@/views/user/Dashboard'
 // import store from '@/store'
@@ -81,12 +80,6 @@ const routes = [
     path: '/event/results',
     name: 'Results',
     component: AppResults
-    // meta: { requiresAuth: true }
-  },
-  {
-    path: '/user',
-    name: 'User',
-    component: AppUser
     // meta: { requiresAuth: true }
   }
 ]
