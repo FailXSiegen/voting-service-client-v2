@@ -4,6 +4,7 @@ export function getCurrentUnixTimeStamp () {
 
 export function createFormattedDateFromTimeStamp (unixTimeStamp) {
   const datestamp = new Date(unixTimeStamp * 1000)
+  // @todo: add to localize
   const months = [
     'Januar',
     'Februar',

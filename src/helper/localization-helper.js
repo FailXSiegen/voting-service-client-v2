@@ -131,7 +131,7 @@ const localizations = {
           bodyText: 'Ihr Login wird nun überprüft. Sobald sich Ihr Status ändert wird sich diese Ansicht automatisch aktualisieren.'
         },
         verified: {
-          welcome: 'Willkommen.'
+          welcome: 'Willkommen'
         }
       }
     },

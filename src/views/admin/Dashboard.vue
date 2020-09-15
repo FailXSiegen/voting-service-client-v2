@@ -6,11 +6,11 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-        <app-event-listing
-          :headline="localize('view.event.upcoming')"
-          :events-detail="true"
-          :events="upcomingEvents"
-        />
+          <app-event-listing
+            :headline="localize('view.event.upcoming')"
+            :events-detail="true"
+            :events="upcomingEvents"
+          />
       </div>
     </div>
   </div>

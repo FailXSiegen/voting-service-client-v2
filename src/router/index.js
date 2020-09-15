@@ -9,8 +9,7 @@ import AppMemberList from '@/views/admin/event/MemberList'
 import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
 import AppResults from '@/views/admin/event/Results'
-import AppUserLogin from '@/views/user/Login'
-import AppUserDashboard from '@/views/user/Dashboard'
+import AppUserEvent from '@/views/user/Event'
 // import store from '@/store'
 
 Vue.use(VueRouter)
@@ -47,39 +46,34 @@ const routes = [
     // meta: { requiresAuth: true }
   },
   {
-    path: '/user/login',
-    name: 'User Login',
-    component: AppUserLogin
-    // meta: { requiresAuth: true }
-  },
-  {
-    path: '/user/dashboard',
-    name: 'User Dashboard',
-    component: AppUserDashboard
-    // meta: { requiresAuth: true }
-  },
-  {
-    path: '/event',
+    path: '/admin/event',
     name: 'MemberList',
     component: AppMemberList
     // meta: { requiresAuth: true }
   },
   {
-    path: '/event/polls',
+    path: '/admin/event/polls',
     name: 'Polls',
     component: AppPolls
     // meta: { requiresAuth: true }
   },
   {
-    path: '/event/waitingroom',
+    path: '/admin/event/waitingroom',
     name: 'Waiting Room',
     component: AppWaitingRoom
     // meta: { requiresAuth: true }
   },
   {
-    path: '/event/results',
+    path: '/admin/event/results',
     name: 'Results',
     component: AppResults
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/:eventSlug',
+    name: 'Event',
+    props: true,
+    component: AppUserEvent
     // meta: { requiresAuth: true }
   }
 ]
