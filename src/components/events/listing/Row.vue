@@ -10,10 +10,10 @@
       {{ localize('view.event.listing.stateLocked') }}
     </td>
     <td v-if="eventsDetail">
-      <button @click="onEdit" class="btn btn-primary mx-1 my-2"
+      <router-link to="/editEvent" :eventRecord="event" class="btn btn-primary mx-1 my-2"
               :title="localize('view.event.listing.actions.edit')">
         <i class="bi-pencil-square bi--2xl"></i>
-      </button>
+      </router-link>
       <button @click="onInviteLink" class="btn btn-secondary mx-1 my-2"
               :title="localize('view.event.listing.actions.inviteLink')">
         <i class="bi-files bi--2xl"></i>
