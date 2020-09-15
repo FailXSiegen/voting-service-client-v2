@@ -1,0 +1,38 @@
+language: php
+php:
+- 7.3
+dist: xenial
+os: linux
+cache:
+  directories:
+  - "$HOME/.composer/cache"
+notifications:
+  email:
+    recipients:
+    - info@failx.de
+    on_success: change
+    on_failure: change
+before_install:
+- openssl aes-256-cbc -K $encrypted_db2095f63ba3_key -iv $encrypted_db2095f63ba3_iv
+  -in deploy_rsa.enc -out deploy_rsa -d
+- openssl aes-256-cbc -K $encrypted_db2095f63ba3_key -iv $encrypted_db2095f63ba3_iv
+  -in deploy_rsa.enc -out /tmp/deploy_rsa -d
+install:
+- composer require -q --dev deployer/deployer:~6.4 deployphp/recipes:~6.2
+addons:
+  ssh_known_hosts: oc-vm87.riconnect.de
+before_script:
+- eval "$(ssh-agent -s)"
+- chmod 600 /tmp/deploy_rsa
+- ssh-add /tmp/deploy_rsa
+stages:
+- name: deploy_staging
+  if: tag IS NOT present
+- name: deploy_live
+  if: tag IS present
+jobs:
+  include:
+  - stage: deploy_staging
+    script: vendor/bin/dep deploy staging
+  - stage: deploy_live
+    script: vendor/bin/dep deploy prod
