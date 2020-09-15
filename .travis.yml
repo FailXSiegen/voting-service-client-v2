@@ -26,13 +26,13 @@ before_script:
 - chmod 600 /tmp/deploy_rsa
 - ssh-add /tmp/deploy_rsa
 stages:
-- name: deploy_staging
-  if: tag IS NOT present
-- name: deploy_live
-  if: tag IS present
+  - name: deploy_staging
+    if: tag IS NOT present
+  - name: deploy_live
+    if: tag IS present
 jobs:
   include:
-  - stage: deploy_staging
-    script: vendor/bin/dep deploy staging
-  - stage: deploy_live
-    script: vendor/bin/dep deploy prod
+    - stage: deploy_staging
+      script: vendor/bin/dep deploy staging
+    - stage: deploy_live
+      script: vendor/bin/dep deploy prod
