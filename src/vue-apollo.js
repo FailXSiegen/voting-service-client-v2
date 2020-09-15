@@ -13,7 +13,7 @@ import { apolloProvider } from '@/main'
 Vue.use(VueApollo)
 
 // Name of the localStorage item
-const AUTH_TOKEN = 'apollo-token'
+export const AUTH_TOKEN = 'apollo-token'
 
 // Http endpoint (use httpsEndpoint in production)
 const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost/graphql?debug=1'
@@ -23,7 +23,7 @@ const link = ApolloLink.from([
     isTokenValidOrUndefined: () => {
       const token = localStorage.getItem(AUTH_TOKEN)
       if (token === null) {
-        router.push('/')
+        router.push('/').catch(() => {})
       }
       const decodedToken = jwtDecode(token)
       return decodedToken.payload.exp > getCurrentUnixTimeStamp()

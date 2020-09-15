@@ -39,17 +39,17 @@ export default {
   apollo: {
     upcomingEvents: {
       query: UPCOMING_EVENTS,
-      variables: () => {
+      variables () {
         return {
-          organizerId: 1 // @TODO fetch real id.
+          organizerId: this.$store.getters.getCurrentUserId
         }
       }
     },
     expiredEvents: {
       query: EXPIRED_EVENTS,
-      variables: () => {
+      variables () {
         return {
-          organizerId: 1 // @TODO fetch real id.
+          organizerId: this.$store.getters.getCurrentUserId
         }
       }
     }
