@@ -10,7 +10,7 @@
       {{ localize('view.event.listing.stateLocked') }}
     </td>
     <td v-if="eventsDetail">
-      <router-link to="/editEvent" :eventRecord="event" class="btn btn-primary mx-1 my-2"
+      <router-link to="#" :eventRecord="event" class="btn btn-primary mx-1 my-2"
               :title="localize('view.event.listing.actions.edit')">
         <i class="bi-pencil-square bi--2xl"></i>
       </router-link>
