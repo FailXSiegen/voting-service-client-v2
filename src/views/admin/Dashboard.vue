@@ -8,7 +8,7 @@
         <h1>{{ headline }}</h1>
           <app-event-listing
             :headline="localize('view.event.upcoming')"
-            :events-detail="false"
+            :events-detail="true"
             :events="upcomingEvents"
           />
       </div>
@@ -20,32 +20,36 @@
 import AppNavigation from '@/components/Navigation'
 import AppEventListing from '@/components/events/Listing'
 import { localize } from '@/helper/localization-helper'
+import { EXPIRED_EVENTS, UPCOMING_EVENTS } from '@/graphql/queries'
 
 export default {
   components: {
     AppNavigation,
     AppEventListing
   },
+  apollo: {
+    upcomingEvents: {
+      query: UPCOMING_EVENTS,
+      variables: () => {
+        return {
+          organizerId: 1 // @TODO fetch real id.
+        }
+      }
+    },
+    expiredEvents: {
+      query: EXPIRED_EVENTS,
+      variables: () => {
+        return {
+          organizerId: 1 // @TODO fetch real id.
+        }
+      }
+    }
+  },
   data () {
     return {
       headline: 'Dashboard',
-      upcomingEvents: [
-        {
-          title: 'Next Event 1',
-          created: '22.09.2020',
-          finished: true
-        },
-        {
-          title: 'Next Event 2',
-          created: '23.09.2020',
-          finished: false
-        },
-        {
-          title: 'Next Event 3',
-          created: '26.10.2020',
-          finished: true
-        }
-      ]
+      expiredEvents: [],
+      upcomingEvents: []
     }
   },
   methods: {
