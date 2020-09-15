@@ -6,11 +6,11 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-          <app-event-listing
-            :headline="localize('view.event.upcoming')"
-            :events-detail="true"
-            :events="upcomingEvents"
-          />
+        <app-event-listing
+          :headline="localize('view.event.upcoming')"
+          :events-detail="true"
+          :events="upcomingEvents"
+        />
       </div>
     </div>
   </div>
@@ -30,17 +30,17 @@ export default {
   apollo: {
     upcomingEvents: {
       query: UPCOMING_EVENTS,
-      variables: () => {
+      variables () {
         return {
-          organizerId: 1 // @TODO fetch real id.
+          organizerId: this.$store.getters.getCurrentUserId
         }
       }
     },
     expiredEvents: {
       query: EXPIRED_EVENTS,
-      variables: () => {
+      variables () {
         return {
-          organizerId: 1 // @TODO fetch real id.
+          organizerId: this.$store.getters.getCurrentUserId
         }
       }
     }

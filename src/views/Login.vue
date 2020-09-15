@@ -60,6 +60,7 @@ export default {
         const token = R.path(['token'], data)
         const expiresAt = R.path(['expiresAt'], data)
         await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)
+        await this.$store.dispatch('extractUserData')
         await this.$router.push('/admin')
       }).catch((error) => {
         console.error(error)

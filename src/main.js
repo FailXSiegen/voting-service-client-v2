@@ -11,6 +11,11 @@ Vue.config.productionTip = false
 
 export const apolloProvider = createProvider()
 
+// Fetch user data, if present.
+store.dispatch('extractUserData').catch((error) => {
+  console.error(error)
+})
+
 new Vue({
   router,
   store,
