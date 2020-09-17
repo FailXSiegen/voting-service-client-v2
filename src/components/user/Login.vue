@@ -36,6 +36,9 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
+import * as R from 'ramda'
+import { onLogin as loginApolloClient } from '@/vue-apollo'
+import { login } from '@/graphql/auth'
 
 export default {
   props: {
@@ -51,19 +54,21 @@ export default {
       return localize(path, this.$store.state.language)
     },
     onLogin () {
-      const emailSearch = this.users.filter(user => user.email === this.user.email)
-      if (emailSearch.length > 0) {
+      const loginType = 'event-user'
+      // @todo set the event and display_name as optional parameter in login
+      login(this.user.email, this.user.password, loginType).then(async (data) => {
+        const token = R.path(['token'], data)
+        const expiresAt = R.path(['expiresAt'], data)
+        await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)
+        await this.$store.dispatch('extractUserData')
+        // @todo add verified as claim in token handling
         this.$emit('changeComponent', {
           component: 'AppUserDashboard',
-          displayName: this.displayName,
           verified: true
         })
-      } else {
-        this.$emit('changeComponent', {
-          component: 'AppUserDashboard',
-          verified: false
-        })
-      }
+      }).catch((error) => {
+        console.error(error)
+      })
     }
   }
 }

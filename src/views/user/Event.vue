@@ -8,15 +8,7 @@
 import { localize } from '@/helper/localization-helper'
 import AppUserLogin from '@/components/user/Login'
 import AppUserDashboard from '@/components/user/Dashboard'
-
-const events = [
-  {
-    slug: 'test-event',
-    event: {
-      name: 'Event 1'
-    }
-  }
-]
+import { fetchEventBySlug } from '@/api/event'
 
 export default {
   props: {
@@ -28,16 +20,12 @@ export default {
     AppUserLogin,
     AppUserDashboard
   },
-  created () {
-    // @todo Get event by 'find by slug' API shit
-    const foundEvent = events.filter(event => {
-      return event.slug === this.eventSlug
-    })
-    if (foundEvent.length > 0) {
-      this.event = foundEvent
-    } else {
+  async created () {
+    const response = await fetchEventBySlug(this.eventSlug)
+    if (response === null || response.success === false) {
       this.$router.push('/')
     }
+    this.event = response.event
   },
   data () {
     return {
