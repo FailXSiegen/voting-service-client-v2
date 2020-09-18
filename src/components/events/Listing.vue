@@ -35,7 +35,10 @@ export default {
     },
     events: {
       type: Array,
-      required: true
+      required: false,
+      default () {
+        return []
+      }
     }
   },
   methods: {
