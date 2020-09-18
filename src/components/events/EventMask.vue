@@ -36,7 +36,7 @@
 <script>
 
 import { localize } from '@/helper/localization-helper'
-import { createFormattedDateFromTimeStampForInput } from '@/lib/time-stamp'
+import { convertUnixTimeStampForDatetimeLocaleInput } from '@/lib/time-stamp'
 
 export default {
   props: {
@@ -46,7 +46,7 @@ export default {
     }
   },
   async created () {
-    this.eventRecord.scheduledDatetime = createFormattedDateFromTimeStampForInput(this.eventRecord.scheduledDatetime)
+    this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
     delete this.eventRecord.__typename
     delete this.eventRecord.modifiedDatetime
   },

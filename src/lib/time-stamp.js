@@ -12,7 +12,7 @@ export function createFormattedDateFromTimeStamp (unixTimeStamp) {
   return `${date}.${month}.${year}, ${hour}:${min}`
 }
 
-export function createFormattedDateFromTimeStampForInput (unixTimeStamp) {
+export function convertUnixTimeStampForDatetimeLocaleInput (unixTimeStamp) {
   const datestamp = new Date(unixTimeStamp * 1000)
   const year = datestamp.getFullYear()
   const month = datestamp.getMonth() < 9 ? '0' + (datestamp.getMonth() + 1) : (datestamp.getMonth() + 1)
