@@ -6,7 +6,7 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-        <app-event-mask :eventRecord="eventRecord" @mutateEvent="createEvent"/>
+        <app-event-mask :eventRecord="eventRecord" @mutateEvent="updateEvent"/>
       </div>
     </div>
   </div>
@@ -17,7 +17,8 @@
 import AppNavigation from '@/components/Navigation'
 import AppEventMask from '@/components/events/EventMask'
 import { localize } from '@/helper/localization-helper'
-import { createEventMutation } from '@/graphql/views/event'
+import { updateEventMutation } from '@/graphql/views/event'
+import { createFormattedDateFromTimeStampForInput } from '@/lib/time-stamp'
 
 export default {
   components: {
@@ -35,21 +36,23 @@ export default {
     }
   },
   methods: {
-    createEvent () {
+    updateEvent () {
+      delete this.eventRecord.createDatetime
       this.eventRecord.scheduledDatetime = this.convertScheduledDatetime()
       this.$apollo.mutate({
-        mutation: createEventMutation(),
+        mutation: updateEventMutation(),
         variables: { input: this.eventRecord }
       }).then(() => {
         this.$router.push('/admin/events')
       }).catch((error) => {
         console.error(error)
-        this.eventRecord.scheduledDatetime = null
+        this.eventRecord.scheduledDatetime = createFormattedDateFromTimeStampForInput(this.eventRecord.scheduledDatetime)
       })
     },
     convertScheduledDatetime () {
       if (this.eventRecord.scheduledDatetime) {
-        return Math.round(new Date(this.eventRecord.scheduledDatetime).getTime() / 1000)
+        const convertedDatetime = Date.parse(this.eventRecord.scheduledDatetime)
+        return convertedDatetime / 1000
       }
       return 0
     },

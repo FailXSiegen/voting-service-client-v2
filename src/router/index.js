@@ -5,6 +5,7 @@ import AppDashboard from '@/views/admin/Dashboard'
 import AppEvents from '@/views/admin/Events'
 import AppProfile from '@/views/admin/Profile'
 import AppCreateEvent from '@/views/admin/CreateEvent'
+import AppUpdateEvent from '@/views/admin/UpdateEvent'
 import AppMemberList from '@/views/admin/event/MemberList'
 import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
@@ -40,9 +41,16 @@ const routes = [
     // meta: { requiresAuth: true }
   },
   {
-    path: '/admin/events/new',
+    path: '/admin/event/new',
     name: 'Create Event',
     component: AppCreateEvent
+    // meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/event/update',
+    name: 'updateEvent',
+    props: true,
+    component: AppUpdateEvent
     // meta: { requiresAuth: true }
   },
   {

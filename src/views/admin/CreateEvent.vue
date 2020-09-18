@@ -18,6 +18,7 @@ import AppNavigation from '@/components/Navigation'
 import AppEventMask from '@/components/events/EventMask'
 import { localize } from '@/helper/localization-helper'
 import { createEventMutation } from '@/graphql/views/event'
+import { createFormattedDateFromTimeStampForInput, getCurrentUnixTimeStamp } from '@/lib/time-stamp'
 
 export default {
   components: {
@@ -31,7 +32,7 @@ export default {
         title: '',
         slug: '',
         description: '',
-        scheduledDatetime: '',
+        scheduledDatetime: createFormattedDateFromTimeStampForInput(getCurrentUnixTimeStamp()),
         lobbyOpen: false,
         active: true,
         organizerId: this.$store.getters.getCurrentUserId
@@ -48,12 +49,13 @@ export default {
         this.$router.push('/admin/events')
       }).catch((error) => {
         console.error(error)
-        this.eventRecord.scheduledDatetime = null
+        this.eventRecord.scheduledDatetime = createFormattedDateFromTimeStampForInput(this.eventRecord.scheduledDatetime)
       })
     },
     convertScheduledDatetime () {
       if (this.eventRecord.scheduledDatetime) {
-        return Math.round(new Date(this.eventRecord.scheduledDatetime).getTime() / 1000)
+        const convertedDatetime = Date.parse(this.eventRecord.scheduledDatetime)
+        return convertedDatetime / 1000
       }
       return 0
     },

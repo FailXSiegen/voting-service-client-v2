@@ -36,6 +36,7 @@
 <script>
 
 import { localize } from '@/helper/localization-helper'
+import { createFormattedDateFromTimeStampForInput } from '@/lib/time-stamp'
 
 export default {
   props: {
@@ -44,7 +45,18 @@ export default {
       required: true
     }
   },
+  async created () {
+    this.eventRecord.scheduledDatetime = createFormattedDateFromTimeStampForInput(this.eventRecord.scheduledDatetime)
+    delete this.eventRecord.__typename
+    delete this.eventRecord.modifiedDatetime
+  },
   methods: {
+    convertScheduledDatetime () {
+      if (this.eventRecord.scheduledDatetime) {
+        return Math.round(new Date(this.eventRecord.scheduledDatetime).getTime() / 1000)
+      }
+      return 0
+    },
     onMutateEvent () {
       this.$emit('mutateEvent', {
         eventRecord: this.eventRecord

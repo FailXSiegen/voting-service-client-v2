@@ -3,14 +3,16 @@
     <th scope="row">{{ event.title }} <br/>
       <small>{{ event.description}}</small>
     </th>
-    <td>{{ getDate }}</td>
+    <td>{{ getCreateDatetime }}</td>
+    <td>{{ getScheduledDatetime }}</td>
     <td class="text-center text-success text-uppercase" v-if="!eventsDetail && event.active">
       {{ localize('view.event.listing.stateActive') }}
     <td class="text-center text-danger text-uppercase" v-else-if="!eventsDetail && !event.active">
       {{ localize('view.event.listing.stateLocked') }}
     </td>
-    <td v-if="eventsDetail">
-      <router-link to="#" :eventRecord="event" class="btn btn-primary mx-1 my-2"
+    <td>
+      <router-link :to="{ name: 'updateEvent', params: { eventRecord }}"
+                   class="btn btn-primary mx-1 my-2"
               :title="localize('view.event.listing.actions.edit')">
         <i class="bi-pencil-square bi--2xl"></i>
       </router-link>
@@ -18,10 +20,10 @@
               :title="localize('view.event.listing.actions.inviteLink')">
         <i class="bi-files bi--2xl"></i>
       </button>
-      <router-link to="/event" target="_blank" class="btn btn-info mx-1 my-2"
+      <a :href="'/'+event.slug" target="_blank" class="btn btn-info mx-1 my-2"
                    :title="localize('view.event.listing.actions.newTab')">
         <i class="bi-eye-fill bi--2xl"></i>
-      </router-link>
+      </a>
       <button @click="onClose"
               class="btn btn-danger mx-1 my-2"
               :title="localize('view.event.listing.actions.close')">
@@ -46,6 +48,11 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      eventRecord: this.event
+    }
+  },
   methods: {
     localize (path) {
       return localize(path)
@@ -63,8 +70,11 @@ export default {
     }
   },
   computed: {
-    getDate () {
+    getCreateDatetime () {
       return createFormattedDateFromTimeStamp(this.event.createDatetime)
+    },
+    getScheduledDatetime () {
+      return createFormattedDateFromTimeStamp(this.event.scheduledDatetime)
     }
   }
 }
