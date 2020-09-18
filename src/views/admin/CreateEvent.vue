@@ -34,7 +34,7 @@ export default {
         scheduledDatetime: '',
         lobbyOpen: false,
         active: true,
-        organizerId: 1 // @TODO fetch real id.
+        organizerId: this.$store.getters.getCurrentUserId
       }
     }
   },
