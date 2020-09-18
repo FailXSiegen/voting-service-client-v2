@@ -71,6 +71,7 @@ const localizations = {
         listing: {
           name: 'Name',
           created: 'Erstellt am',
+          scheduled: 'Geplant am',
           state: 'Status',
           stateActive: 'laufend',
           stateLocked: 'verschlossen',

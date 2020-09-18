@@ -5,7 +5,20 @@ export function createEventMutation () {
     createEvent(input: $input) {
       id
       createDatetime
-      modifiedDatetime
+      title
+      slug
+      description
+      scheduledDatetime
+      lobbyOpen
+      active
+    }
+  }`
+}
+
+export function updateEventMutation () {
+  return gql`mutation UpdateEvent($input: UpdateEventInput!){
+    updateEvent(input: $input) {
+      id
       title
       slug
       description

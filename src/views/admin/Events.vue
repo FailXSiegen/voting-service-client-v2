@@ -6,7 +6,7 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-        <router-link to="/admin/events/new" class="btn btn-success btn-lg my-3">
+        <router-link to="/admin/event/new" class="btn btn-success btn-lg my-3">
           <i class="bi-plus bi--2xl align-middle"></i>
           <span class="align-middle">{{ localize('view.event.create.createNew') }}</span>
         </router-link>
