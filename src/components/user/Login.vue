@@ -8,13 +8,13 @@
             <div class="mb-5 col-md-5 order-1 order-md-2 border py-3">
               <form @submit.prevent="onLogin">
                 <div class="form-group">
-                  <label for="email">{{ localize('view.login.label.email') }}</label>
-                  <input v-model="user.email" type="email" name="email" id="email" class="form-control" required="required">
-                  <small>{{ localize('view.login.label.emailHelp') }}</small>
+                  <label for="username">{{ localize('view.login.label.username') }}</label>
+                  <input v-model="user.username" type="text" name="username" id="username" class="form-control" required="required">
+                  <small>{{ localize('view.login.label.usernameHelp') }}</small>
                 </div>
                 <div class="form-group">
                   <label for="password">{{ localize('view.login.label.password') }}</label>
-                  <input type="password" name="password" id="password" class="form-control" required="required">
+                  <input v-model="user.password" type="password" name="password" id="password" class="form-control" required="required">
                   <small>{{ localize('view.login.label.passwordHelp') }}</small>
                 </div>
                 <div class="form-group">
@@ -47,6 +47,9 @@ export default {
     },
     user: {
       type: Object
+    },
+    event: {
+      type: Object
     }
   },
   methods: {
@@ -56,15 +59,14 @@ export default {
     onLogin () {
       const loginType = 'event-user'
       // @todo set the event and display_name as optional parameter in login
-      login(this.user.email, this.user.password, loginType).then(async (data) => {
+      login(this.user.username, this.user.password, loginType, this.user.displayName, this.event.id).then(async (data) => {
         const token = R.path(['token'], data)
         const expiresAt = R.path(['expiresAt'], data)
         await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)
         await this.$store.dispatch('extractUserData')
         // @todo add verified as claim in token handling
         this.$emit('changeComponent', {
-          component: 'AppUserDashboard',
-          verified: true
+          component: 'AppUserDashboard'
         })
       }).catch((error) => {
         console.error(error)

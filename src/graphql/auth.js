@@ -1,10 +1,10 @@
 import { localize } from '@/helper/localization-helper'
 
-export async function login (email, password, loginType) {
+export async function login (username, password, loginType, displayName = '', eventId = null) {
   const endpoint = process.env.VUE_APP_API_HOST + '/login'
   const requestOptions = {
     method: 'POST',
-    body: JSON.stringify({ email, password, loginType }),
+    body: JSON.stringify({ username, password, loginType, displayName, eventId }),
     redirect: 'follow',
     referrerPolicy: 'no-referrer',
     cache: 'no-cache',

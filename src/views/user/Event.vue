@@ -1,6 +1,6 @@
 <template>
   <div :id="this.event.slug">
-      <component :user="user" :users="users" v-bind:is="component" @changeComponent="changeComponent"/>
+      <component :user="user" :users="users" :event="event" v-bind:is="component" @changeComponent="changeComponent"/>
   </div>
 </template>
 
@@ -23,7 +23,7 @@ export default {
   async created () {
     const response = await fetchEventBySlug(this.eventSlug)
     if (response === null || response.success === false) {
-      this.$router.push('/')
+      await this.$router.push('/')
     }
     this.event = response.event
   },

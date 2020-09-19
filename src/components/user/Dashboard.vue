@@ -1,6 +1,6 @@
 <template>
   <section class="user-dashboard-container">
-    <div class="container-fluid bg-white min-vh-100">
+    <div class="container bg-white min-vh-100">
       <div v-if="!user.verified" class="row min-vh-100 justify-content-center align-items-center">
         <div class="col-12 text-center">
           <i class="bi-arrow-repeat bi--spin bi--4xl mb-3"></i>
