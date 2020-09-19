@@ -12,7 +12,8 @@ export default new Vuex.Store({
     currentUser: {
       type: null,
       id: null,
-      role: null
+      role: null,
+      verified: null
     },
     views: [
       {
@@ -29,58 +30,7 @@ export default new Vuex.Store({
       maximumNumberOfLinks: 5
     },
     alerts: [],
-    users: [
-      {
-        uid: 1234,
-        username: 'habundloot',
-        email: 'mo@habundloot.de',
-        publicName: 'Moritz Preuß',
-        allowToVote: true,
-        online: true,
-        verified: true,
-        eventCoOrganisator: false
-      },
-      {
-        uid: 23456,
-        username: '0m3gaC0d3',
-        email: 'technoutz@gmail.com',
-        publicName: 'Wolf Peterchens Mondfahrt',
-        allowToVote: false,
-        online: false,
-        verified: true,
-        eventCoOrganisator: false
-      },
-      {
-        uid: 34567,
-        username: 'FailXSiegen',
-        email: 'failX@fail2000.com',
-        publicName: 'Herr Felix Mann',
-        allowToVote: true,
-        online: true,
-        verified: true,
-        eventCoOrganisator: true
-      },
-      {
-        uid: 45678,
-        username: 'Testdummy2000',
-        email: 'dumm@duemmer.com',
-        publicName: 'Pending Test Visitor',
-        allowToVote: false,
-        online: true,
-        verified: true,
-        eventCoOrganisator: false
-      },
-      {
-        uid: 45678,
-        username: 'Testdummy2000',
-        email: 'dumm@duemmer.com',
-        publicName: 'Pending Test Member',
-        allowToVote: true,
-        online: true,
-        verified: false,
-        eventCoOrganisator: false
-      }
-    ]
+    users: []
   },
   getters: {
     verifiedUsers: state => {
@@ -95,6 +45,9 @@ export default new Vuex.Store({
         throw new Error('Could not fetch id from store')
       }
       return id
+    },
+    isCurrentUserVerfied: state => {
+      return R.path(['currentUser', 'verified'], state)
     }
   },
   mutations: {
@@ -108,7 +61,8 @@ export default new Vuex.Store({
       state.currentUser = {
         type: R.path(['payload', 'user', 'type'], decodedToken),
         id: R.path(['payload', 'user', 'id'], decodedToken),
-        role: R.path(['payload', 'role'], decodedToken)
+        role: R.path(['payload', 'role'], decodedToken),
+        verified: R.path(['payload', 'user', 'verified'], decodedToken)
       }
     }
   },

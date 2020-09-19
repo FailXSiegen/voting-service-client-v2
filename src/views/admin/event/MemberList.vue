@@ -2,12 +2,12 @@
   <div class="memberlist-container container-fluid">
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
-        <app-navigation />
+        <app-navigation :eventRecord="eventRecord" />
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-verified-users />
+        <app-verified-users :eventRecord="eventRecord" />
       </div>
     </div>
   </div>
@@ -20,6 +20,12 @@ import AppVerifiedUsers from '@/components/events/event/VerifiedUsers'
 import { localize } from '@/helper/localization-helper'
 
 export default {
+  props: {
+    eventRecord: {
+      type: Object,
+      required: true
+    }
+  },
   components: {
     AppNavigation,
     AppVerifiedUsers

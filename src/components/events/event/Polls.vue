@@ -81,12 +81,17 @@ import AppCreatePoll from '@/components/events/event/polls/CreatePoll'
 import AppPollsListing from '@/components/events/event/polls/PollsListing'
 
 export default {
+  created () {
+    this.eventRecord = this.$route.params.eventRecord
+  },
   components: {
     AppCreatePoll,
     AppPollsListing
   },
   data () {
-    return {}
+    return {
+      eventRecord: []
+    }
   },
   methods: {
     localize (path) {

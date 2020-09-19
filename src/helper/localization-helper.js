@@ -14,6 +14,7 @@ const localizations = {
         label: {
           username: 'E-Mail oder Mitgliedsnummer*',
           usernameHelp: 'Als Benutzername dient Ihre Mitgliedsnummer oder Ihre E-Mail Adresse. Die Informationen dienen zur Akkredetierung.',
+          email: 'E-Mail*',
           password: 'Passwort*',
           passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zum Event benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',
           displayName: 'Anzeige-Name*',
@@ -47,7 +48,8 @@ const localizations = {
           members: 'Teilnehmer',
           waitingRoom: 'Warteraum',
           polls: 'Abstimmungen',
-          results: 'Ergebnisse'
+          results: 'Ergebnisse',
+          back: 'Zurück zur Übersicht'
         },
         user: {
           verifyAs: 'Verifizieren als:',
@@ -79,7 +81,7 @@ const localizations = {
             label: 'Aktionen',
             edit: 'Bearbeiten',
             inviteLink: 'Einladungs-Link kopieren',
-            newTab: 'Event in neuem Tab öffnen',
+            newTab: 'Event-Organisation in neuem Tab öffnen',
             close: 'Event beenden'
           }
         },

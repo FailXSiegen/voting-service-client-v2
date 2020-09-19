@@ -64,9 +64,9 @@ export default {
         const expiresAt = R.path(['expiresAt'], data)
         await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)
         await this.$store.dispatch('extractUserData')
-        // @todo add verified as claim in token handling
         this.$emit('changeComponent', {
-          component: 'AppUserDashboard'
+          component: 'AppUserDashboard',
+          verified: this.$store.getters.isCurrentUserVerfied
         })
       }).catch((error) => {
         console.error(error)
