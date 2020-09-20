@@ -17,8 +17,8 @@ const localizations = {
           email: 'E-Mail*',
           password: 'Passwort*',
           passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zum Event benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',
-          displayName: 'Anzeige-Name*',
-          displayNameHelp: 'Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die unteren Felder.',
+          publicName: 'Anzeige-Name*',
+          publicNameHelp: 'Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die unteren Felder.',
           eventIdent: 'Event-ID eingeben*'
         },
         headline: {

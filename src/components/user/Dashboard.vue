@@ -1,7 +1,7 @@
 <template>
   <section class="user-dashboard-container">
-    <div class="container bg-white min-vh-100">
-      <div v-if="!user.verified" class="row min-vh-100 justify-content-center align-items-center">
+    <div v-if="eventUser" class="container bg-white min-vh-100">
+      <div v-if="!eventUser.verified" class="row min-vh-100 justify-content-center align-items-center">
         <div class="col-12 text-center">
           <i class="bi-arrow-repeat bi--spin bi--4xl mb-3"></i>
           <h1>{{ localize('view.user.pending.tankYou') }}</h1>
@@ -10,7 +10,7 @@
       </div>
       <div v-else class="row min-vh-100 justify-content-center align-items-center">
         <div class="col-12">
-          <h1>{{ localize('view.user.verified.welcome') }} {{ user.publicName }}</h1>
+          <h1>{{ localize('view.user.verified.welcome') }} {{ eventUser.publicName }}</h1>
         </div>
       </div>
     </div>
@@ -20,15 +20,18 @@
 <script>
 import { localize } from '@/helper/localization-helper'
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/graphql/subscriptions'
+import { EVENT_USER_BY_ID } from '@/graphql/queries'
 
 export default {
-  props: {
-    user: {
-      type: Object,
-      required: true
-    }
-  },
   apollo: {
+    eventUser: {
+      query: EVENT_USER_BY_ID,
+      variables () {
+        return {
+          id: this.$store.getters.getCurrentUserId
+        }
+      }
+    },
     $subscribe: {
       updateEventUserAccessRights: {
         query: UPDATE_EVENT_USER_ACCESS_RIGHTS,
@@ -37,10 +40,14 @@ export default {
           if (id !== this.$store.getters.getCurrentUserId) {
             return
           }
-          alert('Change detected!')
-          this.$emit('refresh')
+          this.$apollo.queries.eventUser.refetch()
         }
       }
+    }
+  },
+  data () {
+    return {
+      eventUser: null
     }
   },
   methods: {
