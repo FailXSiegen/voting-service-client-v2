@@ -17,7 +17,6 @@
               <p class="small text-muted">
                 {{ localize('view.results.givenVotes') }} 52 | {{ localize('view.results.voters') }} 51
               </p>
-              <bar-chart></bar-chart>
               <hr class="divider my-2" />
               <p>{{ localize('view.results.mainResult') }}</p>
               <div class="result-list">
@@ -101,93 +100,7 @@
     </div>
     <h2>Vergangene Abstimmungen</h2>
     <ul class="created-polls list-group">
-      <li class="list-group-item">
-        <div class="border p-3">
-          <h5 class="mb-1">Titel der Abstimmung (offen)</h5>
-          <p class="small text-muted">
-            {{ localize('view.results.givenVotes') }} 52 | {{ localize('view.results.voters') }} 51
-          </p>
-          <hr class="divider my-2" />
-          <div class="row">
-            <div class="col-12 col-md-6">
-              <p>{{ localize('view.results.mainResult') }}</p>
-              <div class="result-list">
-                <ul class="list-group">
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ localize('general.yes') }}
-                    <span class="badge badge-pill" style="background-color: green;color: white;">40</span>
-                  </li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ localize('general.no') }}
-                    <span class="badge badge-pill" style="background-color: red; color: white;">10</span>
-                  </li>
-                  <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ localize('general.abstention') }}
-                    <span class="badge badge-primary badge-pill" style="background-color: grey">2</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-12 col-md-6">
-              <p>{{ localize('general.member') }}</p>
-              <button class="btn btn-primary"
-                      type="button"
-                      data-toggle="collapse"
-                      data-target="#poll-ID-ResultVoters"
-                      aria-expanded="false"
-                      aria-controls="poll-ID-ResultVoters">
-                <i class="bi bi-caret-right-fill"></i>
-                {{ localize('view.results.showMemberList') }}
-              </button>
-              <div class="collapse" id="poll-ID-ResultVoters">
-                <div class="card card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Felix Meyer
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Superstar of Fistguitar
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Lena Landrut
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <hr class="divider mx-2" />
-              <p>{{ localize('view.results.detailResult') }}</p>
-              <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#poll-ID-ResultDetails"
-                      aria-expanded="false" aria-controls="poll-ID-ResultDetails">
-                <i class="bi bi-caret-right-fill"></i>
-                {{ localize('view.results.showDetailResult') }}
-              </button>
-              <div class="collapse" id="poll-ID-ResultDetails">
-                <div class="card card-body">
-                  <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Felix Meyer
-                      <span class="badge badge-pill" style="background-color: green;color: white;">Ja</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Felix Meyer
-                      <span class="badge badge-pill" style="background-color: green;color: white;">Ja</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Superstar of Fistguitar
-                      <span class="badge badge-pill" style="background-color: grey;color: white;">Enthaltung</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                      Lena Landrut
-                      <span class="badge badge-pill" style="background-color: red;color: white;">Nein</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-
+      <app-result-row v-for="(poll, index) in this.polls" :key="index" :poll="poll"/>
     </ul>
   </div>
 </template>
@@ -201,60 +114,85 @@
 <script>
 
 import { localize } from '@/helper/localization-helper'
-import Vue from 'vue'
-import VueChartJs from 'vue-chartjs'
+import AppResultRow from '@/components/events/event/ResultRow'
 
-Vue.component('bar-chart', {
-  extends: VueChartJs.HorizontalBar,
-  mounted () {
-    this.renderChart({
-      datasets: [
+export default {
+  components: {
+    AppResultRow
+  },
+  data () {
+    return {
+      polls: [
         {
-          label: 'Ja',
-          backgroundColor: 'green',
-          data: [40]
+          title: 'Test',
+          type: 0,
+          modifiedDatetime: '23.08.2020, 16:00',
+          amountVotes: '10',
+          amountPossibleVotes: '12',
+          answers: [
+            {
+              content: 'Ja',
+              amount: '5'
+            },
+            {
+              content: 'Nein',
+              amount: '5'
+            },
+            {
+              content: 'Enthaltung',
+              amount: '0'
+            }
+          ],
+          participants: [
+            {
+              publicName: 'FailX'
+            },
+            {
+              publicName: 'MrX'
+            }
+          ],
+          participantsWithAnswers: [
+            {
+              publicName: 'FailX',
+              content: 'Ja'
+            },
+            {
+              publicName: 'MrX',
+              content: 'Nein'
+            }
+          ]
         },
         {
-          label: 'Nein',
-          backgroundColor: 'red',
-          data: [10]
-        },
-        {
-          label: 'Enthaltung',
-          backgroundColor: 'grey',
-          data: [2]
+          title: 'Test',
+          type: 1,
+          modifiedDatetime: '23.08.2020, 16:00',
+          amountVotes: '10',
+          amountPossibleVotes: '12',
+          answers: [
+            {
+              content: 'Ja',
+              amount: '5'
+            },
+            {
+              content: 'Nein',
+              amount: '5'
+            },
+            {
+              content: 'Enthaltung',
+              amount: '0'
+            }
+          ],
+          participants: [
+            {
+              publicName: 'FailX'
+            },
+            {
+              publicName: 'MrX'
+            }
+          ]
         }
       ]
-    }, {
-      tooltips: {
-        enabled: true
-      },
-      hover: {
-        animationDuration: 0
-      },
-      legend: {
-        position: 'bottom'
-      },
-      scales: {
-        xAxes: [{
-          ticks: {
-            scaleShowLabels: true
-          }
-        }],
-        yAxes: [{
-          ticks: {
-            scaleShowLabels: true
-          }
-        }]
-      },
-      responsive: true,
-      maintainAspectRatio: false
-    })
-  }
-})
-export default {
-  data () {
-    return {}
+    }
   },
   methods: {
     localize (path) {

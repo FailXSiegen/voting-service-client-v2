@@ -23,8 +23,7 @@ import { fetchEventBySlug } from '@/api/event'
 export default {
   props: {
     eventSlug: {
-      type: String,
-      required: true
+      type: String
     }
   },
   async created () {

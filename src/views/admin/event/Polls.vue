@@ -30,8 +30,7 @@ export default {
   },
   props: {
     eventSlug: {
-      type: String,
-      required: true
+      type: String
     }
   },
   components: {
