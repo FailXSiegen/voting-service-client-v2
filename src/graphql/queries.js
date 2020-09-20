@@ -44,3 +44,14 @@ export const EVENT_USERS_BY_EVENT = gql`
     }
   }
 `
+
+export const EVENT_USER_BY_ID = gql`query FindEventUserById($id: ID!) {
+  eventUser(id: $id) {
+    id
+    publicName
+    verified
+    allowToVote
+    online
+    username
+  }
+}`

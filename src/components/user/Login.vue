@@ -9,18 +9,18 @@
               <form @submit.prevent="onLogin">
                 <div class="form-group">
                   <label for="username">{{ localize('view.login.label.username') }}</label>
-                  <input v-model="user.username" type="text" name="username" id="username" class="form-control" required="required">
+                  <input v-model="eventUser.username" type="text" name="username" id="username" class="form-control" required="required">
                   <small>{{ localize('view.login.label.usernameHelp') }}</small>
                 </div>
                 <div class="form-group">
                   <label for="password">{{ localize('view.login.label.password') }}</label>
-                  <input v-model="user.password" type="password" name="password" id="password" class="form-control" required="required">
+                  <input v-model="eventUser.password" type="password" name="password" id="password" class="form-control" required="required">
                   <small>{{ localize('view.login.label.passwordHelp') }}</small>
                 </div>
                 <div class="form-group">
-                  <label for="displayName">{{ localize('view.login.label.displayName') }}</label>
-                  <input v-model="user.displayName" type="text" name="email" id="displayName" class="form-control" required="required">
-                  <small>{{ localize('view.login.label.displayNameHelp') }}</small>
+                  <label for="publicName">{{ localize('view.login.label.publicName') }}</label>
+                  <input v-model="eventUser.publicName" type="text" name="email" id="publicName" class="form-control" required="required">
+                  <small>{{ localize('view.login.label.publicNameHelp') }}</small>
                 </div>
                 <div class="form-group">
                   <button class="btn btn-primary btn-block float-right">{{ localize('view.login.submitToEvent') }}</button>
@@ -42,14 +42,18 @@ import { login } from '@/graphql/auth'
 
 export default {
   props: {
-    users: {
-      type: Array
-    },
-    user: {
-      type: Object
-    },
-    event: {
-      type: Object
+    eventRecord: {
+      type: Object,
+      required: true
+    }
+  },
+  data () {
+    return {
+      eventUser: {
+        username: '',
+        password: '',
+        publicName: ''
+      }
     }
   },
   methods: {
@@ -59,14 +63,13 @@ export default {
     onLogin () {
       const loginType = 'event-user'
       // @todo set the event and display_name as optional parameter in login
-      login(this.user.username, this.user.password, loginType, this.user.displayName, this.event.id).then(async (data) => {
+      login(this.eventUser.username, this.eventUser.password, loginType, this.eventUser.publicName, this.eventRecord.id).then(async (data) => {
         const token = R.path(['token'], data)
         const expiresAt = R.path(['expiresAt'], data)
         await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)
         await this.$store.dispatch('extractUserData')
         this.$emit('changeComponent', {
-          component: 'AppUserDashboard',
-          verified: this.$store.getters.isCurrentUserVerfied
+          component: 'AppUserDashboard'
         })
       }).catch((error) => {
         console.error(error)

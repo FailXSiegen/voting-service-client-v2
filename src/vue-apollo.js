@@ -16,7 +16,7 @@ Vue.use(VueApollo)
 export const AUTH_TOKEN = 'apollo-token'
 
 // Http endpoint (use httpsEndpoint in production)
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost/graphql?debug=1'
+const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP
 
 const link = ApolloLink.from([
   new TokenRefreshLink({
@@ -50,7 +50,7 @@ const link = ApolloLink.from([
 // Config
 const defaultOptions = {
   httpEndpoint,
-  wsEndpoint: null,
+  wsEndpoint: process.env.VUE_APP_WS_ENDPOINT,
   tokenName: AUTH_TOKEN,
   persisting: false,
   websocketsOnly: false,

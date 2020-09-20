@@ -10,9 +10,8 @@
           <span class="badge badge-success badge-pill status-indicator" v-if="user.online">online</span>
           <span class="badge badge-danger badge-pill status-indicator" v-else>offline</span>
         </div>
-
-        <button class="btn btn-success mr-2" v-on:click="verifyWithVoting(user.id)">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.member') }}</button>
-        <button class="btn btn-info mr-2" v-on:click="verifyAsGuest(user.id)">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.visitor') }}</button>
+        <button class="btn btn-success mr-2" v-on:click="updateToParticipant(user.id)">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.member') }}</button>
+        <button class="btn btn-info mr-2" v-on:click="updateUserToGuest(user.id)">{{ localize('view.event.user.verifyAs') }} {{ localize('view.event.user.visitor') }}</button>
         <button class="btn btn-danger mr-2">{{ localize('view.event.user.block') }}</button>
       </li>
     </ul>
@@ -20,10 +19,9 @@
 </template>
 
 <script>
-
 import { localize } from '@/helper/localization-helper'
 import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
-import { UPDATE_EVENT_USER_VERIFIED } from '@/graphql/mutations'
+import { UPDATE_USER_TO_GUEST, UPDATE_USER_TO_PARTICIPANT } from '@/graphql/mutations'
 
 export default {
   props: {
@@ -40,43 +38,6 @@ export default {
   mounted () {
     this.$apollo.queries.eventUsersByEvent.refetch()
   },
-  methods: {
-    localize (path) {
-      return localize(path)
-    },
-    verifyWithVoting (userId) {
-      this.$apollo.mutate({
-        mutation: UPDATE_EVENT_USER_VERIFIED,
-        variables: {
-          input: {
-            id: userId,
-            verified: true,
-            allowToVote: true
-          }
-        }
-      }).then(() => {
-        this.$apollo.queries.eventUsersByEvent.refetch()
-      }).catch((error) => {
-        console.error(error)
-      })
-    },
-    verifyAsGuest (userId) {
-      this.$apollo.mutate({
-        mutation: UPDATE_EVENT_USER_VERIFIED,
-        variables: {
-          input: {
-            id: userId,
-            verified: true,
-            allowToVote: false
-          }
-        }
-      }).then(() => {
-        this.$apollo.queries.eventUsersByEvent.refetch()
-      }).catch((error) => {
-        console.error(error)
-      })
-    }
-  },
   apollo: {
     eventUsersByEvent: {
       query: EVENT_USERS_BY_EVENT,
@@ -89,6 +50,31 @@ export default {
           verified: false
         }
       }
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path)
+    },
+    updateUserToGuest (eventUserId) {
+      this.$apollo.mutate({
+        mutation: UPDATE_USER_TO_GUEST,
+        variables: { eventUserId }
+      }).then(() => {
+        this.$apollo.queries.eventUsersByEvent.refetch()
+      }).catch((error) => {
+        console.error(error)
+      })
+    },
+    updateToParticipant (eventUserId) {
+      this.$apollo.mutate({
+        mutation: UPDATE_USER_TO_PARTICIPANT,
+        variables: { eventUserId }
+      }).then(() => {
+        this.$apollo.queries.eventUsersByEvent.refetch()
+      }).catch((error) => {
+        console.error(error)
+      })
     }
   }
 }
