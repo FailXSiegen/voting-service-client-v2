@@ -10,7 +10,7 @@
       </div>
       <div v-else class="row min-vh-100 justify-content-center align-items-center">
         <div class="col-12">
-          <h1>{{ localize('view.user.verified.welcome') }} {{user.displayName}}</h1>
+          <h1>{{ localize('view.user.verified.welcome') }} {{ user.publicName }}</h1>
         </div>
       </div>
     </div>
@@ -19,14 +19,28 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
+import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/graphql/subscriptions'
 
 export default {
   props: {
-    users: {
-      type: Array
-    },
     user: {
-      type: Object
+      type: Object,
+      required: true
+    }
+  },
+  apollo: {
+    $subscribe: {
+      updateEventUserAccessRights: {
+        query: UPDATE_EVENT_USER_ACCESS_RIGHTS,
+        result ({ data }) {
+          const id = parseInt(data.updateEventUserAccessRights.eventUserId)
+          if (id !== this.$store.getters.getCurrentUserId) {
+            return
+          }
+          alert('Change detected!')
+          this.$emit('refresh')
+        }
+      }
     }
   },
   methods: {

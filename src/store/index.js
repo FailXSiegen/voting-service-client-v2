@@ -39,12 +39,11 @@ export default new Vuex.Store({
     pendingUsers: state => {
       return state.users.filter(user => !user.verified)
     },
+    isLoggedIn: (state, getters) => {
+      return getters.getCurrentUserId > 0
+    },
     getCurrentUserId: state => {
-      const id = R.path(['currentUser', 'id'], state)
-      if (id === null) {
-        throw new Error('Could not fetch id from store')
-      }
-      return id
+      return R.path(['currentUser', 'id'], state)
     },
     isCurrentUserVerfied: state => {
       return R.path(['currentUser', 'verified'], state)

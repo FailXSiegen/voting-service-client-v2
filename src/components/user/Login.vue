@@ -42,14 +42,15 @@ import { login } from '@/graphql/auth'
 
 export default {
   props: {
-    users: {
-      type: Array
-    },
     user: {
-      type: Object
+      type: Object,
+      default () {
+        return {}
+      }
     },
     event: {
-      type: Object
+      type: Object,
+      required: true
     }
   },
   methods: {
@@ -65,8 +66,7 @@ export default {
         await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)
         await this.$store.dispatch('extractUserData')
         this.$emit('changeComponent', {
-          component: 'AppUserDashboard',
-          verified: this.$store.getters.isCurrentUserVerfied
+          component: 'AppUserDashboard'
         })
       }).catch((error) => {
         console.error(error)

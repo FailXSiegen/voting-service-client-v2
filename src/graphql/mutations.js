@@ -5,10 +5,15 @@ export const UPDATE_EVENT_USER = gql`mutation updateEventUser($input: UpdateEven
     id
   }
 }`
-export const UPDATE_EVENT_USER_VERIFIED = gql`mutation updateEventUserVerified($input: UpdateEventUserVerifiedInput!){
-  updateEventUserVerified(input: $input) {
+export const UPDATE_USER_TO_GUEST = gql`mutation UpdateUserToGuest($eventUserId: ID!) {
+  updateUserToGuest(eventUserId: $eventUserId) {
     id
-    verified
-    allowToVote
+    publicName
+  }
+}`
+export const UPDATE_USER_TO_PARTICIPANT = gql`mutation UpdateUserToParticipant($eventUserId: ID!) {
+  updateUserToParticipant(eventUserId: $eventUserId) {
+    id
+    publicName
   }
 }`
