@@ -1,6 +1,7 @@
 <template>
-  <div :id="this.event.slug">
-      <component :user="user" :users="users" :event="event" v-bind:is="component" @changeComponent="changeComponent"/>
+  <div :id="eventSlug">
+    <component v-if="allowToRender" :eventRecord="eventRecord" v-bind:is="component"
+               @changeComponent="changeComponent" />
   </div>
 </template>
 
@@ -25,28 +26,27 @@ export default {
     if (response === null || response.success === false) {
       await this.$router.push('/')
     }
-    this.event = response.event
+    this.eventRecord = response.event
+
+    // Fetch user record if already logged in.
+    if (this.$store.getters.isLoggedIn) {
+      this.component = 'AppUserDashboard'
+    }
+    this.allowToRender = true
   },
   data () {
     return {
-      user: {
-        loggedIn: false,
-        verified: false,
-        displayName: '',
-        email: ''
-      },
-      event: {},
-      users: this.$store.state.users,
-      component: 'AppUserLogin'
+      eventRecord: null,
+      component: 'AppUserLogin',
+      allowToRender: false
     }
   },
   methods: {
     localize (path) {
       return localize(path, this.$store.state.language)
     },
-    changeComponent (event) {
+    async changeComponent (event) {
       this.component = event.component
-      this.user.verified = event.verified
     }
   }
 }
