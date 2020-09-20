@@ -47,35 +47,35 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/admin/event/update',
+    path: '/admin/event/update/:eventSlug',
     name: 'updateEvent',
     props: true,
     component: AppUpdateEvent,
     meta: { requiresAuth: true }
   },
   {
-    path: '/admin/event',
+    path: '/admin/event/:eventSlug',
     name: 'MemberList',
     props: true,
     component: AppMemberList,
     meta: { requiresAuth: true }
   },
   {
-    path: '/admin/event/polls',
+    path: '/admin/event/polls/:eventSlug',
     name: 'Polls',
     props: true,
     component: AppPolls,
     meta: { requiresAuth: true }
   },
   {
-    path: '/admin/event/waitingroom',
+    path: '/admin/event/waitingroom/:eventSlug',
     name: 'WaitingRoom',
     props: true,
     component: AppWaitingRoom,
     meta: { requiresAuth: true }
   },
   {
-    path: '/admin/event/results',
+    path: '/admin/event/results/:eventSlug',
     name: 'Results',
     props: true,
     component: AppResults,

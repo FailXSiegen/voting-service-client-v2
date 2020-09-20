@@ -17,3 +17,13 @@ export const UPDATE_USER_TO_PARTICIPANT = gql`mutation UpdateUserToParticipant($
     publicName
   }
 }`
+export const CREATE_POLL = gql`mutation createPoll($input: CreateNewPollInput!){
+  createPoll(input: $input) {
+    eventId
+    title
+    type
+    possibleAnswers {
+      content
+    }
+  }
+}`

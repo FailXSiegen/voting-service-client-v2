@@ -7,7 +7,7 @@
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-polls />
+        <app-polls :eventRecord="eventRecord" />
       </div>
     </div>
   </div>
@@ -18,11 +18,19 @@
 import AppNavigation from '@/components/events/event/Navigation'
 import AppPolls from '@/components/events/event/Polls'
 import { localize } from '@/helper/localization-helper'
+import { fetchEventBySlug } from '@/api/event'
 
 export default {
+  async created () {
+    const response = await fetchEventBySlug(this.eventSlug)
+    if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
+      await this.$router.push('/admin/events')
+    }
+    this.eventRecord = response.event
+  },
   props: {
-    eventRecord: {
-      type: Object,
+    eventSlug: {
+      type: String,
       required: true
     }
   },
@@ -32,7 +40,8 @@ export default {
   },
   data () {
     return {
-      headline: 'Umfragen'
+      headline: 'Umfragen',
+      eventRecord: {}
     }
   },
   methods: {

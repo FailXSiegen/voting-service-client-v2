@@ -18,13 +18,21 @@
 import AppNavigation from '@/components/events/event/Navigation'
 import AppVerifiedUsers from '@/components/events/event/VerifiedUsers'
 import { localize } from '@/helper/localization-helper'
+import { fetchEventBySlug } from '@/api/event'
 
 export default {
   props: {
-    eventRecord: {
-      type: Object,
+    eventSlug: {
+      type: String,
       required: true
     }
+  },
+  async created () {
+    const response = await fetchEventBySlug(this.eventSlug)
+    if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
+      await this.$router.push('/admin/events')
+    }
+    this.eventRecord = response.event
   },
   components: {
     AppNavigation,
@@ -32,7 +40,8 @@ export default {
   },
   data () {
     return {
-      headline: 'Teilnehmerliste'
+      headline: 'Teilnehmerliste',
+      eventRecord: {}
     }
   },
   methods: {
