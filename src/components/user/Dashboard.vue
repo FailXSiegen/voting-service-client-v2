@@ -14,15 +14,20 @@
         </div>
       </div>
     </div>
+    <app-modal-poll v-if="poll" :identifier="'poll' + poll.id" :poll="poll" :trigger="openModal" />
   </section>
 </template>
 
 <script>
 import { localize } from '@/helper/localization-helper'
-import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/graphql/subscriptions'
+import { POLL_LIFE_CYCLE, UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/graphql/subscriptions'
 import { EVENT_USER_BY_ID } from '@/graphql/queries'
+import AppModalPoll from '@/components/modal/Poll'
 
 export default {
+  components: {
+    AppModalPoll
+  },
   apollo: {
     eventUser: {
       query: EVENT_USER_BY_ID,
@@ -42,12 +47,20 @@ export default {
           }
           this.$apollo.queries.eventUser.refetch()
         }
+      },
+      pollLifeCycle: {
+        query: POLL_LIFE_CYCLE,
+        result ({ data }) {
+          this.poll = data.pollLifeCycle.poll
+        }
       }
     }
   },
   data () {
     return {
-      eventUser: null
+      eventUser: null,
+      poll: null,
+      openModal: false
     }
   },
   methods: {
