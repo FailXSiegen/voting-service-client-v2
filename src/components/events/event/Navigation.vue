@@ -3,7 +3,7 @@
     <span class="h2 my-3 d-block">{{ eventRecord.title }}</span>
     <div class="list-group">
       <router-link
-        :to="{ name: 'MemberList', params: { eventRecord }}"
+        :to="{ name: 'MemberList', params: { eventSlug: eventRecord.slug }}"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         {{ localize('view.event.navigation.members') }}
         <span class="badge badge-success badge-pill">
@@ -11,7 +11,7 @@
         </span>
       </router-link>
       <router-link
-        :to="{ name: 'WaitingRoom', params: { eventRecord }}"
+        :to="{ name: 'WaitingRoom', params: { eventSlug: eventRecord.slug }}"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         {{ localize('view.event.navigation.waitingRoom') }}
         <span class="badge badge-warning badge-pill">
@@ -19,12 +19,12 @@
         </span>
       </router-link>
       <router-link
-        :to="{ name: 'Polls', params: { eventRecord }}"
+        :to="{ name: 'Polls', params: { eventSlug: eventRecord.slug }}"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         {{ localize('view.event.navigation.polls') }}
       </router-link>
       <router-link
-        :to="{ name: 'Results', params: { eventRecord }}"
+        :to="{ name: 'Results', params: { eventSlug: eventRecord.slug }}"
         class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
         {{ localize('view.event.navigation.results') }}
       </router-link>
