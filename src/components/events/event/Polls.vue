@@ -5,50 +5,7 @@
     <app-polls-listing :eventRecord="eventRecord"  />
     <hr class="divider my-5" />
     <h2>TEST VORSCHAU POLL</h2>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#examplePoll">
-      Zeige Vorschau einer Abstimmung
-    </button>
-    <div class="modal fade" id="examplePoll" tabindex="-1" role="dialog" aria-labelledby="examplePollTitle"
-         aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="examplePollTitle">Sind Sie für die Entlastung des Vorstands?<br /><small>(Stimme 1 von 1)</small></h5>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="form-check">
-                <input class="form-check-input"
-                       type="radio"
-                       name="poll##ID##Answers"
-                       id="poll##ID##Answer###ID###1"
-                       value="###ID###" required>
-                <label class="form-check-label" for="poll##ID##Answer###ID###1">
-                  Ja
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="poll##ID##Answers" id="poll##ID##Answer###ID###2"
-                       value="###ID###">
-                <label class="form-check-label" for="poll##ID##Answer###ID###2">
-                  Nein
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="poll##ID##Answers" id="poll##ID##Answer###ID###3"
-                       value="###ID###">
-                <label class="form-check-label" for="poll##ID##Answer###ID###3">
-                  Enthaltung
-                </label>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" data-dismiss="modal" class="btn btn-primary">Jetzt abstimmen</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-modal-poll :poll="poll" :identifier="identifier" :trigger="trigger" />
     <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#examplePollWaiting">
       Zeige Vorschau einer Abstimmung
     </button>
@@ -71,7 +28,6 @@
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -79,6 +35,7 @@
 import { localize } from '@/helper/localization-helper'
 import AppCreatePoll from '@/components/events/event/polls/CreatePoll'
 import AppPollsListing from '@/components/events/event/polls/PollsListing'
+import AppModalPoll from '@/components/modal/Poll'
 
 export default {
   props: {
@@ -89,10 +46,28 @@ export default {
   },
   components: {
     AppCreatePoll,
+    AppModalPoll,
     AppPollsListing
   },
   data () {
     return {
+      poll: {
+        id: 1,
+        title: 'Test 23',
+        maxVotes: 1,
+        answers: [
+          {
+            id: 1,
+            content: 'Ja'
+          },
+          {
+            id: 2,
+            content: 'Nein'
+          }
+        ]
+      },
+      identifier: 'quickpoll',
+      trigger: false
     }
   },
   methods: {
