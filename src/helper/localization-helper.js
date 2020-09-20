@@ -126,7 +126,11 @@ const localizations = {
         mainResult: 'Gesamtergebnis',
         showMemberList: 'Teilnehmerliste Anzeigen',
         detailResult: 'Detailergebnis',
-        showDetailResult: 'Ergebnisliste anzeigen'
+        showDetailResult: 'Ergebnisliste anzeigen',
+        type: {
+          0: 'offen',
+          1: 'geheim'
+        }
       },
       user: {
         pending: {

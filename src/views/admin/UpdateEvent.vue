@@ -19,20 +19,34 @@ import AppEventMask from '@/components/events/EventMask'
 import { localize } from '@/helper/localization-helper'
 import { updateEventMutation } from '@/graphql/views/event'
 import { convertUnixTimeStampForDatetimeLocaleInput } from '@/lib/time-stamp'
+import { fetchEventBySlug } from '@/api/event'
 
 export default {
+  async created () {
+    const response = await fetchEventBySlug(this.eventSlug)
+    if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
+      await this.$router.push('/admin/events')
+    }
+    this.eventRecord = response.event
+    delete this.eventRecord.modifiedDatetime
+    delete this.eventRecord.deleted
+    delete this.eventRecord.imagePath
+    delete this.eventRecord.organizerId
+    this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
+  },
+  props: {
+    eventSlug: {
+      type: String
+    }
+  },
   components: {
     AppNavigation,
     AppEventMask
   },
-  props: {
-    eventRecord: {
-      type: Object
-    }
-  },
   data () {
     return {
-      headline: 'Event'
+      headline: 'Event',
+      eventRecord: {}
     }
   },
   methods: {

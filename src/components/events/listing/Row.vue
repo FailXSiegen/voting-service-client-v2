@@ -11,7 +11,7 @@
       {{ localize('view.event.listing.stateLocked') }}
     </td>
     <td>
-      <router-link :to="{ name: 'updateEvent', params: { eventRecord }}"
+      <router-link :to="{ name: 'updateEvent', params: { eventSlug: event.slug }}"
                    class="btn btn-primary mx-1 my-2"
               :title="localize('view.event.listing.actions.edit')">
         <i class="bi-pencil-square bi--2xl"></i>
