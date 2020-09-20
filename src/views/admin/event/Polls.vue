@@ -7,7 +7,7 @@
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-polls />
+        <app-polls :eventRecord="eventRecord" />
       </div>
     </div>
   </div>

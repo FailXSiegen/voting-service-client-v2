@@ -1,8 +1,8 @@
 <template>
   <div class="polls-container mt-2">
-    <app-create-poll />
+    <app-create-poll :eventRecord="eventRecord" />
     <hr class="divider my-5" />
-    <app-polls-listing />
+    <app-polls-listing :eventRecord="eventRecord"  />
     <hr class="divider my-5" />
     <h2>TEST VORSCHAU POLL</h2>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#examplePoll">
@@ -81,8 +81,11 @@ import AppCreatePoll from '@/components/events/event/polls/CreatePoll'
 import AppPollsListing from '@/components/events/event/polls/PollsListing'
 
 export default {
-  created () {
-    this.eventRecord = this.$route.params.eventRecord
+  props: {
+    eventRecord: {
+      type: Object,
+      required: true
+    }
   },
   components: {
     AppCreatePoll,
@@ -90,7 +93,6 @@ export default {
   },
   data () {
     return {
-      eventRecord: []
     }
   },
   methods: {

@@ -12,3 +12,13 @@ export const UPDATE_EVENT_USER_VERIFIED = gql`mutation updateEventUserVerified($
     allowToVote
   }
 }`
+export const CREATE_POLL = gql`mutation createPoll($input: CreateNewPollInput!){
+  createPoll(input: $input) {
+    eventId
+    title
+    type
+    possibleAnswers {
+      content
+    }
+  }
+}`
