@@ -57,7 +57,7 @@ export default {
   },
   methods: {
     validateInput (parentId) {
-      const formInputs = document.querySelectorAll(parentId + '.form-control')
+      const formInputs = document.querySelectorAll(parentId + ' .form-control')
       for (let i = 0; i < formInputs.length; i++) {
         formInputs[i].classList.add('is-invalid')
       }
@@ -81,7 +81,7 @@ export default {
     onLoginById () {
       fetchEventBySlug(this.eventSlug).then(async (data) => {
         if (data.success) {
-          await this.$router.push('/' + data.event.slug)
+          window.location.href = '/' + data.event.slug
         } else {
           this.validateInput('#event-form')
         }
