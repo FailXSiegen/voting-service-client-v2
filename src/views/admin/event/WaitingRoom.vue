@@ -18,7 +18,7 @@
 import AppNavigation from '@/components/events/event/Navigation'
 import AppPendingUsers from '@/components/events/event/PendingUsers'
 import { fetchEventBySlug } from '@/api/event'
-import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/graphql/subscriptions'
+import { NEW_EVENT_USER_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/graphql/subscriptions'
 import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
 
 export default {
@@ -42,23 +42,29 @@ export default {
     },
     $subscribe: {
       updateEventUserAccessRights: {
-        query: UPDATE_EVENT_USER_ACCESS_RIGHTS,
+        query: UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION,
         result ({ data }) {
           const { eventUserId, eventId, verified, allowToVote } = data.updateEventUserAccessRights
           if (parseInt(eventId) !== this.eventRecord.id) {
-            console.log('not my event')
-            console.log(data.updateEventUserAccessRights)
-            console.log(eventId)
+            return
           }
           const eventUser = this.eventUsers.find((user) => {
             return user.id === eventUserId
           })
           if (!eventUser) {
-            console.log('not my event user')
             return
           }
           eventUser.verified = verified
           eventUser.allowToVote = allowToVote
+        }
+      },
+      newEventUser: {
+        query: NEW_EVENT_USER_SUBSCRIPTION,
+        result ({ data }) {
+          if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
+            return
+          }
+          this.eventUsers.push({ ...data.newEventUser })
         }
       }
     }

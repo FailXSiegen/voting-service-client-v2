@@ -20,6 +20,7 @@ import AppPolls from '@/components/events/event/Polls'
 import { localize } from '@/helper/localization-helper'
 import { fetchEventBySlug } from '@/api/event'
 import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
+import { NEW_EVENT_USER_SUBSCRIPTION } from '@/graphql/subscriptions'
 
 export default {
   async created () {
@@ -44,6 +45,17 @@ export default {
       variables () {
         return {
           eventId: this.eventRecord.id
+        }
+      }
+    },
+    $subscribe: {
+      newEventUser: {
+        query: NEW_EVENT_USER_SUBSCRIPTION,
+        result ({ data }) {
+          if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
+            return
+          }
+          this.eventUsers.push({ ...data.newEventUser })
         }
       }
     }
