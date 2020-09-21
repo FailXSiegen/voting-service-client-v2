@@ -45,6 +45,10 @@ export default {
     eventRecord: {
       type: Object,
       required: true
+    },
+    eventUsers: {
+      type: Array,
+      required: true
     }
   },
   data () {
@@ -56,11 +60,21 @@ export default {
     }
   },
   computed: {
-    pendingUsersCount () {
-      return this.$store.getters.pendingUsers.length
-    },
     verifiedUsersCount () {
-      return this.$store.getters.verifiedUsers.length
+      if (!this.eventUsers) {
+        return []
+      }
+      return this.eventUsers.filter((eventUser) => {
+        return eventUser.verified
+      }).length
+    },
+    pendingUsersCount () {
+      if (!this.eventUsers) {
+        return []
+      }
+      return this.eventUsers.filter((eventUser) => {
+        return !eventUser.verified
+      }).length
     }
   }
 }
