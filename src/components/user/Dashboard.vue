@@ -31,7 +31,7 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
-import { POLL_LIFE_CYCLE, UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/graphql/subscriptions'
+import { POLL_LIFE_CYCLE_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/graphql/subscriptions'
 import { EVENT_USER_BY_ID } from '@/graphql/queries'
 import AppModalPoll from '@/components/modal/Poll'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
@@ -57,7 +57,7 @@ export default {
     },
     $subscribe: {
       updateEventUserAccessRights: {
-        query: UPDATE_EVENT_USER_ACCESS_RIGHTS,
+        query: UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION,
         result ({ data }) {
           const id = parseInt(data.updateEventUserAccessRights.eventUserId)
           if (id !== this.$store.getters.getCurrentUserId) {
@@ -67,7 +67,7 @@ export default {
         }
       },
       pollLifeCycle: {
-        query: POLL_LIFE_CYCLE,
+        query: POLL_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
           this.poll = data.pollLifeCycle.poll
           this.pollState = data.pollLifeCycle.state

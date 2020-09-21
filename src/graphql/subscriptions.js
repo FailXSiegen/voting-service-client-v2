@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const UPDATE_EVENT_USER_ACCESS_RIGHTS = gql`subscription{
+export const UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION = gql`subscription{
   updateEventUserAccessRights {
     eventId
     eventUserId
@@ -9,7 +9,7 @@ export const UPDATE_EVENT_USER_ACCESS_RIGHTS = gql`subscription{
   }
 }`
 
-export const POLL_LIFE_CYCLE = gql`subscription {
+export const POLL_LIFE_CYCLE_SUBSCRIPTION = gql`subscription {
   pollLifeCycle {
     state
     poll {
@@ -24,6 +24,20 @@ export const POLL_LIFE_CYCLE = gql`subscription {
       maxVotes
       allowAbstain
     }
+  }
+}
+`
+
+export const NEW_EVENT_USER_SUBSCRIPTION = gql`subscription{
+  newEventUser{
+    eventId
+    id
+    publicName
+    verified
+    allowToVote
+    online
+    username
+    voteAmount
   }
 }
 `
