@@ -11,8 +11,8 @@ import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
 import AppResults from '@/views/admin/event/Results'
 import AppUserEvent from '@/views/user/Event'
-import AppCreateEventUser from '@/views/admin/event/eventUser/CreateEventUser'
-import AppUpdateEventUser from '@/views/admin/event/eventUser/UpdateEventUser'
+import AppCreateEventUser from '@/views/admin/event/event-user/CreateEventUser'
+import AppUpdateEventUser from '@/views/admin/event/event-user/UpdateEventUser'
 // import store from '@/store'
 
 Vue.use(VueRouter)

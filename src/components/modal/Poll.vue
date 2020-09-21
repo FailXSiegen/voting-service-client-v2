@@ -17,12 +17,12 @@
          aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title"
-                :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme 1 von 1)</small></h5>
-          </div>
-          <div class="modal-body">
-            <form @submit="onPollSubmit">
+          <form @submit.prevent="onPollSubmit">
+            <div class="modal-header">
+              <h5 class="modal-title"
+                  :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme 1 von 1)</small></h5>
+            </div>
+            <div class="modal-body">
               <fieldset class="input-radios" v-if="poll.maxVotes === 1">
                 <div v-for="(pollAnswer, index) in poll.possibleAnswers" :key="index" class="form-check">
                   <input class="form-check-input"
@@ -35,15 +35,14 @@
                   </label>
                 </div>
               </fieldset>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="submit"
-                    data-dismiss="modal"
-                    class="btn btn-primary">
-              Jetzt abstimmen
-            </button>
-          </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit"
+                      class="btn btn-primary">
+                Jetzt abstimmen
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -51,7 +50,7 @@
 </template>
 
 <script>
-import JQuery from 'jquery'
+import $ from 'jquery'
 
 export default {
   props: {
@@ -68,14 +67,18 @@ export default {
       required: true
     }
   },
-  async created () {
+  mounted () {
     if (this.trigger === true) {
-      JQuery('#' + this.identifier).modal('show')
+      this.onTriggerModal()
     }
   },
   methods: {
+    onTriggerModal () {
+      $('#' + this.identifier).modal('show')
+    },
     onPollSubmit () {
-      alert('Abstimmung abgesendet')
+      $('#' + this.identifier).modal('toggle')
+      this.$emit('updatePollState', 'voted')
     }
   }
 }
