@@ -67,7 +67,17 @@ const localizations = {
             descriptionHelp: 'Event-Beschreibung',
             scheduledDatetime: 'Start-Datum',
             lobbyOpen: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
-            submit: 'Dieses Event erstellen'
+            submit: 'Dieses Event erstellen',
+            eventUser: {
+              submit: 'Benutzer speichern',
+              createNew: 'Neuen Benutzer erstellen',
+              update: 'Benutzer bearbeiten',
+              allowToVote: 'Teilnehmer mit Stimmrecht',
+              verified: 'Freigeschaltet',
+              publicName: 'Angezeigter Name',
+              username: 'Benutzername',
+              amountVote: 'Anzahl der Stimmen'
+            }
           }
         },
         listing: {
