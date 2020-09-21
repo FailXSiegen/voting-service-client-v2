@@ -24,7 +24,7 @@
           <div class="modal-body">
             <form @submit="onPollSubmit">
               <fieldset class="input-radios" v-if="poll.maxVotes === 1">
-                <div v-for="(pollAnswer, index) in poll.answers" :key="index" class="form-check">
+                <div v-for="(pollAnswer, index) in poll.possibleAnswers" :key="index" class="form-check">
                   <input class="form-check-input"
                          type="radio"
                          :name="'poll' + poll.id + 'Answers'"
