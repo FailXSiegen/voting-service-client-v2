@@ -66,7 +66,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 @media screen AND (min-width: 991px) {
   #mainNavigation {
     min-height: 100vh;

@@ -11,6 +11,8 @@ import AppPolls from '@/views/admin/event/Polls'
 import AppWaitingRoom from '@/views/admin/event/WaitingRoom'
 import AppResults from '@/views/admin/event/Results'
 import AppUserEvent from '@/views/user/Event'
+import AppCreateEventUser from '@/views/admin/event/event-user/CreateEventUser'
+import AppUpdateEventUser from '@/views/admin/event/event-user/UpdateEventUser'
 // import store from '@/store'
 
 Vue.use(VueRouter)
@@ -58,6 +60,20 @@ const routes = [
     name: 'MemberList',
     props: true,
     component: AppMemberList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/event/eventuser/create/:eventSlug',
+    name: 'CreateEventUser',
+    props: true,
+    component: AppCreateEventUser,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/event/eventuser/update/:eventSlug',
+    name: 'UpdateEventUser',
+    props: true,
+    component: AppUpdateEventUser,
     meta: { requiresAuth: true }
   },
   {

@@ -125,6 +125,7 @@ export default {
   methods: {
     createPoll () {
       this.newPoll = convertPollAnswers(this.newPoll)
+      this.newPoll.eventId = this.eventRecord.id
       delete this.newPoll.pollAnswer
       delete this.newPoll.list
       this.$apollo.mutate({

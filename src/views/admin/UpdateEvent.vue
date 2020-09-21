@@ -28,10 +28,6 @@ export default {
       await this.$router.push('/admin/events')
     }
     this.eventRecord = response.event
-    delete this.eventRecord.modifiedDatetime
-    delete this.eventRecord.deleted
-    delete this.eventRecord.imagePath
-    delete this.eventRecord.organizerId
     this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
   },
   props: {
@@ -46,12 +42,20 @@ export default {
   data () {
     return {
       headline: 'Event',
-      eventRecord: {}
+      eventRecord: {
+        lobbyOpen: false,
+        active: false
+      }
     }
   },
   methods: {
     updateEvent () {
       delete this.eventRecord.createDatetime
+      delete this.eventRecord.__typename
+      delete this.eventRecord.modifiedDatetime
+      delete this.eventRecord.deleted
+      delete this.eventRecord.imagePath
+      delete this.eventRecord.organizerId
       this.eventRecord.scheduledDatetime = this.convertScheduledDatetime()
       this.$apollo.mutate({
         mutation: updateEventMutation(),

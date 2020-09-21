@@ -26,6 +26,12 @@
         {{ localize('view.event.create.labels.lobbyOpen') }}
       </label>
     </div>
+    <div class="form-check">
+      <input v-model="eventRecord.active" class="form-check-input" type="checkbox" id="active">
+      <label class="form-check-label" for="active">
+        Event aktiv
+      </label>
+    </div>
     <button class="btn btn-primary mt-5 mb-3">
       <i class="bi-play bi--2xl align-middle"></i>
       <span class="align-middle">{{ localize('view.event.create.labels.submit') }}</span>
@@ -47,8 +53,6 @@ export default {
   },
   async created () {
     this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
-    delete this.eventRecord.__typename
-    delete this.eventRecord.modifiedDatetime
   },
   methods: {
     convertScheduledDatetime () {

@@ -41,6 +41,7 @@ export const EVENT_USERS_BY_EVENT = gql`
       allowToVote
       online
       username
+      voteAmount
     }
   }
 `
