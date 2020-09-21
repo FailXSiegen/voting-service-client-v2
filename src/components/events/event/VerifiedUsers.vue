@@ -1,8 +1,8 @@
 <template>
-  <div class="container-verified-user" v-if="eventUsersByEvent">
-    <h3>Benutzer: {{ eventUsersByEvent.length }}</h3>
+  <div class="container-verified-user" v-if="eventUsers">
+    <h3>Benutzer: {{ eventUsers.length }}</h3>
     <ul class="allowed-users list-group">
-      <li v-for="(user, index) in eventUsersByEvent" :key="index" class="list-group-item my-2 border">
+      <li v-for="(user, index) in eventUsers" :key="index" class="list-group-item my-2 border">
         <div class="d-flex w-100 justify-content-between mb-1">
           <span class="user-information">
             <h5 class="mb-1">{{ user.publicName }}
@@ -31,33 +31,17 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
-import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
 import { UPDATE_USER_TO_GUEST, UPDATE_USER_TO_PARTICIPANT } from '@/graphql/mutations'
 
 export default {
   props: {
-    eventRecord: Object
-  },
-  data () {
-    return {
-      eventUsersByEvent: []
-    }
-  },
-  mounted () {
-    this.$apollo.queries.eventUsersByEvent.refetch()
-  },
-  apollo: {
-    eventUsersByEvent: {
-      query: EVENT_USERS_BY_EVENT,
-      update (data) {
-        return data.findEventUserByEvent
-      },
-      variables () {
-        return {
-          eventId: this.eventRecord.id,
-          verified: true
-        }
-      }
+    eventRecord: {
+      type: Object,
+      required: true
+    },
+    eventUsers: {
+      type: Array,
+      required: true
     }
   },
   methods: {
@@ -68,8 +52,6 @@ export default {
       this.$apollo.mutate({
         mutation: UPDATE_USER_TO_GUEST,
         variables: { eventUserId }
-      }).then(() => {
-        this.$apollo.queries.eventUsersByEvent.refetch()
       }).catch((error) => {
         console.error(error)
       })
@@ -78,8 +60,6 @@ export default {
       this.$apollo.mutate({
         mutation: UPDATE_USER_TO_PARTICIPANT,
         variables: { eventUserId }
-      }).then(() => {
-        this.$apollo.queries.eventUsersByEvent.refetch()
       }).catch((error) => {
         console.error(error)
       })

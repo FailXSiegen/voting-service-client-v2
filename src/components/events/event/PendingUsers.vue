@@ -1,7 +1,7 @@
 <template>
   <div class="pending-users">
     <ul class="allowed-users list-group">
-      <li v-for="(user, index) in eventUsersByEvent" :key="index" class="list-group-item">
+      <li v-for="(user, index) in eventUsers" :key="index" class="list-group-item">
         <div class="d-flex w-100 justify-content-between mb-3">
           <span  class="user-information mb-1">
             <h5 class="mb-0">{{ user.publicName }}</h5>
@@ -20,7 +20,6 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
-import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
 import { UPDATE_USER_TO_GUEST, UPDATE_USER_TO_PARTICIPANT } from '@/graphql/mutations'
 
 export default {
@@ -28,28 +27,15 @@ export default {
     eventRecord: {
       type: Object,
       required: true
+    },
+    eventUsers: {
+      type: Array,
+      required: true
     }
   },
   data () {
     return {
       eventUsersByEvent: []
-    }
-  },
-  mounted () {
-    this.$apollo.queries.eventUsersByEvent.refetch()
-  },
-  apollo: {
-    eventUsersByEvent: {
-      query: EVENT_USERS_BY_EVENT,
-      update (data) {
-        return data.findEventUserByEvent
-      },
-      variables () {
-        return {
-          eventId: this.eventRecord.id,
-          verified: false
-        }
-      }
     }
   },
   methods: {
@@ -60,8 +46,6 @@ export default {
       this.$apollo.mutate({
         mutation: UPDATE_USER_TO_GUEST,
         variables: { eventUserId }
-      }).then(() => {
-        this.$apollo.queries.eventUsersByEvent.refetch()
       }).catch((error) => {
         console.error(error)
       })
@@ -70,8 +54,6 @@ export default {
       this.$apollo.mutate({
         mutation: UPDATE_USER_TO_PARTICIPANT,
         variables: { eventUserId }
-      }).then(() => {
-        this.$apollo.queries.eventUsersByEvent.refetch()
       }).catch((error) => {
         console.error(error)
       })

@@ -2,6 +2,7 @@ import gql from 'graphql-tag'
 
 export const UPDATE_EVENT_USER_ACCESS_RIGHTS = gql`subscription{
   updateEventUserAccessRights {
+    eventId
     eventUserId
     verified
     allowToVote
