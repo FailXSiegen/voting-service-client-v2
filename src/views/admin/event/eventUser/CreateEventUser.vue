@@ -49,16 +49,19 @@ export default {
     return {
       headline: 'Neuen Benutzer erstellen',
       eventRecord: {},
-      eventUserRecord: {}
+      eventUserRecord: {
+        allowToVote: false,
+        voteAmount: 1
+      }
     }
   },
   methods: {
     createEventUser () {
       this.eventUserRecord.eventId = this.eventRecord.id
       this.eventUserRecord.verified = true
-      this.eventUserRecord.amountVote = parseInt(this.eventUserRecord.amountVote)
+      this.eventUserRecord.voteAmount = parseInt(this.eventUserRecord.voteAmount)
       if (!this.eventUserRecord.allowToVote) {
-        this.eventUserRecord.amountVote = 0
+        this.eventUserRecord.voteAmount = 0
       }
       this.$apollo.mutate({
         mutation: CREATE_EVENT_USER,

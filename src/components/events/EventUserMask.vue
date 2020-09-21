@@ -29,8 +29,8 @@
       </div>
       <div class="participants-input" v-if="eventUserRecord.allowToVote">
         <div class="form-group">
-          <label for="amountVote">{{ localize('view.event.create.labels.eventUser.amountVote') }}</label>
-          <input v-model="eventUserRecord.amountVote" type="number" class="form-control" id="amountVote">
+          <label for="voteAmount">{{ localize('view.event.create.labels.eventUser.voteAmount') }}</label>
+          <input v-model="eventUserRecord.voteAmount" type="number" class="form-control" id="voteAmount">
         </div>
       </div>
       <button class="btn btn-primary mt-5 mb-3">

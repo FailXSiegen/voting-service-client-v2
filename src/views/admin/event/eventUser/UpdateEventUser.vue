@@ -59,9 +59,9 @@ export default {
     updateEventUser () {
       this.eventUserRecord.eventId = this.eventRecord.id
       this.eventUserRecord.verified = true
-      this.eventUserRecord.amountVote = parseInt(this.eventUserRecord.amountVote)
+      this.eventUserRecord.voteAmount = parseInt(this.eventUserRecord.voteAmount)
       if (!this.eventUserRecord.allowToVote) {
-        this.eventUserRecord.amountVote = 0
+        this.eventUserRecord.voteAmount = 0
       }
       this.$apollo.mutate({
         mutation: UPDATE_EVENT_USER,

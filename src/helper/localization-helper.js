@@ -76,7 +76,7 @@ const localizations = {
               verified: 'Freigeschaltet',
               publicName: 'Angezeigter Name',
               username: 'Benutzername',
-              amountVote: 'Anzahl der Stimmen'
+              voteAmount: 'Anzahl der Stimmen'
             }
           }
         },

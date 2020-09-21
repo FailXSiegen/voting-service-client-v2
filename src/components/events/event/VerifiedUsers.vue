@@ -1,5 +1,5 @@
 <template>
-  <div class="container-verified-user">
+  <div class="container-verified-user" v-if="eventUsersByEvent">
     <h3>Benutzer: {{ eventUsersByEvent.length }}</h3>
     <ul class="allowed-users list-group">
       <li v-for="(user, index) in eventUsersByEvent" :key="index" class="list-group-item my-2 border">
@@ -9,7 +9,7 @@
               <span class="text-success small" v-if="user.allowToVote">{{ localize('view.event.user.member') }}</span>
               <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
             </h5>
-            <p class="mb-0">{{ user.username }} <span v-if="user.amountVote">- {{ user.amountVote }}</span>  </p>
+            <p class="mb-0">{{ user.username }} <span v-if="user.voteAmount">- Stimmen: {{ user.voteAmount }}</span>  </p>
           </span>
           <span class="badge badge-success badge-pill status-indicator" v-if="user.online">online</span>
           <span class="badge badge-danger badge-pill status-indicator" v-else>offline</span>
@@ -20,9 +20,9 @@
         <button v-else-if="user.allowToVote" v-on:click="updateUserToGuest(user.id)" class="btn btn-info btn-lg my-3 mr-2">{{ localize('view.event.user.setTo') }}
           {{ localize('view.event.user.visitor') }}
         </button>
-        <router-link :to="{ name: 'UpdateEventUser', params: { eventUserRecord: user } }" class="btn float-right btn-warning btn-lg my-3">
-          <i class="bi-pencil mr-2 align-middle"></i>
-          <span class="align-middle">{{ localize('view.event.create.labels.eventUser.update') }}</span>
+        <router-link :to="{ name: 'UpdateEventUser', params: { eventUserRecord: user } }"
+                     class="btn float-xl-right btn-warning btn-lg my-3">
+          <i class="bi-pencil align-middle"></i>
         </router-link>
       </li>
     </ul>
