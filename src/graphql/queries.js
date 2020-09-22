@@ -56,3 +56,12 @@ export const EVENT_USER_BY_ID = gql`query FindEventUserById($id: ID!) {
     username
   }
 }`
+
+export const POLLS_NO_RESULTS = gql`
+  query findPollsWithNoResults($eventId: ID) {
+    pollsWithNoResults(eventId: $eventId) {
+      id
+      title
+    }
+  }
+`
