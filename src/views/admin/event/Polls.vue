@@ -7,7 +7,7 @@
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-polls :eventRecord="eventRecord" />
+        <app-polls :pollsWithNoResults="pollsWithNoResults" :eventRecord="eventRecord" />
       </div>
     </div>
   </div>
@@ -19,7 +19,7 @@ import AppNavigation from '@/components/events/event/Navigation'
 import AppPolls from '@/components/events/event/Polls'
 import { localize } from '@/helper/localization-helper'
 import { fetchEventBySlug } from '@/api/event'
-import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
+import { EVENT_USERS_BY_EVENT, POLLS_NO_RESULTS } from '@/graphql/queries'
 import { NEW_EVENT_USER_SUBSCRIPTION } from '@/graphql/subscriptions'
 
 export default {
@@ -48,6 +48,14 @@ export default {
         }
       }
     },
+    pollsWithNoResults: {
+      query: POLLS_NO_RESULTS,
+      variables () {
+        return {
+          eventId: this.eventRecord.id
+        }
+      }
+    },
     $subscribe: {
       newEventUser: {
         query: NEW_EVENT_USER_SUBSCRIPTION,
@@ -64,7 +72,8 @@ export default {
     return {
       headline: 'Umfragen',
       eventRecord: {},
-      eventUsers: []
+      eventUsers: [],
+      pollsWithNoResults: []
     }
   },
   methods: {
