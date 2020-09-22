@@ -58,12 +58,14 @@ export default {
     $subscribe: {
       updateEventUserAccessRights: {
         query: UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION,
-        result ({ data }) {
-          const id = parseInt(data.updateEventUserAccessRights.eventUserId)
-          if (id !== this.$store.getters.getCurrentUserId) {
-            return
+        variables () {
+          return {
+            eventUserId: this.$store.getters.getCurrentUserId
           }
-          this.$apollo.queries.eventUser.refetch()
+        },
+        result ({ data }) {
+          this.eventUser.verified = data.updateEventUserAccessRights.verified
+          this.eventUser.allowToVote = data.updateEventUserAccessRights.allowToVote
         }
       },
       pollLifeCycle: {

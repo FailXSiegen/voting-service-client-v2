@@ -2,7 +2,7 @@
   <div class="polls-container mt-2">
     <app-create-poll :eventRecord="eventRecord" />
     <hr class="divider my-5" />
-    <app-polls-listing :eventRecord="eventRecord"  />
+    <app-polls-listing :pollsWithNoResults="pollsWithNoResults" :eventRecord="eventRecord"  />
     <hr class="divider my-5" />
     <h2>TEST VORSCHAU POLL</h2>
     <app-modal-poll :poll="poll" :identifier="identifier" :trigger="trigger" />
@@ -42,6 +42,9 @@ export default {
     eventRecord: {
       type: Object,
       required: true
+    },
+    pollsWithNoResults: {
+      type: Array
     }
   },
   components: {
