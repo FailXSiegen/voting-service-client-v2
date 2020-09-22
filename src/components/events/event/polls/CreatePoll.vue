@@ -79,13 +79,17 @@
       </div>
       <div class="row">
         <div class="col-12 col-md-5">
-          <button class="btn btn-primary mr-2 mb-2 mb-lg-0 w-100">
+          <button type="submit"
+                  @click="instantStart = false"
+                  class="btn btn-primary mr-2 mb-2 mb-lg-0 w-100">
             <i class="bi-plus bi--2xl align-middle"></i>
             <span class="align-middle">{{ localize('view.polls.create.labels.saveOnly') }}</span>
           </button>
         </div>
         <div class="col-12 col-md-7 text-right">
-          <button class="btn btn-secondary w-100">
+          <button type="submit"
+                  @click="instantStart = true"
+                  class="btn btn-success w-100">
             <i class="bi-play bi--2xl align-middle"></i>
             <span class="align-middle">{{ localize('view.polls.create.labels.saveAndStart') }}</span>
           </button>
@@ -109,6 +113,7 @@ export default {
   },
   data () {
     return {
+      instantStart: false,
       newPoll: {
         eventId: this.eventRecord.id,
         title: '',
@@ -130,8 +135,10 @@ export default {
       delete this.newPoll.list
       this.$apollo.mutate({
         mutation: CREATE_POLL,
-        variables: { input: this.newPoll }
-      }).then(() => {}).catch((error) => {
+        variables: { input: this.newPoll, instantStart: this.instantStart }
+      }).then(() => {
+        this.newPoll.pollAnswer = 'yesNoAbstain'
+      }).catch((error) => {
         console.error(error)
       })
     },

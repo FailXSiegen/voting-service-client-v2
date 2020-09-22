@@ -13,6 +13,8 @@
          :id="identifier"
          tabindex="-1"
          role="dialog"
+         data-keyboard="false"
+         data-backdrop="static"
          :aria-labelledby="identifier + 'Title'"
          aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
