@@ -93,6 +93,21 @@ export async function onLogin (apolloClient, token) {
 }
 
 export async function onLogout (apolloClient) {
+  // Force logout (remove refresh token on the server side).
+  const requestOptions = {
+    method: 'GET',
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
+    cache: 'no-cache',
+    credentials: 'include',
+    mode: 'cors'
+  }
+  const endpoint = process.env.VUE_APP_API_HOST + '/logout'
+  try {
+    await fetch(endpoint, requestOptions)
+  } catch (error) {
+    console.error(error)
+  }
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN)
   }

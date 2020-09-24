@@ -18,7 +18,11 @@
 import AppNavigation from '@/components/events/event/Navigation'
 import AppPendingUsers from '@/components/events/event/PendingUsers'
 import { fetchEventBySlug } from '@/api/event'
-import { NEW_EVENT_USER_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/graphql/subscriptions'
+import {
+  EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+  NEW_EVENT_USER_SUBSCRIPTION,
+  UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION
+} from '@/graphql/subscriptions'
 import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
 
 export default {
@@ -66,6 +70,17 @@ export default {
             return
           }
           this.eventUsers.push({ ...data.newEventUser })
+        }
+      },
+      eventUserLifeCycle: {
+        query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          const eventUserId = data.eventUserLifeCycle.eventUserId
+          this.eventUsers.forEach((eventUser) => {
+            if (eventUserId === eventUser.id) {
+              eventUser.online = data.eventUserLifeCycle.online
+            }
+          })
         }
       }
     }

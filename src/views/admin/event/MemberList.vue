@@ -24,7 +24,11 @@ import AppVerifiedUsers from '@/components/events/event/VerifiedUsers'
 import { localize } from '@/helper/localization-helper'
 import { fetchEventBySlug } from '@/api/event'
 import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
-import { NEW_EVENT_USER_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/graphql/subscriptions'
+import {
+  EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+  NEW_EVENT_USER_SUBSCRIPTION,
+  UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION
+} from '@/graphql/subscriptions'
 
 export default {
   props: {
@@ -71,6 +75,17 @@ export default {
             return
           }
           this.eventUsers.push({ ...data.newEventUser })
+        }
+      },
+      eventUserLifeCycle: {
+        query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          const eventUserId = data.eventUserLifeCycle.eventUserId
+          this.eventUsers.forEach((eventUser) => {
+            if (eventUserId === eventUser.id) {
+              eventUser.online = data.eventUserLifeCycle.online
+            }
+          })
         }
       }
     }

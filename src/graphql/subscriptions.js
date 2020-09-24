@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION = gql`subscription($eventUserId: ID!){
+export const UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION = gql`subscription($eventUserId: ID){
   updateEventUserAccessRights(eventUserId: $eventUserId){
     eventId
     eventUserId
@@ -38,6 +38,14 @@ export const NEW_EVENT_USER_SUBSCRIPTION = gql`subscription{
     online
     username
     voteAmount
+  }
+}
+`
+
+export const EVENT_USER_LIFE_CYCLE_SUBSCRIPTION = gql`subscription{
+  eventUserLifeCycle{
+    eventUserId
+    online
   }
 }
 `
