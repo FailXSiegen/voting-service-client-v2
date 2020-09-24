@@ -1,13 +1,13 @@
 <template>
   <div class="results-container container-fluid">
     <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
+      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1 d-print-none">
         <app-navigation  v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-results :eventRecord="eventRecord" />
+        <app-results :pollResult="pollResult" :eventRecord="eventRecord" />
       </div>
     </div>
   </div>
@@ -19,7 +19,7 @@ import AppNavigation from '@/components/events/event/Navigation'
 import AppResults from '@/components/events/event/ResultsListing'
 import { localize } from '@/helper/localization-helper'
 import { fetchEventBySlug } from '@/api/event'
-import { EVENT_USERS_BY_EVENT } from '@/graphql/queries'
+import { EVENT_USERS_BY_EVENT, POLLS_RESULTS } from '@/graphql/queries'
 import { NEW_EVENT_USER_SUBSCRIPTION } from '@/graphql/subscriptions'
 
 export default {
@@ -48,6 +48,14 @@ export default {
         }
       }
     },
+    pollResult: {
+      query: POLLS_RESULTS,
+      variables () {
+        return {
+          eventId: this.eventRecord.id
+        }
+      }
+    },
     $subscribe: {
       newEventUser: {
         query: NEW_EVENT_USER_SUBSCRIPTION,
@@ -64,7 +72,8 @@ export default {
     return {
       headline: 'Umfrage-Ergebnisse',
       eventRecord: {},
-      eventUsers: []
+      eventUsers: [],
+      pollResults: []
     }
   },
   methods: {

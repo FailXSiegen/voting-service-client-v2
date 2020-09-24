@@ -22,7 +22,7 @@
           <form @submit.prevent="onPollSubmit">
             <div class="modal-header">
               <h5 class="modal-title"
-                  :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme 1 von 1)</small></h5>
+                  :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme 1 von {{ voteAmount }})</small></h5>
             </div>
             <div class="modal-body">
               <fieldset class="input-radios" v-if="poll.maxVotes === 1">
@@ -31,17 +31,40 @@
                          type="radio"
                          :name="'poll' + poll.id + 'Answers'"
                          :id="'poll' + poll.id + 'Answer' + pollAnswer.id"
-                         required>
+                         :required="poll.minVotes > 0" >
                   <label class="form-check-label" :for="'poll' + poll.id + 'Answer' + pollAnswer.id">
                     {{ pollAnswer.content }}
                   </label>
                 </div>
               </fieldset>
+              <fieldset class="input-checkbox" v-if="poll.maxVotes > 1">
+                <div v-for="(pollAnswer, index) in poll.possibleAnswers" :key="index" class="form-check">
+                  <input class="form-check-input"
+                         type="checkbox"
+                         :name="'poll' + poll.id + 'Answers'"
+                         :id="'poll' + poll.id + 'Answer' + pollAnswer.id"
+                         :required="poll.minVotes > 0">
+                  <label class="form-check-label" :for="'poll' + poll.id + 'Answer' + pollAnswer.id">
+                    {{ pollAnswer.content }}
+                  </label>
+                </div>
+              </fieldset>
+              <fieldset class="input-checkbox" v-if="poll.allowAbstain > 1">
+                <input class="form-check-input"
+                       type="checkbox"
+                       :name="'poll' + poll.id + 'AnswersAbstain'"
+                       :id="'poll' + poll.id + 'AnswerAnswersAbstain'"
+                       >
+                <label class="form-check-label" :for="'poll' + poll.id + 'AnswerAnswerAnswersAbstain'">
+                  {{ localize('view.polls.modal.abstain') }}
+                </label>
+                <small :id="'poll' + poll.id + 'AnswerAnswerAnswersAbstainHelp'" class="form-text text-muted">{{ localize('view.polls.modal.abstainHelptext') }}</small>
+              </fieldset>
             </div>
             <div class="modal-footer">
               <button type="submit"
                       class="btn btn-primary">
-                Jetzt abstimmen
+                {{ localize('view.polls.modal.submitPoll') }}
               </button>
             </div>
           </form>
@@ -53,6 +76,7 @@
 
 <script>
 import $ from 'jquery'
+import { localize } from '@/helper/localization-helper'
 
 export default {
   props: {
@@ -63,6 +87,12 @@ export default {
     identifier: {
       type: String,
       required: true
+    },
+    voteAmount: {
+      type: Number,
+      default () {
+        return 1
+      }
     },
     trigger: {
       type: Boolean,
@@ -75,6 +105,9 @@ export default {
     }
   },
   methods: {
+    localize (path) {
+      return localize(path, this.$store.state.language)
+    },
     onTriggerModal () {
       $('#' + this.identifier).modal('show')
     },

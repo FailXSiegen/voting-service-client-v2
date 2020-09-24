@@ -1,33 +1,8 @@
 <template>
   <div class="polls-container mt-2">
-    <app-create-poll :eventRecord="eventRecord" />
+    <app-create-poll @createPollSuccess="createPollSuccess" :eventRecord="eventRecord" />
     <hr class="divider my-5" />
     <app-polls-listing :pollsWithNoResults="pollsWithNoResults" :eventRecord="eventRecord"  />
-    <hr class="divider my-5" />
-    <h2>TEST VORSCHAU POLL</h2>
-    <app-modal-poll :poll="poll" :identifier="identifier" :trigger="trigger" />
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-backdrop="static" data-keyboard="false" data-target="#examplePollWaiting">
-      Zeige Vorschau einer Abstimmung
-    </button>
-    <div class="modal fade" id="examplePollWaiting" tabindex="-1" role="dialog" aria-labelledby="examplePollWaitingTitle"
-         aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="examplePollWaitingTitle">Warten auf Abschluss der Abstimmung</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body text-center">
-            <i class="bi--spin bi-arrow-repeat bi--6xl"></i>
-          </div>
-          <div class="modal-footer">
-            <button data-modal="dismiss" class="btn btn-danger mx-auto">Nicht mehr auf das Ergebnis warten</button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -35,7 +10,6 @@
 import { localize } from '@/helper/localization-helper'
 import AppCreatePoll from '@/components/events/event/polls/CreatePoll'
 import AppPollsListing from '@/components/events/event/polls/PollsListing'
-import AppModalPoll from '@/components/modal/Poll'
 
 export default {
   props: {
@@ -49,7 +23,6 @@ export default {
   },
   components: {
     AppCreatePoll,
-    AppModalPoll,
     AppPollsListing
   },
   data () {
@@ -76,6 +49,11 @@ export default {
   methods: {
     localize (path) {
       return localize(path)
+    },
+    createPollSuccess (newPoll) {
+      this.$emit('createPollSuccess', {
+        poll: newPoll.poll
+      })
     }
   }
 }

@@ -7,7 +7,7 @@
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-polls :pollsWithNoResults="pollsWithNoResults" :eventRecord="eventRecord" />
+        <app-polls :pollsWithNoResults="pollsWithNoResults" :eventRecord="eventRecord" @createPollSuccess="createPollSuccess" />
       </div>
     </div>
   </div>
@@ -79,6 +79,13 @@ export default {
   methods: {
     localize (path) {
       return localize(path)
+    },
+    createPollSuccess (newPoll) {
+      if (!this.pollsWithNoResults) {
+        this.pollsWithNoResults = [newPoll.poll]
+      } else {
+        this.pollsWithNoResults.push(newPoll.poll)
+      }
     }
   }
 }

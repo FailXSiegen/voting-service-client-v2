@@ -44,7 +44,7 @@ export default {
       updateEventUserAccessRights: {
         query: UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION,
         result ({ data }) {
-          const { eventUserId, eventId, verified, allowToVote } = data.updateEventUserAccessRights
+          const { eventUserId, eventId, verified, allowToVote, voteAmount } = data.updateEventUserAccessRights
           if (parseInt(eventId) !== this.eventRecord.id) {
             return
           }
@@ -56,6 +56,7 @@ export default {
           }
           eventUser.verified = verified
           eventUser.allowToVote = allowToVote
+          eventUser.voteAmount = voteAmount
         }
       },
       newEventUser: {

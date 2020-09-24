@@ -1,9 +1,12 @@
 <template>
   <li class="list-group-item">
     <div class="border p-3">
-      <h5 class="mb-1">{{  poll.title }} ({{ localize('view.results.type.' + poll.type) }}) - {{ poll.modifiedDatetime }}</h5>
+      <h5 class="mb-1">{{ pollResult.poll.title }} ({{ localize('view.results.type.' + pollResult.type) }}) -
+        {{ getCreateDatetime }}</h5>
       <p class="small text-muted">
-        {{ localize('view.results.givenVotes') }} {{  poll.amountVotes }} | {{ localize('view.results.voters') }} {{  poll.amountPossibleVotes }}
+        {{ localize('view.results.givenVotes') }} {{ pollResult.pollUser.length }} | {{
+          localize('view.results.voters')
+        }} {{ pollResult.pollUser.length }}
       </p>
       <hr class="divider my-2" />
       <div class="row">
@@ -11,16 +14,31 @@
           <p>{{ localize('view.results.mainResult') }}</p>
           <div class="result-list">
             <ul class="list-group">
-              <li v-for="(answer, index) in poll.answers" :key="index" class="list-group-item d-flex justify-content-between align-items-center">
-                {{ answer.content }}
-                <span class="badge badge-pill" style="background-color: green;color: white;"> {{ answer.amount }}</span>
+              <li v-for="(answer, index) in pollAnswerGroups" :key="index"
+                  class="list-group-item d-flex justify-content-between align-items-center">
+                {{ index }}
+                <span v-if="index === 'Ja'"
+                      class="badge badge-pill"
+                      style="background-color: green;color: white;">
+                  {{ answer.length }}
+                </span>
+                <span v-else-if="index === 'Nein'"
+                      class="badge badge-pill"
+                      style="background-color: red;color: white;">
+                  {{ answer.length }}
+                </span>
+                <span v-else
+                      class="badge badge-pill"
+                      style="background-color: grey;color: white;">
+                  {{ answer.length }}
+                </span>
               </li>
             </ul>
           </div>
         </div>
         <div class="col-12 col-md-6">
           <p>{{ localize('general.member') }}</p>
-          <button class="btn btn-primary"
+          <button class="btn btn-primary d-print-none"
                   type="button"
                   data-toggle="collapse"
                   data-target="#poll-ID-ResultVoters"
@@ -32,24 +50,27 @@
           <div class="collapse" id="poll-ID-ResultVoters">
             <div class="card card-body">
               <ul class="list-group">
-                <li v-for="participant in poll.participants" :key="participant.publicName" class="list-group-item d-flex justify-content-between align-items-center">
+                <li v-for="participant in pollResult.pollUser" :key="participant.publicName"
+                    class="list-group-item d-flex justify-content-between align-items-center">
                   {{ participant.publicName }}
                 </li>
               </ul>
             </div>
           </div>
           <hr class="divider mx-2" />
-          <p v-if="poll.participantsWithAnswers">{{ localize('view.results.detailResult') }}</p>
-          <button v-if="poll.participantsWithAnswers" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#poll-ID-ResultDetails"
+          <p v-if="pollResult.type === 'PUBLIC'">{{ localize('view.results.detailResult') }}</p>
+          <button v-if="pollResult.type === 'PUBLIC'" class="btn btn-primary d-print-none" type="button" data-toggle="collapse"
+                  data-target="#poll-ID-ResultDetails"
                   aria-expanded="false" aria-controls="poll-ID-ResultDetails">
             <i class="bi bi-caret-right-fill"></i>
             {{ localize('view.results.showDetailResult') }}
           </button>
-          <div class="collapse" id="poll-ID-ResultDetails" v-if="poll.participantsWithAnswers">
+          <div class="collapse" id="poll-ID-ResultDetails" v-if="pollResult.type === 'PUBLIC'">
             <div class="card card-body">
               <ul class="list-group">
-                <li  v-for="participantWithAnswer in poll.participantsWithAnswers" :key="participantWithAnswer.publicName" class="list-group-item d-flex justify-content-between align-items-center">
-                  {{ participantWithAnswer.publicName }} - {{ participantWithAnswer.content }}
+                <li v-for="participantWithAnswer in pollResult.pollAnswer" :key="participantWithAnswer.pollUser.publicName"
+                    class="list-group-item d-flex justify-content-between align-items-center">
+                  {{ participantWithAnswer.pollUser.publicName }} - {{ participantWithAnswer.answerContent }}
                 </li>
               </ul>
             </div>
@@ -62,18 +83,56 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
+import { createFormattedDateFromTimeStamp } from '@/lib/time-stamp'
 
 export default {
   props: {
-    poll: {
+    pollResult: {
       type: Object,
       required: true
+    }
+  },
+  data () {
+    return {
+      headline: 'Umfrage-Ergebnisse',
+      eventRecord: {},
+      eventUsers: [],
+      pollResults: []
+    }
+  },
+  computed: {
+    pollAnswerGroups () {
+      return this.groupBy(this.pollResult.pollAnswer, 'answerContent')
+    },
+    getCreateDatetime () {
+      return createFormattedDateFromTimeStamp(this.pollResult.createDatetime)
     }
   },
   methods: {
     localize (path) {
       return localize(path)
+    },
+    groupBy (array, key) {
+      const result = {}
+      array.forEach(item => {
+        if (!result[item[key]]) {
+          result[item[key]] = []
+        }
+        result[item[key]].push(item)
+      })
+      return result
     }
   }
 }
 </script>
+<style scoped>
+@media print {
+  .collapse {
+    display: block !important;
+    height: auto !important;
+  }
+  .col-md-9 {
+    width: 100% !important;
+  }
+}
+</style>

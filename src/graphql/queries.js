@@ -54,6 +54,7 @@ export const EVENT_USER_BY_ID = gql`query FindEventUserById($id: ID!) {
     allowToVote
     online
     username
+    voteAmount
   }
 }`
 
@@ -62,6 +63,28 @@ export const POLLS_NO_RESULTS = gql`
     pollsWithNoResults(eventId: $eventId) {
       id
       title
+    }
+  }
+`
+export const POLLS_RESULTS = gql`
+  query pollResult($eventId: ID) {
+    pollResult(eventId: $eventId) {
+      id
+      type
+      createDatetime
+      poll {
+        title
+      }
+      pollAnswer {
+        answerContent
+        pollResultId
+        pollUser {
+          publicName
+        }
+      }
+      pollUser {
+        publicName
+      }
     }
   }
 `

@@ -4,24 +4,28 @@
     <form @submit.prevent="createPoll">
       <div class="form-group">
         <label for="pollTitle">{{ localize('view.polls.create.labels.title') }}</label>
-        <input v-model="newPoll.title" type="text" class="form-control" id="pollTitle" required="required" :placeholder="localize('view.polls.create.labels.title')">
+        <input v-model="newPoll.title" type="text" class="form-control" id="pollTitle" required="required"
+               :placeholder="localize('view.polls.create.labels.title')">
       </div>
       <p>{{ localize('view.polls.headlines.answerOptionsTitle') }}</p>
       <div class="poll-basic-type alert alert-secondary">
         <div class="form-check">
-          <input v-model="newPoll.pollAnswer" class="form-check-input" type="radio" name="pollAnswer" id="pollAnswerPossibilities1" value="yesNo">
+          <input v-model="newPoll.pollAnswer" class="form-check-input" type="radio" name="pollAnswer"
+                 id="pollAnswerPossibilities1" value="yesNo">
           <label class="form-check-label" for="pollAnswerPossibilities1">
             {{ localize('view.polls.create.labels.yesNo') }}
           </label>
         </div>
         <div class="form-check">
-          <input v-model="newPoll.pollAnswer" class="form-check-input" type="radio" name="pollAnswer" id="pollAnswerPossibilities2" value="yesNoAbstain">
+          <input v-model="newPoll.pollAnswer" class="form-check-input" type="radio" name="pollAnswer"
+                 id="pollAnswerPossibilities2" value="yesNoAbstain">
           <label class="form-check-label" for="pollAnswerPossibilities2">
             {{ localize('view.polls.create.labels.yesNoAbstain') }}
           </label>
         </div>
         <div class="form-check">
-          <input v-model="newPoll.pollAnswer" class="form-check-input" type="radio" name="pollAnswer" id="pollAnswerPossibilities3" value="custom">
+          <input v-model="newPoll.pollAnswer" class="form-check-input" type="radio" name="pollAnswer"
+                 id="pollAnswerPossibilities3" value="custom">
           <label class="form-check-label" for="pollAnswerPossibilities3">
             {{ localize('view.polls.create.labels.custom') }}
           </label>
@@ -29,7 +33,9 @@
       </div>
       <div v-if="newPoll.pollAnswer === 'custom'" class="individual-options my-4 border ml-4 p-3">
         <div class="form-group">
-          <label for="pollAnswerPossibilitiesCustomList">{{ localize('view.polls.create.labels.listOfAnswerOptions') }}</label>
+          <label for="pollAnswerPossibilitiesCustomList">{{
+              localize('view.polls.create.labels.listOfAnswerOptions')
+            }}</label>
           <textarea v-model="newPoll.list" class="form-control" id="pollAnswerPossibilitiesCustomList" rows="3"
                     aria-describedby="pollAnswerPossibilitiesCustomListHelpBlock"></textarea>
           <small id="pollAnswerPossibilitiesCustomListHelpBlock" class="form-text text-muted">
@@ -37,7 +43,9 @@
           </small>
         </div>
         <div class="form-group">
-          <label for="pollAnswerPossibilitiesCustomListMaximal">{{ localize('view.polls.create.labels.maxVotes') }}</label>
+          <label for="pollAnswerPossibilitiesCustomListMaximal">{{
+              localize('view.polls.create.labels.maxVotes')
+            }}</label>
           <input v-model="newPoll.maxVotes" type="number"
                  class="form-control w-auto"
                  id="pollAnswerPossibilitiesCustomListMaximal"
@@ -47,7 +55,9 @@
           </small>
         </div>
         <div class="form-group">
-          <label for="pollAnswerPossibilitiesCustomListMinimal">{{ localize('view.polls.create.labels.minVotes') }}</label>
+          <label for="pollAnswerPossibilitiesCustomListMinimal">{{
+              localize('view.polls.create.labels.minVotes')
+            }}</label>
           <input v-model="newPoll.minVotes" type="number"
                  class="form-control w-auto"
                  id="pollAnswerPossibilitiesCustomListMinimal"
@@ -57,7 +67,8 @@
           </small>
         </div>
         <div class="form-check">
-          <input v-model="newPoll.allowAbstain" class="form-check-input" type="checkbox" id="pollAnswerPossibilitiesCustomListAbstention">
+          <input v-model="newPoll.allowAbstain" class="form-check-input" type="checkbox"
+                 id="pollAnswerPossibilitiesCustomListAbstention">
           <label class="form-check-label" for="pollAnswerPossibilitiesCustomListAbstention">
             {{ localize('view.polls.create.labels.abstention') }}
           </label>
@@ -65,13 +76,15 @@
       </div>
       <div class="poll-type my-3 alert alert-secondary">
         <div class="form-check">
-          <input v-model="newPoll.type" class="form-check-input" type="radio" name="pollType" id="pollType1" value="PUBLIC">
+          <input v-model="newPoll.type" class="form-check-input" type="radio" name="pollType" id="pollType1"
+                 value="PUBLIC">
           <label class="form-check-label" for="pollType1">
             {{ localize('view.polls.create.labels.openPoll') }}
           </label>
         </div>
         <div class="form-check">
-          <input v-model="newPoll.type" class="form-check-input" type="radio" name="pollType" id="pollType2" value="SECRET">
+          <input v-model="newPoll.type" class="form-check-input" type="radio" name="pollType" id="pollType2"
+                 value="SECRET">
           <label class="form-check-label" for="pollType2">
             {{ localize('view.polls.create.labels.secretPoll') }}
           </label>
@@ -137,8 +150,12 @@ export default {
         mutation: CREATE_POLL,
         variables: { input: this.newPoll, instantStart: this.instantStart }
       }).then(() => {
+        if (!this.instantStart) {
+          this.$emit('createPollSuccess', { poll: this.newPoll })
+        }
         this.newPoll.pollAnswer = 'yesNoAbstain'
-      }).catch((error) => {
+      }
+      ).catch((error) => {
         console.error(error)
       })
     },

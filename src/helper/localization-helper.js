@@ -128,6 +128,11 @@ const localizations = {
           startConfirm: 'Möchtest du die Abstimmung starten?',
           delete: 'Abstimmung löschen',
           deleteConfirm: 'Möchtest du die Abstimmung wirklich löschen?'
+        },
+        modal: {
+          submitPoll: 'Jetzt abstimmen',
+          abstain: 'Enthaltung',
+          abstainHelptext: 'Entwertet oben ausgewählte Felder; Stimme wird komplett als Enthaltung gezählt!'
         }
       },
       results: {
@@ -139,7 +144,9 @@ const localizations = {
         showDetailResult: 'Ergebnisliste anzeigen',
         type: {
           0: 'offen',
-          1: 'geheim'
+          1: 'geheim',
+          SECRET: 'geheim',
+          PUBLIC: 'offen'
         }
       },
       user: {
