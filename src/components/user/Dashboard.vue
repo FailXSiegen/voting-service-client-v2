@@ -96,13 +96,13 @@ export default {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
       await this.$router.push({ name: 'Login' })
     },
-    submitPoll (pollSubmitAnswer) {
-      pollSubmitAnswer.pollResultId = this.pollResultId
-      delete pollSubmitAnswer.answerContentArray
+    submitPoll (pollSubmitAnswerInput) {
+      pollSubmitAnswerInput.pollResultId = this.pollResultId
+      delete pollSubmitAnswerInput.answerContentArray
       this.$apollo.mutate({
         mutation: CREATE_POLL_SUBMIT_ANSWER,
         variables: {
-          input: pollSubmitAnswer
+          input: pollSubmitAnswerInput
         }
       }).then((response) => {
         this.pollState = 'vote'
