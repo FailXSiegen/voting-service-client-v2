@@ -155,7 +155,6 @@ export default {
       this.newPoll = convertPollAnswers(this.newPoll)
       this.newPoll.eventId = this.eventRecord.id
       this.$emit('onCreatePoll', this.newPoll, this.instantStart)
-      delete this.newPoll
       this.newPoll = this.initPoll
     },
     localize (path) {

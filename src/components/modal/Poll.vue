@@ -7,7 +7,7 @@
             data-backdrop="static"
             data-keyboard="false"
             :data-target="'#' + identifier">
-      Abstimmung starten
+      {{ localize('view.polls.modal.buttonStart') }}
     </button>
     <div class="modal fade"
          :id="identifier"
@@ -131,7 +131,6 @@ export default {
       $('#' + this.identifier).modal('show')
     },
     submitPoll () {
-      // console.log(this.pollSubmitAnswer)
       $('#' + this.identifier).modal('toggle')
       this.$emit('onSubmitPoll', this.pollSubmitAnswer)
     },
