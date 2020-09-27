@@ -1,7 +1,8 @@
 <template>
  <div class="container-active-poll" v-if="activePoll.title">
-  <h2>Aktive Abstimmung</h2>
+  <h2>{{ localize('view.polls.active.title') }}</h2>
   <p> {{ activePoll.title }}</p>
+  <button type="button" class="btn btn-danger" @click="closeActivePoll">{{ localize('view.polls.active.close') }}</button>
  </div>
 </template>
 
@@ -17,6 +18,11 @@ export default {
   methods: {
     localize (path) {
       return localize(path)
+    },
+    closeActivePoll () {
+      if (confirm('Abstimmung schließen?')) {
+        this.$emit('onCloseActivePoll')
+      }
     }
   }
 }

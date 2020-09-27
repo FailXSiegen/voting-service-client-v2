@@ -137,6 +137,9 @@ export default {
     },
     setPossibleAnswerId (pollAnswerId) {
       this.pollSubmitAnswer.possibleAnswerId = pollAnswerId
+    },
+    close () {
+      $('#' + this.identifier).modal('toggle')
     }
   }
 }

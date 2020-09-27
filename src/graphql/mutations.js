@@ -60,3 +60,6 @@ export const START_POLL = gql`mutation startPoll($pollId: ID!){
 export const CREATE_POLL_SUBMIT_ANSWER = gql`mutation createPollSubmitAnswer($input: PollSubmitAnswerInput!){
   createPollSubmitAnswer(input: $input)
 }`
+export const STOP_POLL = gql`mutation stopPoll($id: ID!){
+  stopPoll(id: $id)
+}`

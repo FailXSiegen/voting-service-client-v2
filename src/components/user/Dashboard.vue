@@ -39,6 +39,7 @@
                           :voteAmount="eventUser.voteAmount"
                           :trigger="openModal"
                           @onSubmitPoll="submitPoll"
+                          ref="pollModal"
           />
 
         </div>
@@ -105,12 +106,17 @@ export default {
       pollLifeCycle: {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
-          this.poll = data.pollLifeCycle.poll
-          this.pollState = data.pollLifeCycle.state
-          this.pollResultId = data.pollLifeCycle.pollResultId
           if (data.pollLifeCycle.state === 'closed') {
+            this.$refs.pollModal.close()
             this.$apollo.queries.pollResult.refetch()
           }
+          if (data.pollLifeCycle.poll) {
+            this.poll = data.pollLifeCycle.poll
+          }
+          if (data.pollLifeCycle.pollResultId) {
+            this.pollResultId = data.pollLifeCycle.pollResultId
+          }
+          this.pollState = data.pollLifeCycle.state
         }
       }
     }
