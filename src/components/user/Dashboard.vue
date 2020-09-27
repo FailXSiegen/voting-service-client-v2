@@ -1,7 +1,7 @@
 <template>
   <section class="user-dashboard-container">
-    <div v-if="eventUser" class="container position-relative bg-white min-vh-100">
-      <div v-if="!eventUser.verified" class="row min-vh-100 justify-content-center align-items-center">
+    <div v-if="eventUser" class="container position-relative bg-white min-vh-100 pt-5 pt-md-0">
+      <div v-if="!eventUser.verified" class="row min-vh-100 justify-content-center align-items-center d-print-none">
         <div class="col-12 text-center">
           <i class="bi-arrow-repeat bi--spin bi--4xl mb-3"></i>
           <h1>{{ localize('view.user.pending.tankYou') }}</h1>
@@ -9,14 +9,15 @@
           <p>{{ localize('view.user.pending.bodyText') }}</p>
         </div>
       </div>
-      <div v-else class="row min-vh-100 justify-content-center align-items-center">
+      <div v-else class="row min-vh-100 justify-content-center align-items-center pt-5 pt-md-0">
         <div class="col-12">
           <h1>{{ eventRecord.title }}</h1>
-          <h2>{{ localize('view.user.verified.welcome') }} {{ eventUser.publicName }} <small>{{ eventUser.username }}</small></h2>
-          <hr>
-          <p v-if="eventRecord.description">{{ eventRecord.description }}</p>
-          <hr>
-          <div class="container-poll-status">
+          <h2>{{ localize('view.user.verified.welcome') }} {{ eventUser.publicName }}</h2>
+          <small>{{ eventUser.username }}</small>
+          <hr class="d-print-none">
+          <p class="d-print-none" v-if="eventRecord.description">{{ eventRecord.description }}</p>
+          <hr class="d-print-none">
+          <div class="container-poll-status d-print-none">
             <div class="container-poll-voted text-center alert alert-success" v-if="this.pollState === 'voted'">
               <i class="bi-check bi--4xl my-3"></i>
               <h2 v-html="localize('view.user.verified.voted')">{{ localize('view.user.verified.voted') }}</h2>
@@ -30,7 +31,7 @@
             </div>
           </div>
           <div class="container-poll-result mt-3" v-if="pollResult">
-            <hr>
+            <hr class="d-print-none">
             <app-results :pollResult="pollResult" :eventRecord="eventRecord" />
           </div>
           <app-modal-poll v-if="pollState === 'new' && eventUser.allowToVote"
@@ -38,14 +39,12 @@
                           :poll="poll"
                           :voteAmount="eventUser.voteAmount"
                           :trigger="openModal"
-                          :voteCounter="voteCounter"
                           @onSubmitPoll="submitPoll"
                           ref="pollModal"
           />
-
         </div>
       </div>
-      <button @click="onLogout" class="logout btn btn-danger py-2 d-flex align-items-center">
+      <button @click="onLogout" class="logout btn btn-danger py-2 d-flex align-items-center d-print-none">
         <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
       </button>
     </div>
@@ -107,17 +106,17 @@ export default {
       pollLifeCycle: {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
-          if (data.pollLifeCycle.state === 'closed') {
-            this.$apollo.queries.pollResult.refetch()
-            if (this.$refs.pollModal) {
-              this.$refs.pollModal.close()
-            }
-          }
           if (data.pollLifeCycle.poll) {
             this.poll = data.pollLifeCycle.poll
           }
           if (data.pollLifeCycle.pollResultId) {
             this.pollResultId = data.pollLifeCycle.pollResultId
+          }
+          if (data.pollLifeCycle.state === 'closed') {
+            this.$apollo.queries.pollResult.refetch()
+            if (this.$refs.pollModal) {
+              this.$refs.pollModal.close()
+            }
           }
           this.pollState = data.pollLifeCycle.state
         }
@@ -131,8 +130,7 @@ export default {
       pollResultId: null,
       openModal: true,
       pollState: '',
-      pollResult: [],
-      voteCounter: 1
+      pollResult: []
     }
   },
   computed: {
@@ -156,9 +154,8 @@ export default {
       }).then((response) => {
         if (this.voteCounter === this.eventUser.voteAmount) {
           this.pollState = 'voted'
-          this.voteCounter = 0
+          this.voteCounter = 1
         }
-        this.voteCounter++
       }).catch((error) => {
         console.error(error)
       })

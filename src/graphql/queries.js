@@ -80,12 +80,10 @@ export const POLLS_RESULTS = gql`
         id
         answerContent
         pollResultId
-        pollUser {
-          id
-          publicName
-        }
+        pollUserId
       }
       pollUser {
+        id
         publicName
       }
     }

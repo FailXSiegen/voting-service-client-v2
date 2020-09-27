@@ -73,7 +73,7 @@
               <ul class="list-group">
                 <li v-for="(participantWithAnswer,index) in pollResult.pollAnswer" :key="index"
                     class="list-group-item d-flex justify-content-between align-items-center">
-                  {{ participantWithAnswer.pollUser.publicName }} - {{ participantWithAnswer.answerContent }}
+                  {{ getPublicName(participantWithAnswer.pollUserId) }} - {{ participantWithAnswer.answerContent }}
                 </li>
               </ul>
             </div>
@@ -124,6 +124,10 @@ export default {
         result[item[key]].push(item)
       })
       return result
+    },
+    getPublicName (pollUserId) {
+      const userFound = this.pollResult.pollUser.find(user => user.id === pollUserId)
+      return userFound.publicName
     }
   }
 }

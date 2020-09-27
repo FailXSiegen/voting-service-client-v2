@@ -1,5 +1,5 @@
 <template>
-  <div class="container-modal">
+  <div class="container-modal d-print-none">
     <button v-if="trigger === false"
             type="button"
             class="btn btn-primary"
@@ -101,12 +101,6 @@ export default {
         return 1
       }
     },
-    voteCounter: {
-      type: Number,
-      default () {
-        return 1
-      }
-    },
     trigger: {
       type: Boolean,
       required: true
@@ -121,7 +115,8 @@ export default {
         eventId: this.poll.eventId,
         type: this.poll.type,
         eventUserId: this.$store.getters.getCurrentUserId
-      }
+      },
+      voteCounter: 1
     }
   },
   mounted () {
@@ -138,15 +133,18 @@ export default {
     },
     submitPoll () {
       this.$emit('onSubmitPoll', this.pollSubmitAnswer)
-      if (this.voteCounter === this.voteAmount) {
-        $('#' + this.identifier).modal('toggle')
+      if (this.voteCounter >= this.voteAmount) {
+        $('#' + this.identifier).modal('hide')
+      }
+      if (this.voteCounter < this.voteAmount) {
+        this.voteCounter++
       }
     },
     setPossibleAnswerId (pollAnswerId) {
       this.pollSubmitAnswer.possibleAnswerId = pollAnswerId
     },
     close () {
-      $('#' + this.identifier).modal('toggle')
+      $('#' + this.identifier).modal('hide')
     }
   }
 }
