@@ -19,7 +19,7 @@
          aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-          <form @submit.prevent="onPollSubmit">
+          <form @submit.prevent="submitPoll">
             <div class="modal-header">
               <h5 class="modal-title"
                   :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme 1 von {{ voteAmount }})</small></h5>
@@ -29,9 +29,12 @@
                 <div v-for="(pollAnswer, index) in poll.possibleAnswers" :key="index" class="form-check">
                   <input class="form-check-input"
                          type="radio"
+                         v-model="pollSubmitAnswer.answerContent"
+                         @click="setPossibleAnswerId(pollAnswer.id)"
+                         :value="pollAnswer.content"
                          :name="'poll' + poll.id + 'Answers'"
                          :id="'poll' + poll.id + 'Answer' + pollAnswer.id"
-                         :required="poll.minVotes > 0" >
+                         required="required" >
                   <label class="form-check-label" :for="'poll' + poll.id + 'Answer' + pollAnswer.id">
                     {{ pollAnswer.content }}
                   </label>
@@ -41,6 +44,9 @@
                 <div v-for="(pollAnswer, index) in poll.possibleAnswers" :key="index" class="form-check">
                   <input class="form-check-input"
                          type="checkbox"
+                         v-model="pollSubmitAnswer.answerContentArray"
+                         @click="setPossibleAnswerId(pollAnswer.id)"
+                         :value="pollAnswer.content"
                          :name="'poll' + poll.id + 'Answers'"
                          :id="'poll' + poll.id + 'Answer' + pollAnswer.id"
                          :required="poll.minVotes > 0">
@@ -52,6 +58,7 @@
               <fieldset class="input-checkbox" v-if="poll.allowAbstain > 1">
                 <input class="form-check-input"
                        type="checkbox"
+                       v-model="pollSubmitAnswer.answerContentArray"
                        :name="'poll' + poll.id + 'AnswersAbstain'"
                        :id="'poll' + poll.id + 'AnswerAnswersAbstain'"
                        >
@@ -99,6 +106,18 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      pollSubmitAnswer: {
+        possibleAnswerId: 0,
+        answerContent: '',
+        answerContentArray: [],
+        eventId: this.poll.eventId,
+        type: this.poll.type,
+        eventUserId: this.$store.getters.getCurrentUserId
+      }
+    }
+  },
   mounted () {
     if (this.trigger === true) {
       this.onTriggerModal()
@@ -111,9 +130,13 @@ export default {
     onTriggerModal () {
       $('#' + this.identifier).modal('show')
     },
-    onPollSubmit () {
+    submitPoll () {
+      // console.log(this.pollSubmitAnswer)
       $('#' + this.identifier).modal('toggle')
-      this.$emit('updatePollState', 'voted')
+      this.$emit('onSubmitPoll', this.pollSubmitAnswer)
+    },
+    setPossibleAnswerId (pollAnswerId) {
+      this.pollSubmitAnswer.possibleAnswerId = pollAnswerId
     }
   }
 }

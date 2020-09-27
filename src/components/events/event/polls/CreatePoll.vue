@@ -114,7 +114,6 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
-import { CREATE_POLL } from '@/graphql/mutations'
 import { convertPollAnswers } from '@/converter/poll/convertPollAnswers'
 
 export default {
@@ -137,6 +136,17 @@ export default {
         maxVotes: 1,
         allowAbstain: false,
         possibleAnswers: []
+      },
+      initPoll: {
+        eventId: this.eventRecord.id,
+        title: '',
+        type: 'PUBLIC',
+        pollAnswer: 'yesNoAbstain',
+        list: '',
+        minVotes: 0,
+        maxVotes: 1,
+        allowAbstain: false,
+        possibleAnswers: []
       }
     }
   },
@@ -144,20 +154,9 @@ export default {
     createPoll () {
       this.newPoll = convertPollAnswers(this.newPoll)
       this.newPoll.eventId = this.eventRecord.id
-      delete this.newPoll.pollAnswer
-      delete this.newPoll.list
-      this.$apollo.mutate({
-        mutation: CREATE_POLL,
-        variables: { input: this.newPoll, instantStart: this.instantStart }
-      }).then(() => {
-        if (!this.instantStart) {
-          this.$emit('createPollSuccess', { poll: this.newPoll })
-        }
-        this.newPoll.pollAnswer = 'yesNoAbstain'
-      }
-      ).catch((error) => {
-        console.error(error)
-      })
+      this.$emit('onCreatePoll', this.newPoll, this.instantStart)
+      delete this.newPoll
+      this.newPoll = this.initPoll
     },
     localize (path) {
       return localize(path)

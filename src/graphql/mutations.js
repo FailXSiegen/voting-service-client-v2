@@ -34,6 +34,7 @@ export const UPDATE_USER_TO_PARTICIPANT = gql`mutation UpdateUserToParticipant($
 }`
 export const CREATE_POLL = gql`mutation createPoll($input: CreateNewPollInput!, $instantStart: Boolean!){
   createPoll(input: $input, instantStart: $instantStart) {
+    id
     eventId
     title
     type
@@ -41,4 +42,21 @@ export const CREATE_POLL = gql`mutation createPoll($input: CreateNewPollInput!, 
       content
     }
   }
+}`
+export const REMOVE_POLL = gql`mutation removePoll($pollId: ID!){
+  removePoll(id: $pollId)
+}`
+export const START_POLL = gql`mutation startPoll($pollId: ID!){
+  startPoll(id: $pollId) {
+    id
+    eventId
+    title
+    type
+    possibleAnswers {
+      content
+    }
+  }
+}`
+export const CREATE_POLL_SUBMIT_ANSWER = gql`mutation createPollSubmitAnswer($input: PollSubmitAnswerInput!){
+  createPollSubmitAnswer(input: $input)
 }`

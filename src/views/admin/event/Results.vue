@@ -76,6 +76,9 @@ export default {
       pollResults: []
     }
   },
+  mounted () {
+    this.$apollo.queries.pollResult.refetch()
+  },
   methods: {
     localize (path) {
       return localize(path)

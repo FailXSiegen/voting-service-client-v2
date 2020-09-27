@@ -71,6 +71,7 @@ export const POLLS_RESULTS = gql`
     pollResult(eventId: $eventId) {
       id
       type
+      maxVotes
       createDatetime
       poll {
         title

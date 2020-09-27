@@ -4,13 +4,13 @@
    <ul class="created-polls list-group">
      <li v-for="(poll, index) in pollsWithNoResults" :key="index" class="list-group-item">
        <h5 class="mb-1">{{ poll.title }}</h5>
-       <button class="btn btn-primary my-2 mr-2" @click="startPoll">
+       <button class="btn btn-primary my-2 mr-2" @click="startPoll(poll.id)">
          <i class="bi-play bi--2xl align-middle"></i>
          <span class="align-middle">
            {{ localize('view.polls.listing.start') }}
          </span>
        </button>
-       <button class="btn btn-danger my-2 mr-2" @click="deletePoll">
+       <button class="btn btn-danger my-2 mr-2" @click="deletePoll(poll.id)">
          {{ localize('view.polls.listing.delete') }}
        </button>
      </li>
@@ -29,12 +29,15 @@ export default {
     }
   },
   methods: {
-    // @todo ADD LOCALIZATIONS - ERROR DUE TO LOST 'THIS' RELATION IN METHODS
-    startPoll () {
-      return confirm('ADD CONFIRM MESSAGE')
+    startPoll (pollId) {
+      if (confirm('Abstimmung starten?')) {
+        this.$emit('onStartPoll', pollId)
+      }
     },
-    deletePoll () {
-      return confirm('ADD ANOTHER CONFIRM MESSAGE')
+    deletePoll (pollId) {
+      if (confirm('Datensatz wirklich löschen?')) {
+        this.$emit('onRemovePoll', pollId)
+      }
     },
     localize (path) {
       return localize(path)

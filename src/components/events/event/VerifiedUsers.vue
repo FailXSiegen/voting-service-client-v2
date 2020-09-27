@@ -14,10 +14,10 @@
           <span class="badge badge-success badge-pill status-indicator" v-if="user.online">online</span>
           <span class="badge badge-danger badge-pill status-indicator" v-else>offline</span>
         </div>
-        <button v-if="!user.allowToVote" v-on:click="updateToParticipant(user.id)" class="btn btn-success btn-lg my-3 mr-2">{{ localize('view.event.user.setTo') }}
+        <button v-if="!user.allowToVote" v-on:click="updateToParticipant(user)" class="btn btn-success btn-lg my-3 mr-2">{{ localize('view.event.user.setTo') }}
           {{ localize('view.event.user.member') }}
         </button>
-        <button v-else-if="user.allowToVote" v-on:click="updateUserToGuest(user.id)" class="btn btn-info btn-lg my-3 mr-2">{{ localize('view.event.user.setTo') }}
+        <button v-else-if="user.allowToVote" v-on:click="updateUserToGuest(user)" class="btn btn-info btn-lg my-3 mr-2">{{ localize('view.event.user.setTo') }}
           {{ localize('view.event.user.visitor') }}
         </button>
         <router-link :to="{ name: 'UpdateEventUser', params: { eventUserRecord: user } }"
@@ -48,18 +48,24 @@ export default {
     localize (path) {
       return localize(path)
     },
-    updateUserToGuest (eventUserId) {
+    updateUserToGuest (user) {
+      const eventUserId = user.id
       this.$apollo.mutate({
         mutation: UPDATE_USER_TO_GUEST,
         variables: { eventUserId }
+      }).then(() => {
+        user.voteAmount = 0
       }).catch((error) => {
         console.error(error)
       })
     },
-    updateToParticipant (eventUserId) {
+    updateToParticipant (user) {
+      const eventUserId = user.id
       this.$apollo.mutate({
         mutation: UPDATE_USER_TO_PARTICIPANT,
         variables: { eventUserId }
+      }).then(() => {
+        user.voteAmount = 1
       }).catch((error) => {
         console.error(error)
       })

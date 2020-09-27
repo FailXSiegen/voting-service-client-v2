@@ -24,6 +24,7 @@ export const POLL_LIFE_CYCLE_SUBSCRIPTION = gql`subscription {
       maxVotes
       allowAbstain
     }
+    pollResultId
   }
 }
 `

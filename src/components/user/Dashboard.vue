@@ -15,11 +15,12 @@
           <hr />
           <p v-if="eventRecord.description">{{ eventRecord.description }}</p>
           <app-modal-poll v-if="pollState === 'new' && eventUser.allowToVote"
-                          @updatePollState="changePollState"
                           :identifier="'poll' + poll.id"
                           :poll="poll"
                           :voteAmount="eventUser.voteAmount"
-                          :trigger="openModal" />
+                          :trigger="openModal"
+                          @onSubmitPoll="submitPoll"
+          />
           <button @click="onLogout" class="logout btn btn-danger py-3 d-flex align-items-center">
             <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
           </button>
@@ -36,6 +37,7 @@ import { POLL_LIFE_CYCLE_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPT
 import { EVENT_USER_BY_ID } from '@/graphql/queries'
 import AppModalPoll from '@/components/modal/Poll'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
+import { CREATE_POLL_SUBMIT_ANSWER } from '@/graphql/mutations'
 
 export default {
   components: {
@@ -67,6 +69,7 @@ export default {
         result ({ data }) {
           this.eventUser.verified = data.updateEventUserAccessRights.verified
           this.eventUser.allowToVote = data.updateEventUserAccessRights.allowToVote
+          this.eventUser.voteAmount = data.updateEventUserAccessRights.voteAmount
         }
       },
       pollLifeCycle: {
@@ -74,6 +77,7 @@ export default {
         result ({ data }) {
           this.poll = data.pollLifeCycle.poll
           this.pollState = data.pollLifeCycle.state
+          this.pollResultId = data.pollLifeCycle.pollResultId
         }
       }
     }
@@ -82,6 +86,7 @@ export default {
     return {
       eventUser: null,
       poll: null,
+      pollResultId: null,
       openModal: true,
       pollState: ''
     }
@@ -91,8 +96,19 @@ export default {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
       await this.$router.push({ name: 'Login' })
     },
-    changePollState (state) {
-      this.pollState = state
+    submitPoll (pollSubmitAnswer) {
+      pollSubmitAnswer.pollResultId = this.pollResultId
+      delete pollSubmitAnswer.answerContentArray
+      this.$apollo.mutate({
+        mutation: CREATE_POLL_SUBMIT_ANSWER,
+        variables: {
+          input: pollSubmitAnswer
+        }
+      }).then((response) => {
+        this.pollState = 'vote'
+      }).catch((error) => {
+        console.error(error)
+      })
     },
     localize (path) {
       return localize(path, this.$store.state.language)

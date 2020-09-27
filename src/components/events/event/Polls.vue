@@ -1,8 +1,14 @@
 <template>
   <div class="polls-container mt-2">
-    <app-create-poll @createPollSuccess="createPollSuccess" :eventRecord="eventRecord" />
+    <app-create-poll :eventRecord="eventRecord"
+                     @onCreatePoll="createPoll"
+    />
     <hr class="divider my-5" />
-    <app-polls-listing :pollsWithNoResults="pollsWithNoResults" :eventRecord="eventRecord"  />
+    <app-polls-listing :pollsWithNoResults="pollsWithNoResults"
+                       :eventRecord="eventRecord"
+                       @onRemovePoll="removePoll"
+                       @onStartPoll="startPoll"
+    />
   </div>
 </template>
 
@@ -50,10 +56,14 @@ export default {
     localize (path) {
       return localize(path)
     },
-    createPollSuccess (newPoll) {
-      this.$emit('createPollSuccess', {
-        poll: newPoll.poll
-      })
+    createPoll (poll, instantStart) {
+      this.$emit('onCreatePoll', poll, instantStart)
+    },
+    removePoll (pollId) {
+      this.$emit('onRemovePoll', pollId)
+    },
+    startPoll (pollId) {
+      this.$emit('onStartPoll', pollId)
     }
   }
 }

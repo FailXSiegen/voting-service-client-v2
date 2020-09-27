@@ -1,6 +1,8 @@
 <template>
   <div :id="eventSlug">
-    <component v-if="allowToRender" :eventRecord="eventRecord" v-bind:is="component"
+    <component v-if="allowToRender"
+               :eventRecord="eventRecord"
+               v-bind:is="component"
                @changeComponent="changeComponent" />
   </div>
 </template>

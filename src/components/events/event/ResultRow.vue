@@ -4,9 +4,9 @@
       <h5 class="mb-1">{{ pollResult.poll.title }} ({{ localize('view.results.type.' + pollResult.type) }}) -
         {{ getCreateDatetime }}</h5>
       <p class="small text-muted">
-        {{ localize('view.results.givenVotes') }} {{ pollResult.pollUser.length }} | {{
+        {{ localize('view.results.givenVotes') }} {{ pollResult.pollAnswer.length }} | {{
           localize('view.results.voters')
-        }} {{ pollResult.pollUser.length }}
+        }} {{ pollResult.maxVotes }}
       </p>
       <hr class="divider my-2" />
       <div class="row">
@@ -41,13 +41,13 @@
           <button class="btn btn-primary d-print-none"
                   type="button"
                   data-toggle="collapse"
-                  data-target="#poll-ID-ResultVoters"
+                  :data-target="'#poll-'+pollResult.id+'-ResultVoters'"
                   aria-expanded="false"
-                  aria-controls="poll-ID-ResultVoters">
+                  :aria-controls="'poll-'+pollResult.id+'-ResultVoters'">
             <i class="bi bi-caret-right-fill"></i>
             {{ localize('view.results.showMemberList') }}
           </button>
-          <div class="collapse" id="poll-ID-ResultVoters">
+          <div class="collapse" :id="'poll-'+pollResult.id+'-ResultVoters'">
             <div class="card card-body">
               <ul class="list-group">
                 <li v-for="participant in pollResult.pollUser" :key="participant.publicName"
@@ -60,12 +60,15 @@
           <hr class="divider mx-2" />
           <p v-if="pollResult.type === 'PUBLIC'">{{ localize('view.results.detailResult') }}</p>
           <button v-if="pollResult.type === 'PUBLIC'" class="btn btn-primary d-print-none" type="button" data-toggle="collapse"
-                  data-target="#poll-ID-ResultDetails"
-                  aria-expanded="false" aria-controls="poll-ID-ResultDetails">
+                  :data-target="'#poll-'+pollResult.id+'-ResultDetails'"
+                  aria-expanded="false"
+                  :aria-controls="'poll-'+pollResult.id+'-ResultDetails'">
             <i class="bi bi-caret-right-fill"></i>
             {{ localize('view.results.showDetailResult') }}
           </button>
-          <div class="collapse" id="poll-ID-ResultDetails" v-if="pollResult.type === 'PUBLIC'">
+          <div class="collapse"
+               :id="'poll-'+pollResult.id+'-ResultDetails'"
+               v-if="pollResult.type === 'PUBLIC'">
             <div class="card card-body">
               <ul class="list-group">
                 <li v-for="participantWithAnswer in pollResult.pollAnswer" :key="participantWithAnswer.pollUser.publicName"
