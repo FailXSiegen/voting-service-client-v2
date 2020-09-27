@@ -152,10 +152,15 @@ const localizations = {
       user: {
         pending: {
           tankYou: 'Vielen Dank für Ihren Login.',
+          loggedInAs: 'Sie sind angemeldet als:',
           bodyText: 'Ihr Login wird nun überprüft. Sobald sich Ihr Status ändert wird sich diese Ansicht automatisch aktualisieren.'
         },
         verified: {
-          welcome: 'Willkommen'
+          welcome: 'Willkommen',
+          activePoll: 'Es findet zur Zeit eine Abstimmung statt.<br>' +
+            'Bitte warten Sie auf das Ergebnis. Das Ergebnis erscheint automatisch.<br>' +
+            'Sie müssen die Seite nicht aktualisieren.',
+          noActivePoll: 'Es findet zur Zeit keine Abstimmung statt.'
         }
       }
     },
