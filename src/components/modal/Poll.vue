@@ -22,7 +22,7 @@
           <form @submit.prevent="submitPoll">
             <div class="modal-header">
               <h5 class="modal-title"
-                  :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme 1 von {{ voteAmount }})</small></h5>
+                  :id="identifier + 'Title'">{{ poll.title }}<br /><small>(Stimme {{ voteCounter }} von {{ voteAmount }})</small></h5>
             </div>
             <div class="modal-body">
               <fieldset class="input-radios" v-if="poll.maxVotes === 1">
@@ -101,6 +101,12 @@ export default {
         return 1
       }
     },
+    voteCounter: {
+      type: Number,
+      default () {
+        return 1
+      }
+    },
     trigger: {
       type: Boolean,
       required: true
@@ -131,8 +137,10 @@ export default {
       $('#' + this.identifier).modal('show')
     },
     submitPoll () {
-      $('#' + this.identifier).modal('toggle')
       this.$emit('onSubmitPoll', this.pollSubmitAnswer)
+      if (this.voteCounter === this.voteAmount) {
+        $('#' + this.identifier).modal('toggle')
+      }
     },
     setPossibleAnswerId (pollAnswerId) {
       this.pollSubmitAnswer.possibleAnswerId = pollAnswerId

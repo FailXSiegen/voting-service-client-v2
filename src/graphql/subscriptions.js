@@ -50,3 +50,12 @@ export const EVENT_USER_LIFE_CYCLE_SUBSCRIPTION = gql`subscription{
   }
 }
 `
+
+export const POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION = gql`subscription{
+  pollAnswerLifeCycle {
+    pollResultId
+    maxVotes
+    pollAnswersCount
+  }
+}
+`

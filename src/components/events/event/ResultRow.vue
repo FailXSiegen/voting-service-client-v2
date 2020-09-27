@@ -50,7 +50,7 @@
           <div class="collapse" :id="'poll-'+pollResult.id+'-ResultVoters'">
             <div class="card card-body">
               <ul class="list-group">
-                <li v-for="participant in pollResult.pollUser" :key="participant.publicName"
+                <li v-for="(participant,index) in pollResult.pollUser" :key="index"
                     class="list-group-item d-flex justify-content-between align-items-center">
                   {{ participant.publicName }}
                 </li>
@@ -71,7 +71,7 @@
                v-if="pollResult.type === 'PUBLIC'">
             <div class="card card-body">
               <ul class="list-group">
-                <li v-for="participantWithAnswer in pollResult.pollAnswer" :key="participantWithAnswer.pollUser.publicName"
+                <li v-for="(participantWithAnswer,index) in pollResult.pollAnswer" :key="index"
                     class="list-group-item d-flex justify-content-between align-items-center">
                   {{ participantWithAnswer.pollUser.publicName }} - {{ participantWithAnswer.answerContent }}
                 </li>

@@ -7,7 +7,7 @@
       <div class="col-12 col-md-6 col-lg-4 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr v-if="activePoll.title" />
-        <app-active-poll :activePoll="activePoll" @onCloseActivePoll="closeActivePoll" />
+        <app-active-poll :activePoll="activePoll" :activePollAnswerCount="activePollAnswerCount" :activePollMaxAnswer="activePollMaxAnswer" @onCloseActivePoll="closeActivePoll" />
         <hr v-if="pollsWithNoResults" />
         <app-polls :pollsWithNoResults="pollsWithNoResults"
                    :eventRecord="eventRecord"
@@ -29,7 +29,11 @@ import { localize } from '@/helper/localization-helper'
 import { fetchEventBySlug } from '@/api/event'
 import { EVENT_USERS_BY_EVENT, POLLS_NO_RESULTS } from '@/graphql/queries'
 import { CREATE_POLL, REMOVE_POLL, START_POLL, STOP_POLL } from '@/graphql/mutations'
-import { NEW_EVENT_USER_SUBSCRIPTION } from '@/graphql/subscriptions'
+import {
+  NEW_EVENT_USER_SUBSCRIPTION,
+  POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION,
+  POLL_LIFE_CYCLE_SUBSCRIPTION
+} from '@/graphql/subscriptions'
 
 export default {
   async created () {
@@ -75,6 +79,21 @@ export default {
           }
           this.eventUsers.push({ ...data.newEventUser })
         }
+      },
+      pollAnswerLifeCycle: {
+        query: POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          this.activePollAnswerCount = data.pollAnswerLifeCycle.pollAnswersCount
+          this.activePollMaxAnswer = data.pollAnswerLifeCycle.maxVotes
+        }
+      },
+      pollLifeCycle: {
+        query: POLL_LIFE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          if (data.pollLifeCycle.state === 'closed') {
+            this.activePoll = {}
+          }
+        }
       }
     }
   },
@@ -84,7 +103,9 @@ export default {
       eventRecord: {},
       eventUsers: [],
       pollsWithNoResults: [],
-      activePoll: {}
+      activePoll: {},
+      activePollAnswerCount: 0,
+      activePollMaxAnswer: 0
     }
   },
   methods: {

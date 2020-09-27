@@ -77,9 +77,11 @@ export const POLLS_RESULTS = gql`
         title
       }
       pollAnswer {
+        id
         answerContent
         pollResultId
         pollUser {
+          id
           publicName
         }
       }

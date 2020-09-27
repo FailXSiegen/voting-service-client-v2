@@ -38,6 +38,7 @@
                           :poll="poll"
                           :voteAmount="eventUser.voteAmount"
                           :trigger="openModal"
+                          :voteCounter="voteCounter"
                           @onSubmitPoll="submitPoll"
                           ref="pollModal"
           />
@@ -130,7 +131,8 @@ export default {
       pollResultId: null,
       openModal: true,
       pollState: '',
-      pollResult: []
+      pollResult: [],
+      voteCounter: 1
     }
   },
   computed: {
@@ -152,7 +154,11 @@ export default {
           input: pollSubmitAnswerInput
         }
       }).then((response) => {
-        this.pollState = 'voted'
+        if (this.voteCounter === this.eventUser.voteAmount) {
+          this.pollState = 'voted'
+          this.voteCounter = 0
+        }
+        this.voteCounter++
       }).catch((error) => {
         console.error(error)
       })
