@@ -1,6 +1,6 @@
 <template>
   <div class="container-create-event-user">
-    <form @submit.prevent="onMutateEvent">
+    <form @submit.prevent="onUpdateEventUser">
       <div class="form-check">
         <input v-model="eventUserRecord.verified"
                class="form-check-input"
@@ -59,8 +59,8 @@ export default {
     delete this.eventUserRecord.eventId
   },
   methods: {
-    onMutateEvent () {
-      this.$emit('mutateEvent', {
+    onUpdateEventUser () {
+      this.$emit('updateEventUser', {
         eventUserRecord: this.eventUserRecord
       })
     },

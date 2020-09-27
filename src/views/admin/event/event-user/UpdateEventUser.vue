@@ -16,7 +16,7 @@
       <div class="col-12 col-md-3 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
         <hr />
-        <app-event-user-mask :eventUserRecord="eventUserRecord" @mutateEvent="updateEventUser" />
+        <app-event-user-mask :eventUserRecord="eventUserRecord" @updateEventUser="onUpdateEventUser" />
       </div>
     </div>
   </div>
@@ -56,7 +56,7 @@ export default {
     }
   },
   methods: {
-    updateEventUser () {
+    onUpdateEventUser () {
       this.eventUserRecord.eventId = this.eventRecord.id
       this.eventUserRecord.voteAmount = parseInt(this.eventUserRecord.voteAmount)
       if (!this.eventUserRecord.allowToVote) {
