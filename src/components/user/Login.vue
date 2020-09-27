@@ -6,7 +6,7 @@
           <h1 class="mb-4 text-center">{{ localize('view.login.headline.userWelcomeTo') }}</h1>
           <div class="row justify-content-around mt-5">
             <div class="mb-5 col-md-5 order-1 order-md-2 border py-3">
-              <form @submit.prevent="onLogin">
+              <form id="eventuser-login-form" @submit.prevent="onLogin">
                 <div class="form-group">
                   <label for="username">{{ localize('view.login.label.username') }}</label>
                   <input v-model="eventUser.username" type="text" name="username" id="username" class="form-control" required="required">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="form-group">
                   <label for="publicName">{{ localize('view.login.label.publicName') }}</label>
-                  <input v-model="eventUser.publicName" type="text" name="email" id="publicName" class="form-control" required="required">
+                  <input v-model="eventUser.publicName" type="text" name="publicName" id="publicName" class="form-control" required="required">
                   <small>{{ localize('view.login.label.publicNameHelp') }}</small>
                 </div>
                 <div class="form-group">
@@ -60,6 +60,19 @@ export default {
     localize (path) {
       return localize(path, this.$store.state.language)
     },
+    validateInput (parentId, ignoreInput = '') {
+      const formInputs = document.querySelectorAll(parentId + ' .form-control')
+
+      for (let i = 0; i < formInputs.length; i++) {
+        if (ignoreInput.length > 0) {
+          if (formInputs[i].id !== ignoreInput) {
+            formInputs[i].classList.add('is-invalid')
+          }
+        } else {
+          formInputs[i].classList.add('is-invalid')
+        }
+      }
+    },
     onLogin () {
       const loginType = 'event-user'
       // @todo set the event and display_name as optional parameter in login
@@ -72,6 +85,7 @@ export default {
           component: 'AppUserDashboard'
         })
       }).catch((error) => {
+        this.validateInput('#eventuser-login-form', 'publicName')
         console.error(error)
       })
     }
