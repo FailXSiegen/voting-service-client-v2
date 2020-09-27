@@ -107,8 +107,10 @@ export default {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
           if (data.pollLifeCycle.state === 'closed') {
-            this.$refs.pollModal.close()
             this.$apollo.queries.pollResult.refetch()
+            if (this.$refs.pollModal) {
+              this.$refs.pollModal.close()
+            }
           }
           if (data.pollLifeCycle.poll) {
             this.poll = data.pollLifeCycle.poll
