@@ -160,6 +160,7 @@ const localizations = {
           activePoll: 'Es findet zur Zeit eine Abstimmung statt.<br>' +
             'Bitte warten Sie auf das Ergebnis. Das Ergebnis erscheint automatisch.<br>' +
             'Sie müssen die Seite nicht aktualisieren.',
+          voted: 'Erfolgreich abgestimmt',
           noActivePoll: 'Es findet zur Zeit keine Abstimmung statt.'
         }
       }

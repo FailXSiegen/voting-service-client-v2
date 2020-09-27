@@ -17,6 +17,10 @@
           <p v-if="eventRecord.description">{{ eventRecord.description }}</p>
           <hr>
           <div class="container-poll-status">
+            <div class="container-poll-voted text-center alert alert-success" v-if="this.pollState === 'voted'">
+              <i class="bi-check bi--4xl my-3"></i>
+              <h2 v-html="localize('view.user.verified.voted')">{{ localize('view.user.verified.voted') }}</h2>
+            </div>
             <div class="container-active-poll text-center alert alert-primary" role="alert" v-if="existActivePoll">
               <i class="bi-arrow-repeat bi--spin bi--4xl my-3"></i>
               <p v-html="localize('view.user.verified.activePoll')">{{ localize('view.user.verified.activePoll') }}</p>
@@ -104,6 +108,9 @@ export default {
           this.poll = data.pollLifeCycle.poll
           this.pollState = data.pollLifeCycle.state
           this.pollResultId = data.pollLifeCycle.pollResultId
+          if (data.pollLifeCycle.state === 'closed') {
+            this.$apollo.queries.pollResult.refetch()
+          }
         }
       }
     }
@@ -137,7 +144,7 @@ export default {
           input: pollSubmitAnswerInput
         }
       }).then((response) => {
-        this.pollState = 'vote'
+        this.pollState = 'voted'
       }).catch((error) => {
         console.error(error)
       })
