@@ -4,8 +4,8 @@
       <div class="col-12 my-5">
         <h1 class="mb-4 text-center">{{ localize('view.login.headline.title') }}</h1>
         <div class="row justify-content-around mt-5">
-          <div class="mb-5 col-md-5 order-2 order-md-1 border py-3">
-            <form id="event-form" @submit.prevent="onLoginById">
+          <div class="mb-5 col-md-5 border py-3">
+            <form id="event-form" @submit.prevent="onLoginById" autocomplete="off">
               <h2 class="mb-4">{{ localize('view.login.headline.eventIdent') }}</h2>
               <div class="form-group">
                 <label for="eventSlug">{{ localize('view.login.label.eventIdent') }}</label>
@@ -15,8 +15,8 @@
               </button>
             </form>
           </div>
-          <div class="mb-5 col-md-5 order-1 order-md-2 border py-3">
-            <form id="organizer-form" @submit.prevent="onLoginUser">
+          <div class="mb-5 col-md-5 border py-3">
+            <form id="organizer-form" @submit.prevent="onLoginUser" autocomplete="off">
               <h2 class="mb-4">{{ localize('view.login.headline.orgaLogin') }}</h2>
               <div class="form-group">
                 <label for="email">{{ localize('view.login.label.email') }}</label>
@@ -24,7 +24,7 @@
               </div>
               <div class="form-group">
                 <label for="password">{{ localize('view.login.label.password') }}</label>
-                <input v-model="user.password" type="password" name="password" id="password" class="form-control" required="required">
+                <input v-model="user.password" type="password" name="password" id="password" class="form-control" required="required" autocomplete="new-password">
               </div>
               <div class="form-group">
                 <button class="btn btn-primary btn-block float-right">{{ localize('view.login.submit') }}</button>
@@ -54,6 +54,9 @@ export default {
       },
       eventSlug: ''
     }
+  },
+  created () {
+    document.title = 'digitalwahl.org'
   },
   methods: {
     validateInput (parentId) {

@@ -3,10 +3,11 @@
     <div class="min-vh-100 container-fluid">
       <div class="row align-items-center justify-content-around h-100">
         <div class="col-12 my-5">
-          <h1 class="mb-4 text-center">{{ localize('view.login.headline.userWelcomeTo') }}</h1>
+          <h1 class="mb-4 text-center">{{ eventRecord.title }}</h1>
+          <h2 class="h4 text-center">{{ localize('view.login.headline.userWelcomeTo') }}</h2>
           <div class="row justify-content-around mt-5">
             <div class="mb-5 col-md-5 order-1 order-md-2 border py-3">
-              <form id="eventuser-login-form" @submit.prevent="onLogin">
+              <form id="eventuser-login-form" @submit.prevent="onLogin" autocomplete="off">
                 <div class="form-group">
                   <label for="username">{{ localize('view.login.label.username') }}</label>
                   <input v-model="eventUser.username" type="text" name="username" id="username" class="form-control" required="required">
@@ -14,7 +15,7 @@
                 </div>
                 <div class="form-group">
                   <label for="password">{{ localize('view.login.label.password') }}</label>
-                  <input v-model="eventUser.password" type="password" name="password" id="password" class="form-control" required="required">
+                  <input v-model="eventUser.password" type="password" name="password" id="password" class="form-control" required="required" autocomplete="one-time-code">
                   <small>{{ localize('view.login.label.passwordHelp') }}</small>
                 </div>
                 <div class="form-group">
@@ -41,11 +42,15 @@ import { onLogin as loginApolloClient } from '@/vue-apollo'
 import { login } from '@/graphql/auth'
 
 export default {
+  title: 'Foo Page',
   props: {
     eventRecord: {
       type: Object,
       required: true
     }
+  },
+  created () {
+    document.title = this.eventRecord.title + ' - digitalwahl.org'
   },
   data () {
     return {
@@ -62,7 +67,6 @@ export default {
     },
     validateInput (parentId, ignoreInput = '') {
       const formInputs = document.querySelectorAll(parentId + ' .form-control')
-
       for (let i = 0; i < formInputs.length; i++) {
         if (ignoreInput.length > 0) {
           if (formInputs[i].id !== ignoreInput) {
@@ -87,6 +91,7 @@ export default {
       }).catch((error) => {
         this.validateInput('#eventuser-login-form', 'publicName')
         console.error(error)
+        return false
       })
     }
   }

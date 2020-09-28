@@ -141,5 +141,10 @@ export default {
   .col-md-9 {
     width: 100% !important;
   }
+  .list-group-item {
+    position:relative;
+    page-break-inside: avoid;
+    page-break-after: always;
+  }
 }
 </style>

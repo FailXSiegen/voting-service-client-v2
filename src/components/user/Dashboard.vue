@@ -3,10 +3,12 @@
     <div v-if="eventUser" class="container position-relative bg-white min-vh-100 pt-5 pt-md-0">
       <div v-if="!eventUser.verified" class="row min-vh-100 justify-content-center align-items-center d-print-none">
         <div class="col-12 text-center">
-          <i class="bi-arrow-repeat bi--spin bi--4xl mb-3"></i>
+          <div class="spinner-border mb-5" style="width: 3rem; height: 3rem;" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
           <h1>{{ localize('view.user.pending.tankYou') }}</h1>
           <h2>{{ localize('view.user.pending.loggedInAs') }} {{ eventUser.username }}</h2>
-          <p>{{ localize('view.user.pending.bodyText') }}</p>
+          <p class="alert alert-info w-auto d-inline-block mt-2">{{ localize('view.user.pending.bodyText') }}</p>
         </div>
       </div>
       <div v-else class="row min-vh-100 justify-content-center align-items-center pt-5 pt-md-0">
@@ -137,6 +139,9 @@ export default {
     existActivePoll () {
       return (this.poll && this.pollState !== 'closed')
     }
+  },
+  created () {
+    document.title = 'digitalwahl.org'
   },
   methods: {
     async onLogout () {

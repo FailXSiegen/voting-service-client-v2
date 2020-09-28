@@ -13,12 +13,12 @@ const localizations = {
       login: {
         label: {
           username: 'E-Mail oder Mitgliedsnummer*',
-          usernameHelp: 'Als Benutzername dient Ihre Mitgliedsnummer oder Ihre E-Mail Adresse. Die Informationen dienen zur Akkredetierung.',
+          usernameHelp: 'Als Benutzername dient Ihre Mitgliedsnummer oder Ihre E-Mail Adresse. Die Informationen dienen zur Akkreditierung.',
           email: 'E-Mail*',
           password: 'Passwort*',
           passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zum Event benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',
           publicName: 'Anzeige-Name*',
-          publicNameHelp: 'Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die unteren Felder.',
+          publicNameHelp: 'Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die oberen 2 Felder.',
           eventIdent: 'Event-ID eingeben*'
         },
         headline: {
