@@ -127,6 +127,9 @@ export default {
     },
     getPublicName (pollUserId) {
       const userFound = this.pollResult.pollUser.find(user => user.id === pollUserId)
+      if (!userFound) {
+        return 'Unknown'
+      }
       return userFound.publicName
     }
   }
