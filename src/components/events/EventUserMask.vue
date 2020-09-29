@@ -1,6 +1,6 @@
 <template>
   <div class="container-create-event-user">
-    <form @submit.prevent="onUpdateEventUser">
+    <form @submit.prevent="createOrUpdateEventUser">
       <div class="form-check">
         <input v-model="eventUserRecord.verified"
                class="form-check-input"
@@ -59,8 +59,8 @@ export default {
     delete this.eventUserRecord.eventId
   },
   methods: {
-    onUpdateEventUser () {
-      this.$emit('updateEventUser', {
+    createOrUpdateEventUser () {
+      this.$emit('onUpdateOrCreateEventUser', {
         eventUserRecord: this.eventUserRecord
       })
     },

@@ -16,7 +16,7 @@
       <div class="col-12 col-md-3 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
         <hr />
-        <app-event-user-mask :eventUserRecord="eventUserRecord" @mutateEvent="createEventUser" />
+        <app-event-user-mask :eventUserRecord="eventUserRecord" @onUpdateOrCreateEventUser="createEventUser" />
       </div>
     </div>
   </div>
