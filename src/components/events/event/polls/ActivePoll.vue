@@ -2,7 +2,8 @@
  <div class="container-active-poll" v-if="activePoll.title">
   <h2>{{ localize('view.polls.active.title') }}</h2>
   <p> {{ activePoll.title }}</p>
-   <p> {{ activePollAnswerCount }}/{{ activePollMaxAnswer }}</p>
+   <p v-if="activePollMaxAnswer"> Abegebene Stimmen {{ activePollAnswerCount }} von maximal {{ activePollMaxAnswer }}</p>
+   <p v-if="!activePollMaxAnswer"> Abegebene Stimmen {{ activePoll.answerCount }} von maximal {{ activePoll.maxVotes }}</p>
   <button type="button" class="btn btn-danger" @click="closeActivePoll">{{ localize('view.polls.active.close') }}</button>
  </div>
 </template>

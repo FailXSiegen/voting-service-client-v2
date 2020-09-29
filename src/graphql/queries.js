@@ -66,6 +66,17 @@ export const POLLS_NO_RESULTS = gql`
     }
   }
 `
+export const ACTIVE_POLL = gql`
+  query findActivePoll($eventId: ID) {
+    activePoll(eventId: $eventId) {
+      id
+      title
+      maxVotes
+      answerCount
+    }
+  }
+`
+
 export const POLLS_RESULTS = gql`
   query pollResult($eventId: ID) {
     pollResult(eventId: $eventId) {

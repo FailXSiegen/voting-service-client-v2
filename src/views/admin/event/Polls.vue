@@ -6,9 +6,13 @@
       </div>
       <div class="col-12 col-md-6 col-lg-4 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
-        <hr v-if="activePoll.title" />
-        <app-active-poll :activePoll="activePoll" :activePollAnswerCount="activePollAnswerCount" :activePollMaxAnswer="activePollMaxAnswer" @onCloseActivePoll="closeActivePoll" />
-        <hr v-if="pollsWithNoResults" />
+        <hr>
+        <app-active-poll v-if="activePoll" :activePoll="activePoll" :activePollAnswerCount="activePollAnswerCount" :activePollMaxAnswer="activePollMaxAnswer"
+                         @onCloseActivePoll="stopPoll" />
+        <div class="container-no-active-poll text-center alert alert-warning d-flex justify-content-center align-items-center" role="alert" v-if="!activePoll">
+          <p class="mb-0">{{ localize('view.user.verified.noActivePoll') }}</p>
+        </div>
+        <hr v-if="pollsWithNoResults">
         <app-polls :pollsWithNoResults="pollsWithNoResults"
                    :eventRecord="eventRecord"
                    @onCreatePoll="createPoll"
@@ -27,7 +31,7 @@ import AppPolls from '@/components/events/event/Polls'
 import AppActivePoll from '@/components/events/event/polls/ActivePoll'
 import { localize } from '@/helper/localization-helper'
 import { fetchEventBySlug } from '@/api/event'
-import { EVENT_USERS_BY_EVENT, POLLS_NO_RESULTS } from '@/graphql/queries'
+import { EVENT_USERS_BY_EVENT, POLLS_NO_RESULTS, ACTIVE_POLL } from '@/graphql/queries'
 import { CREATE_POLL, REMOVE_POLL, START_POLL, STOP_POLL } from '@/graphql/mutations'
 import {
   NEW_EVENT_USER_SUBSCRIPTION,
@@ -55,6 +59,7 @@ export default {
   },
   apollo: {
     eventUsers: {
+      fetchPolicy: 'network-only',
       query: EVENT_USERS_BY_EVENT,
       variables () {
         return {
@@ -62,7 +67,17 @@ export default {
         }
       }
     },
+    activePoll: {
+      fetchPolicy: 'network-only',
+      query: ACTIVE_POLL,
+      variables () {
+        return {
+          eventId: this.eventRecord.id
+        }
+      }
+    },
     pollsWithNoResults: {
+      fetchPolicy: 'network-only',
       query: POLLS_NO_RESULTS,
       variables () {
         return {
@@ -91,7 +106,7 @@ export default {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
           if (data.pollLifeCycle.state === 'closed') {
-            this.activePoll = {}
+            this.activePoll = undefined
           }
         }
       }
@@ -103,7 +118,7 @@ export default {
       eventRecord: {},
       eventUsers: [],
       pollsWithNoResults: [],
-      activePoll: {},
+      activePoll: undefined,
       activePollAnswerCount: 0,
       activePollMaxAnswer: 0
     }
@@ -128,7 +143,7 @@ export default {
             this.pollsWithNoResults.push(createdPoll)
           }
         } else {
-          this.activePoll = createdPoll
+          this.$apollo.queries.activePoll.refetch()
         }
       }
       ).catch((error) => {
@@ -151,18 +166,20 @@ export default {
         variables: { pollId }
       }).then((response) => {
         this.removePollFromNoResultList(response.data.startPoll.id)
-        this.activePoll = response.data.startPoll
+        this.$apollo.queries.activePoll.refetch()
       }).catch((error) => {
         console.error(error)
       })
     },
-    closeActivePoll () {
+    stopPoll () {
       this.$apollo.mutate({
         mutation: STOP_POLL,
         variables: { id: this.activePoll.id }
       }).then((response) => {
-        if (response) {
-          this.activePoll = {}
+        if (response.data.stopPoll) {
+          this.activePoll = undefined
+        } else {
+          console.log('Could not close poll')
         }
       }).catch((error) => {
         console.error(error)

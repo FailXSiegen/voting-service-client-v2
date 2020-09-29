@@ -41,6 +41,7 @@ export default {
   },
   apollo: {
     eventUsers: {
+      fetchPolicy: 'network-only',
       query: EVENT_USERS_BY_EVENT,
       variables () {
         return {
@@ -49,6 +50,7 @@ export default {
       }
     },
     pollResult: {
+      fetchPolicy: 'network-only',
       query: POLLS_RESULTS,
       variables () {
         return {
@@ -75,9 +77,6 @@ export default {
       eventUsers: [],
       pollResults: []
     }
-  },
-  mounted () {
-    this.$apollo.queries.pollResult.refetch()
   },
   methods: {
     localize (path) {

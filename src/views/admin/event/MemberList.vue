@@ -42,6 +42,7 @@ export default {
   },
   apollo: {
     eventUsers: {
+      fetchPolicy: 'network-only',
       query: EVENT_USERS_BY_EVENT,
       variables () {
         return {
