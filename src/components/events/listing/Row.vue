@@ -5,24 +5,24 @@
     </th>
     <td>{{ getCreateDatetime }}</td>
     <td>{{ getScheduledDatetime }}</td>
-    <td class="text-center text-success text-uppercase" v-if="!eventsDetail && event.active">
+    <td class="text-center text-success text-uppercase" v-if="event.active">
       {{ localize('view.event.listing.stateActive') }}
-    <td class="text-center text-danger text-uppercase" v-else-if="!eventsDetail && !event.active">
+    <td class="text-center text-danger text-uppercase" v-else-if="event.active">
       {{ localize('view.event.listing.stateLocked') }}
     </td>
-    <td>
+    <td v-if="eventsDetail">
       <router-link :to="{ name: 'updateEvent', params: { eventSlug: event.slug }}"
                    class="btn btn-primary mx-1 my-2"
-              :title="localize('view.event.listing.actions.edit')">
+                   :title="localize('view.event.listing.actions.edit')">
         <i class="bi-pencil-square bi--2xl"></i>
       </router-link>
       <router-link :to="{ name: 'Event', params: { eventSlug: event.slug }}"
                    class="btn btn-secondary mx-1 my-2"
-              :title="localize('view.event.listing.actions.inviteLink')">
+                   :title="localize('view.event.listing.actions.inviteLink')">
         <i class="bi-files bi--2xl"></i>
       </router-link>
       <router-link :to="{ name: 'MemberList', params: { eventSlug: event.slug }}"
-         class="btn btn-info mx-1 my-2"
+                   class="btn btn-info mx-1 my-2"
                    :title="localize('view.event.listing.actions.newTab')">
         <i class="bi-eye-fill bi--2xl"></i>
       </router-link>

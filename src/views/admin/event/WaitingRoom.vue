@@ -1,5 +1,6 @@
 <template>
   <div class="waitingroom-container container-fluid">
+    <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
         <app-navigation v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
@@ -17,6 +18,7 @@
 
 import AppNavigation from '@/components/events/event/Navigation'
 import AppPendingUsers from '@/components/events/event/PendingUsers'
+import { addSuccessMessage } from '@/helper/alert-helper'
 import { fetchEventBySlug } from '@/api/event'
 import {
   EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
@@ -62,6 +64,7 @@ export default {
           eventUser.verified = verified
           eventUser.allowToVote = allowToVote
           eventUser.voteAmount = voteAmount
+          addSuccessMessage('Erfolg', 'Die Rechte des Nutzers wurden erfolgreich angepasst.')
         }
       },
       newEventUser: {
@@ -71,6 +74,7 @@ export default {
             return
           }
           this.eventUsers.push({ ...data.newEventUser })
+          addSuccessMessage('Hallöchen', 'Ein neuer User ist dem Waitingroom beigetreten.')
         }
       },
       eventUserLifeCycle: {

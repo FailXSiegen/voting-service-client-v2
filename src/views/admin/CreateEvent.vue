@@ -1,5 +1,6 @@
 <template>
   <div class="create-new-container container-fluid">
+    <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
         <app-navigation />
@@ -17,6 +18,7 @@
 import AppNavigation from '@/components/Navigation'
 import AppEventMask from '@/components/events/EventMask'
 import { localize } from '@/helper/localization-helper'
+import { addDangerMessage, addSuccessMessage } from '@/helper/alert-helper'
 import { createEventMutation } from '@/graphql/views/event'
 import { convertUnixTimeStampForDatetimeLocaleInput, getCurrentUnixTimeStamp } from '@/lib/time-stamp'
 
@@ -47,7 +49,9 @@ export default {
         variables: { input: this.eventRecord }
       }).then(() => {
         this.$router.push('/admin/events')
+        addSuccessMessage('Juhu', 'Das Event wurde erstellt.')
       }).catch((error) => {
+        addDangerMessage('Fehler', 'Das Event konnte nicht erstellt werden. Für weitere Infos lohnt ein Blick in die Console.')
         console.error(error)
         this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
       })

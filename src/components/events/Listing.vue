@@ -7,7 +7,7 @@
         <th scope="col">{{ localize('view.event.listing.name') }}</th>
         <th scope="col">{{ localize('view.event.listing.created') }}</th>
         <th scope="col">{{ localize('view.event.listing.scheduled') }}</th>
-        <th scope="col" class="text-center" v-if="!eventsDetail">{{ localize('view.event.listing.state') }}</th>
+        <th scope="col" class="text-center">{{ localize('view.event.listing.state') }}</th>
         <th scope="col" v-if="eventsDetail">{{ localize('view.event.listing.actions.label') }}</th>
       </tr>
       </thead>

@@ -1,9 +1,10 @@
 <template>
   <div class="create-new-container container-fluid">
+    <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
         <nav id="mainNavigation">
-          <span class="h2 my-3 d-block">{{ eventRecord.title }}</span>
+          <span class="h5 my-3 d-block">{{ eventRecord.title }}</span>
           <div class="list-group">
             <router-link
               :to="{ name: 'MemberList' }"
@@ -28,6 +29,7 @@ import AppEventUserMask from '@/components/events/EventUserMask'
 import { localize } from '@/helper/localization-helper'
 import { CREATE_EVENT_USER } from '@/graphql/mutations'
 import { fetchEventBySlug } from '@/api/event'
+import { addDangerMessage } from '@/helper/alert-helper.js'
 
 export default {
   components: {
@@ -69,6 +71,7 @@ export default {
       }).then(() => {
         this.$router.push({ name: 'MemberList' })
       }).catch((error) => {
+        addDangerMessage('Fehler!', 'Der User konnte nicht erstellt werden. Für mehr Informationen lohnt ein Blick in die Console.')
         console.error(error)
       })
     },

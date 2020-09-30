@@ -1,5 +1,6 @@
 <template>
   <section class="user-login-container">
+    <slot name="alerts"></slot>
     <div class="min-vh-100 container-fluid">
       <div class="row align-items-center justify-content-around h-100">
         <div class="col-12 my-5">
@@ -37,6 +38,7 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
+import { addDangerMessage, addSuccessMessage } from '@/helper/alert-helper'
 import * as R from 'ramda'
 import { onLogin as loginApolloClient } from '@/vue-apollo'
 import { login } from '@/graphql/auth'
@@ -88,7 +90,9 @@ export default {
         this.$emit('changeComponent', {
           component: 'AppUserDashboard'
         })
+        addSuccessMessage('Erfolg', 'Der Login hat funktioniert. Gleich geht es weiter.')
       }).catch((error) => {
+        addDangerMessage('Fehler', 'Der Login hat nicht funktioniert. Für genauere Infos lohnt ein Blick in die Console.')
         this.validateInput('#eventuser-login-form', 'publicName')
         console.error(error)
         return false

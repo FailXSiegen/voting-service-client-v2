@@ -1,5 +1,6 @@
 <template>
   <div class="create-new-container container-fluid">
+    <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
         <app-navigation />
@@ -17,6 +18,7 @@
 import AppNavigation from '@/components/Navigation'
 import AppEventMask from '@/components/events/EventMask'
 import { localize } from '@/helper/localization-helper'
+import { addDangerMessage } from '@/helper/alert-helper'
 import { updateEventMutation } from '@/graphql/views/event'
 import { convertUnixTimeStampForDatetimeLocaleInput } from '@/lib/time-stamp'
 import { fetchEventBySlug } from '@/api/event'
@@ -63,6 +65,7 @@ export default {
       }).then(() => {
         this.$router.push('/admin/events')
       }).catch((error) => {
+        addDangerMessage('Fehler', 'Das Event konnte nicht geupdated werden. Für weitere Informationen lohnt ein Blick in die Console.', true)
         console.error(error)
         this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
       })

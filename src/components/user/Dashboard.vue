@@ -1,5 +1,6 @@
 <template>
   <section class="user-dashboard-container">
+    <slot name="alerts"></slot>
     <div v-if="eventUser" class="container position-relative bg-white min-vh-100 pt-5 pt-md-0">
       <div v-if="!eventUser.verified" class="row min-vh-100 justify-content-center align-items-center d-print-none">
         <div class="col-12 text-center">
@@ -56,6 +57,7 @@
 
 <script>
 import { localize } from '@/helper/localization-helper'
+import { addDangerMessage } from '@/helper/alert-helper'
 import { POLL_LIFE_CYCLE_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/graphql/subscriptions'
 import { EVENT_USER_BY_ID, POLLS_RESULTS } from '@/graphql/queries'
 import AppModalPoll from '@/components/modal/Poll'
@@ -162,6 +164,7 @@ export default {
           this.voteCounter = 1
         }
       }).catch((error) => {
+        addDangerMessage('Das hat nicht funktioniert. Für weitere Informationen lohnt ein Blick in die Console.')
         console.error(error)
       })
     },

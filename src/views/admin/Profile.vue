@@ -24,8 +24,8 @@ export default {
   },
   data () {
     return {
-      headline: 'My Profil',
-      username: 'Testuser1337'
+      headline: 'ICH BIN NOCH KOMPLETT STATISCH!!',
+      username: 'ICH BIN NOCH KOMPLETT STATISCH!!'
     }
   }
 }

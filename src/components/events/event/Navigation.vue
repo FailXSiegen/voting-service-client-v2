@@ -1,6 +1,6 @@
 <template>
   <nav id="mainNavigation">
-    <span class="h2 my-3 d-block">{{ eventRecord.title }}</span>
+    <span class="h5 my-3 d-block">{{ eventRecord.title }}</span>
     <div class="list-group">
       <router-link
         :to="{ name: 'MemberList' }"
@@ -30,7 +30,7 @@
       </router-link>
       <router-link
         :to="{ name: 'Events' }"
-         class="mt-5 list-group-item list-group-item-action bg-danger list-group-item-dark mb-3 rounded">
+         class="mt-5 list-group-item list-group-item-action bg-danger list-group-item-dark mb-3 rounded text-white">
         {{ localize('view.event.navigation.back') }}
       </router-link>
     </div>

@@ -1,5 +1,6 @@
 <template>
   <div class="polls-container container-fluid">
+    <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
         <app-navigation v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
