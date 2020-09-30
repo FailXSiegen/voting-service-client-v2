@@ -87,6 +87,7 @@ export default {
   apollo: {
     eventUser: {
       query: EVENT_USER_BY_ID,
+      pollInterval: 5000,
       variables () {
         return {
           id: this.$store.getters.getCurrentUserId
