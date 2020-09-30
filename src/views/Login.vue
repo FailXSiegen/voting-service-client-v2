@@ -16,7 +16,7 @@
             </form>
           </div>
           <div class="mb-5 col-md-5 border py-3">
-            <form id="organizer-form" @submit.prevent="onLoginUser" autocomplete="off">
+            <form id="organizer-form" @submit.prevent="onLoginUser">
               <h2 class="mb-4">{{ localize('view.login.headline.orgaLogin') }}</h2>
               <div class="form-group">
                 <label for="email">{{ localize('view.login.label.email') }}</label>

@@ -73,6 +73,7 @@ export default {
           if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
             return
           }
+
           this.eventUsers.push({ ...data.newEventUser })
           addSuccessMessage('Hallöchen', 'Ein neuer User ist dem Waitingroom beigetreten.')
         }

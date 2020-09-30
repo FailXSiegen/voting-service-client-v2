@@ -1,16 +1,17 @@
-import JQuery from 'jquery'
+import $ from 'jquery'
 import store from '@/store'
 
 export function addMessage (type, headline, message, persistent) {
-  JQuery('.toast:not([data-autohide="false"])').remove()
+  $('.toast:not([data-autohide="false"])').remove()
   store.state.alerts.push({ type, headline, message, persistent })
   setTimeout(() => {
-    JQuery('.toast').toast('show')
-    JQuery('.toast').on('hidden.bs.toast', function () {
-      const index = parseInt(JQuery(this).data('index'))
+    const toastElement = $('.toast')
+    toastElement.toast('show')
+    toastElement.on('hidden.bs.toast', function () {
+      const index = parseInt($(this).data('index'))
       store.state.alerts.splice(index, 1)
     })
-  }, 100)
+  }, 300)
 }
 
 export function addSuccessMessage (headline, message, persistent = false) {

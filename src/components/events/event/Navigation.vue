@@ -54,11 +54,6 @@ export default {
   data () {
     return {}
   },
-  methods: {
-    localize (path) {
-      return localize(path)
-    }
-  },
   computed: {
     verifiedUsersCount () {
       if (!this.eventUsers) {
@@ -75,6 +70,11 @@ export default {
       return this.eventUsers.filter((eventUser) => {
         return !eventUser.verified
       }).length
+    }
+  },
+  methods: {
+    localize (path) {
+      return localize(path)
     }
   }
 }

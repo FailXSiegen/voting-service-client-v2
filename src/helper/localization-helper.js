@@ -133,7 +133,10 @@ const localizations = {
           submitPoll: 'Jetzt abstimmen',
           abstain: 'Enthaltung',
           abstainHelptext: 'Entwertet oben ausgewählte Felder; Stimme wird komplett als Enthaltung gezählt!',
-          buttonStart: 'Abstimmung starten'
+          buttonStart: 'Abstimmung starten',
+          maxVote1: 'Sie können eine Position auswählen',
+          maxVoteGreater1: 'Achtung: Sie können mehrere Positionenen auswählen: ',
+          minVoteGreater0: 'Achtung: Sie müssen eine Mindestanzahl auswählen: '
         },
         active: {
           title: 'Aktuelle Abstimmung',
@@ -152,7 +155,9 @@ const localizations = {
           1: 'geheim',
           SECRET: 'geheim',
           PUBLIC: 'offen'
-        }
+        },
+        showMore: 'Weitere Ergebnisse anzeigen',
+        noMoreResults: 'Keine weitere Ergebnisse verfügbar'
       },
       user: {
         pending: {

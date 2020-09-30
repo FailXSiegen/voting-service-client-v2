@@ -6,6 +6,7 @@ export const UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION = gql`subscription($ev
     eventUserId
     verified
     allowToVote
+    voteAmount
   }
 }`
 

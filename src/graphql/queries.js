@@ -78,8 +78,8 @@ export const ACTIVE_POLL = gql`
 `
 
 export const POLLS_RESULTS = gql`
-  query pollResult($eventId: ID) {
-    pollResult(eventId: $eventId) {
+  query pollResult($eventId: ID, $page: Int, $pageSize: Int) {
+    pollResult(eventId: $eventId, page: $page, pageSize: $pageSize) {
       id
       type
       maxVotes

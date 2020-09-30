@@ -39,6 +39,7 @@ import {
   POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION,
   POLL_LIFE_CYCLE_SUBSCRIPTION
 } from '@/graphql/subscriptions'
+import { addInfoMessage } from '@/helper/alert-helper'
 
 export default {
   async created () {
@@ -90,10 +91,10 @@ export default {
       newEventUser: {
         query: NEW_EVENT_USER_SUBSCRIPTION,
         result ({ data }) {
-          if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
-            return
-          }
-          this.eventUsers.push({ ...data.newEventUser })
+          // if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
+          //   return
+          // }
+          addInfoMessage('Neuer Benutzer', ' ist da')
         }
       },
       pollAnswerLifeCycle: {
@@ -189,6 +190,24 @@ export default {
     removePollFromNoResultList (pollId) {
       const removeIndex = this.pollsWithNoResults.map(item => item.id).indexOf(pollId)
       this.pollsWithNoResults.splice(removeIndex, 1)
+    }
+  },
+  computed: {
+    verifiedUsersCount () {
+      if (!this.eventUsers) {
+        return []
+      }
+      return this.eventUsers.filter((eventUser) => {
+        return eventUser.verified
+      }).length
+    },
+    pendingUsersCount () {
+      if (!this.eventUsers) {
+        return []
+      }
+      return this.eventUsers.filter((eventUser) => {
+        return !eventUser.verified
+      }).length
     }
   }
 }

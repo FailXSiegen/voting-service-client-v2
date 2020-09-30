@@ -153,6 +153,8 @@ export default {
   methods: {
     createPoll () {
       this.newPoll = convertPollAnswers(this.newPoll)
+      this.newPoll.maxVotes = parseInt(this.newPoll.maxVotes)
+      this.newPoll.minVotes = parseInt(this.newPoll.minVotes)
       this.newPoll.eventId = this.eventRecord.id
       this.$emit('onCreatePoll', this.newPoll, this.instantStart)
       this.newPoll = this.initPoll
