@@ -50,7 +50,7 @@
                           @onSubmitPoll="submitPoll"
                           ref="pollModal"
           />
-          <button v-if="showMoreEnabled" class="btn btn-info my-3 mx-auto py-2 d-flex align-items-center d-print-none" @click="showMorePollResults">
+          <button v-if="showMoreEnabled && pollResult" class="btn btn-info my-3 mx-auto py-2 d-flex align-items-center d-print-none" @click="showMorePollResults">
             <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i>   {{ localize('view.results.showMore') }}
           </button>
           <p v-if="!showMoreEnabled">{{ localize('view.results.noMoreResults') }}</p>
@@ -104,7 +104,7 @@ export default {
         }
       },
       result ({ data }) {
-        if (data.pollResult.length === 10) {
+        if (data.pollResult && data.pollResult.length === 10) {
           this.showMoreEnabled = true
         }
       }
