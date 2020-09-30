@@ -156,15 +156,9 @@ export default {
     },
     submitPoll () {
       if (this.poll.minVotes > 0 && this.poll.minVotes > this.pollSubmitAnswerInput.answerContents.length) {
-        console.log('Minvotes')
-        console.log(this.poll.minVotes)
-        console.log(this.pollSubmitAnswerInput.answerContents.length)
         addWarnMessage('Hinweis', 'Es fehlt noch eine Auswahl')
         return false
       } else if (this.poll.maxVotes < this.pollSubmitAnswerInput.answerContents.length) {
-        console.log('Maxvotes')
-        console.log(this.poll.maxVotes)
-        console.log(this.pollSubmitAnswerInput.answerContents.length)
         addWarnMessage('Hinweis', 'Sie haben noch offene Angaben')
         return false
       } else {

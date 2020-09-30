@@ -206,7 +206,7 @@ export default {
         addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
         console.error(error)
       })
-      if (pollSubmitAnswerInput.answerContents.length) {
+      if (pollSubmitAnswerInput.answerContents && pollSubmitAnswerInput.answerContents.length > 0) {
         const parentObject = this
         pollSubmitAnswerInput.answerContents.forEach(function (pollAnswer, index) {
           const answer = {}
