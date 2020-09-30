@@ -155,7 +155,7 @@ export default {
       }
     },
     submitPoll () {
-      if (this.poll.minVotes > 0 && !(this.poll.minVotes < this.pollSubmitAnswerInput.answerContents.length)) {
+      if (this.poll.minVotes > 0 && this.poll.minVotes > this.pollSubmitAnswerInput.answerContents.length) {
         console.log('Minvotes')
         console.log(this.poll.minVotes)
         console.log(this.pollSubmitAnswerInput.answerContents.length)
