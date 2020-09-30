@@ -20,7 +20,7 @@
             <span v-if="eventUser.allowToVote"> | Anzahl Stimmen: {{ eventUser.voteAmount }}</span>
             <span> | Status: </span>
             <span class="badge badge-success badge-pill status-indicator" v-if="eventUser.online">online</span>
-            <span class="badge badge-danger badge-pill status-indicator" v-else> | Status: offline</span>
+            <span class="badge badge-danger badge-pill status-indicator" v-else>offline</span>
           </p>
           <hr class="d-print-none">
           <p class="d-print-none" v-if="eventRecord.description">{{ eventRecord.description }}</p>
