@@ -71,7 +71,7 @@ import { EVENT_USER_BY_ID, POLLS_RESULTS } from '@/graphql/queries'
 import AppModalPoll from '@/components/modal/Poll'
 import AppResults from '@/components/events/event/ResultsListing'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
-import { CREATE_POLL_SUBMIT_ANSWER } from '@/graphql/mutations'
+import { CREATE_POLL_SUBMIT_ANSWER, CREATE_POLL_USER_VOTED } from '@/graphql/mutations'
 
 export default {
   components: {
@@ -196,6 +196,16 @@ export default {
     },
     submitPoll (pollSubmitAnswerInput) {
       pollSubmitAnswerInput.pollResultId = this.pollResultId
+      const pollUserVotedInput = { pollResultId: this.pollResultId, eventUserId: this.eventUser.id, voteCycle: 1 }
+      this.$apollo.mutate({
+        mutation: CREATE_POLL_USER_VOTED,
+        variables: {
+          input: pollUserVotedInput
+        }
+      }).catch((error) => {
+        addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
+        console.error(error)
+      })
       if (pollSubmitAnswerInput.answerContents.length) {
         const parentObject = this
         pollSubmitAnswerInput.answerContents.forEach(function (pollAnswer, index) {
