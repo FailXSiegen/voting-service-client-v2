@@ -231,7 +231,9 @@ export default {
         }
       }).then((response) => {
         if (voteCounter === this.eventUser.voteAmount) {
-          this.pollState = 'voted'
+          if (this.pollState === 'new') {
+            this.pollState = 'voted'
+          }
           this.voteCounter = 1
         }
       }).catch((error) => {
