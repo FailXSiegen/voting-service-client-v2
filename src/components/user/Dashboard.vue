@@ -197,50 +197,42 @@ export default {
     },
     async submitPoll (pollSubmitAnswerInput) {
       pollSubmitAnswerInput.pollResultId = this.pollResultId
+      const answer = {}
+      Object.assign(answer, pollSubmitAnswerInput)
+      let answerCounter = 1
       if (pollSubmitAnswerInput.answerContents && pollSubmitAnswerInput.answerContents.length > 0) {
-        let answerCounter = 1
         for await (const pollAnswer of pollSubmitAnswerInput.answerContents) {
-          const answer = {}
-          Object.assign(answer, pollSubmitAnswerInput)
-          answer.answerContent = pollAnswer
-          answer.possibleAnswerId = null
-          answer.voteCycle = this.voteCounter
-          answer.answerItemLength = pollSubmitAnswerInput.answerContents.length
-          answer.answerItemCount = answerCounter
-          delete answer.answerContents
-          delete answer.possibleAnswerIds
-          await this.submitAnswer(answer, answerCounter, pollSubmitAnswerInput)
+          const multipleAnswer = {}
+          Object.assign(multipleAnswer, pollSubmitAnswerInput)
+          multipleAnswer.answerContent = pollAnswer
+          multipleAnswer.possibleAnswerId = null
+          multipleAnswer.voteCycle = this.voteCounter
+          multipleAnswer.answerItemLength = pollSubmitAnswerInput.answerContents.length
+          multipleAnswer.answerItemCount = answerCounter
+          delete multipleAnswer.answerContents
+          delete multipleAnswer.possibleAnswerIds
+          await this.submitAnswer(multipleAnswer, answerCounter, this.voteCounter)
           answerCounter++
         }
       } else {
-        delete pollSubmitAnswerInput.answerContents
-        delete pollSubmitAnswerInput.possibleAnswerIds
-        pollSubmitAnswerInput.answerItemLength = 1
-        pollSubmitAnswerInput.answerItemCount = 1
-        await this.submitAnswer(pollSubmitAnswerInput)
+        delete answer.answerContents
+        delete answer.possibleAnswerIds
+        answer.answerItemLength = 1
+        answer.answerItemCount = 1
+        await this.submitAnswer(answer, answerCounter, this.voteCounter)
       }
+      this.voteCounter++
     },
-    async submitAnswer (answer, answerCounter, eventUser, voteCounter, pollSubmitAnswerInput = null) {
+    async submitAnswer (answer, answerCounter, voteCounter) {
       this.$apollo.mutate({
         mutation: CREATE_POLL_SUBMIT_ANSWER,
         variables: {
           input: answer
         }
       }).then((response) => {
-        if (pollSubmitAnswerInput) {
-          if (this.voteCounter === this.eventUser.voteAmount && answerCounter === pollSubmitAnswerInput.answerContents.length) {
-            if (this.pollState === 'new') {
-              this.pollState = 'voted'
-            }
-            this.voteCounter = 1
-          }
-        } else {
-          if (this.voteCounter === this.eventUser.voteAmount) {
-            if (this.pollState === 'new') {
-              this.pollState = 'voted'
-            }
-            this.voteCounter = 1
-          }
+        if (voteCounter === this.eventUser.voteAmount) {
+          this.pollState = 'voted'
+          this.voteCounter = 1
         }
       }).catch((error) => {
         addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
