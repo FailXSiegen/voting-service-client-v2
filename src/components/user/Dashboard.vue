@@ -71,7 +71,7 @@ import { EVENT_USER_BY_ID, POLLS_RESULTS } from '@/graphql/queries'
 import AppModalPoll from '@/components/modal/Poll'
 import AppResults from '@/components/events/event/ResultsListing'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
-import { CREATE_POLL_SUBMIT_ANSWER, CREATE_POLL_USER_VOTED } from '@/graphql/mutations'
+import { CREATE_POLL_SUBMIT_ANSWER } from '@/graphql/mutations'
 
 export default {
   components: {
@@ -156,7 +156,8 @@ export default {
       pollResult: [],
       page: 0,
       pageSize: 10,
-      showMoreEnabled: false
+      showMoreEnabled: false,
+      voteCounter: 1
     }
   },
   computed: {
@@ -194,60 +195,57 @@ export default {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
       await this.$router.push({ name: 'Login' })
     },
-    submitPoll (pollSubmitAnswerInput) {
+    async submitPoll (pollSubmitAnswerInput) {
       pollSubmitAnswerInput.pollResultId = this.pollResultId
-      const pollUserVotedInput = { pollResultId: this.pollResultId, eventUserId: this.eventUser.id, voteCycle: 1 }
+      if (pollSubmitAnswerInput.answerContents && pollSubmitAnswerInput.answerContents.length > 0) {
+        let answerCounter = 1
+        for await (const pollAnswer of pollSubmitAnswerInput.answerContents) {
+          const answer = {}
+          Object.assign(answer, pollSubmitAnswerInput)
+          answer.answerContent = pollAnswer
+          answer.possibleAnswerId = null
+          answer.voteCycle = this.voteCounter
+          answer.answerItemLength = pollSubmitAnswerInput.answerContents.length
+          answer.answerItemCount = answerCounter
+          delete answer.answerContents
+          delete answer.possibleAnswerIds
+          await this.submitAnswer(answer, answerCounter, pollSubmitAnswerInput)
+          answerCounter++
+        }
+      } else {
+        delete pollSubmitAnswerInput.answerContents
+        delete pollSubmitAnswerInput.possibleAnswerIds
+        pollSubmitAnswerInput.answerItemLength = 1
+        pollSubmitAnswerInput.answerItemCount = 1
+        await this.submitAnswer(pollSubmitAnswerInput)
+      }
+    },
+    async submitAnswer (answer, answerCounter, eventUser, voteCounter, pollSubmitAnswerInput = null) {
       this.$apollo.mutate({
-        mutation: CREATE_POLL_USER_VOTED,
+        mutation: CREATE_POLL_SUBMIT_ANSWER,
         variables: {
-          input: pollUserVotedInput
+          input: answer
+        }
+      }).then((response) => {
+        if (pollSubmitAnswerInput) {
+          if (this.voteCounter === this.eventUser.voteAmount && answerCounter === pollSubmitAnswerInput.answerContents.length) {
+            if (this.pollState === 'new') {
+              this.pollState = 'voted'
+            }
+            this.voteCounter = 1
+          }
+        } else {
+          if (this.voteCounter === this.eventUser.voteAmount) {
+            if (this.pollState === 'new') {
+              this.pollState = 'voted'
+            }
+            this.voteCounter = 1
+          }
         }
       }).catch((error) => {
         addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
         console.error(error)
       })
-      if (pollSubmitAnswerInput.answerContents && pollSubmitAnswerInput.answerContents.length > 0) {
-        const parentObject = this
-        pollSubmitAnswerInput.answerContents.forEach(function (pollAnswer, index) {
-          const answer = {}
-          Object.assign(answer, pollSubmitAnswerInput)
-          answer.answerContent = pollAnswer
-          answer.possibleAnswerId = pollSubmitAnswerInput.possibleAnswerIds[index].id
-          delete answer.answerContents
-          delete answer.possibleAnswerIds
-          parentObject.$apollo.mutate({
-            mutation: CREATE_POLL_SUBMIT_ANSWER,
-            variables: {
-              input: answer
-            }
-          }).then((response) => {
-            if (parentObject.voteCounter === parentObject.eventUser.voteAmount && index === pollSubmitAnswerInput.answerContents.length - 1) {
-              parentObject.pollState = 'voted'
-              parentObject.voteCounter = 1
-            }
-          }).catch((error) => {
-            addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
-            console.error(error)
-          })
-        })
-      } else {
-        delete pollSubmitAnswerInput.answerContents
-        delete pollSubmitAnswerInput.possibleAnswerIds
-        this.$apollo.mutate({
-          mutation: CREATE_POLL_SUBMIT_ANSWER,
-          variables: {
-            input: pollSubmitAnswerInput
-          }
-        }).then((response) => {
-          if (this.voteCounter === this.eventUser.voteAmount) {
-            this.pollState = 'voted'
-            this.voteCounter = 1
-          }
-        }).catch((error) => {
-          addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
-          console.error(error)
-        })
-      }
     },
     localize (path) {
       return localize(path, this.$store.state.language)
