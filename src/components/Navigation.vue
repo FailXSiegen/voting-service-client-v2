@@ -32,7 +32,7 @@ export default {
   methods: {
     async onLogout () {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
-      await this.$router.push('/')
+      this.$router.push('/').catch(() => {})
     },
     localize (path) {
       return localize(path)

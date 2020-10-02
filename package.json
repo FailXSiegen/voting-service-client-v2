@@ -10,6 +10,7 @@
   "dependencies": {
     "@vue/apollo-util": "^4.0.0-alpha.6",
     "apollo-link-token-refresh": "^0.3.2",
+    "apollo-link-error": "^1.1.13",
     "bootstrap": "^4.5.0",
     "bootstrap-icons": "^1.0.0",
     "bootstrap-icons-font": "^2.0.3",

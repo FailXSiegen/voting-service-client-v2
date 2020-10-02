@@ -5,11 +5,9 @@ import store from '@/store'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons-font/dist/bootstrap-icons-font.min.css'
-import { createProvider } from '@/vue-apollo'
+import apolloProvider from '@/vue-apollo.js'
 
 Vue.config.productionTip = false
-
-export const apolloProvider = createProvider()
 
 // Fetch user data, if present.
 store.dispatch('extractUserData').catch((error) => {
