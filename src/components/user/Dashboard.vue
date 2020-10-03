@@ -13,7 +13,7 @@
         </div>
       </div>
       <div v-else class="row min-vh-100 justify-content-center align-items-center pt-5 pt-md-0">
-        <div class="col-12" style="height: 400vh;">
+        <div class="col-12">
           <h1>{{ eventRecord.title }}</h1>
           <h2>{{ localize('view.user.verified.welcome') }} {{ eventUser.publicName }}</h2>
           <p id="userInformation">{{ eventUser.username }} - <span class="text-success small" v-if="eventUser.allowToVote">{{ localize('view.event.user.member') }}</span> <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
