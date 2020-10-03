@@ -36,6 +36,7 @@ export const EVENT_USERS_BY_EVENT = gql`
   query findEventUserByEvent($eventId: ID) {
     eventUsers(eventId: $eventId) {
       id
+      eventId
       publicName
       verified
       allowToVote
@@ -49,6 +50,7 @@ export const EVENT_USERS_BY_EVENT = gql`
 export const EVENT_USER_BY_ID = gql`query FindEventUserById($id: ID!) {
   eventUser(id: $id) {
     id
+    eventId
     publicName
     verified
     allowToVote
@@ -73,6 +75,27 @@ export const ACTIVE_POLL = gql`
       title
       maxVotes
       answerCount
+    }
+  }
+`
+
+export const ACTIVE_POLL_EVENT_USER = gql`
+  query findActivePollEventUser($eventId: ID) {
+    activePollEventUser(eventId: $eventId) {
+      state
+      poll {
+        id
+        title
+        type
+        possibleAnswers {
+          id
+          content
+        }
+        minVotes
+        maxVotes
+        allowAbstain
+      }
+      pollResultId
     }
   }
 `

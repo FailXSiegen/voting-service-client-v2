@@ -59,15 +59,18 @@
       <button @click="onLogout" class="logout btn btn-danger py-2 d-flex align-items-center d-print-none">
         <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
       </button>
+      <button @click="reloadPage" class="reload btn btn-info py-2 d-flex align-items-center d-print-none">
+        <i class="mr-3 bi bi-arrow-repeat bi--1xl"></i> {{ localize('navigation.reload') }}
+      </button>
     </div>
   </section>
 </template>
 
 <script>
 import { localize } from '@/helper/localization-helper'
-import { addDangerMessage, addSuccessMessage } from '@/helper/alert-helper'
+import { addDangerMessage, addSuccessMessage, addWarnMessage } from '@/helper/alert-helper'
 import { POLL_LIFE_CYCLE_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/graphql/subscriptions'
-import { EVENT_USER_BY_ID, POLLS_RESULTS } from '@/graphql/queries'
+import { ACTIVE_POLL_EVENT_USER, EVENT_USER_BY_ID, POLLS_RESULTS } from '@/graphql/queries'
 import AppModalPoll from '@/components/modal/Poll'
 import AppResults from '@/components/events/event/ResultsListing'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
@@ -88,10 +91,33 @@ export default {
   apollo: {
     eventUser: {
       query: EVENT_USER_BY_ID,
-      pollInterval: 5000,
+      pollInterval: 10000,
       variables () {
         return {
           id: this.$store.getters.getCurrentUserId
+        }
+      },
+      result ({ data }) {
+        if (parseInt(data.eventUser.eventId) !== this.eventRecord.id) {
+          this.onLogout(this.eventRecord.slug)
+          addWarnMessage('Achtung', 'Es liegt ein Fehler vor. Bitte melden Sie sich ab und danach wieder neu ein.')
+        }
+      }
+    },
+    activePollEventUser: {
+      query: ACTIVE_POLL_EVENT_USER,
+      pollInterval: 10000,
+      variables () {
+        return {
+          eventId: this.eventRecord.id
+        }
+      },
+      result ({ data }) {
+        if (data.activePollEventUser && data.activePollEventUser.poll) {
+          this.poll = data.activePollEventUser.poll
+          this.pollState = data.activePollEventUser.state
+          this.pollResultId = data.activePollEventUser.pollResultId
+          this.voteCounter = 1
         }
       }
     },
@@ -101,11 +127,11 @@ export default {
         return {
           eventId: this.eventRecord.id,
           page: 0,
-          pageSize: this.pageSize
+          pageSize: 1
         }
       },
       result ({ data }) {
-        if (data.pollResult && data.pollResult.length === 10) {
+        if (data.pollResult && data.pollResult.length === 1) {
           this.showMoreEnabled = true
         }
       }
@@ -154,6 +180,7 @@ export default {
       pollResultId: null,
       openModal: true,
       pollState: '',
+      activePollEventUser: null,
       pollResult: [],
       page: 0,
       pageSize: 10,
@@ -206,9 +233,16 @@ export default {
         }
       })
     },
-    async onLogout () {
+    async onLogout (route = null) {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
-      this.$router.push({ name: 'Login' }).catch(() => {})
+      if (route) {
+        window.location.href = '/' + route
+      } else {
+        this.$router.push({ name: 'Login' }).catch(() => {})
+      }
+    },
+    async reloadPage () {
+      location.reload()
     },
     async submitPoll (pollSubmitAnswerInput) {
       pollSubmitAnswerInput.pollResultId = this.pollResultId
@@ -266,6 +300,11 @@ export default {
  .logout {
    position: absolute;
    top: 15px;
+   right: 15px;
+ }
+ .reload {
+   position: absolute;
+   top: 75px;
    right: 15px;
  }
 

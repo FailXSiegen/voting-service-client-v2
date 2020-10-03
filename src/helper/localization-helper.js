@@ -181,7 +181,8 @@ const localizations = {
     },
     navigation: {
       myProfile: 'Mein Profil',
-      logOut: 'Ausloggen'
+      logOut: 'Ausloggen',
+      reload: 'Aktualisieren'
     },
     error: {
       network: {
