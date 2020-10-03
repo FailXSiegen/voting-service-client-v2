@@ -98,6 +98,9 @@ export default {
         }
       },
       result ({ data }) {
+        if (!data.eventUser) {
+          this.onLogout(this.eventRecord.slug)
+        }
         if (parseInt(data.eventUser.eventId) !== this.eventRecord.id) {
           this.onLogout(this.eventRecord.slug)
           addWarnMessage('Achtung', 'Es liegt ein Fehler vor. Bitte melden Sie sich ab und danach wieder neu ein.')
