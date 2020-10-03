@@ -106,18 +106,20 @@ export default {
     },
     activePollEventUser: {
       query: ACTIVE_POLL_EVENT_USER,
-      pollInterval: 10000,
       variables () {
         return {
           eventId: this.eventRecord.id
         }
       },
       result ({ data }) {
-        if (data.activePollEventUser && data.activePollEventUser.poll) {
+        if (data.activePollEventUser && data.activePollEventUser.poll && data.activePollEventUser.pollUserVoted.findIndex(x => x.eventUserId === this.eventUser.id) === -1) {
           this.poll = data.activePollEventUser.poll
           this.pollState = data.activePollEventUser.state
           this.pollResultId = data.activePollEventUser.pollResultId
           this.voteCounter = 1
+        }
+        if (data.activePollEventUser && data.activePollEventUser.poll && data.activePollEventUser.pollUserVoted.findIndex(x => x.eventUserId === this.eventUser.id) >= 0) {
+          this.poll = 'voted'
         }
       }
     },

@@ -96,6 +96,11 @@ export const ACTIVE_POLL_EVENT_USER = gql`
         allowAbstain
       }
       pollResultId
+      pollUserVoted {
+        id
+        eventUserId
+        pollResultId
+      }
     }
   }
 `
