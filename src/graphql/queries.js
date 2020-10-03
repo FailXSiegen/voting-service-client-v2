@@ -95,6 +95,10 @@ export const ACTIVE_POLL_EVENT_USER = gql`
         maxVotes
         allowAbstain
       }
+      pollUser {
+        id
+        eventUserId
+      }
       pollResultId
       pollUserVoted {
         id

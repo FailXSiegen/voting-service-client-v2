@@ -115,13 +115,20 @@ export default {
         }
       },
       result ({ data }) {
-        if (data.activePollEventUser && data.activePollEventUser.poll && data.activePollEventUser.pollUserVoted.findIndex(x => x.eventUserId === this.eventUser.id) === -1) {
+        if (
+          data.activePollEventUser &&
+          data.activePollEventUser.poll &&
+          data.activePollEventUser.pollUserVoted.findIndex(x => x.eventUserId === this.eventUser.id) === -1 &&
+          data.activePollEventUser.pollUser.findIndex(x => x.eventUserId === this.eventUser.id) >= 0
+        ) {
           this.poll = data.activePollEventUser.poll
           this.pollState = data.activePollEventUser.state
           this.pollResultId = data.activePollEventUser.pollResultId
           this.voteCounter = 1
-        }
-        if (data.activePollEventUser && data.activePollEventUser.poll && data.activePollEventUser.pollUserVoted.findIndex(x => x.eventUserId === this.eventUser.id) >= 0) {
+        } else if (
+          data.activePollEventUser &&
+          data.activePollEventUser.poll
+        ) {
           this.poll = 'voted'
         }
       }
@@ -169,6 +176,7 @@ export default {
             this.$apollo.queries.pollResult.refetch()
             this.showMoreEnabled = true
             this.page = 1
+            this.voteCounter = 1
             if (this.$refs.pollModal) {
               this.$refs.pollModal.close()
             }
@@ -241,9 +249,11 @@ export default {
     async onLogout (route = null) {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
       if (route) {
+        this.eventUser = {}
         window.location.href = '/' + route
       } else {
-        this.$router.push({ name: 'Login' }).catch(() => {})
+        this.eventUser = {}
+        this.$emit('logout')
       }
     },
     async reloadPage () {

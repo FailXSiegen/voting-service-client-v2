@@ -174,7 +174,7 @@ export async function onLogout (apolloClient) {
     apolloClient.wsClient.close(true)
   }
   try {
-    await apolloClient.resetStore()
+    // await apolloClient.resetStore()
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log('%cError on cache reset (logout)', 'color: orange;', e.message)
