@@ -307,11 +307,6 @@ export default {
    top: 75px;
    right: 15px;
  }
-
- #userInformation {
-   padding: .8rem 1.2rem;
-   margin: .8rem -1.2rem;
- }
  .pulse {
    background: rgba(23, 162, 184, .15);
    box-shadow: 0 0 0 0 rgba(23, 162, 184, .5);
