@@ -9,7 +9,7 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="toast-body">
+          <div class="toast-body" v-html="alert.message">
             {{ alert.message }}
           </div>
         </div>
@@ -34,7 +34,7 @@ export default {
     width: 100%;
     max-width: 300px;
     right: 0;
-    top: 20%;
+    bottom: 10%;
     z-index: 200;
   }
   .toast {
@@ -46,6 +46,12 @@ export default {
   }
   .toast-header {
     color: white;
+  }
+  @media all and (min-width: 991px) {
+    .toast-container {
+      top: 10%;
+      bottom: auto;
+    }
   }
   .close {
     color: white;

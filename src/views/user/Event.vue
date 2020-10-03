@@ -1,5 +1,6 @@
 <template>
   <div :id="eventSlug">
+    <slot name="alerts"></slot>
     <component v-if="allowToRender"
                :eventRecord="eventRecord"
                v-bind:is="component"
@@ -53,3 +54,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.toast-container {
+  top: 10%;
+  bottom: auto;
+}
+</style>

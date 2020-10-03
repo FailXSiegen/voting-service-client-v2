@@ -29,7 +29,7 @@ import AppEventUserMask from '@/components/events/EventUserMask'
 import { localize } from '@/helper/localization-helper'
 import { CREATE_EVENT_USER } from '@/graphql/mutations'
 import { fetchEventBySlug } from '@/api/event'
-import { addDangerMessage } from '@/helper/alert-helper.js'
+import { addDangerMessage, addSuccessMessage } from '@/helper/alert-helper.js'
 
 export default {
   components: {
@@ -69,6 +69,7 @@ export default {
         mutation: CREATE_EVENT_USER,
         variables: { input: this.eventUserRecord }
       }).then(() => {
+        addSuccessMessage('Erfolg', 'Der Nutzer wurde erfolgreich erstellt. ')
         this.$router.push({ name: 'MemberList' })
       }).catch((error) => {
         addDangerMessage('Fehler!', 'Der User konnte nicht erstellt werden. Für mehr Informationen lohnt ein Blick in die Console.')

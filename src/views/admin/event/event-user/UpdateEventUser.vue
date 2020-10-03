@@ -29,7 +29,7 @@ import AppEventUserMask from '@/components/events/EventUserMask'
 import { localize } from '@/helper/localization-helper'
 import { UPDATE_EVENT_USER } from '@/graphql/mutations'
 import { fetchEventBySlug } from '@/api/event'
-import { addDangerMessage } from '@/helper/alert-helper'
+import { addDangerMessage, addSuccessMessage } from '@/helper/alert-helper'
 
 export default {
   components: {
@@ -68,6 +68,7 @@ export default {
         mutation: UPDATE_EVENT_USER,
         variables: { input: this.eventUserRecord }
       }).then(() => {
+        addSuccessMessage('Erfolg', 'Der Nutzer wurde erfolgreich geupdated. ')
         this.$router.push({ name: 'MemberList' })
       }).catch((error) => {
         addDangerMessage('Fehler', 'User konnte nicht geupdated werden. Für mehr Informationen lohnt ein Blick in die Console.')

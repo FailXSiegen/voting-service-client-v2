@@ -46,11 +46,10 @@ export default {
 .logout {
   width: 100%;
 }
+#mainNavigation {
+  min-height: 100vh;
+}
 @media screen AND (min-width: 991px) {
-  #mainNavigation {
-    min-height: 100vh;
-    position: relative;
-  }
   .logout {
     position: fixed;
     bottom: 1.5rem;

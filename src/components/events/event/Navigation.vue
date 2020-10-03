@@ -81,10 +81,8 @@ export default {
 </script>
 
 <style>
-@media screen AND (min-width: 991px) {
-  #mainNavigation {
-    min-height: 100vh;
-  }
+#mainNavigation {
+  min-height: 100vh;
 }
 .list-group-item {
   border-color: transparent;

@@ -13,10 +13,10 @@
         </div>
       </div>
       <div v-else class="row min-vh-100 justify-content-center align-items-center pt-5 pt-md-0">
-        <div class="col-12">
+        <div class="col-12" style="height: 400vh;">
           <h1>{{ eventRecord.title }}</h1>
           <h2>{{ localize('view.user.verified.welcome') }} {{ eventUser.publicName }}</h2>
-          <p>{{ eventUser.username }} - <span class="text-success small" v-if="eventUser.allowToVote">{{ localize('view.event.user.member') }}</span> <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
+          <p id="userInformation">{{ eventUser.username }} - <span class="text-success small" v-if="eventUser.allowToVote">{{ localize('view.event.user.member') }}</span> <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
             <span v-if="eventUser.allowToVote"> | Anzahl Stimmen: {{ eventUser.voteAmount }}</span>
             <span> | Status: </span>
             <span class="badge badge-success badge-pill status-indicator" v-if="eventUser.online">online</span>
@@ -72,6 +72,7 @@ import AppModalPoll from '@/components/modal/Poll'
 import AppResults from '@/components/events/event/ResultsListing'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
 import { CREATE_POLL_SUBMIT_ANSWER } from '@/graphql/mutations'
+import $ from 'jquery'
 
 export default {
   components: {
@@ -121,7 +122,7 @@ export default {
           this.eventUser.verified = data.updateEventUserAccessRights.verified
           this.eventUser.allowToVote = data.updateEventUserAccessRights.allowToVote
           this.eventUser.voteAmount = data.updateEventUserAccessRights.voteAmount
-          addSuccessMessage('Statusänderung', 'Ihr Status wurde aktualisiert')
+          addSuccessMessage('Statusänderung', '<p>Ihr Status wurde aktualisiert</p><a class="btn btn-primary btn-block my-3" id="anchorLink" href="#">Änderung anschauen</a>')
         }
       },
       pollLifeCycle: {
@@ -167,6 +168,20 @@ export default {
   },
   created () {
     document.title = 'digitalwahl.org'
+  },
+  mounted () {
+    $(function () {
+      $('body, html').on('click', '#anchorLink', function () {
+        $([document.documentElement, document.body]).animate({
+          scrollTop: $('#userInformation').offset().top - 110
+        }, 200, function () {
+          $('#userInformation').addClass('pulse')
+          setTimeout(function () {
+            $('#userInformation').removeClass('pulse')
+          }, 3000)
+        })
+      })
+    })
   },
   methods: {
     showMorePollResults () {
@@ -253,4 +268,29 @@ export default {
    top: 15px;
    right: 15px;
  }
+
+ #userInformation {
+   padding: .8rem 1.2rem;
+   margin: .8rem -1.2rem;
+ }
+ .pulse {
+   background: rgba(23, 162, 184, .15);
+   box-shadow: 0 0 0 0 rgba(23, 162, 184, .5);
+   transform: scale(1);
+   animation: pulse 1.5s infinite;
+ }
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.4);
+  }
+  30% {
+    transform: scale(.99);
+    box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
+  }
+}
 </style>
