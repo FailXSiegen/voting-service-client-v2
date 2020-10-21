@@ -19,41 +19,5 @@
 </template>
 
 <script>
-export default {
-  data () {
-    return {
-      alerts: this.$store.state.alerts
-    }
-  }
-}
+export { default } from '@/app.vue.js'
 </script>
-
-<style scoped>
-  .toast-container {
-    position: fixed;
-    width: 100%;
-    max-width: 300px;
-    right: 0;
-    bottom: 10%;
-    z-index: 200;
-  }
-  .toast {
-    position: relative;
-    right: 0;
-    top: 0;
-    width: 100%;
-
-  }
-  .toast-header {
-    color: white;
-  }
-  @media all and (min-width: 991px) {
-    .toast-container {
-      top: 10%;
-      bottom: auto;
-    }
-  }
-  .close {
-    color: white;
-  }
-</style>
