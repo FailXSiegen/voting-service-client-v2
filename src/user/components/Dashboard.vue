@@ -225,7 +225,6 @@ export default {
   },
   methods: {
     showMorePollResults () {
-      this.page++
       // Fetch more data and transform the original result
       this.$apollo.queries.pollResult.fetchMore({
         // New variables
@@ -237,11 +236,15 @@ export default {
         // Transform the previous result with new data
         updateQuery: (previousResult, { fetchMoreResult }) => {
           const newResults = fetchMoreResult.pollResult
+          if (!Array.isArray(newResults)) {
+            return false
+          }
           this.showMoreEnabled = true
           this.pollResult.push(...newResults)
           if (newResults.length < this.pageSize) {
             this.showMoreEnabled = false
           }
+          this.page++
           return true
         }
       })
