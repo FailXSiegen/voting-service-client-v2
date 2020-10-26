@@ -57,6 +57,8 @@ export const POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION = gql`subscription{
     pollResultId
     maxVotes
     pollAnswersCount
+    pollUserCount
+    pollUserVotedCount
   }
 }
 `
