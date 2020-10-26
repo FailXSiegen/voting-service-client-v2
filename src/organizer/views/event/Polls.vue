@@ -8,7 +8,12 @@
       <div class="col-12 col-md-6 col-lg-4 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <hr>
-        <app-active-poll v-if="activePoll" :activePoll="activePoll" :activePollAnswerCount="activePollAnswerCount" :activePollMaxAnswer="activePollMaxAnswer"
+        <app-active-poll v-if="activePoll"
+                         :activePoll="activePoll"
+                         :activePollAnswerCount="activePollAnswerCount"
+                         :activePollMaxAnswer="activePollMaxAnswer"
+                         :pollUserCount="pollUserCount"
+                         :pollUserVotedCount="pollUserVotedCount"
                          @onCloseActivePoll="stopPoll" />
         <div class="container-no-active-poll text-center alert alert-warning d-flex justify-content-center align-items-center" role="alert" v-if="!activePoll">
           <p class="mb-0">{{ localize('view.user.verified.noActivePoll') }}</p>
@@ -102,6 +107,8 @@ export default {
         result ({ data }) {
           this.activePollAnswerCount = data.pollAnswerLifeCycle.pollAnswersCount
           this.activePollMaxAnswer = data.pollAnswerLifeCycle.maxVotes
+          this.pollUserCount = data.pollAnswerLifeCycle.pollUserCount
+          this.pollUserVotedCount = data.pollAnswerLifeCycle.pollUserVotedCount
         }
       },
       pollLifeCycle: {
@@ -122,7 +129,9 @@ export default {
       pollsWithNoResults: [],
       activePoll: undefined,
       activePollAnswerCount: 0,
-      activePollMaxAnswer: 0
+      activePollMaxAnswer: 0,
+      pollUserCount: 0,
+      pollUserVotedCount: 0
     }
   },
   methods: {

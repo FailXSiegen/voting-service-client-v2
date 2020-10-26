@@ -63,6 +63,8 @@ export const ACTIVE_POLL = gql`
       title
       maxVotes
       answerCount
+      pollUserCount
+      pollUserVotedCount
     }
   }
 `
