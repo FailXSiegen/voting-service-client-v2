@@ -1,6 +1,5 @@
 <template>
   <div class="container-verified-user" v-if="eventUsers">
-    <h3>Benutzer: {{ eventUsers.length }}</h3>
     <ul class="allowed-users list-group">
       <li v-for="(user, index) in eventUsers" :key="index" class="list-group-item my-2 border">
         <div class="list-group-content">
@@ -16,7 +15,7 @@
               </h5>
               <p class="mb-0">{{ user.username }}
                 <span v-if="user.voteAmount">
-                    - Stimmen: {{ user.voteAmount }}
+                    - {{ localize('view.event.listing.voteAmount') }}: {{ user.voteAmount }}
                   </span>
               </p>
             </div>

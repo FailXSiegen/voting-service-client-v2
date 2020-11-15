@@ -4,7 +4,7 @@
       <h5 class="mb-1">{{ pollResult.poll.title }} ({{ localize('view.results.type.' + pollResult.type) }}) -
         {{ getCreateDatetime }}</h5>
       <p class="small text-muted">
-        {{ localize('view.results.givenVotes') }} {{ pollResult.pollAnswer.length }} | {{
+        {{ localize('view.event.user.member') }}: {{ pollResult.pollUser.length  }} | {{ localize('view.results.givenVotes') }} {{ pollResult.pollAnswer.length }} | {{
           localize('view.results.voters')
         }} {{ pollResult.maxVotes }}
       </p>

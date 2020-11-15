@@ -16,9 +16,10 @@
           <table class="table table-sm">
             <thead class="thead-light">
               <tr>
-                <th>Teilnehmer / Online / Offline</th>
-                <th>Gäste / Online / Offline</th>
-                <th>Gesamt / Online / Offline</th>
+                <th>{{ localize('view.event.user.member') }} / {{ localize('view.event.user.online') }} / {{ localize('view.event.user.offline') }} </th>
+                <th>{{ localize('view.event.user.visitor') }} / {{ localize('view.event.user.online') }} / {{ localize('view.event.user.offline') }}</th>
+                <th>{{ localize('view.event.user.all') }} / {{ localize('view.event.user.online') }} / {{ localize('view.event.user.offline') }}</th>
+                <th>{{ localize('view.event.user.allVoteAmount') }} / {{ localize('view.event.user.online') }} / {{ localize('view.event.user.offline') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -26,6 +27,7 @@
               <td>{{ verifiedUsersCountAllowToVote }} / {{ verifiedUsersCountAllowToVoteOnline }} / {{ verifiedUsersCountAllowToVoteOffline }}</td>
               <td>{{ verifiedUsersCountNotAllowToVote }} / {{ verifiedUsersCountNotAllowToVoteOnline }} / {{ verifiedUsersCountNotAllowToVoteOffline }}</td>
               <td>{{ verifiedUsersCount }} / {{ verifiedUsersCountOnline }} / {{ verifiedUsersCountOffline }}</td>
+              <td>{{ verifiedUsersVoteCount }} / {{ verifiedUsersVoteCountOnline }} / {{ verifiedUsersVoteCountOffline }}</td>
             </tr>
             </tbody>
           </table>
@@ -210,6 +212,42 @@ export default {
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && !eventUser.online && !eventUser.allowToVote
       }).length
+    },
+    verifiedUsersVoteCount () {
+      if (!this.eventUsers) {
+        return []
+      }
+      let voteCount = 0
+      this.eventUsers.forEach(eventUser => {
+        if (eventUser.verified && eventUser.allowToVote) {
+          voteCount += eventUser.voteAmount
+        }
+      })
+      return voteCount
+    },
+    verifiedUsersVoteCountOnline () {
+      if (!this.eventUsers) {
+        return []
+      }
+      let voteCount = 0
+      this.eventUsers.forEach(eventUser => {
+        if (eventUser.verified && eventUser.online && eventUser.allowToVote) {
+          voteCount += eventUser.voteAmount
+        }
+      })
+      return voteCount
+    },
+    verifiedUsersVoteCountOffline () {
+      if (!this.eventUsers) {
+        return []
+      }
+      let voteCount = 0
+      this.eventUsers.forEach(eventUser => {
+        if (eventUser.verified && !eventUser.online && eventUser.allowToVote) {
+          voteCount += eventUser.voteAmount
+        }
+      })
+      return voteCount
     }
   }
 }
