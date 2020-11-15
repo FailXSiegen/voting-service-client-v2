@@ -3,7 +3,7 @@
       <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1 d-print-none">
-        <app-navigation  v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
+        <app-navigation v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>

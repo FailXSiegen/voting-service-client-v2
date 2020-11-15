@@ -16,7 +16,10 @@
         <div class="col-12">
           <h1>{{ eventRecord.title }}</h1>
           <h2>{{ localize('view.user.verified.welcome') }} {{ eventUser.publicName }}</h2>
-          <p id="userInformation">{{ eventUser.username }} - <span class="text-success small" v-if="eventUser.allowToVote">{{ localize('view.event.user.member') }}</span> <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
+          <p id="userInformation">{{ eventUser.username }} - <span class="text-success small"
+                                                                   v-if="eventUser.allowToVote">
+            {{ localize('view.event.user.member') }}</span>
+            <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
             <span v-if="eventUser.allowToVote"> | Anzahl Stimmen: {{ eventUser.voteAmount }}</span>
             <span> | Status: </span>
             <span class="badge badge-success badge-pill status-indicator" v-if="eventUser.online">online</span>
@@ -34,7 +37,9 @@
               <i class="bi-arrow-repeat bi--spin bi--4xl my-3"></i>
               <p v-html="localize('view.user.verified.activePoll')">{{ localize('view.user.verified.activePoll') }}</p>
             </div>
-            <div class="container-no-active-poll text-center alert alert-warning d-flex justify-content-center align-items-center" role="alert"  v-else>
+            <div
+              class="container-no-active-poll text-center alert alert-warning d-flex justify-content-center align-items-center"
+              role="alert" v-else>
               <p class="mb-0">{{ localize('view.user.verified.noActivePoll') }}</p>
             </div>
           </div>
@@ -50,8 +55,10 @@
                           @onSubmitPoll="submitPoll"
                           ref="pollModal"
           />
-          <button v-if="showMoreEnabled && pollResult" class="btn btn-info my-3 mx-auto py-2 d-flex align-items-center d-print-none" @click="showMorePollResults">
-            <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i>   {{ localize('view.results.showMore') }}
+          <button v-if="showMoreEnabled && pollResult"
+                  class="btn btn-info my-3 mx-auto py-2 d-flex align-items-center d-print-none"
+                  @click="showMorePollResults">
+            <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i> {{ localize('view.results.showMore') }}
           </button>
           <p v-if="!showMoreEnabled">{{ localize('view.results.noMoreResults') }}</p>
         </div>
@@ -69,7 +76,10 @@
 <script>
 import { localize } from '@/frame/lib/localization-helper'
 import { addDangerMessage, addSuccessMessage, addWarnMessage } from '@/frame/lib/alert-helper'
-import { POLL_LIFE_CYCLE_SUBSCRIPTION, UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION } from '@/frame/api/graphql/gql/subscriptions'
+import {
+  POLL_LIFE_CYCLE_SUBSCRIPTION,
+  UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION
+} from '@/frame/api/graphql/gql/subscriptions'
 import { POLLS_RESULTS } from '@/frame/api/graphql/gql/queries'
 import { ACTIVE_POLL_EVENT_USER, EVENT_USER_BY_ID } from '@/user/api/graphql/gql/queries'
 import AppModalPoll from '@/user/components/modal/Poll'
@@ -99,7 +109,11 @@ export default {
       },
       result ({ data }) {
         if (!data.eventUser) {
-          this.onLogout(this.eventRecord.slug)
+          if (this.eventRecord.slug) {
+            this.onLogout(this.eventRecord.slug)
+          } else {
+            this.onLogout()
+          }
         }
         if (parseInt(data.eventUser.eventId) !== this.eventRecord.id) {
           this.onLogout(this.eventRecord.slug)
@@ -165,6 +179,11 @@ export default {
       },
       pollLifeCycle: {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
+        variables () {
+          return {
+            eventId: this.eventRecord.id
+          }
+        },
         result ({ data }) {
           if (data.pollLifeCycle.poll) {
             this.poll = data.pollLifeCycle.poll
@@ -175,7 +194,7 @@ export default {
           if (data.pollLifeCycle.state === 'closed') {
             this.$apollo.queries.pollResult.refetch()
             this.showMoreEnabled = true
-            this.page = 1
+            this.page = 0
             this.voteCounter = 1
             if (this.$refs.pollModal) {
               this.$refs.pollModal.close()
@@ -185,6 +204,23 @@ export default {
         }
       }
     }
+  },
+  created () {
+    document.title = 'digitalwahl.org'
+  },
+  mounted () {
+    $(function () {
+      $('body, html').on('click', '#anchorLink', function () {
+        $([document.documentElement, document.body]).animate({
+          scrollTop: $('#userInformation').offset().top - 110
+        }, 200, function () {
+          $('#userInformation').addClass('pulse')
+          setTimeout(function () {
+            $('#userInformation').removeClass('pulse')
+          }, 3000)
+        })
+      })
+    })
   },
   data () {
     return {
@@ -206,23 +242,6 @@ export default {
       return (this.poll && this.pollState !== 'closed')
     }
   },
-  created () {
-    document.title = 'digitalwahl.org'
-  },
-  mounted () {
-    $(function () {
-      $('body, html').on('click', '#anchorLink', function () {
-        $([document.documentElement, document.body]).animate({
-          scrollTop: $('#userInformation').offset().top - 110
-        }, 200, function () {
-          $('#userInformation').addClass('pulse')
-          setTimeout(function () {
-            $('#userInformation').removeClass('pulse')
-          }, 3000)
-        })
-      })
-    })
-  },
   methods: {
     showMorePollResults () {
       // Fetch more data and transform the original result
@@ -240,6 +259,9 @@ export default {
             return false
           }
           this.showMoreEnabled = true
+          if (this.page === 0) {
+            newResults.shift()
+          }
           this.pollResult.push(...newResults)
           if (newResults.length < this.pageSize) {
             this.showMoreEnabled = false
@@ -256,7 +278,7 @@ export default {
         window.location.href = '/' + route
       } else {
         this.eventUser = {}
-        this.$emit('logout')
+        window.location.href = '/'
       }
     },
     async reloadPage () {
@@ -315,22 +337,25 @@ export default {
 }
 </script>
 <style scoped>
- .logout {
-   position: absolute;
-   top: 15px;
-   right: 15px;
- }
- .reload {
-   position: absolute;
-   top: 75px;
-   right: 15px;
- }
- .pulse {
-   background: rgba(23, 162, 184, .15);
-   box-shadow: 0 0 0 0 rgba(23, 162, 184, .5);
-   transform: scale(1);
-   animation: pulse 1.5s infinite;
- }
+.logout {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+}
+
+.reload {
+  position: absolute;
+  top: 75px;
+  right: 15px;
+}
+
+.pulse {
+  background: rgba(23, 162, 184, .15);
+  box-shadow: 0 0 0 0 rgba(23, 162, 184, .5);
+  transform: scale(1);
+  animation: pulse 1.5s infinite;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);

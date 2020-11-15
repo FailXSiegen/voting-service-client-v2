@@ -113,6 +113,11 @@ export default {
       },
       pollLifeCycle: {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
+        variables () {
+          return {
+            eventId: this.eventRecord.id
+          }
+        },
         result ({ data }) {
           if (data.pollLifeCycle.state === 'closed') {
             this.activePoll = undefined

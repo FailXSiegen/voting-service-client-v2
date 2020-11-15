@@ -10,8 +10,9 @@ export const UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION = gql`subscription($ev
   }
 }`
 
-export const POLL_LIFE_CYCLE_SUBSCRIPTION = gql`subscription {
-  pollLifeCycle {
+export const POLL_LIFE_CYCLE_SUBSCRIPTION = gql`subscription($eventId: ID) {
+  pollLifeCycle(eventId: $eventId) {
+    eventId
     state
     poll {
       id
