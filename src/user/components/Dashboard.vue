@@ -179,6 +179,11 @@ export default {
       },
       pollLifeCycle: {
         query: POLL_LIFE_CYCLE_SUBSCRIPTION,
+        variables () {
+          return {
+            eventId: this.eventRecord.id
+          }
+        },
         result ({ data }) {
           if (data.pollLifeCycle.poll) {
             this.poll = data.pollLifeCycle.poll
@@ -200,6 +205,23 @@ export default {
       }
     }
   },
+  created () {
+    document.title = 'digitalwahl.org'
+  },
+  mounted () {
+    $(function () {
+      $('body, html').on('click', '#anchorLink', function () {
+        $([document.documentElement, document.body]).animate({
+          scrollTop: $('#userInformation').offset().top - 110
+        }, 200, function () {
+          $('#userInformation').addClass('pulse')
+          setTimeout(function () {
+            $('#userInformation').removeClass('pulse')
+          }, 3000)
+        })
+      })
+    })
+  },
   data () {
     return {
       eventUser: null,
@@ -219,23 +241,6 @@ export default {
     existActivePoll () {
       return (this.poll && this.pollState !== 'closed')
     }
-  },
-  created () {
-    document.title = 'digitalwahl.org'
-  },
-  mounted () {
-    $(function () {
-      $('body, html').on('click', '#anchorLink', function () {
-        $([document.documentElement, document.body]).animate({
-          scrollTop: $('#userInformation').offset().top - 110
-        }, 200, function () {
-          $('#userInformation').addClass('pulse')
-          setTimeout(function () {
-            $('#userInformation').removeClass('pulse')
-          }, 3000)
-        })
-      })
-    })
   },
   methods: {
     showMorePollResults () {
