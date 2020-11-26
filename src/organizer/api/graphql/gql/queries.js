@@ -47,6 +47,25 @@ export const EVENT_USERS_BY_EVENT = gql`
   }
 `
 
+export const ORGANIZERS = gql`
+  query findOrganizers {
+    organizers {
+      id
+      createDatetime
+      username
+      email
+      password
+      publicName
+      events {
+        id
+      }
+      confirmedEmail
+      superAdmin
+      verified
+    }
+  }
+`
+
 export const POLLS_NO_RESULTS = gql`
   query findPollsWithNoResults($eventId: ID) {
     pollsWithNoResults(eventId: $eventId) {
