@@ -109,14 +109,10 @@ export default {
       },
       result ({ data }) {
         if (!data.eventUser) {
-          if (this.eventRecord.slug) {
-            this.onLogout(this.eventRecord.slug)
-          } else {
-            this.onLogout()
-          }
+          this.onLogout()
         }
         if (parseInt(data.eventUser.eventId) !== this.eventRecord.id) {
-          this.onLogout(this.eventRecord.slug)
+          this.onLogout()
           addWarnMessage('Achtung', 'Es liegt ein Fehler vor. Bitte melden Sie sich ab und danach wieder neu ein.')
         }
       }
@@ -271,14 +267,14 @@ export default {
         }
       })
     },
-    async onLogout (route = null) {
+    async onLogout () {
       await apolloOnLogout(this.$apollo.provider.defaultClient)
-      if (route) {
+      if (this.eventRecord.slug) {
         this.eventUser = {}
-        window.location.href = '/' + route
+        window.location = '/' + this.eventRecord.slug
       } else {
         this.eventUser = {}
-        window.location.href = '/'
+        window.location = '/'
       }
     },
     async reloadPage () {
