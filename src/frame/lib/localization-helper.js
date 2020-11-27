@@ -30,7 +30,20 @@ const localizations = {
         },
         submit: 'Login',
         submitToEvent: 'In Event einloggen',
+        registerAsOrganizer: 'Als Organisator registrieren',
         invalidCredentials: 'Invalid credentials'
+      },
+      register: {
+        headline: 'Registrierung',
+        subheadline: 'Hier können Sie eine Anfrage zur Registrierung abschicken',
+        label: {
+          username: 'Benutzername *',
+          email: 'E-Mail Adresse *',
+          password: 'Passwort *',
+          repeatPassword: 'Passwort wiederholen *',
+          publicName: 'Echter Name *'
+        },
+        submit: 'Registrierung abschicken'
       },
       profile: {
         headline: '',

@@ -29,6 +29,10 @@ export default new Vuex.Store({
       {
         title: 'Veranstaltungen',
         route: '/admin/events'
+      },
+      {
+        title: 'Organisatoren',
+        route: '/admin/organizers'
       }
     ],
     pagination: {

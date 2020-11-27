@@ -1,9 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import AppLogin from '@/frame/views/Login'
+import AppImprint from '@/frame/views/Imprint'
+import AppDataProtection from '@/frame/views/DataProtection'
+import AppRegister from '@/frame/views/Register'
 import AppDashboard from '@/organizer/views/Dashboard'
 import AppEvents from '@/organizer/views/Events'
 import AppProfile from '@/organizer/views/Profile'
+import AppOrganizers from '@/organizer/views/Organizers'
 import AppCreateEvent from '@/organizer/views/CreateEvent'
 import AppUpdateEvent from '@/organizer/views/UpdateEvent'
 import AppMemberList from '@/organizer/views/event/MemberList'
@@ -25,6 +29,24 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
+    path: '/imprint',
+    name: 'Imprint',
+    component: AppImprint,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/data-protection',
+    name: 'Data Protection',
+    component: AppDataProtection,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register',
+    name: 'Register Organizer',
+    component: AppRegister,
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/admin',
     name: 'Admin',
     component: AppDashboard,
@@ -40,6 +62,12 @@ const routes = [
     path: '/admin/profile',
     name: 'Profile',
     component: AppProfile,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/organizers',
+    name: 'Organizers',
+    component: AppOrganizers,
     meta: { requiresAuth: true }
   },
   {
