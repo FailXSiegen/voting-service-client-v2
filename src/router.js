@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import AppLogin from '@/frame/views/Login'
+import AppImprint from '@/frame/views/Imprint'
+import AppDataProtection from '@/frame/views/DataProtection'
 import AppRegister from '@/frame/views/Register'
 import AppDashboard from '@/organizer/views/Dashboard'
 import AppEvents from '@/organizer/views/Events'
@@ -24,6 +26,18 @@ const routes = [
     path: '/',
     name: 'Login',
     component: AppLogin,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/imprint',
+    name: 'Imprint',
+    component: AppImprint,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/data-protection',
+    name: 'Data Protection',
+    component: AppDataProtection,
     meta: { requiresAuth: false }
   },
   {

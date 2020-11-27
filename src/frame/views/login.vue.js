@@ -3,8 +3,12 @@ import { login } from '@/frame/api/fetch/auth'
 import * as R from 'ramda'
 import { onLogin as loginApolloClient } from '@/vue-apollo'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
+import AppFooter from '@/frame/components/Footer'
 
 export default {
+  components: {
+    AppFooter
+  },
   data () {
     return {
       user: {

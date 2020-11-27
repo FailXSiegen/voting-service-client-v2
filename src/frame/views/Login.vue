@@ -49,7 +49,7 @@
                 </button>
               </div>
             </form>
-            <div class="login__organizer border border-info mt-3 p-3">
+            <div class="login__organizer border border-info mt-3 p-3 d-none">
               <router-link to="/register" class="login__button btn btn-primary btn-block w-100 h-100">
                 {{ localize('view.login.registerAsOrganizer') }}
               </router-link>
@@ -58,6 +58,7 @@
         </div>
       </div>
     </div>
+    <app-footer />
   </div>
 </template>
 
