@@ -48,7 +48,7 @@ export default {
         mutation: CREATE_EVENT_MUTATION,
         variables: { input: this.eventRecord }
       }).then(() => {
-        this.$router.push('/admin/events')
+        window.location = '/admin/events'
         addSuccessMessage('Juhu', 'Das Event wurde erstellt.')
       }).catch((error) => {
         addDangerMessage('Fehler', 'Das Event konnte nicht erstellt werden. Für weitere Infos lohnt ein Blick in die Console.')
