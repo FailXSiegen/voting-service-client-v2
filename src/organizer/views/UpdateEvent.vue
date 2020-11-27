@@ -7,7 +7,7 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-        <app-event-mask :eventRecord="eventRecord" @mutateEvent="updateEvent"/>
+        <app-event-mask :eventRecord="eventRecord" @mutateEvent="updateEvent" />
       </div>
     </div>
   </div>
@@ -18,9 +18,9 @@
 import AppNavigation from '@/organizer/components/Navigation'
 import AppEventMask from '@/organizer/components/events/EventMask'
 import { localize } from '@/frame/lib/localization-helper'
-import { addDangerMessage } from '@/frame/lib/alert-helper'
 import { convertUnixTimeStampForDatetimeLocaleInput } from '@/frame/lib/time-stamp'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
+import { addDangerMessage } from '@/frame/lib/alert-helper'
 import { UPDATE_EVENT_MUTATION } from '@/organizer/api/graphql/gql/mutations'
 
 export default {
@@ -44,10 +44,7 @@ export default {
   data () {
     return {
       headline: 'Event',
-      eventRecord: {
-        lobbyOpen: false,
-        active: false
-      }
+      eventRecord: {}
     }
   },
   methods: {
@@ -58,12 +55,15 @@ export default {
       delete this.eventRecord.deleted
       delete this.eventRecord.imagePath
       delete this.eventRecord.organizerId
+      this.eventRecord.active = this.eventRecord.active === true || this.eventRecord.active === 1
+      this.eventRecord.lobbyOpen = this.eventRecord.lobbyOpen === true || this.eventRecord.lobbyOpen === 1
       this.eventRecord.scheduledDatetime = this.convertScheduledDatetime()
       this.$apollo.mutate({
         mutation: UPDATE_EVENT_MUTATION,
         variables: { input: this.eventRecord }
       }).then(() => {
-        this.$router.push('/admin/events')
+        this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(this.eventRecord.scheduledDatetime)
+        window.location = '/admin/events'
       }).catch((error) => {
         addDangerMessage('Fehler', 'Das Event konnte nicht geupdated werden. Für weitere Informationen lohnt ein Blick in die Console.', true)
         console.error(error)

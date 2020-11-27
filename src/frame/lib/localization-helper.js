@@ -26,8 +26,10 @@ const localizations = {
           orgaLogin: 'Als Organisator einloggen',
           userLogin: 'Als Besucher einloggen',
           eventIdent: 'Mit Event-ID einloggen',
-          userWelcomeTo: 'Herzlich willkommen, bitte loggen Sie sich ein.'
+          userWelcomeTo: 'Herzlich willkommen, bitte loggen Sie sich ein.',
+          inactiveEvent: 'Das Event ist noch nicht freigeschaltet'
         },
+        inactiveEventText: 'Bitte versuchen Sie es später noch einmal. Das Event ist noch nicht aktiv.',
         submit: 'Login',
         submitToEvent: 'In Event einloggen',
         registerAsOrganizer: 'Als Organisator registrieren',
@@ -84,7 +86,7 @@ const localizations = {
             descriptionHelp: 'Event-Beschreibung',
             scheduledDatetime: 'Start-Datum',
             lobbyOpen: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
-            submit: 'Dieses Event erstellen',
+            submit: 'Dieses Event speichern',
             eventUser: {
               submit: 'Benutzer speichern',
               createNew: 'Neuen Benutzer erstellen',
@@ -102,8 +104,8 @@ const localizations = {
           created: 'Erstellt am',
           scheduled: 'Geplant am',
           state: 'Status',
-          stateActive: 'laufend',
-          stateLocked: 'verschlossen',
+          stateActive: 'Aktiv',
+          stateLocked: 'Inaktiv',
           voteAmount: 'Stimmen',
           actions: {
             label: 'Aktionen',
@@ -153,7 +155,7 @@ const localizations = {
           abstainHelptext: 'Entwertet oben ausgewählte Felder; Stimme wird komplett als Enthaltung gezählt!',
           buttonStart: 'Abstimmung starten',
           maxVote1: 'Sie können eine Position auswählen',
-          maxVoteGreater1: 'Achtung: Sie können mehrere Positionenen auswählen: ',
+          maxVoteGreater1: 'Achtung: Sie können mehrere Positionen auswählen: ',
           minVoteGreater0: 'Achtung: Sie müssen eine Mindestanzahl auswählen: '
         },
         active: {

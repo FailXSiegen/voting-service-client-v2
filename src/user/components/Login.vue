@@ -5,8 +5,8 @@
       <div class="row align-items-center justify-content-around h-100">
         <div class="col-12 my-5">
           <h1 class="mb-4 text-center">{{ eventRecord.title }}</h1>
-          <h2 class="h4 text-center">{{ localize('view.login.headline.userWelcomeTo') }}</h2>
-          <div class="row justify-content-around mt-5">
+          <h2 class="h4 text-center" v-if="eventRecord.active">{{ localize('view.login.headline.userWelcomeTo') }}</h2>
+          <div class="row justify-content-around mt-5" v-if="eventRecord.active">
             <div class="mb-5 col-md-5 order-1 order-md-2 border py-3">
               <form id="eventuser-login-form" @submit.prevent="onLogin" autocomplete="off">
                 <div class="form-group">
@@ -29,6 +29,10 @@
                 </div>
               </form>
             </div>
+          </div>
+          <div v-else>
+            <h2 class="h4 text-center">{{ localize('view.login.headline.inactiveEvent') }}</h2>
+            <p class="alert alert-info container text-center mt-5">{{ localize('view.login.inactiveEventText') }}</p>
           </div>
         </div>
       </div>

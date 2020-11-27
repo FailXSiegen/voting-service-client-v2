@@ -12,7 +12,9 @@
       </tr>
       </thead>
       <tbody>
-        <app-row v-for="(event, index) in this.events" :key="index" :event="event" :eventsDetail="eventsDetail"/>
+        <app-row v-for="(event, index) in this.events" :key="index"
+                 :event="event"
+                 :eventsDetail="eventsDetail" />
       </tbody>
     </table>
   </div>

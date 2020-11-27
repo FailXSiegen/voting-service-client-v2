@@ -7,7 +7,7 @@
     <td>{{ getScheduledDatetime }}</td>
     <td class="text-center text-success text-uppercase" v-if="event.active">
       {{ localize('view.event.listing.stateActive') }}
-    <td class="text-center text-danger text-uppercase" v-else-if="event.active">
+    <td class="text-center text-danger text-uppercase" v-else>
       {{ localize('view.event.listing.stateLocked') }}
     </td>
     <td v-if="eventsDetail">
