@@ -19,5 +19,5 @@ export function convertUnixTimeStampForDatetimeLocaleInput (unixTimeStamp) {
   const date = datestamp.getDate() < 10 ? '0' + datestamp.getDate() : datestamp.getDate()
   const hour = datestamp.getHours() < 10 ? '0' + datestamp.getHours() : datestamp.getHours()
   const min = datestamp.getMinutes() < 10 ? '0' + datestamp.getMinutes() : datestamp.getMinutes()
-  return `${year}-${month}-${date}T${hour}:${min}`
+  return `${date}.${month}.${year}, ${hour}:${min}`
 }

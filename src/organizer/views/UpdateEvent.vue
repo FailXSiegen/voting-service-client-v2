@@ -22,6 +22,7 @@ import { convertUnixTimeStampForDatetimeLocaleInput } from '@/frame/lib/time-sta
 import { fetchEventBySlug } from '@/user/api/fetch/event'
 import { addDangerMessage } from '@/frame/lib/alert-helper'
 import { UPDATE_EVENT_MUTATION } from '@/organizer/api/graphql/gql/mutations'
+import moment from 'moment'
 
 export default {
   async created () {
@@ -72,8 +73,7 @@ export default {
     },
     convertScheduledDatetime () {
       if (this.eventRecord.scheduledDatetime) {
-        const convertedDatetime = Date.parse(this.eventRecord.scheduledDatetime)
-        return convertedDatetime / 1000
+        return moment(this.eventRecord.scheduledDatetime, 'DD.MM.YYYY, HH:mm').unix()
       }
       return 0
     },
