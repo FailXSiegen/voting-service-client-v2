@@ -193,6 +193,18 @@ const localizations = {
           voted: 'Erfolgreich abgestimmt',
           noActivePoll: 'Es findet zur Zeit keine Abstimmung statt.'
         }
+      },
+      organizers: {
+        user: 'Benutzer',
+        state: 'Status',
+        mail: 'E-Mail',
+        actions: 'Aktionen',
+        username: 'Benutzername',
+        verified: 'aktiv',
+        verify: 'aktivieren',
+        denied: 'inaktiv',
+        deny: 'deaktivieren',
+        edit: 'bearbeiten'
       }
     },
     pagination: {

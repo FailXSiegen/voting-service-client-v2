@@ -11,6 +11,7 @@
         {{ view.title }}
       </router-link>
     </div>
+    <!-- @todo: implement "organizers button" as single button to show it only to super admins? -->
     <div class="mt-5">
       <button @click="onLogout" class="logout btn btn-danger py-3 d-flex align-items-center">
         <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
