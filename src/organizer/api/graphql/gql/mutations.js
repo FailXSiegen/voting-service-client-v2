@@ -87,3 +87,11 @@ mutation UpdateEvent($input: UpdateEventInput!){
     active
   }
 }`
+
+export const UPDATE_ORGANIZER = gql`mutation updateOrganizer($input: UpdateOrganizerInput!){
+  updateOrganizer(input: $input) {
+    id
+    publicName
+    email
+  }
+}`
