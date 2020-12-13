@@ -46,6 +46,16 @@ export const EVENT_USERS_BY_EVENT = gql`
     }
   }
 `
+export const ORGANIZER = gql`
+ query organizer($organizerId:ID!) {
+  organizer(organizerId:$organizerId) {
+    id
+    username
+    password
+    publicName
+  }
+}
+`
 
 export const ORGANIZERS = gql`
   query findOrganizers {
