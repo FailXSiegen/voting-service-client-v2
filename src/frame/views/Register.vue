@@ -1,5 +1,6 @@
 <template>
   <div class="register container-fluid">
+    <slot name="alerts"></slot>
     <div class="register__row row align-items-center justify-content-center">
       <div class="register__col col-md-5 py-3 text-center">
         <h1 class="register__headline">
@@ -8,12 +9,16 @@
         <p class="register__subheadline">
           {{ localize('view.register.subheadline') }}
         </p>
-        <form id="register-form" class="register__form border p-3 text-left" @submit.prevent="onRegisterOrganizer(submitData)">
+        <div v-if="submitSuccess" class="alert alert-success">
+          <h2>Erfolgreich registriert</h2>
+          <p>Bitte bestätigen Sie Ihre E-Mail Adresse. Nach Ihrer Bestätigung wird der Account von einem Administrator geprüft und freigeschaltet. Sie erhalten eine Bestätigung nach Freischaltung!</p>
+        </div>
+        <form v-else id="register-form" class="register__form border p-3 text-left" @submit.prevent="onRegisterOrganizer(submitData)">
           <div class="register__form-group form-group">
             <label class="register__label" for="username">
               {{ localize('view.register.label.username') }}
             </label>
-            <input v-model="submitData.userName"
+            <input v-model="submitData.username"
                    class="register__form-control form-control"
                    id="username"
                    type="text"
@@ -24,12 +29,17 @@
             <label class="register__label" for="email">
               {{ localize('view.register.label.email') }}
             </label>
-            <input v-model="submitData.email"
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <div class="input-group-text">@</div>
+              </div>
+              <input v-model="submitData.email"
                    type="email"
                    name="email"
                    id="email"
                    class="register__form-control form-control"
                    required="required">
+            </div>
           </div>
           <div class="register__form-group form-group">
             <label class="register__label" for="password">

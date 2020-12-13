@@ -17,7 +17,7 @@ export const UPCOMING_EVENTS = gql`
 `
 
 export const EXPIRED_EVENTS = gql`
-  query expiredEvents($organizerId: ID) {
+  query expiredEvents($organizerId: ID!) {
      expiredEvents(organizerId: $organizerId) {
         id
         createDatetime
