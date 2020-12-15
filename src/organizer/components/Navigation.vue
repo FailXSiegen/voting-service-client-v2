@@ -5,12 +5,15 @@
         {{ localize('navigation.myProfile') }}
       </router-link>
     </div>
-    <div class="list-group">
-      <router-link v-for="(view, index) in views" :key="index" :to="view.route"
-                   class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
-        {{ view.title }}
-      </router-link>
-    </div>
+    <ul class="list-group">
+      <li class="list-group-item" v-for="(view, index) in views" :key="index">
+        <router-link v-if="view.superAdmin && organizer.superAdmin || !view.superAdmin"
+                    :to="view.route"
+                    class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded">
+          {{ view.title }}
+        </router-link>
+      </li>
+    </ul>
     <!-- @todo: implement "organizers button" as single button to show it only to super admins? -->
     <div class="mt-5">
       <button @click="onLogout" class="logout btn btn-danger py-3 d-flex align-items-center">
@@ -23,11 +26,23 @@
 <script>
 import { localize } from '@/frame/lib/localization-helper'
 import { onLogout as apolloOnLogout } from '@/vue-apollo'
+import { ORGANIZER } from '@/organizer/api/graphql/gql/queries'
 
 export default {
   data () {
     return {
-      views: this.$store.state.views
+      views: this.$store.state.views,
+      organizer: {}
+    }
+  },
+  apollo: {
+    organizer: {
+      query: ORGANIZER,
+      variables () {
+        return {
+          organizerId: this.$store.state.currentUser.id
+        }
+      }
     }
   },
   methods: {

@@ -51,8 +51,12 @@ export const ORGANIZER = gql`
   organizer(organizerId:$organizerId) {
     id
     username
+    email
     password
     publicName
+    confirmedEmail
+    verified
+    superAdmin
   }
 }
 `

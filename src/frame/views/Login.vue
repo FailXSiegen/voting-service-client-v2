@@ -26,8 +26,8 @@
             <form id="organizer-form" class="login__form login__form--organizer border p-3" @submit.prevent="onLoginUser">
               <h2 class="login__form--headline mb-4">{{ localize('view.login.headline.orgaLogin') }}</h2>
               <div class="login__form-group from-group">
-                <label class="login__label" for="email">{{ localize('view.login.label.email') }}</label>
-                <input v-model="user.email" type="email" name="email" id="email"
+                <label class="login__label" for="username">{{ localize('view.organizers.username') }}</label>
+                <input v-model="user.username" type="input" name="username" id="username"
                        class="login__form-control form-control"
                        required="required">
               </div>

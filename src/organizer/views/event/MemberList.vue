@@ -5,7 +5,7 @@
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
         <app-navigation v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
       </div>
-      <div class="col-12 col-md-9 col-lg-9 col-xl-9 py-3 order-1 order-lg-2">
+      <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
         <router-link :to="{ name: 'CreateEventUser' }" class="btn btn-success my-3">
           <i class="bi-plus bi--2xl align-middle"></i>

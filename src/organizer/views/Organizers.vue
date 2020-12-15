@@ -35,7 +35,7 @@
                 <td class="text-danger text-uppercase" v-else>
                   <strong>{{ localize('view.organizers.denied') }}</strong>
                 </td>
-                <td class="d-flex flex-row">
+                <td class="d-flex flex-row" v-if="currentUserId != organizer.id">
                   <button v-if="organizer.verified" @click.prevent="onDeny(organizer)"
                           class="btn btn-danger mx-1 my-2 d-flex align-items-center justify-content-center"
                           :title="localize('view.organizers.deny')">
@@ -80,7 +80,8 @@ export default {
   data () {
     return {
       headline: 'Organizers',
-      organizers: []
+      organizers: [],
+      currentUserId: this.$store.state.currentUser.id
     }
   },
   methods: {

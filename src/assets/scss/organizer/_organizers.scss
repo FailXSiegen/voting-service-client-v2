@@ -1,6 +1,10 @@
 .organizers-container {
-th, td {
-    vertical-align: middle;
-    line-height: 1;
+    th, td {
+        vertical-align: middle;
+        line-height: 1;
+    }
 }
+.router-link-exact-active {
+    background-color: $primary;
+    color: white;
 }

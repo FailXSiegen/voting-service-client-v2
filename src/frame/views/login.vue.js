@@ -13,7 +13,7 @@ export default {
     return {
       user: {
         displayName: '',
-        email: '',
+        username: '',
         password: ''
       },
       eventSlug: ''
@@ -31,7 +31,7 @@ export default {
     },
     onLoginUser () {
       const loginType = 'organizer'
-      login(this.user.email, this.user.password, loginType).then(async (data) => {
+      login(this.user.username, this.user.password, loginType).then(async (data) => {
         const token = R.path(['token'], data)
         const expiresAt = R.path(['expiresAt'], data)
         await loginApolloClient(this.$apollo.provider.defaultClient, token, expiresAt)

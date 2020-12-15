@@ -24,15 +24,18 @@ export default new Vuex.Store({
     views: [
       {
         title: 'Übersicht',
-        route: '/admin'
+        route: '/admin',
+        superAdmin: false
       },
       {
         title: 'Veranstaltungen',
-        route: '/admin/events'
+        route: '/admin/events',
+        superAdmin: false
       },
       {
         title: 'Organisatoren',
-        route: '/admin/organizers'
+        route: '/admin/organizers',
+        superAdmin: true
       }
     ],
     pagination: {
