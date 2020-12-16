@@ -95,3 +95,14 @@ export const UPDATE_ORGANIZER = gql`mutation updateOrganizer($input: UpdateOrgan
     email
   }
 }`
+
+export const UPDATE_ORGANIZER_VERIFICATION = gql`mutation updateOrganizer($input: UpdateOrganizerInput!){
+  updateOrganizer(input: $input) {
+    id
+    verified
+  }
+}`
+
+export const DELETE_ORGANIZER = gql`mutation deleteOrganizer($id: ID!){
+  deleteOrganizer(id: $id)
+}`

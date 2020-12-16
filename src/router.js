@@ -4,6 +4,7 @@ import AppLogin from '@/frame/views/Login'
 import AppImprint from '@/frame/views/Imprint'
 import AppDataProtection from '@/frame/views/DataProtection'
 import AppRegister from '@/frame/views/Register'
+import AppValidateEmail from '@/frame/views/ValidateEmail'
 import AppDashboard from '@/organizer/views/Dashboard'
 import AppEvents from '@/organizer/views/Events'
 import AppProfile from '@/organizer/views/Profile'
@@ -44,6 +45,13 @@ const routes = [
     path: '/register',
     name: 'Register Organizer',
     component: AppRegister,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/validate/:hash',
+    props: true,
+    name: 'Validate Register Organizer',
+    component: AppValidateEmail,
     meta: { requiresAuth: false }
   },
   {

@@ -198,13 +198,15 @@ const localizations = {
         user: 'Benutzer',
         state: 'Status',
         mail: 'E-Mail',
+        confirmedMail: 'E-Mail bestätigt',
         actions: 'Aktionen',
         username: 'Benutzername',
         verified: 'aktiv',
         verify: 'aktivieren',
         denied: 'inaktiv',
         deny: 'deaktivieren',
-        edit: 'bearbeiten'
+        edit: 'bearbeiten',
+        delete: 'löschen'
       }
     },
     pagination: {
