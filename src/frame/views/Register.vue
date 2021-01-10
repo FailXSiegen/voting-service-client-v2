@@ -9,6 +9,9 @@
         <p class="register__subheadline">
           {{ localize('view.register.subheadline') }}
         </p>
+        <div class="jumbotron jumbotron-fluid">
+          <p class="register__description" v-html="localize('view.register.description')"></p>
+        </div>
         <div v-if="submitSuccess" class="alert alert-success">
           <h2>Erfolgreich registriert</h2>
           <p>Bitte bestätigen Sie Ihre E-Mail Adresse. Nach Ihrer Bestätigung wird der Account von einem Administrator geprüft und freigeschaltet. Sie erhalten eine Bestätigung nach Freischaltung!</p>
@@ -75,6 +78,37 @@
                    required="required"/>
           </div>
           <div class="register__form-group form-group">
+            <label class="register__label" for="public-organisation">
+              {{ localize('view.register.label.publicOrganisation') }}
+            </label>
+            <input v-model="submitData.publicOrganisation"
+                   class="register__form-control form-control"
+                   aria-describedby="public-organisation-hint"
+                   id="public-organisation"
+                   type="text"
+                   name="public-organisation"
+                   required="required"/>
+              <small id="public-organisation-hint" class="form-text text-muted">{{ localize('view.register.label.publicOrganisationHint') }}</small>
+          </div>
+          <hr class="my-3 d-inline-block w-100" />
+          <div class="register__form-group form-group ml-4">
+              <input class="register__form-control form-check-input"
+                   id="data-protection"
+                   type="checkbox"
+                   name="data-protection"
+                   required="required"/>
+            <label class="register__label form-check-label" for="data-protection" v-html="localize('view.register.label.dataProtection')"></label>
+          </div>
+          <div class="register__form-group form-group ml-4">
+              <input class="register__form-control form-check-input"
+                   id="beta"
+                   type="checkbox"
+                   name="beta"
+                   required="required"/>
+            <label class="register__label form-check-label" for="beta" v-html="localize('view.register.label.beta')"></label>
+          </div>
+          <hr class="my-3 d-inline-block w-100" />
+          <div class="register__form-group form-group">
             <button class="register__button btn btn-primary btn-block float-right mt-3">
               {{ localize('view.register.submit') }}
             </button>
@@ -82,6 +116,7 @@
         </form>
       </div>
     </div>
+    <app-footer />
   </div>
 </template>
 

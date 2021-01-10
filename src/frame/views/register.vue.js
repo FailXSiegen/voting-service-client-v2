@@ -1,8 +1,12 @@
 import { localize } from '@/frame/lib/localization-helper'
 import { addSuccessMessage, addDangerMessage } from '@/frame/lib/alert-helper'
 import { createOrganizer } from '@/frame/api/fetch/create'
+import AppFooter from '@/frame/components/Footer'
 
 export default {
+  components: {
+    AppFooter
+  },
   data () {
     return {
       submitData: {

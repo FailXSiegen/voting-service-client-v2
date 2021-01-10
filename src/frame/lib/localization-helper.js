@@ -22,12 +22,14 @@ const localizations = {
           eventIdent: 'Event-ID eingeben*'
         },
         headline: {
-          title: 'Voting Service',
+          title: 'digitalwahl.org',
+          subtitle: 'Einfach die Wahl haben',
           orgaLogin: 'Als Organisator einloggen',
           userLogin: 'Als Besucher einloggen',
           eventIdent: 'Mit Event-ID einloggen',
           userWelcomeTo: 'Herzlich willkommen, bitte loggen Sie sich ein.',
-          inactiveEvent: 'Das Event ist noch nicht freigeschaltet'
+          inactiveEvent: 'Das Event ist noch nicht freigeschaltet',
+          orgaRegister: 'Als Organisator registrieren'
         },
         inactiveEventText: 'Bitte versuchen Sie es später noch einmal. Das Event ist noch nicht aktiv.',
         submit: 'Login',
@@ -38,12 +40,17 @@ const localizations = {
       register: {
         headline: 'Registrierung',
         subheadline: 'Hier können Sie eine Anfrage zur Registrierung abschicken',
+        description: 'Sie müssen nach der Registrierung Ihre E-Mail Adresse bestätigen.<br />Nach Bestätigung erhält ein Administrator Ihre Registrierungsanfrage und schaltet Ihren Zugang frei.<hr class="my-4"><u class="h3">Die Plattform befindet sich im Beta-Status!</u>',
         label: {
           username: 'Benutzername *',
           email: 'E-Mail Adresse *',
           password: 'Passwort *',
           repeatPassword: 'Passwort wiederholen *',
-          publicName: 'Echter Name *'
+          publicName: 'Ihr Name *',
+          publicOrganisation: 'Ihre Organisation *',
+          publicOrganisationHint: 'Die kostenlose Nutzung ist gemeinnützigen Organisationen und Verbänden vorbehalten.',
+          dataProtection: '* Ich bestätige, dass ich die <a href="/datenschutz" target="_blank">Datenschutzerklärung</a> gelesen habe, zur Kenntnis nehme und mit den <a href="/nutzungsbedingungen" target="_blank">Nutzungsbedigungen</a> einverstanden bin.',
+          beta: '* Ich nehme zur Kenntnis, dass die Plattform sich im Entwicklungszustand befindet und es dadurch zu Einschränkungen kommen kann.'
         },
         submit: 'Registrierung abschicken'
       },

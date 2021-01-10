@@ -1,8 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import AppLogin from '@/frame/views/Login'
-import AppImprint from '@/frame/views/Imprint'
-import AppDataProtection from '@/frame/views/DataProtection'
+import AppImprint from '@/frame/views/staticPages/Imprint'
+import AppDataProtection from '@/frame/views/staticPages/DataProtection'
+import AppFaq from '@/frame/views/staticPages/Faq'
+import AppManual from '@/frame/views/staticPages/Manual'
+import AppUserAgreement from '@/frame/views/staticPages/UserAgreement'
+import AppFunctions from '@/frame/views/staticPages/Functions'
 import AppRegister from '@/frame/views/Register'
 import AppValidateEmail from '@/frame/views/ValidateEmail'
 import AppDashboard from '@/organizer/views/Dashboard'
@@ -30,15 +34,39 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
-    path: '/imprint',
+    path: '/impressum',
     name: 'Imprint',
     component: AppImprint,
     meta: { requiresAuth: false }
   },
   {
-    path: '/data-protection',
+    path: '/datenschutz',
     name: 'Data Protection',
     component: AppDataProtection,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/haeufige-fragen',
+    name: 'Faq',
+    component: AppFaq,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/nutzervereinbarung',
+    name: 'User Agreement',
+    component: AppUserAgreement,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/anleitung',
+    name: 'Manual',
+    component: AppManual,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/funktionen-planung',
+    name: 'Functions',
+    component: AppFunctions,
     meta: { requiresAuth: false }
   },
   {
