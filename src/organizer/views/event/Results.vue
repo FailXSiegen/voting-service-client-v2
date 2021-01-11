@@ -1,25 +1,37 @@
 <template>
   <div class="results-container container-fluid">
-      <slot name="alerts"></slot>
+    <slot name="alerts"></slot>
     <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1 d-print-none">
-        <app-navigation v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
+      <div
+        class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1 d-print-none"
+      >
+        <app-navigation
+          v-if="eventUsers"
+          :eventUsers="eventUsers"
+          :eventRecord="eventRecord"
+        />
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
-        <hr>
+        <hr />
         <app-results :pollResult="pollResult" :eventRecord="eventRecord" />
-        <button v-if="showMoreEnabled" class="my-5 mx-auto btn btn-info py-2 d-flex align-items-center d-print-none" @click="showMorePollResults">
-          <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i> {{ localize('view.results.showMore') }}
+        <button
+          v-if="showMoreEnabled"
+          class="my-5 mx-auto btn btn-info py-2 d-flex align-items-center d-print-none"
+          @click="showMorePollResults"
+        >
+          <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i>
+          {{ localize('view.results.showMore') }}
         </button>
-        <p v-if="!showMoreEnabled" class="alert alert-light mx-auto my-5">{{ localize('view.results.noMoreResults') }}</p>
+        <p v-if="!showMoreEnabled" class="alert alert-light mx-auto my-5">
+          {{ localize('view.results.noMoreResults') }}
+        </p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
 import AppNavigation from '@/organizer/components/events/detail/Navigation'
 import AppResults from '@/organizer/components/events/detail/ResultsListing'
 import { localize } from '@/frame/lib/localization-helper'
@@ -31,7 +43,11 @@ import { NEW_EVENT_USER_SUBSCRIPTION } from '@/frame/api/graphql/gql/subscriptio
 export default {
   async created () {
     const response = await fetchEventBySlug(this.eventSlug)
-    if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
+    if (
+      response === null ||
+      response.success === false ||
+      response.event.organizerId !== this.$store.getters.getCurrentUserId
+    ) {
       await this.$router.push('/admin/events')
     }
     this.eventRecord = response.event
@@ -85,7 +101,7 @@ export default {
   },
   data () {
     return {
-      headline: 'Umfrage-Ergebnisse',
+      headline: 'Ergebnisse',
       eventRecord: {},
       eventUsers: [],
       pollResult: [],
