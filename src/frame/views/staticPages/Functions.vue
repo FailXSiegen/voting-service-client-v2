@@ -17,9 +17,11 @@
     <ul>
       <li>Einfacher Export der Ergebnisse</li>
       <li>Integrierte Videokonferenz</li>
-      <li>Asynchrone Wahlen</li>
-      <li>Briefwahl</li>
-      <li>Endgeräte-bezogene Wahl (ohne Namen/Zugängen)</li>
+      <li>Asynchrone Wahlen (digitale Briefwahl)</li>
+      <li>
+        Endgeräte-bezogene Wahl (nach E-Mail basiertem Anmeldeprozess ohne
+        Namen, Token wird auf Endgerät gespeichert)
+      </li>
     </ul>
     <span class="alert alert-info text-center h4 w-100 mt-3 d-inline-block">
       Diese Seite befindet sich noch im Aufbau und wird laufend aktualisiert
