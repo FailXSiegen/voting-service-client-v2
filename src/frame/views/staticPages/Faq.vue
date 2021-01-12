@@ -120,41 +120,6 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-header" id="faq5head">
-          <h2 class="mb-0">
-            <button
-              class="btn btn-block text-left d-flex align-items-center"
-              type="button"
-              data-toggle="collapse"
-              data-target="#faq5"
-              aria-expanded="true"
-              aria-controls="faq5"
-            >
-              <i class="bi bi-plus mr-2 mb-0 h2"></i>
-              Können wir Support bei unserer digitalen/hybriden Veranstaltung
-              anfordern?
-            </button>
-          </h2>
-        </div>
-        <div
-          id="faq5"
-          class="collapse"
-          aria-labelledby="faq5head"
-          data-parent="#faq5"
-        >
-          <div class="card-body">
-            Ja. Je nach Konstellation können wir von digitalwahl.org bei der
-            Veranstaltung mit teilnehmen und die Plattform für Sie bedienen,
-            also Teilnehmer verwalten und Wahlen durchführen. Die Dienstleistung
-            ist kostenpflichtig und kann unter
-            <a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a>
-            angefragt werden. Bei größeren Veranstaltungen greifen wir auch
-            gerne auf Partner zurück, die Ihre Veranstaltung für Sie
-            unterstützen.
-          </div>
-        </div>
-      </div>
-      <div class="card">
         <div class="card-header" id="faq6head">
           <h2 class="mb-0">
             <button
