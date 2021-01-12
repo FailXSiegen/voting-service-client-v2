@@ -54,6 +54,7 @@ export const ORGANIZER = gql`
     email
     password
     publicName
+    publicOrganisation
     confirmedEmail
     verified
     superAdmin
@@ -70,6 +71,7 @@ export const ORGANIZERS = gql`
       email
       password
       publicName
+      publicOrganisation
       events {
         id
       }

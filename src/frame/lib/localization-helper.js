@@ -203,6 +203,7 @@ const localizations = {
       },
       organizers: {
         user: 'Benutzer',
+        organisation: 'Organisation',
         state: 'Status',
         mail: 'E-Mail',
         confirmedMail: 'E-Mail bestätigt',
