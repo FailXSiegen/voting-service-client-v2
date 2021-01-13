@@ -3,19 +3,22 @@
     <slot name="alerts"></slot>
     <div class="row">
       <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
-        <app-navigation v-if="eventUsers" :eventUsers="eventUsers" :eventRecord="eventRecord" />
+        <app-navigation :eventUsers="eventUsers" :eventRecord="eventRecord" />
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
-        <hr>
-        <app-pending-users v-if="eventUsers" :eventUsers="pendingUsers" :eventRecord="eventRecord" />
+        <hr />
+        <app-pending-users
+          v-if="eventUsers"
+          :eventUsers="pendingUsers"
+          :eventRecord="eventRecord"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
 import AppNavigation from '@/organizer/components/events/detail/Navigation'
 import AppPendingUsers from '@/organizer/components/events/detail/PendingUsers'
 import { addSuccessMessage } from '@/frame/lib/alert-helper'
@@ -51,11 +54,17 @@ export default {
       updateEventUserAccessRights: {
         query: UPDATE_EVENT_USER_ACCESS_RIGHTS_SUBSCRIPTION,
         result ({ data }) {
-          const { eventUserId, eventId, verified, allowToVote, voteAmount } = data.updateEventUserAccessRights
+          const {
+            eventUserId,
+            eventId,
+            verified,
+            allowToVote,
+            voteAmount
+          } = data.updateEventUserAccessRights
           if (parseInt(eventId) !== this.eventRecord.id) {
             return
           }
-          const eventUser = this.eventUsers.find((user) => {
+          const eventUser = this.eventUsers.find(user => {
             return user.id === eventUserId
           })
           if (!eventUser) {
@@ -64,7 +73,10 @@ export default {
           eventUser.verified = verified
           eventUser.allowToVote = allowToVote
           eventUser.voteAmount = voteAmount
-          addSuccessMessage('Erfolg', 'Die Rechte des Nutzers wurden erfolgreich angepasst.')
+          addSuccessMessage(
+            'Erfolg',
+            'Die Rechte des Nutzers wurden erfolgreich angepasst.'
+          )
         }
       },
       newEventUser: {
@@ -75,14 +87,17 @@ export default {
           }
 
           this.eventUsers.push({ ...data.newEventUser })
-          addSuccessMessage('Hallöchen', 'Ein neuer User ist dem Waitingroom beigetreten.')
+          addSuccessMessage(
+            'Hallöchen',
+            'Ein neuer User ist dem Waitingroom beigetreten.'
+          )
         }
       },
       eventUserLifeCycle: {
         query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
           const eventUserId = data.eventUserLifeCycle.eventUserId
-          this.eventUsers.forEach((eventUser) => {
+          this.eventUsers.forEach(eventUser => {
             if (eventUserId === eventUser.id) {
               eventUser.online = data.eventUserLifeCycle.online
             }
@@ -93,7 +108,11 @@ export default {
   },
   async created () {
     const response = await fetchEventBySlug(this.eventSlug)
-    if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
+    if (
+      response === null ||
+      response.success === false ||
+      response.event.organizerId !== this.$store.getters.getCurrentUserId
+    ) {
       await this.$router.push('/admin/events')
     }
     this.eventRecord = response.event
@@ -110,7 +129,7 @@ export default {
       if (!this.eventUsers) {
         return []
       }
-      return this.eventUsers.filter((eventUser) => {
+      return this.eventUsers.filter(eventUser => {
         return !eventUser.verified
       })
     }
