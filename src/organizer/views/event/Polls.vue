@@ -28,8 +28,13 @@
         >
           <p class="mb-0">{{ localize('view.user.verified.noActivePoll') }}</p>
         </div>
+        <span>
+          Aktuelle Anzahl wahlberechtigter Teilnehmer:
+          {{ verifiedUsersCountAllowToVoteOnline }}
+        </span>
         <hr v-if="pollsWithNoResults" />
         <app-polls
+          v-if="!activePoll"
           :pollsWithNoResults="pollsWithNoResults"
           :eventRecord="eventRecord"
           @onCreatePoll="createPoll"
@@ -46,6 +51,7 @@ import AppNavigation from '@/organizer/components/events/detail/Navigation'
 import AppPolls from '@/organizer/components/events/detail/Polls'
 import AppActivePoll from '@/organizer/components/events/detail/polls/ActivePoll'
 import { localize } from '@/frame/lib/localization-helper'
+import { addDangerMessage, addSuccessMessage } from '@/frame/lib/alert-helper'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
 import {
   EVENT_USERS_BY_EVENT,
@@ -61,9 +67,9 @@ import {
 import {
   NEW_EVENT_USER_SUBSCRIPTION,
   POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION,
-  POLL_LIFE_CYCLE_SUBSCRIPTION
+  POLL_LIFE_CYCLE_SUBSCRIPTION,
+  EVENT_USER_LIFE_CYCLE_SUBSCRIPTION
 } from '@/frame/api/graphql/gql/subscriptions'
-import { addInfoMessage } from '@/frame/lib/alert-helper'
 
 export default {
   async created () {
@@ -119,10 +125,21 @@ export default {
       newEventUser: {
         query: NEW_EVENT_USER_SUBSCRIPTION,
         result ({ data }) {
-          // if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
-          //   return
-          // }
-          addInfoMessage('Neuer Benutzer', ' ist da')
+          if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
+            return
+          }
+          this.eventUsers.push({ ...data.newEventUser })
+        }
+      },
+      eventUserLifeCycle: {
+        query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          const eventUserId = data.eventUserLifeCycle.eventUserId
+          this.eventUsers.forEach(eventUser => {
+            if (eventUserId === eventUser.id) {
+              eventUser.online = data.eventUserLifeCycle.online
+            }
+          })
         }
       },
       pollAnswerLifeCycle: {
@@ -143,7 +160,6 @@ export default {
         },
         result ({ data }) {
           if (data.pollLifeCycle.state === 'closed') {
-            location.reload()
             this.activePoll = undefined
           }
         }
@@ -152,7 +168,7 @@ export default {
   },
   data () {
     return {
-      headline: 'Umfragen',
+      headline: 'Abstimmungen',
       eventRecord: {},
       eventUsers: [],
       pollsWithNoResults: [],
@@ -168,6 +184,10 @@ export default {
       return localize(path)
     },
     createPoll (poll, instantStart) {
+      if (this.activePoll) {
+        addDangerMessage('Fehler', 'Es wird eine Abstimmung durchgeführt')
+        return false
+      }
       delete poll.pollAnswer
       delete poll.list
       // @todo Don't start if there is an activePoll Object | set instantStart to false?
@@ -184,6 +204,7 @@ export default {
             } else {
               this.pollsWithNoResults.push(createdPoll)
             }
+            addSuccessMessage('Erfolg', 'Abstimmung erfolgreich erstellt')
           } else {
             this.$apollo.queries.activePoll.refetch()
           }
@@ -244,6 +265,14 @@ export default {
     }
   },
   computed: {
+    verifiedUsersCountAllowToVoteOnline () {
+      if (!this.eventUsers) {
+        return []
+      }
+      return this.eventUsers.filter(eventUser => {
+        return eventUser.verified && eventUser.online && eventUser.allowToVote
+      }).length
+    },
     verifiedUsersCount () {
       if (!this.eventUsers) {
         return []
