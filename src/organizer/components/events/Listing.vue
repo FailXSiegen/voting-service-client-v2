@@ -1,20 +1,28 @@
 <template>
   <div class="events-listing-container my-5">
-    <h2 v-if="headline" class="mb-3"> {{ headline }} </h2>
+    <h2 v-if="headline" class="mb-3">{{ headline }}</h2>
     <table class="table table-responsive-md">
       <thead class="thead-light">
-      <tr>
-        <th scope="col">{{ localize('view.event.listing.name') }}</th>
-        <th scope="col">{{ localize('view.event.listing.created') }}</th>
-        <th scope="col">{{ localize('view.event.listing.scheduled') }}</th>
-        <th scope="col" class="text-center">{{ localize('view.event.listing.state') }}</th>
-        <th scope="col" v-if="eventsDetail">{{ localize('view.event.listing.actions.label') }}</th>
-      </tr>
+        <tr>
+          <th scope="col">{{ localize('view.event.listing.name') }}</th>
+          <th scope="col">{{ localize('view.event.listing.slug') }}</th>
+          <th scope="col">{{ localize('view.event.listing.created') }}</th>
+          <th scope="col">{{ localize('view.event.listing.scheduled') }}</th>
+          <th scope="col" class="text-center">
+            {{ localize('view.event.listing.state') }}
+          </th>
+          <th scope="col" v-if="eventsDetail">
+            {{ localize('view.event.listing.actions.label') }}
+          </th>
+        </tr>
       </thead>
       <tbody>
-        <app-row v-for="(event, index) in this.events" :key="index"
-                 :event="event"
-                 :eventsDetail="eventsDetail" />
+        <app-row
+          v-for="(event, index) in this.events"
+          :key="index"
+          :event="event"
+          :eventsDetail="eventsDetail"
+        />
       </tbody>
     </table>
   </div>
@@ -53,7 +61,8 @@ export default {
 </script>
 
 <style scoped>
-  .table td, .table th {
-    vertical-align: middle;
-  }
+.table td,
+.table th {
+  vertical-align: middle;
+}
 </style>

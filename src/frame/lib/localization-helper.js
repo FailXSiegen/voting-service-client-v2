@@ -76,7 +76,7 @@ const localizations = {
         user: {
           verifyAs: 'Verifizieren als:',
           setTo: 'Setzen auf:',
-          block: 'Benutzer blockieren',
+          block: 'Benutzer löschen',
           member: 'Teilnehmer',
           visitor: 'Besucher',
           online: 'Online',
@@ -103,11 +103,20 @@ const localizations = {
               publicName: 'Angezeigter Name',
               username: 'Benutzername',
               voteAmount: 'Anzahl der Stimmen'
+            },
+            eventMultipleUser: {
+              submit: 'Benutzerliste speichern',
+              createNew: 'Mehrere Benutzer erstellen',
+              allowToVote: 'Teilnehmer mit Stimmrecht',
+              usernames: 'Benutzernamen',
+              usernamesHint: 'Immer ein Benutzer pro Zeile. Keine Leerzeichen im Benutzernamen. Keine leeren Zeilen',
+              voteAmount: 'Anzahl der Stimmen'
             }
           }
         },
         listing: {
           name: 'Name',
+          slug: 'Slug / Identifikator',
           created: 'Erstellt am',
           scheduled: 'Geplant am',
           state: 'Status',

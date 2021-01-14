@@ -1,36 +1,73 @@
 <template>
   <div class="container-verified-user" v-if="eventUsers">
+    <small class="d-inline-block text-muted mb-3">
+      Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren ->
+      Haken bei "Freigeschaltet" entfernen. Benutzer erscheint wieder im
+      Warteraum
+    </small>
     <ul class="allowed-users list-group">
-      <li v-for="(user, index) in eventUsers" :key="index" class="list-group-item my-2 border">
+      <li
+        v-for="(user, index) in eventUsers"
+        :key="index"
+        class="list-group-item my-2 border"
+      >
         <div class="list-group-content">
           <div class="list-group-info">
             <div class="user-information">
               <h5 class="mb-1">
                 {{ user.publicName }}
-                <span class="badge badge-success badge-pill status-indicator" v-if="user.online">online</span>
-                <span class="badge badge-danger badge-pill status-indicator" v-else>offline</span>
+                <span
+                  class="badge badge-success badge-pill status-indicator"
+                  v-if="user.online"
+                  >online</span
+                >
+                <span
+                  class="badge badge-danger badge-pill status-indicator"
+                  v-else
+                  >offline</span
+                >
                 <span class="text-success small" v-if="user.allowToVote">
-                  {{ localize('view.event.user.member') }}</span>
-                <span class="text-info small" v-else>{{ localize('view.event.user.visitor') }}</span>
+                  {{ localize('view.event.user.member') }}</span
+                >
+                <span class="text-info small" v-else>
+                  {{ localize('view.event.user.visitor') }}</span
+                >
               </h5>
-              <p class="mb-0">{{ user.username }}
+              <p class="mb-0">
+                {{ user.username }}
                 <span v-if="user.voteAmount">
-                    - {{ localize('view.event.listing.voteAmount') }}: {{ user.voteAmount }}
-                  </span>
+                  - {{ localize('view.event.listing.voteAmount') }}:
+                  {{ user.voteAmount }}
+                </span>
               </p>
             </div>
           </div>
-          <div class="d-flex justify-content-center align-items-center btn-group">
-            <button v-if="!user.allowToVote" v-on:click="updateToParticipant(user)" class="h-100 btn btn-success">
+          <div
+            class="d-flex justify-content-center align-items-center btn-group"
+          >
+            <button
+              v-if="!user.allowToVote"
+              v-on:click="updateToParticipant(user)"
+              class="h-100 btn btn-success"
+            >
               {{ localize('view.event.user.setTo') }}
               {{ localize('view.event.user.member') }}
             </button>
-            <button v-else-if="user.allowToVote" v-on:click="updateUserToGuest(user)" class="h-100 btn btn-info">
+            <button
+              v-else-if="user.allowToVote"
+              v-on:click="updateUserToGuest(user)"
+              class="h-100 btn btn-info"
+            >
               {{ localize('view.event.user.setTo') }}
               {{ localize('view.event.user.visitor') }}
             </button>
-            <router-link :to="{ name: 'UpdateEventUser', params: { eventUserRecord: user } }"
-                         class="btn h-100 btn-warning d-flex justify-content-center align-items-center">
+            <router-link
+              :to="{
+                name: 'UpdateEventUser',
+                params: { eventUserRecord: user }
+              }"
+              class="btn h-100 btn-warning d-flex justify-content-center align-items-center"
+            >
               <i class="bi-pencil align-middle"></i>
             </router-link>
           </div>
@@ -42,7 +79,10 @@
 
 <script>
 import { localize } from '@/frame/lib/localization-helper'
-import { UPDATE_USER_TO_GUEST, UPDATE_USER_TO_PARTICIPANT } from '@/organizer/api/graphql/gql/mutations'
+import {
+  UPDATE_USER_TO_GUEST,
+  UPDATE_USER_TO_PARTICIPANT
+} from '@/organizer/api/graphql/gql/mutations'
 
 export default {
   props: {
@@ -61,25 +101,31 @@ export default {
     },
     updateUserToGuest (user) {
       const eventUserId = user.id
-      this.$apollo.mutate({
-        mutation: UPDATE_USER_TO_GUEST,
-        variables: { eventUserId }
-      }).then(() => {
-        user.voteAmount = 0
-      }).catch((error) => {
-        console.error(error)
-      })
+      this.$apollo
+        .mutate({
+          mutation: UPDATE_USER_TO_GUEST,
+          variables: { eventUserId }
+        })
+        .then(() => {
+          user.voteAmount = 0
+        })
+        .catch(error => {
+          console.error(error)
+        })
     },
     updateToParticipant (user) {
       const eventUserId = user.id
-      this.$apollo.mutate({
-        mutation: UPDATE_USER_TO_PARTICIPANT,
-        variables: { eventUserId }
-      }).then(() => {
-        user.voteAmount = 1
-      }).catch((error) => {
-        console.error(error)
-      })
+      this.$apollo
+        .mutate({
+          mutation: UPDATE_USER_TO_PARTICIPANT,
+          variables: { eventUserId }
+        })
+        .then(() => {
+          user.voteAmount = 1
+        })
+        .catch(error => {
+          console.error(error)
+        })
     }
   }
 }
@@ -92,7 +138,7 @@ export default {
 
 .status-indicator {
   font-weight: initial;
-  font-size: .7rem;
+  font-size: 0.7rem;
   margin-top: -2px;
 }
 
@@ -124,7 +170,7 @@ export default {
   }
 
   .btn-group .btn {
-    font-size: .8rem;
+    font-size: 0.8rem;
   }
 
   .list-group-info {

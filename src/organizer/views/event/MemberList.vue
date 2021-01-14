@@ -9,11 +9,20 @@
         <h1>{{ headline }}</h1>
         <router-link
           :to="{ name: 'CreateEventUser' }"
-          class="btn btn-success my-3"
+          class="btn btn-success my-3 mr-3"
         >
           <i class="bi-plus bi--2xl align-middle"></i>
           <span class="align-middle">{{
             localize('view.event.create.labels.eventUser.createNew')
+          }}</span>
+        </router-link>
+        <router-link
+          :to="{ name: 'CreateEventMultipleUser' }"
+          class="btn btn-info my-3"
+        >
+          <i class="bi-list bi--2xl align-middle"></i>
+          <span class="align-middle">{{
+            localize('view.event.create.labels.eventMultipleUser.createNew')
           }}</span>
         </router-link>
         <hr />

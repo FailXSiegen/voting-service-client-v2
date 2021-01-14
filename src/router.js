@@ -21,6 +21,7 @@ import AppWaitingRoom from '@/organizer/views/event/WaitingRoom'
 import AppResults from '@/organizer/views/event/Results'
 import AppUserEvent from '@/user/views/Event'
 import AppCreateEventUser from '@/organizer/views/event/event-user/CreateEventUser'
+import AppCreateEventMultipleUser from '@/organizer/views/event/event-user/CreateEventMultipleUser'
 import AppUpdateEventUser from '@/organizer/views/event/event-user/UpdateEventUser'
 // import store from '@/store'
 
@@ -131,6 +132,13 @@ const routes = [
     name: 'CreateEventUser',
     props: true,
     component: AppCreateEventUser,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/event/eventmultipleuser/create/:eventSlug',
+    name: 'CreateEventMultipleUser',
+    props: true,
+    component: AppCreateEventMultipleUser,
     meta: { requiresAuth: true }
   },
   {

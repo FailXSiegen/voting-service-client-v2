@@ -32,6 +32,9 @@ export const UPDATE_USER_TO_PARTICIPANT = gql`mutation UpdateUserToParticipant($
     publicName
   }
 }`
+export const DELETE_EVENT_USER = gql`mutation deleteEventUser($eventUserId: ID!){
+  deleteEventUser(eventUserId: $eventUserId)
+}`
 export const CREATE_POLL = gql`mutation createPoll($input: CreateNewPollInput!, $instantStart: Boolean!){
   createPoll(input: $input, instantStart: $instantStart) {
     id

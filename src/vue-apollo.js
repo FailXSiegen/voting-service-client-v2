@@ -65,7 +65,6 @@ const errorLink = onError(error => {
   logErrorMessages(error)
   handleGraphQlErrors(error)
 })
-
 wsLink.subscriptionClient.on('connecting', () => {
   if (process.env.VUE_APP_VERBOSE === '1') {
     console.info('connecting to websocket')

@@ -4,6 +4,7 @@
       {{ event.title }} <br />
       <small>{{ event.description }}</small>
     </th>
+    <td>{{ event.slug }}</td>
     <td>{{ getCreateDatetime }}</td>
     <td>{{ getScheduledDatetime }}</td>
     <td class="text-center text-success text-uppercase" v-if="event.active">
@@ -35,6 +36,8 @@
       >
         <i class="bi-eye-fill bi--2xl"></i>
       </router-link>
+      <!--
+        @ToDo Add onClose
       <button
         @click="onClose"
         class="btn btn-danger mx-1 my-2"
@@ -42,6 +45,7 @@
       >
         <i class="bi-shield-fill-exclamation bi--2xl"></i>
       </button>
+      -->
     </td>
   </tr>
 </template>
