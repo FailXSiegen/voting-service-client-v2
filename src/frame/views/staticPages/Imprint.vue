@@ -20,7 +20,30 @@
       <h2 class="mb-3">Unterstüzt und gefördert von:</h2>
       <hr class="d-none d-sm-block" />
       <div class="row align-items-baseline">
-        <div class="col-sm col-12">
+        <div class="col-sm-auto col-12">
+          <figure class="figure">
+            <img
+              src="../../../assets/images/logos/BMI_Fz_2018_Web_de.gif"
+              class="figure-img img-fluid"
+              alt="BMI"
+            />
+            <figcaption class="figure-caption">BMI</figcaption>
+          </figure>
+        </div>
+        <div class="col-sm-auto col-12">
+          <figure class="figure">
+            <img
+              src="../../../assets/images/logos/zt_logo_rgb.png"
+              class="figure-img img-fluid"
+              alt="Z:T"
+              width="200"
+            />
+            <figcaption class="figure-caption">
+              Z:T
+            </figcaption>
+          </figure>
+        </div>
+        <div class="col-sm-auto col-12">
           <figure class="figure">
             <a
               href="https://www.deutsche-chorjugend.de/"
@@ -36,7 +59,10 @@
             <figcaption class="figure-caption">Deutsche Chorjugend</figcaption>
           </figure>
         </div>
-        <div class="col-sm col-12">
+      </div>
+      <hr class="d-none d-sm-block" />
+      <div class="row align-items-baseline">
+        <div class="col-sm-auto col-12">
           <figure class="figure">
             <a
               href="https://www.s-chorverband.de/"
@@ -54,10 +80,7 @@
             </figcaption>
           </figure>
         </div>
-      </div>
-      <hr class="d-none d-sm-block" />
-      <div class="row align-items-baseline">
-        <div class="col-sm col-12">
+        <div class="col-sm-auto col-12">
           <figure class="figure">
             <a
               href="http://www.bcvonline.de/"
@@ -75,7 +98,7 @@
             </figcaption>
           </figure>
         </div>
-        <div class="col-sm col-12">
+        <div class="col-sm-auto col-12">
           <figure class="figure">
             <a
               href="http://www.saengerjugend.de/"
