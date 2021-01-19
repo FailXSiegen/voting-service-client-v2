@@ -24,7 +24,7 @@ const uriWs = process.env.VUE_APP_WS_ENDPOINT
 const headers = { authorization: getAuth() }
 
 const httpLink = new HttpLink({ uri: uriHttp, headers })
-const wsLink = new WebSocketLink({
+export const wsLink = new WebSocketLink({
   uri: uriWs,
   options: {
     reconnect: true,

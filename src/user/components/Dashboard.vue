@@ -2,6 +2,22 @@
   <section class="user-dashboard-container">
     <slot name="alerts"></slot>
     <div
+      v-if="overlayError"
+      id="overlay"
+      class="h-100 w-100 position-fixed d-flex align-items-center align-content-center justify-content-center text-center"
+    >
+      <span class="content alert alert-danger">
+        <h1>Serververbindung unterbrochen</h1>
+        <button
+          @click="reloadPage"
+          class="btn-lg btn btn-info py-2 d-print-none"
+        >
+          <i class="mr-3 bi bi-arrow-repeat bi--1xl"></i>
+          {{ localize('navigation.reload') }}
+        </button>
+      </span>
+    </div>
+    <div
       v-if="eventUser"
       class="container position-relative bg-white min-vh-100 pt-5 pt-md-0"
     >
@@ -155,7 +171,7 @@ import {
 } from '@/user/api/graphql/gql/queries'
 import AppModalPoll from '@/user/components/modal/Poll'
 import AppResults from '@/organizer/components/events/detail/ResultsListing'
-import { onLogout as apolloOnLogout } from '@/vue-apollo'
+import { onLogout as apolloOnLogout, wsLink } from '@/vue-apollo'
 import { CREATE_POLL_SUBMIT_ANSWER } from '@/user/api/graphql/gql/mutations'
 import $ from 'jquery'
 
@@ -262,6 +278,12 @@ export default {
         },
         result ({ data }) {
           if (data.pollLifeCycle.poll) {
+            if (
+              typeof this.eventUser.id === 'undefined' ||
+              isNaN(this.eventUser.id)
+            ) {
+              this.reloadPage()
+            }
             this.poll = data.pollLifeCycle.poll
           }
           if (data.pollLifeCycle.pollResultId) {
@@ -285,6 +307,19 @@ export default {
     document.title = 'digitalwahl.org'
   },
   mounted () {
+    const self = this
+    wsLink.subscriptionClient.on('disconnected', () => {
+      self.overlayError = true
+      self.eventUser.online = false
+    })
+    wsLink.subscriptionClient.on('connected', () => {
+      self.overlayError = false
+      self.eventUser.online = true
+    })
+    wsLink.subscriptionClient.on('reconnected', () => {
+      self.overlayError = false
+      self.eventUser.online = true
+    })
     $(function () {
       $('body, html').on('click', '#anchorLink', function () {
         $([document.documentElement, document.body]).animate(
@@ -314,7 +349,8 @@ export default {
       page: 0,
       pageSize: 10,
       showMoreEnabled: false,
-      voteCounter: 1
+      voteCounter: 1,
+      overlayError: false
     }
   },
   computed: {
@@ -369,7 +405,6 @@ export default {
       const answer = {}
       Object.assign(answer, pollSubmitAnswerInput)
       let answerCounter = 1
-      console.log(pollSubmitAnswerInput)
       if (
         pollSubmitAnswerInput.answerContents &&
         pollSubmitAnswerInput.answerContents.length > 0
@@ -429,6 +464,15 @@ export default {
 }
 </script>
 <style scoped>
+#overlay {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
 .logout {
   position: absolute;
   top: 15px;
