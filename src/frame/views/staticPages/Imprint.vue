@@ -17,7 +17,7 @@
       du <a href="/nutzerbedingungen">hier</a>.
     </p>
     <div class="border border-primary p-3">
-      <h2 class="mb-3">Unterstüzt und gefördert von:</h2>
+      <h2 class="mb-3">Unterstützt und gefördert von:</h2>
       <hr class="d-none d-sm-block" />
       <div class="row align-items-baseline">
         <div class="col-sm-auto col-12">
