@@ -90,11 +90,11 @@
               <img
                 src="../../../assets/images/logos/bcv.png"
                 class="figure-img img-fluid"
-                alt="Badischer Chroverband"
+                alt="Badischer Chorverband"
               />
             </a>
             <figcaption class="figure-caption">
-              Badischer Chroverband
+              Badischer Chorverband
             </figcaption>
           </figure>
         </div>
