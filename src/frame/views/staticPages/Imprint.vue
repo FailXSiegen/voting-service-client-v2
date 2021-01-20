@@ -22,12 +22,18 @@
       <div class="row align-items-baseline">
         <div class="col-sm-auto col-12">
           <figure class="figure">
-            <img
-              src="../../../assets/images/logos/zt_logo_rgb.png"
-              class="figure-img img-fluid"
-              alt="Z:T"
-              width="200"
-            />
+            <a
+              href="https://www.zusammenhalt-durch-teilhabe.de/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="../../../assets/images/logos/zt_logo_rgb.png"
+                class="figure-img img-fluid"
+                alt="Z:T"
+                width="200"
+              />
+            </a>
             <figcaption class="figure-caption">
               Z:T
             </figcaption>
@@ -35,11 +41,17 @@
         </div>
         <div class="col-sm-auto col-12">
           <figure class="figure">
-            <img
-              src="../../../assets/images/logos/BMI_Fz_2018_Web_de.gif"
-              class="figure-img img-fluid"
-              alt="BMI"
-            />
+            <a
+              href="https://www.bmi.bund.de/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="../../../assets/images/logos/BMI_Fz_2018_Web_de.gif"
+                class="figure-img img-fluid"
+                alt="BMI"
+              />
+            </a>
             <figcaption class="figure-caption">BMI</figcaption>
           </figure>
         </div>
