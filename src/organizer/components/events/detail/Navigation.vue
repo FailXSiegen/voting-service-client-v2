@@ -4,7 +4,8 @@
     <div class="list-group">
       <router-link
         :to="{ name: 'MemberList' }"
-        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
+        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+      >
         {{ localize('view.event.navigation.members') }}
         <span class="badge badge-success badge-pill">
           {{ verifiedUsersCount }}
@@ -12,7 +13,8 @@
       </router-link>
       <router-link
         :to="{ name: 'WaitingRoom' }"
-        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
+        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+      >
         {{ localize('view.event.navigation.waitingRoom') }}
         <span class="badge badge-warning badge-pill">
           {{ pendingUsersCount }}
@@ -20,17 +22,20 @@
       </router-link>
       <router-link
         :to="{ name: 'Polls' }"
-        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
+        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+      >
         {{ localize('view.event.navigation.polls') }}
       </router-link>
       <router-link
         :to="{ name: 'Results' }"
-        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
+        class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+      >
         {{ localize('view.event.navigation.results') }}
       </router-link>
       <router-link
         :to="{ name: 'Events' }"
-         class="mt-5 list-group-item list-group-item-action bg-danger list-group-item-dark mb-3 rounded text-white">
+        class="mt-5 list-group-item list-group-item-action bg-danger list-group-item-dark mb-3 rounded text-white"
+      >
         {{ localize('view.event.navigation.back') }}
       </router-link>
     </div>
@@ -47,8 +52,7 @@ export default {
       required: true
     },
     eventUsers: {
-      type: Array,
-      required: true
+      type: Array
     }
   },
   data () {
@@ -59,7 +63,7 @@ export default {
       if (!this.eventUsers) {
         return []
       }
-      return this.eventUsers.filter((eventUser) => {
+      return this.eventUsers.filter(eventUser => {
         return eventUser.verified
       }).length
     },
@@ -67,7 +71,7 @@ export default {
       if (!this.eventUsers) {
         return []
       }
-      return this.eventUsers.filter((eventUser) => {
+      return this.eventUsers.filter(eventUser => {
         return !eventUser.verified
       }).length
     }
@@ -100,7 +104,7 @@ export default {
   background-color: var(--primary);
   color: white;
 }
-.list-group-item+.list-group-item {
+.list-group-item + .list-group-item {
   border-top-width: initial;
 }
 </style>

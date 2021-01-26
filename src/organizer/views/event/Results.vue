@@ -9,6 +9,23 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
         <h1>{{ headline }}</h1>
+        <div class="d-flex">
+          <button @click="exportPollOverview()" class="btn btn-success mr-3">
+            Export Übersicht
+          </button>
+          <button @click="exportPollResults" class="btn btn-success mr-3">
+            Export Ergebnisse
+          </button>
+          <button @click="exportPollResultsDetail" class="btn btn-success mr-3">
+            Export Ergebnisse mit Details
+          </button>
+          <button
+            @click="exportPollEventUsersVoted"
+            class="btn btn-success mr-3"
+          >
+            Export Teilnehmer mit abgegebener Stimmenanzahl
+          </button>
+        </div>
         <hr />
         <app-results :pollResult="pollResult" :eventRecord="eventRecord" />
         <button
@@ -32,6 +49,7 @@ import AppNavigation from '@/organizer/components/events/detail/Navigation'
 import AppResults from '@/organizer/components/events/detail/ResultsListing'
 import { localize } from '@/frame/lib/localization-helper'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
+import { exportPollResultsCsv } from '@/organizer/api/fetch/export-results-csv'
 import { EVENT_USERS_BY_EVENT } from '@/organizer/api/graphql/gql/queries'
 import { POLLS_RESULTS } from '@/frame/api/graphql/gql/queries'
 import { NEW_EVENT_USER_SUBSCRIPTION } from '@/frame/api/graphql/gql/subscriptions'
@@ -78,7 +96,7 @@ export default {
         }
       },
       result ({ data }) {
-        if (data.pollResult.length === 10) {
+        if (data.pollResult && data.pollResult.length === 10) {
           this.showMoreEnabled = true
         }
       }
@@ -131,6 +149,43 @@ export default {
           return true
         }
       })
+    },
+    async exportPollOverview () {
+      const response = await exportPollResultsCsv(
+        this.eventRecord.id,
+        'pollOverview'
+      )
+      await this.downloadCsv(await response.text(), 'pollOverview.csv')
+    },
+    async exportPollResults () {
+      const response = await exportPollResultsCsv(
+        this.eventRecord.id,
+        'pollResults'
+      )
+      await this.downloadCsv(await response.text(), 'pollResults.csv')
+    },
+    async exportPollResultsDetail () {
+      const response = await exportPollResultsCsv(
+        this.eventRecord.id,
+        'pollResultsDetail'
+      )
+      await this.downloadCsv(await response.text(), 'pollResultsDetail.csv')
+    },
+    async exportPollEventUsersVoted () {
+      const response = await exportPollResultsCsv(
+        this.eventRecord.id,
+        'pollEventUsersVoted'
+      )
+      await this.downloadCsv(await response.text(), 'pollEventUsersVoted.csv')
+    },
+    async downloadCsv (reponseText, filename) {
+      const blob = new Blob([reponseText], { type: 'text/csv' })
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
   }
 }
