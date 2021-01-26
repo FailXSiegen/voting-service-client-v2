@@ -16,6 +16,9 @@
     <hr />
     <h2>In Planung</h2>
     <ul>
+      <li>Dokumentation und Installer</li>
+      <li>Docker-Image</li>
+      <li>OpenSource-Veröffentlichung</li>
       <li>Integrierte Videokonferenz</li>
       <li>Asynchrone Wahlen (digitale Briefwahl)</li>
       <li>
