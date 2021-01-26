@@ -7,6 +7,7 @@
       <li>Synchrone Wahl</li>
       <li>Geheime und offene Wahlen</li>
       <li>Teilnehmer- und Gäste-Verwaltung</li>
+      <li>Einfacher Export der Ergebnisse</li>
     </ul>
     <p>
       Die Plattform digitalwahl.org ist aktuell als <b>Begleit-Anwendung</b> zur
@@ -15,7 +16,6 @@
     <hr />
     <h2>In Planung</h2>
     <ul>
-      <li>Einfacher Export der Ergebnisse</li>
       <li>Integrierte Videokonferenz</li>
       <li>Asynchrone Wahlen (digitale Briefwahl)</li>
       <li>
