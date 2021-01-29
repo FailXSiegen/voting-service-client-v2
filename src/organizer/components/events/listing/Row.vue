@@ -11,7 +11,7 @@
       ><br />
       <hr v-if="event.description" />
       <small>{{ event.description }}</small>
-    </td>w
+    </td>
     <td class="align-middle">{{ getCreateDatetime }}</td>
     <td class="align-middle">{{ getScheduledDatetime }}</td>
     <td
