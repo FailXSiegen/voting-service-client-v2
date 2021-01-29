@@ -1,20 +1,30 @@
 <template>
   <tr class="table-event">
-    <th scope="row">
-      {{ event.title }} <br />
+    <td scope="row" class="pb-3">
+      <b>{{ event.title }}</b> <br />
+      <small
+        ><u
+          class="btn p-0"
+          @click="copyTextToClipboard(location + '/' + event.slug)"
+          >{{ event.slug }}</u
+        ></small
+      ><br />
+      <hr v-if="event.description" />
       <small>{{ event.description }}</small>
-    </th>
-    <td>{{ event.slug }}</td>
-    <td>{{ getCreateDatetime }}</td>
-    <td>{{ getScheduledDatetime }}</td>
-    <td class="text-center text-success text-uppercase" v-if="event.active">
+    </td>w
+    <td class="align-middle">{{ getCreateDatetime }}</td>
+    <td class="align-middle">{{ getScheduledDatetime }}</td>
+    <td
+      class="text-center text-success text-uppercase align-middle"
+      v-if="event.active"
+    >
       {{ localize('view.event.listing.stateActive') }}
     </td>
 
-    <td class="text-center text-danger text-uppercase" v-else>
+    <td class="text-center text-danger text-uppercase align-middle" v-else>
       {{ localize('view.event.listing.stateLocked') }}
     </td>
-    <td v-if="eventsDetail">
+    <td class="align-middle" v-if="eventsDetail">
       <router-link
         :to="{ name: 'updateEvent', params: { eventSlug: event.slug } }"
         class="btn btn-primary mx-1 my-2"

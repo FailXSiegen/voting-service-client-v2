@@ -49,7 +49,7 @@ const localizations = {
           publicName: 'Ihr Name *',
           publicOrganisation: 'Ihre Organisation *',
           publicOrganisationHint: 'Die kostenlose Nutzung ist gemeinnützigen Organisationen und Verbänden vorbehalten.',
-          dataProtection: '* Ich bestätige, dass ich die <a href="/datenschutz" target="_blank">Datenschutzerklärung</a> gelesen habe, zur Kenntnis nehme und mit den <a href="/nutzungsbedingungen" target="_blank">Nutzungsbedigungen</a> einverstanden bin.',
+          dataProtection: '* Ich bestätige, dass ich die <a href="/datenschutz" target="_blank">Datenschutzerklärung</a> gelesen habe, zur Kenntnis nehme und mit den <a href="/nutzervereinbarung" target="_blank">Nutzungsbedigungen</a> einverstanden bin.',
           beta: '* Ich nehme zur Kenntnis, dass die Plattform sich im Entwicklungszustand befindet und es dadurch zu Einschränkungen kommen kann.'
         },
         submit: 'Registrierung abschicken'

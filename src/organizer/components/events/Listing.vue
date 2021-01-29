@@ -1,11 +1,23 @@
 <template>
   <div class="events-listing-container my-5">
     <h2 v-if="headline" class="mb-3">{{ headline }}</h2>
-    <table class="table table-responsive-md">
+    <table
+      class="table table-responsive-md table-bordered table-hover table-sm"
+    >
       <thead class="thead-light">
         <tr>
-          <th scope="col">{{ localize('view.event.listing.name') }}</th>
-          <th scope="col">{{ localize('view.event.listing.slug') }}</th>
+          <th scope="col">
+            {{ localize('view.event.listing.name') }} <br />
+            <small
+              ><b>{{ localize('view.event.listing.slug') }}</b></small
+            ><br />
+            <hr />
+            <small
+              ><b>{{
+                localize('view.event.create.labels.description')
+              }}</b></small
+            >
+          </th>
           <th scope="col">{{ localize('view.event.listing.created') }}</th>
           <th scope="col">{{ localize('view.event.listing.scheduled') }}</th>
           <th scope="col" class="text-center">
