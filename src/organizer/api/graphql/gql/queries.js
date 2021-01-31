@@ -32,6 +32,27 @@ export const EXPIRED_EVENTS = gql`
   }
 `
 
+export const ALL_UPCOMING_EVENTS = gql`
+  query allUpcomingEvents {
+     allUpcomingEvents {
+        id
+        organizer {
+          publicName
+          username
+          email
+        } 
+        createDatetime
+        modifiedDatetime
+        title
+        slug
+        description
+        scheduledDatetime
+        lobbyOpen
+        active
+     }
+  }
+`
+
 export const EVENT_USERS_BY_EVENT = gql`
   query findEventUserByEvent($eventId: ID) {
     eventUsers(eventId: $eventId) {

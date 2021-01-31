@@ -18,6 +18,7 @@
               }}</b></small
             >
           </th>
+          <th scope="col" v-if="showOrganizer">Veranstalter</th>
           <th scope="col">{{ localize('view.event.listing.created') }}</th>
           <th scope="col">{{ localize('view.event.listing.scheduled') }}</th>
           <th scope="col" class="text-center">
@@ -34,6 +35,7 @@
           :key="index"
           :event="event"
           :eventsDetail="eventsDetail"
+          :showOrganizer="showOrganizer"
         />
       </tbody>
     </table>
@@ -61,6 +63,12 @@ export default {
       required: false,
       default () {
         return []
+      }
+    },
+    showOrganizer: {
+      type: Boolean,
+      default () {
+        return false
       }
     }
   },

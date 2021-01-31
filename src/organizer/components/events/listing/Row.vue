@@ -12,6 +12,11 @@
       <hr v-if="event.description" />
       <small>{{ event.description }}</small>
     </td>
+    <td class="align-middle" v-if="showOrganizer">
+      <b>{{ event.organizer.publicName }}</b> <br />
+      {{ event.organizer.username }}<br />
+      {{ event.organizer.email }}<br />
+    </td>
     <td class="align-middle">{{ getCreateDatetime }}</td>
     <td class="align-middle">{{ getScheduledDatetime }}</td>
     <td
@@ -74,6 +79,12 @@ export default {
     eventsDetail: {
       type: Boolean,
       required: true
+    },
+    showOrganizer: {
+      type: Boolean,
+      default () {
+        return false
+      }
     }
   },
   data () {

@@ -13,6 +13,7 @@ import AppDashboard from '@/organizer/views/Dashboard'
 import AppEvents from '@/organizer/views/Events'
 import AppProfile from '@/organizer/views/Profile'
 import AppOrganizers from '@/organizer/views/Organizers'
+import AppAllEvents from '@/organizer/views/AllEventsForSuperOrganizer'
 import AppCreateEvent from '@/organizer/views/CreateEvent'
 import AppUpdateEvent from '@/organizer/views/UpdateEvent'
 import AppMemberList from '@/organizer/views/event/MemberList'
@@ -105,6 +106,12 @@ const routes = [
     path: '/admin/organizers',
     name: 'Organizers',
     component: AppOrganizers,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/organizer/allevents',
+    name: 'AllEvents',
+    component: AppAllEvents,
     meta: { requiresAuth: true }
   },
   {
