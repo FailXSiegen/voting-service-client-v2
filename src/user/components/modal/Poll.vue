@@ -26,9 +26,10 @@
           <form @submit.prevent="submitPoll">
             <div class="modal-header">
               <h5 class="modal-title" :id="identifier + 'Title'">
-                {{ poll.title }}<br /><small
-                  >(Stimme {{ voteCounter }} von {{ voteAmount }})</small
-                >
+                {{ poll.title }}<br />
+                <small id="pollCounter">
+                  <b>(Stimme {{ voteCounter }} von {{ voteAmount }})</b>
+                </small>
               </h5>
             </div>
             <div class="modal-body">
@@ -189,22 +190,34 @@ export default {
         const validateCheckbox = $('.form-check-input[name*="pollAnswer"]')
         let checkCounter = 0
         validateCheckbox.each(function (index, element) {
+          $(element).removeAttr('disabled')
           if ($(element).prop('checked')) {
             checkCounter++
           }
         })
-        if (checkCounter === this.poll.minVotes) {
+        if (
+          checkCounter >= this.poll.minVotes &&
+          checkCounter < this.poll.maxVotes
+        ) {
           validateCheckbox.each(function (index, element) {
             if (!$(element).prop('checked')) {
               $(element).removeAttr('required')
             }
           })
         } else {
-          validateCheckbox.each(function (index, element) {
-            if (!$(element).prop('checked')) {
-              $(element).attr('required', 'required')
-            }
-          })
+          if (checkCounter > 0) {
+            validateCheckbox.each(function (index, element) {
+              if (!$(element).prop('checked')) {
+                $(element).attr('disabled', 'disabled')
+              }
+            })
+          } else {
+            validateCheckbox.each(function (index, element) {
+              if (!$(element).prop('checked')) {
+                $(element).attr('required', 'required')
+              }
+            })
+          }
         }
       }
     },
@@ -222,7 +235,10 @@ export default {
         this.poll.maxVotes > 0 &&
         !this.abstain
       ) {
-        addWarnMessage('Hinweis', 'Sie haben noch offene Angaben')
+        addWarnMessage(
+          'Hinweis',
+          'Bitte beachten Sie die Anzahl der ausgewählten Positionen'
+        )
         return false
       } else {
         if (this.abstain) {
@@ -237,6 +253,14 @@ export default {
         if (this.voteCounter < this.voteAmount) {
           this.voteCounter++
           this.pollSubmitAnswerInput.voteCycle++
+          $(function () {
+            $('.modal-header').addClass('pulse')
+            $('.modal-footer .btn').addClass('btn-success')
+            setTimeout(function () {
+              $('.modal-header').removeClass('pulse')
+              $('.modal-footer .btn').removeClass('btn-success')
+            }, 1500)
+          })
         }
       }
     },
@@ -306,5 +330,27 @@ export default {
   height: 30px;
   font-size: 24px;
   margin: 0 0 25px 0;
+}
+
+.pulse {
+  background: rgba(23, 162, 184, 0.15);
+  box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.5);
+  transform: scale(1);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.4);
+  }
+  30% {
+    transform: scale(0.99);
+    box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
+  }
 }
 </style>
