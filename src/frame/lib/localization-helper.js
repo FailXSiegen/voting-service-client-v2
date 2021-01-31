@@ -89,6 +89,7 @@ const localizations = {
           labels: {
             title: 'Event-Titel',
             slug: 'Slug',
+            slugHelp: 'Pfadsegment für URL: "digitalwahl.org/mein-event" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.',
             description: 'Event-Beschreibung',
             descriptionHelp: 'Event-Beschreibung',
             scheduledDatetime: 'Start-Datum',
