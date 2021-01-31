@@ -42,7 +42,7 @@ export default {
             this.submitSuccess = true
           } else {
             usernameField.classList.add('is-invalid')
-            addDangerMessage('Fehler', 'Anmeldung nicht erfolgreich abgesendet')
+            addDangerMessage('Fehler', 'Anmeldung nicht erfolgreich abgesendet <br />' + response.error)
           }
         }).catch((error) => {
           addDangerMessage('Fehler', 'Anmeldung nicht erfolgreich abgesendet')
