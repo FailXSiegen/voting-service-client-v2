@@ -52,7 +52,10 @@ import { fetchEventBySlug } from '@/user/api/fetch/event'
 import { exportPollResultsCsv } from '@/organizer/api/fetch/export-results-csv'
 import { EVENT_USERS_BY_EVENT } from '@/organizer/api/graphql/gql/queries'
 import { POLLS_RESULTS } from '@/frame/api/graphql/gql/queries'
-import { NEW_EVENT_USER_SUBSCRIPTION } from '@/frame/api/graphql/gql/subscriptions'
+import {
+  NEW_EVENT_USER_SUBSCRIPTION,
+  EVENT_USER_LIFE_CYCLE_SUBSCRIPTION
+} from '@/frame/api/graphql/gql/subscriptions'
 
 export default {
   async created () {
@@ -109,6 +112,22 @@ export default {
             return
           }
           this.eventUsers.push({ ...data.newEventUser })
+        }
+      },
+      eventUserLifeCycle: {
+        query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          let eventUserFound = false
+          const eventUserId = data.eventUserLifeCycle.eventUserId
+          this.eventUsers.forEach(eventUser => {
+            if (eventUserId === eventUser.id) {
+              eventUserFound = true
+              eventUser.online = data.eventUserLifeCycle.online
+            }
+          })
+          if (!eventUserFound) {
+            this.eventUsers.push({ ...data.eventUserLifeCycle })
+          }
         }
       }
     }

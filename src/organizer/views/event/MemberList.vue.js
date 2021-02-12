@@ -79,12 +79,17 @@ export default {
       eventUserLifeCycle: {
         query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
+          let eventUserFound = false
           const eventUserId = data.eventUserLifeCycle.eventUserId
-          this.eventUsers.forEach((eventUser) => {
+          this.eventUsers.forEach(eventUser => {
             if (eventUserId === eventUser.id) {
+              eventUserFound = true
               eventUser.online = data.eventUserLifeCycle.online
             }
           })
+          if (!eventUserFound) {
+            this.eventUsers.push({ ...data.eventUserLifeCycle })
+          }
         }
       }
     }
