@@ -43,6 +43,7 @@ export async function refreshLogin () {
     throw new Error(localize('error.network.internalServerError'))
   }
   if (response.status !== 201) {
+    window.location.reload(true)
     throw new Error(localize('view.login.invalidCredentials'))
   }
   const result = await response.json()
