@@ -1,4 +1,5 @@
 import { localize } from '@/frame/lib/localization-helper'
+import { addDangerMessage } from '@/frame/lib/alert-helper'
 
 export async function login (username, password, loginType, displayName = '', eventId = null) {
   const endpoint = process.env.VUE_APP_API_HOST + '/login'
@@ -44,6 +45,7 @@ export async function refreshLogin () {
   }
   if (response.status !== 201) {
     window.location.reload(true)
+    addDangerMessage('Fehler', 'Lokale Daten sind nicht mehr valide. Bitte den Browser-Cache leeren')
     throw new Error(localize('view.login.invalidCredentials'))
   }
   const result = await response.json()
