@@ -7,9 +7,11 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-
+        <hr />
+        <p>Gesamt: {{ organizers.length }}</p>
+        <hr />
         <div class="row">
-          <div class="col-12 my-5">
+          <div class="col-12 my-2">
             <table class="table table-responsive-md">
               <thead class="thead-light">
                 <tr>
