@@ -35,8 +35,13 @@
                     {{ organizerItem.publicName }} <br />
                     <small>
                       {{ localize('view.organizers.username') }}:
-                      <strong>{{ organizerItem.username }}</strong>
-                    </small>
+                      <strong>{{ organizerItem.username }}</strong> </small
+                    ><br />
+                    <small>{{
+                      getCreateDatetimeFromTimestamp(organizerItem)
+                    }}</small
+                    ><br />
+                    <small>{{ organizerItem.hash }}</small>
                   </th>
                   <td>
                     {{ organizerItem.publicOrganisation }}
@@ -109,6 +114,7 @@ import {
   UPDATE_ORGANIZER_VERIFICATION,
   DELETE_ORGANIZER
 } from '@/organizer/api/graphql/gql/mutations'
+import { createFormattedDateFromTimeStamp } from '@/frame/lib/time-stamp'
 
 export default {
   components: {
@@ -138,6 +144,9 @@ export default {
   methods: {
     localize (path) {
       return localize(path)
+    },
+    getCreateDatetimeFromTimestamp (item) {
+      return createFormattedDateFromTimeStamp(item.createDatetime)
     },
     emittedAlert () {
       return addSuccessMessage(

@@ -79,6 +79,7 @@ export const ORGANIZER = gql`
     confirmedEmail
     verified
     superAdmin
+    createDatetime
   }
 }
 `
@@ -99,6 +100,7 @@ export const ORGANIZERS = gql`
       confirmedEmail
       superAdmin
       verified
+      hash
     }
   }
 `
