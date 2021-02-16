@@ -28,7 +28,7 @@
               <tbody>
                 <tr
                   class="table-organizer"
-                  v-for="(organizerItem, index) in organizers"
+                  v-for="(organizerItem, index) in sortedOrganizers"
                   :key="index"
                 >
                   <th scope="row">
@@ -138,7 +138,8 @@ export default {
       headline: 'Organizers',
       organizers: [],
       organizer: [],
-      currentUserId: this.$store.state.currentUser.id
+      currentUserId: this.$store.state.currentUser.id,
+      sortParam: 'createDatetime'
     }
   },
   methods: {
@@ -154,7 +155,6 @@ export default {
         'Keine Ahnung wie ich das gemacht habe.'
       )
     },
-    // @todo: add real manipulation
     onDeny (organizer) {
       organizer.verified = false
       this.updateUnverifyOrganizer(organizer)
@@ -175,7 +175,6 @@ export default {
           })
       }
     },
-    // @todo: add real manipulation
     async onVerify (organizer) {
       organizer.verified = true
       await this.updateVerifyOrganizer(organizer)
@@ -210,6 +209,14 @@ export default {
         .catch(error => {
           console.error(error)
         })
+    }
+  },
+  computed: {
+    sortedOrganizers: function () {
+      const sortOrganizerArray = this.organizers
+      return sortOrganizerArray.sort((a, b) =>
+        a[this.sortParam] > b[this.sortParam] ? -1 : 0
+      )
     }
   }
 }
