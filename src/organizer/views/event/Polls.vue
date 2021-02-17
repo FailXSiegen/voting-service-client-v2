@@ -138,7 +138,7 @@ export default {
               eventUser.online = data.eventUserLifeCycle.online
             }
           })
-          if (!eventUserFound) {
+          if (!eventUserFound && data.eventUserLifeCycle) {
             this.eventUsers.push({ ...data.eventUserLifeCycle })
           }
         }
