@@ -20,6 +20,7 @@ export default {
     AppVerifiedUsers
   },
   async created () {
+    document.title = 'Teilnehmer - digitalwahl.org'
     const response = await fetchEventBySlug(this.eventSlug)
     if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
       await this.$router.push('/admin/events')

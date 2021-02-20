@@ -112,6 +112,7 @@ export default {
     }
   },
   async created () {
+    document.title = 'Warteraum - digitalwahl.org'
     const response = await fetchEventBySlug(this.eventSlug)
     if (
       response === null ||

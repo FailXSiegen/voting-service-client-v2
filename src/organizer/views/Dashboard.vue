@@ -6,11 +6,11 @@
       </div>
       <div class="col-12 col-md-9 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
-          <app-event-listing
-            :headline="localize('view.event.upcoming')"
-            :events-detail="true"
-            :events="upcomingEvents"
-          />
+        <app-event-listing
+          :headline="localize('view.event.upcoming')"
+          :events-detail="true"
+          :events="upcomingEvents"
+        />
       </div>
     </div>
   </div>
@@ -20,7 +20,10 @@
 import AppNavigation from '@/organizer/components/Navigation'
 import AppEventListing from '@/organizer/components/events/Listing'
 import { localize } from '@/frame/lib/localization-helper'
-import { EXPIRED_EVENTS, UPCOMING_EVENTS } from '@/organizer/api/graphql/gql/queries'
+import {
+  EXPIRED_EVENTS,
+  UPCOMING_EVENTS
+} from '@/organizer/api/graphql/gql/queries'
 
 export default {
   components: {
@@ -44,6 +47,9 @@ export default {
         }
       }
     }
+  },
+  created () {
+    document.title = 'Übersicht - digitalwahl.org'
   },
   data () {
     return {

@@ -26,6 +26,7 @@ import {
 
 export default {
   async created () {
+    document.title = 'Abstimmungen - digitalwahl.org'
     const response = await fetchEventBySlug(this.eventSlug)
     if (
       response === null ||

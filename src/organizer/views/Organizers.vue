@@ -144,6 +144,9 @@ export default {
       sortParam: 'createDatetime'
     }
   },
+  created () {
+    document.title = 'Organisatoren - digitalwahl.org'
+  },
   methods: {
     localize (path) {
       return localize(path)

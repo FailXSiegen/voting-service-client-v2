@@ -9,7 +9,9 @@
         <h1>{{ headline }}</h1>
         <router-link to="/admin/event/new" class="btn btn-success btn-lg my-3">
           <i class="bi-plus bi--2xl align-middle"></i>
-          <span class="align-middle">{{ localize('view.event.create.createNew') }}</span>
+          <span class="align-middle">{{
+            localize('view.event.create.createNew')
+          }}</span>
         </router-link>
         <app-event-listing
           :headline="localize('view.event.upcoming')"
@@ -31,7 +33,10 @@ import AppNavigation from '@/organizer/components/Navigation'
 import AppEventListing from '@/organizer/components/events/Listing'
 import { addSuccessMessage } from '@/frame/lib/alert-helper'
 import { localize } from '@/frame/lib/localization-helper'
-import { UPCOMING_EVENTS, EXPIRED_EVENTS } from '@/organizer/api/graphql/gql/queries'
+import {
+  UPCOMING_EVENTS,
+  EXPIRED_EVENTS
+} from '@/organizer/api/graphql/gql/queries'
 
 export default {
   components: {
@@ -63,12 +68,18 @@ export default {
       upcomingEvents: []
     }
   },
+  created () {
+    document.title = 'Meine Events - digitalwahl.org'
+  },
   methods: {
     localize (path) {
       return localize(path)
     },
     emittedAlert () {
-      return addSuccessMessage('Erfolg', 'Keine Ahnung wie ich das gemacht habe.')
+      return addSuccessMessage(
+        'Erfolg',
+        'Keine Ahnung wie ich das gemacht habe.'
+      )
     }
   }
 }

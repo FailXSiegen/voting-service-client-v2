@@ -54,6 +54,9 @@ export default {
       currentUserId: this.$store.state.currentUser.id
     }
   },
+  created () {
+    document.title = 'Alle kommenden Events - digitalwahl.org'
+  },
   methods: {
     localize (path) {
       return localize(path)

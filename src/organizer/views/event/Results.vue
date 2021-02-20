@@ -59,6 +59,7 @@ import {
 
 export default {
   async created () {
+    document.title = 'Ergebnisse - digitalwahl.org'
     const response = await fetchEventBySlug(this.eventSlug)
     if (
       response === null ||
