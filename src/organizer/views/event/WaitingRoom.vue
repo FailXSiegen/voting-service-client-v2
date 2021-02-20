@@ -42,7 +42,7 @@ export default {
   },
   apollo: {
     eventUsers: {
-      pollInterval: 500,
+      pollInterval: 5000,
       query: EVENT_USERS_BY_EVENT,
       variables () {
         return {

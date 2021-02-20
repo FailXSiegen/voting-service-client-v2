@@ -10,14 +10,32 @@
         class="list-group-item"
       >
         <h5 class="mb-1">{{ poll.title }}</h5>
-        <button class="btn btn-primary my-2 mr-2" @click="startPoll(poll.id)">
-          <i class="bi-play bi--2xl align-middle"></i>
-          <span class="align-middle">
-            {{ localize('view.polls.listing.start') }}
-          </span>
+        <button class="btn btn-success my-2 mr-2" @click="startPoll(poll.id)">
+          <i
+            class="bi-play-fill bi--2xl"
+            @title="
+              {
+                {
+                  localize('view.polls.listing.start')
+                }
+              }
+            "
+          ></i>
+        </button>
+        <button class="btn btn-warning my-2 mr-2" @click="copyPoll(poll)">
+          <i class="bi-files bi--2xl"></i>
         </button>
         <button class="btn btn-danger my-2 mr-2" @click="deletePoll(poll.id)">
-          {{ localize('view.polls.listing.delete') }}
+          <i
+            class="bi-trash bi--2xl"
+            @title="
+              {
+                {
+                  localize('view.polls.listing.delete')
+                }
+              }
+            "
+          ></i>
         </button>
       </li>
     </ul>
@@ -43,6 +61,9 @@ export default {
       if (confirm('Datensatz wirklich löschen?')) {
         this.$emit('onRemovePoll', pollId)
       }
+    },
+    copyPoll (poll) {
+      this.$emit('onCopyPoll', poll)
     },
     localize (path) {
       return localize(path)

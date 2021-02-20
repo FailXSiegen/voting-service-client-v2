@@ -184,6 +184,45 @@
           </button>
         </div>
       </div>
+      <div class="row mt-5" v-if="newPoll.copy">
+        <div class="col-12 col-md-5">
+          <button
+            type="button"
+            @click="updatePoll(false)"
+            class="btn btn-primary mr-2 mb-2 mb-lg-0 w-100"
+          >
+            <i class="bi-plus bi--2xl align-middle"></i>
+            <span class="align-middle">{{
+              localize('view.polls.create.labels.replaceOnly')
+            }}</span>
+          </button>
+        </div>
+        <div class="col-12 col-md-7 text-right">
+          <button
+            type="button"
+            @click="updatePoll(true)"
+            class="btn btn-success w-100"
+          >
+            <i class="bi-play bi--2xl align-middle"></i>
+            <span class="align-middle">{{
+              localize('view.polls.create.labels.replaceAndStart')
+            }}</span>
+          </button>
+        </div>
+      </div>
+      <div class="row mt-5" v-if="newPoll.title">
+        <div class="col-12 col-md-5">
+          <button
+            type="button"
+            @click="reset()"
+            class="btn btn-danger mr-2 mb-2 mb-lg-0 w-100"
+          >
+            <span class="align-middle">{{
+              localize('view.polls.create.labels.reset')
+            }}</span>
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 </template>
@@ -198,22 +237,14 @@ export default {
     eventRecord: {
       type: Object,
       required: true
+    },
+    newPoll: {
+      type: Object
     }
   },
   data () {
     return {
       instantStart: false,
-      newPoll: {
-        eventId: this.eventRecord.id,
-        title: '',
-        type: 'PUBLIC',
-        pollAnswer: 'yesNoAbstain',
-        list: '',
-        minVotes: 0,
-        maxVotes: 1,
-        allowAbstain: false,
-        possibleAnswers: []
-      },
       initPoll: {
         eventId: this.eventRecord.id,
         title: '',
@@ -229,33 +260,41 @@ export default {
   },
   methods: {
     createPoll () {
-      if (this.newPoll.maxVotes < this.newPoll.minVotes) {
+      let createPollObject = JSON.parse(JSON.stringify(this.newPoll))
+      if (createPollObject.maxVotes < createPollObject.minVotes) {
         $('#pollAnswerPossibilitiesCustomListMinimal').addClass('is-invalid')
         $('#pollAnswerPossibilitiesCustomListMaximal').addClass('is-invalid')
         return false
       }
-      this.newPoll = convertPollAnswers(this.newPoll)
-      this.newPoll.maxVotes = parseInt(this.newPoll.maxVotes)
-      this.newPoll.minVotes = parseInt(this.newPoll.minVotes)
-      this.newPoll.eventId = this.eventRecord.id
-      this.$emit('onCreatePoll', this.newPoll, this.instantStart)
-      this.reset()
+      createPollObject = convertPollAnswers(createPollObject)
+      createPollObject.maxVotes = parseInt(createPollObject.maxVotes)
+      createPollObject.minVotes = parseInt(createPollObject.minVotes)
+      createPollObject.eventId = this.eventRecord.id
+      delete createPollObject.__typename
+      delete createPollObject.copy
+      delete createPollObject.id
+      this.$emit('onCreatePoll', createPollObject, this.instantStart)
+    },
+    updatePoll (instantStart) {
+      let updatePollObject = JSON.parse(JSON.stringify(this.newPoll))
+      if (updatePollObject.maxVotes < updatePollObject.minVotes) {
+        $('#pollAnswerPossibilitiesCustomListMinimal').addClass('is-invalid')
+        $('#pollAnswerPossibilitiesCustomListMaximal').addClass('is-invalid')
+        return false
+      }
+      updatePollObject = convertPollAnswers(updatePollObject)
+      updatePollObject.maxVotes = parseInt(updatePollObject.maxVotes)
+      updatePollObject.minVotes = parseInt(updatePollObject.minVotes)
+      updatePollObject.eventId = this.eventRecord.id
+      delete updatePollObject.__typename
+      delete updatePollObject.copy
+      this.$emit('onUpdatePoll', updatePollObject, instantStart)
     },
     localize (path) {
       return localize(path)
     },
     reset () {
-      this.newPoll = {
-        eventId: this.eventRecord.id,
-        title: '',
-        type: 'PUBLIC',
-        pollAnswer: 'yesNoAbstain',
-        list: '',
-        minVotes: 0,
-        maxVotes: 1,
-        allowAbstain: false,
-        possibleAnswers: []
-      }
+      this.$emit('onReset')
     }
   }
 }

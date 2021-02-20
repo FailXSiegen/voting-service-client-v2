@@ -14,6 +14,10 @@ export function convertPollAnswers (poll) {
           content: 'Enthaltung'
         }
       ]
+      poll.list = ''
+      poll.allowAbstain = false
+      poll.maxVotes = 1
+      poll.minVotes = 0
       break
     case 'yesNo':
       poll.possibleAnswers = [
@@ -24,6 +28,10 @@ export function convertPollAnswers (poll) {
           content: 'Nein'
         }
       ]
+      poll.list = ''
+      poll.allowAbstain = false
+      poll.maxVotes = 1
+      poll.minVotes = 0
       break
     case 'custom':
       for (const customAnswer of poll.list.split('\n')) {

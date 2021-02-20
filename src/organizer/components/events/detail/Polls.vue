@@ -1,13 +1,19 @@
 <template>
   <div class="polls-container mt-2">
-    <app-create-poll :eventRecord="eventRecord"
-                     @onCreatePoll="createPoll"
+    <app-create-poll
+      :eventRecord="eventRecord"
+      :newPoll="poll"
+      @onCreatePoll="createPoll"
+      @onUpdatePoll="updatePoll"
+      @onReset="reset"
     />
     <hr class="divider my-5" />
-    <app-polls-listing :pollsWithNoResults="pollsWithNoResults"
-                       :eventRecord="eventRecord"
-                       @onRemovePoll="removePoll"
-                       @onStartPoll="startPoll"
+    <app-polls-listing
+      :pollsWithNoResults="pollsWithNoResults"
+      :eventRecord="eventRecord"
+      @onRemovePoll="removePoll"
+      @onStartPoll="startPoll"
+      @onCopyPoll="copyPoll"
     />
   </div>
 </template>
@@ -34,19 +40,15 @@ export default {
   data () {
     return {
       poll: {
-        id: 1,
-        title: 'Test 23',
+        eventId: this.eventRecord.id,
+        title: '',
+        type: 'PUBLIC',
+        pollAnswer: 'yesNoAbstain',
+        list: '',
+        minVotes: 0,
         maxVotes: 1,
-        answers: [
-          {
-            id: 1,
-            content: 'Ja'
-          },
-          {
-            id: 2,
-            content: 'Nein'
-          }
-        ]
+        allowAbstain: false,
+        possibleAnswers: []
       },
       identifier: 'quickpoll',
       trigger: false
@@ -58,12 +60,34 @@ export default {
     },
     createPoll (poll, instantStart) {
       this.$emit('onCreatePoll', poll, instantStart)
+      this.reset()
+    },
+    updatePoll (poll, instantStart) {
+      this.$emit('onUpdatePoll', poll, instantStart)
+      this.reset()
     },
     removePoll (pollId) {
       this.$emit('onRemovePoll', pollId)
     },
     startPoll (pollId) {
       this.$emit('onStartPoll', pollId)
+    },
+    copyPoll (copyPoll) {
+      copyPoll.copy = true
+      this.poll = JSON.parse(JSON.stringify(copyPoll))
+    },
+    reset () {
+      this.poll = {
+        eventId: this.eventRecord.id,
+        title: '',
+        type: 'PUBLIC',
+        pollAnswer: 'yesNoAbstain',
+        list: '',
+        minVotes: 0,
+        maxVotes: 1,
+        allowAbstain: false,
+        possibleAnswers: []
+      }
     }
   }
 }

@@ -42,7 +42,7 @@
         class="btn btn-secondary mx-1 my-2"
         :title="localize('view.event.listing.actions.inviteLink')"
       >
-        <i class="bi-files bi--2xl"></i>
+        <i class="bi-link-45deg bi--2xl"></i>
       </span>
       <router-link
         :to="{ name: 'MemberList', params: { eventSlug: event.slug } }"

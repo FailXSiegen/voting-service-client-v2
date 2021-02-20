@@ -156,8 +156,11 @@ const localizations = {
             abstention: 'Enthaltungsfeld anzeigen',
             openPoll: 'Offene Abstimmung',
             secretPoll: 'Geheime Abstimmung',
-            saveOnly: 'Abstimmung speichern',
-            saveAndStart: 'Abstimmung speichern & sofort starten'
+            saveOnly: 'Neue Abstimmung speichern',
+            saveAndStart: 'Neue Abstimmung speichern & sofort starten',
+            replaceOnly: 'Abstimmung ersetzen',
+            replaceAndStart: 'Abstimmung ersetzen & sofort starten',
+            reset: 'Abbrechen'
           }
         },
         listing: {
