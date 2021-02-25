@@ -5,6 +5,37 @@
       Haken bei "Freigeschaltet" entfernen. Benutzer erscheint wieder im
       Warteraum
     </small>
+    <h3>Sortieren nach:</h3>
+    <div class="row row-header sortable mb-3">
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('createDatetime')"
+          @click.prevent="sortTable('createDatetime')"
+        >
+          Erstellungsdatum
+        </span>
+      </div>
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('username')"
+          @click.prevent="sortTable('username')"
+        >
+          {{ localize('view.organizers.user') }}
+        </span>
+      </div>
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('publicName')"
+          @click.prevent="sortTable('publicName')"
+        >
+          Angezeigter Name
+        </span>
+      </div>
+    </div>
+    <hr />
     <ul class="allowed-users list-group">
       <li
         v-for="(user, index) in eventUsers"
@@ -93,11 +124,23 @@ export default {
     eventUsers: {
       type: Array,
       required: true
+    },
+    sortParam: {
+      type: String
     }
   },
   methods: {
     localize (path) {
       return localize(path)
+    },
+    sortTable (sortParam) {
+      this.$emit('onSort', sortParam)
+    },
+    activeSortParam (sortProperty) {
+      if (sortProperty !== this.sortParam) {
+        return
+      }
+      return 'active'
     },
     updateUserToGuest (user) {
       const eventUserId = user.id

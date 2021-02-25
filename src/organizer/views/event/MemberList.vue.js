@@ -33,7 +33,9 @@ export default {
       eventRecord: {},
       eventUsers: [],
       filteredEventUsers: [],
-      filterByUsername: ''
+      filterByUsername: '',
+      sortParam: 'createDatetime',
+      sortOrderInvert: false
     }
   },
   methods: {
@@ -44,6 +46,12 @@ export default {
       this.filteredEventUsers = this.eventUsers.filter((eventUser) => {
         return eventUser.verified && eventUser.username.includes(this.filterByUsername)
       })
+    },
+    sortTable (sortProperty) {
+      if (sortProperty === this.sortParam) {
+        this.sortOrderInvert = !this.sortOrderInvert
+      }
+      this.sortParam = sortProperty
     }
   },
   apollo: {
@@ -110,6 +118,18 @@ export default {
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified
       })
+    },
+    sortedVerifiedUsers: function () {
+      const sortPendingUsers = this.eventUsers.filter(eventUser => {
+        return eventUser.verified
+      })
+      const sortedArray = sortPendingUsers.sort((a, b) =>
+        a[this.sortParam] > b[this.sortParam] ? -1 : 0
+      )
+      if (this.sortOrderInvert) {
+        sortedArray.reverse()
+      }
+      return sortedArray
     },
     verifiedUsersCount () {
       if (!this.eventUsers) {

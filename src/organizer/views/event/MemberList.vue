@@ -100,8 +100,10 @@
           </div>
           <hr />
           <app-verified-users
-            :eventUsers="verifiedUsers"
+            :eventUsers="sortedVerifiedUsers"
             :eventRecord="eventRecord"
+            :sortParam="sortParam"
+            @onSort="sortTable"
           />
         </div>
       </div>
