@@ -66,13 +66,13 @@ export default {
   },
   data () {
     return {
-      headline: 'Events',
+      headline: 'Veranstaltungen',
       expiredEvents: [],
       upcomingEvents: []
     }
   },
   created () {
-    document.title = 'Meine Events - digitalwahl.org'
+    document.title = 'Meine Veranstaltungen - digitalwahl.org'
   },
   methods: {
     localize (path) {

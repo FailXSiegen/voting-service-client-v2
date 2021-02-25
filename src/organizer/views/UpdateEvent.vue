@@ -53,7 +53,7 @@ export default {
   },
   data () {
     return {
-      headline: 'Event',
+      headline: 'Veranstaltung',
       eventRecord: {}
     }
   },
