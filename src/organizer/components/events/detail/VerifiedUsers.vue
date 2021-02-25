@@ -34,6 +34,15 @@
           Angezeigter Name
         </span>
       </div>
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('online')"
+          @click.prevent="sortTable('online')"
+        >
+          Online
+        </span>
+      </div>
     </div>
     <hr />
     <ul class="allowed-users list-group">
