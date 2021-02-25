@@ -22,7 +22,6 @@
 .router-link-exact-active {
     background-color: $primary;
 }
-
 .navbar {
     > .h5 {
         margin-left: 100px;
@@ -30,6 +29,7 @@
 }
 .navbar.fixed-top {
     position: fixed;
+    height: 72px;
 }
 .navbar-toggler {
     position: fixed;
