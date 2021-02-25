@@ -1,6 +1,6 @@
-import { handleGraphQlErrors } from './frame/error/handler/apollo-error-handler'
-import { onError } from 'apollo-link-error'
 import { logErrorMessages } from '@vue/apollo-util'
+import { onError } from 'apollo-link-error'
+import { handleGraphQlErrors } from './frame/error/handler/apollo-error-handler'
 import { restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client'
 import Vue from 'vue'
 import VueApollo from 'vue-apollo'
@@ -62,8 +62,12 @@ const refreshTokenLink = new TokenRefreshLink({
 })
 
 const errorLink = onError(error => {
-  logErrorMessages(error)
-  handleGraphQlErrors(error)
+  if (typeof error !== 'undefined') {
+    if (error.graphQLErrors) {
+      handleGraphQlErrors(error)
+    }
+    logErrorMessages(error)
+  }
 })
 wsLink.subscriptionClient.on('connecting', () => {
   if (process.env.VUE_APP_VERBOSE === '1') {
@@ -173,7 +177,7 @@ export async function onLogout (apolloClient) {
     apolloClient.wsClient.close(true)
   }
   try {
-    // await apolloClient.resetStore()
+    await this.onResetLocalStorage()
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log('%cError on cache reset (logout)', 'color: orange;', e.message)
@@ -181,5 +185,11 @@ export async function onLogout (apolloClient) {
     if (typeof localStorage !== 'undefined') {
       localStorage.removeItem(AUTH_TOKEN)
     }
+  }
+}
+
+export async function onResetLocalStorage () {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem(AUTH_TOKEN)
   }
 }

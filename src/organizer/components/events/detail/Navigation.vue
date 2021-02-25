@@ -16,39 +16,69 @@
       <div class="list-group">
         <router-link
           :to="{ name: 'MemberList' }"
-          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded text-center"
         >
-          {{ localize('view.event.navigation.members') }}
+          <span class="nav-title mr-1">
+            {{ localize('view.event.navigation.members') }}</span
+          >
+          <span
+            class="nav-icon bi--2xl bi-people-fill pt-3"
+            :title="localize('view.event.navigation.members')"
+          ></span>
           <span class="badge badge-success badge-pill">
             {{ verifiedUsersCount }}
           </span>
         </router-link>
         <router-link
           :to="{ name: 'WaitingRoom' }"
-          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded text-center"
         >
-          {{ localize('view.event.navigation.waitingRoom') }}
+          <span class="nav-title mr-1">{{
+            localize('view.event.navigation.waitingRoom')
+          }}</span>
+          <span
+            class="nav-icon bi--2xl bi-person-plus-fill pt-3"
+            :title="localize('view.event.navigation.waitingRoom')"
+          ></span>
           <span class="badge badge-warning badge-pill">
             {{ pendingUsersCount }}
           </span>
         </router-link>
         <router-link
           :to="{ name: 'Polls' }"
-          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded text-center"
         >
-          {{ localize('view.event.navigation.polls') }}
+          <span class="nav-title">{{
+            localize('view.event.navigation.polls')
+          }}</span>
+          <span
+            class="nav-icon bi--2xl bi-collection-fill py-3"
+            :title="localize('view.event.navigation.polls')"
+          ></span>
         </router-link>
         <router-link
           :to="{ name: 'Results' }"
-          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+          class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded text-center"
         >
-          {{ localize('view.event.navigation.results') }}
+          <span class="nav-title">{{
+            localize('view.event.navigation.results')
+          }}</span>
+          <span
+            class="nav-icon bi--2xl bi-card-checklist py-3"
+            :title="localize('view.event.navigation.results')"
+          ></span>
         </router-link>
         <router-link
           :to="{ name: 'Events' }"
-          class="mt-5 list-group-item list-group-item-action bg-danger list-group-item-dark mb-3 rounded text-white"
+          class="mt-5 list-group-item list-group-item-action bg-danger list-group-item-dark mb-3 rounded text-white text-center"
         >
-          {{ localize('view.event.navigation.back') }}
+          <span class="nav-title">{{
+            localize('view.event.navigation.back')
+          }}</span>
+          <span
+            class="nav-icon bi--2xl bi-arrow-left-square-fill py-3"
+            :title="localize('view.event.navigation.back')"
+          ></span>
         </router-link>
       </div>
     </div>

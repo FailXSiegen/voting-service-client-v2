@@ -12,17 +12,50 @@
           <div class="row">
             <div class="col-12 my-2">
               <table class="table table-responsive-md">
-                <thead class="thead-light">
+                <thead class="thead-light sortable">
                   <tr>
-                    <th scope="col">{{ localize('view.organizers.user') }}</th>
-                    <th scope="col">
+                    <th
+                      scope="col"
+                      :class="activeSortParam('username')"
+                      @click.prevent="sortTable('username')"
+                    >
+                      {{ localize('view.organizers.user') }}
+                    </th>
+                    <th
+                      scope="col"
+                      :class="activeSortParam('createDatetime')"
+                      @click.prevent="sortTable('createDatetime')"
+                    >
+                      {{ localize('view.organizers.createDatetime') }}
+                    </th>
+                    <th
+                      scope="col"
+                      :class="activeSortParam('publicOrganisation')"
+                      @click.prevent="sortTable('publicOrganisation')"
+                    >
                       {{ localize('view.organizers.organisation') }}
                     </th>
-                    <th scope="col">{{ localize('view.organizers.mail') }}</th>
-                    <th scope="col">
+                    <th
+                      scope="col"
+                      :class="activeSortParam('email')"
+                      @click.prevent="sortTable('email')"
+                    >
+                      {{ localize('view.organizers.mail') }}
+                    </th>
+                    <th
+                      scope="col"
+                      :class="activeSortParam('confirmedEmail')"
+                      @click.prevent="sortTable('confirmedEmail')"
+                    >
                       {{ localize('view.organizers.confirmedMail') }}
                     </th>
-                    <th scope="col">{{ localize('view.organizers.state') }}</th>
+                    <th
+                      scope="col"
+                      :class="activeSortParam('verified')"
+                      @click.prevent="sortTable('verified')"
+                    >
+                      {{ localize('view.organizers.state') }}
+                    </th>
                     <th scope="col">
                       {{ localize('view.organizers.actions') }}
                     </th>
@@ -40,12 +73,11 @@
                         {{ localize('view.organizers.username') }}:
                         <strong>{{ organizerItem.username }}</strong> </small
                       ><br />
-                      <small>{{
-                        getCreateDatetimeFromTimestamp(organizerItem)
-                      }}</small
-                      ><br />
                       <small>{{ organizerItem.hash }}</small>
                     </th>
+                    <td>
+                      {{ getCreateDatetimeFromTimestamp(organizerItem) }}
+                    </td>
                     <td>
                       {{ organizerItem.publicOrganisation }}
                     </td>
@@ -143,7 +175,8 @@ export default {
       organizers: [],
       organizer: [],
       currentUserId: this.$store.state.currentUser.id,
-      sortParam: 'createDatetime'
+      sortParam: 'createDatetime',
+      sortOrderInvert: false
     }
   },
   created () {
@@ -161,6 +194,18 @@ export default {
         'Erfolg',
         'Keine Ahnung wie ich das gemacht habe.'
       )
+    },
+    activeSortParam (sortProperty) {
+      if (sortProperty !== this.sortParam) {
+        return
+      }
+      return 'active'
+    },
+    sortTable (sortProperty) {
+      if (sortProperty === this.sortParam) {
+        this.sortOrderInvert = !this.sortOrderInvert
+      }
+      this.sortParam = sortProperty
     },
     onDeny (organizer) {
       organizer.verified = false
@@ -221,9 +266,13 @@ export default {
   computed: {
     sortedOrganizers: function () {
       const sortOrganizerArray = this.organizers
-      return sortOrganizerArray.sort((a, b) =>
+      const sortedArray = sortOrganizerArray.sort((a, b) =>
         a[this.sortParam] > b[this.sortParam] ? -1 : 0
       )
+      if (this.sortOrderInvert) {
+        sortedArray.reverse()
+      }
+      return sortedArray
     }
   }
 }

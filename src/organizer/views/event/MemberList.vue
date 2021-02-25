@@ -25,6 +25,28 @@
             }}</span>
           </router-link>
           <hr />
+          <div class="form-group">
+            <label for="filterByUsername">Filter für Benutzernamen</label>
+            <input
+              type="text"
+              class="form-control"
+              id="filterByUsername"
+              value=""
+              placeholder="Filtern nach Benutzernamen"
+              v-model="filterByUsername"
+              @input="onFilter"
+            />
+          </div>
+          <div
+            class="filter-result"
+            v-if="filteredEventUsers && filterByUsername"
+          >
+            <app-verified-users
+              :eventUsers="filteredEventUsers"
+              :eventRecord="eventRecord"
+            />
+          </div>
+          <hr />
           <div class="container-member-status">
             <table class="table table-sm">
               <thead class="thead-light">

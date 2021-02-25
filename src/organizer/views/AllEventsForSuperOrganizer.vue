@@ -48,7 +48,7 @@ export default {
   },
   data () {
     return {
-      headline: 'Events',
+      headline: 'Veranstaltungen',
       allUpcomingEvents: [],
       organizer: [],
       currentUserId: this.$store.state.currentUser.id

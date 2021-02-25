@@ -16,24 +16,24 @@ const localizations = {
           usernameHelp: 'Als Benutzername dient Ihre Mitgliedsnummer oder Ihre E-Mail Adresse. Die Informationen dienen zur Akkreditierung.',
           email: 'E-Mail*',
           password: 'Passwort*',
-          passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zum Event benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',
+          passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zur Veranstaltung benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',
           publicName: 'Anzeige-Name*',
           publicNameHelp: 'Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die oberen 2 Felder.',
-          eventIdent: 'Event-ID eingeben*'
+          eventIdent: 'Veranstaltungs-ID eingeben*'
         },
         headline: {
           title: 'digitalwahl.org',
           subtitle: 'Einfach die Wahl haben',
           orgaLogin: 'Als Organisator einloggen',
           userLogin: 'Als Besucher einloggen',
-          eventIdent: 'Mit Event-ID einloggen',
+          eventIdent: 'Mit Veranstaltungs-ID einloggen',
           userWelcomeTo: 'Herzlich willkommen, bitte loggen Sie sich ein.',
-          inactiveEvent: 'Das Event ist noch nicht freigeschaltet',
+          inactiveEvent: 'Die Veranstaltung ist noch nicht freigeschaltet',
           orgaRegister: 'Als Organisator registrieren'
         },
-        inactiveEventText: 'Bitte versuchen Sie es später noch einmal. Das Event ist noch nicht aktiv.',
+        inactiveEventText: 'Bitte versuchen Sie es später noch einmal. Die Veranstaltung ist noch nicht aktiv.',
         submit: 'Login',
-        submitToEvent: 'In Event einloggen',
+        submitToEvent: 'In Veranstaltung einloggen',
         registerAsOrganizer: 'Als Organisator registrieren',
         invalidCredentials: 'Invalid credentials'
       },
@@ -85,16 +85,16 @@ const localizations = {
           allVoteAmount: 'Gesamtstimmen'
         },
         create: {
-          createNew: 'Neues Event erstellen',
+          createNew: 'Neue Veranstaltung erstellen',
           labels: {
-            title: 'Event-Titel',
+            title: 'Veranstaltungtitel',
             slug: 'Slug',
-            slugHelp: 'Pfadsegment für URL: "digitalwahl.org/mein-event" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.',
-            description: 'Event-Beschreibung',
-            descriptionHelp: 'Event-Beschreibung',
+            slugHelp: 'Pfadsegment für URL: "digitalwahl.org/meine-veranstaltung" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.',
+            description: 'Veranstaltungsbeschreibung',
+            descriptionHelp: 'Veranstaltungsbeschreibung',
             scheduledDatetime: 'Start-Datum',
-            lobbyOpen: 'Lobby aktivieren / vorzeitiger Login und Anzeige des Events auf der Startseite',
-            submit: 'Dieses Event speichern',
+            lobbyOpen: 'Lobby aktivieren / vorzeitiger Login und Anzeige der Veranstaltung auf der Startseite',
+            submit: 'Diese Veranstaltungen speichern',
             eventUser: {
               submit: 'Benutzer speichern',
               createNew: 'Neuen Benutzer erstellen',
@@ -128,18 +128,18 @@ const localizations = {
             label: 'Aktionen',
             edit: 'Bearbeiten',
             inviteLink: 'Einladungs-Link kopieren',
-            newTab: 'Event-Organisation in neuem Tab öffnen',
-            close: 'Event beenden'
+            newTab: 'Veranstaltungs-Organisation in neuem Tab öffnen',
+            close: 'Veranstaltungen beenden'
           }
         },
-        upcoming: 'Bevorstehende Events',
-        latest: 'Letzte Events'
+        upcoming: 'Bevorstehende Veranstaltungen',
+        latest: 'Letzte Veranstaltungen'
       },
       polls: {
         headlines: {
           createTitle: 'Neue Abstimmung erstellen',
           answerOptionsTitle: 'Antwortoptionen für Abstimmung',
-          listingTitle: 'Vorgefertigte Umfragen'
+          listingTitle: 'Abgespeicherte Abstimmungen'
         },
         create: {
           labels: {
@@ -216,6 +216,7 @@ const localizations = {
       },
       organizers: {
         user: 'Benutzer',
+        createDatetime: 'Erstellungsdatum',
         organisation: 'Organisation',
         state: 'Status',
         mail: 'E-Mail',

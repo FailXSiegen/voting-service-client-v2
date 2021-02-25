@@ -141,6 +141,7 @@ export default {
         .then(async data => {
           const token = R.path(['token'], data)
           const expiresAt = R.path(['expiresAt'], data)
+
           await loginApolloClient(
             this.$apollo.provider.defaultClient,
             token,

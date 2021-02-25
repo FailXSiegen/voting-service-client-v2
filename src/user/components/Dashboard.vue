@@ -195,7 +195,7 @@ export default {
         }
       },
       result ({ data }) {
-        if (!data.eventUser) {
+        if (data === 'undefined') {
           this.onLogout()
         }
         if (parseInt(data.eventUser.eventId) !== this.eventRecord.id) {

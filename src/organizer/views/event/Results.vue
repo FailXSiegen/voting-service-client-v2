@@ -7,7 +7,7 @@
         <div class="col-12 py-3 order-1 order-lg-2">
           <h1>{{ headline }}</h1>
           <div class="row">
-            <div class="col-6 col-md-3 mb-3">
+            <div class="col-6 col-md-auto mb-3">
               <button
                 @click="exportPollOverview()"
                 class="btn btn-success mr-3"
@@ -15,12 +15,12 @@
                 Export Übersicht
               </button>
             </div>
-            <div class="col-6 col-md-3  mb-3">
+            <div class="col-6 col-md-auto  mb-3">
               <button @click="exportPollResults" class="btn btn-success mr-3">
                 Export Ergebnisse
               </button>
             </div>
-            <div class="col-6 col-md-3 mb-3">
+            <div class="col-6 col-md-auto mb-3">
               <button
                 @click="exportPollResultsDetail"
                 class="btn btn-success mr-3"
@@ -28,7 +28,7 @@
                 Export Ergebnisse mit Details
               </button>
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-auto">
               <button
                 @click="exportPollEventUsersVoted"
                 class="btn btn-success mr-3"

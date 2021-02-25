@@ -41,7 +41,7 @@ export default new Vuex.Store({
         superAdmin: true
       },
       {
-        title: 'Alle Events',
+        title: 'Alle Veranstaltungen',
         icon: 'bi-calendar2-range-fill',
         route: '/admin/organizer/allevents',
         superAdmin: true

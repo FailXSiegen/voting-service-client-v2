@@ -20,7 +20,7 @@
       <li class="mb-3">
         <a href="#teilnehmer" class="h3">Für Teilnehmer</a>
         <ol class="mt-3">
-          <li><a href="#loginmaske">An einem Event teilnehmen</a></li>
+          <li><a href="#loginmaske">An einer Veranstaltung teilnehmen</a></li>
           <li><a href="#warteraum">Warteraum</a></li>
           <li><a href="#gast">Gast</a></li>
           <li><a href="#stimmrecht">Teilnehmer</a></li>
@@ -31,9 +31,9 @@
         <a href="#organisator" class="h3">Für Organisatoren</a>
         <ol class="mt-3">
           <li><a href="#dashboard">Dashboard</a></li>
-          <li><a href="#uebersicht">Meine Events</a></li>
-          <li><a href="#eventerstellen">Neues Event erstellen</a></li>
-          <li><a href="#event-teilnehmer">Event-Details</a></li>
+          <li><a href="#uebersicht">Meine Veranstaltungen</a></li>
+          <li><a href="#eventerstellen">Neue Veranstaltung erstellen</a></li>
+          <li><a href="#event-teilnehmer">Veranstaltungs-Details</a></li>
           <li>
             <a href="#teilnehmer-editieren">Einzelnen Teilnehmer editieren</a>
           </li>
@@ -60,7 +60,7 @@
         />
       </span>
       <div class="media-body">
-        <h3>An einem Event teilnehmen</h3>
+        <h3>An einer Veranstaltung teilnehmen</h3>
         <p>
           Sie können über einen vom Organisator bereitgestellten Link an dem
           Event teilnehmen.
@@ -74,10 +74,10 @@
           </li>
           <li>
             <b>Passwort:</b><br />Geben Sie ein eigenes Kennwort ein, um sich
-            nach dem Event erneut anmelden zu können. Das Passwort dient auch
-            zur Wiederanmeldung, falls Sie während des Events das Endgerät
-            wechseln oder sonstige technische Schwierigkeiten haben und sich neu
-            anmelden müssen.
+            nach der Veranstaltung erneut anmelden zu können. Das Passwort dient
+            auch zur Wiederanmeldung, falls Sie während der Veranstaltung das
+            Endgerät wechseln oder sonstige technische Schwierigkeiten haben und
+            sich neu anmelden müssen.
           </li>
           <li>
             <b>Anzeige-Name:</b><br />
@@ -102,10 +102,10 @@
       <div class="media-body">
         <h3>Warteraum</h3>
         <p>
-          Falls der Organisator keine Teilnehmer im Vorfeld im Event hinterlegt
-          hat, Sie andere Anmelde-Information verwenden oder einfach einen
-          Rechtschreibfehler in Ihren Anmeldeinformationen haben sind Sie dem
-          System nicht bekannt und müssen auf eine Freigabe warten.
+          Falls der Organisator keine Teilnehmer im Vorfeld der Veranstaltung
+          hinterlegt hat, Sie andere Anmelde-Information verwenden oder einfach
+          einen Rechtschreibfehler in Ihren Anmeldeinformationen haben sind Sie
+          dem System nicht bekannt und müssen auf eine Freigabe warten.
         </p>
         <p>
           Der Organisator wird Sie entweder als Teilnehmer oder Gast
@@ -198,7 +198,7 @@
       <div class="media-body">
         <h3>Dashboard</h3>
         <p>
-          Übersicht aller bevorstehenden Events
+          Übersicht aller bevorstehenden Veranstaltungen
         </p>
       </div>
     </div>
@@ -213,15 +213,17 @@
         />
       </span>
       <div class="media-body">
-        <h3>Event-Übersicht</h3>
+        <h3>Veranstaltungsübersicht</h3>
         <p>
-          Hier sehen Sie die bevorstehende und vergangenen Events. Zusätzlich
-          können Sie Events erstellen mit den Button "Neues Event erstellen".
+          Hier sehen Sie die bevorstehende und vergangenen Veranstaltungen.
+          Zusätzlich können Sie Veranstaltungen erstellen mit den Button "Neues
+          Veranstaltung erstellen".
         </p>
         <p>
-          In der Aktionsspalte der erstellten Events können Sie das vorhandene
-          Event editieren, den Einladungslink kopieren, in die Detailansicht des
-          Events gehen und das Event deaktivieren.
+          In der Aktionsspalte der erstellten Veranstaltungen können Sie die
+          vorhandene Veranstaltung editieren, den Einladungslink kopieren, in
+          die Detailansicht der Veranstaltung gehen und die Veranstaltung
+          deaktivieren.
         </p>
       </div>
     </div>
@@ -236,7 +238,7 @@
         />
       </span>
       <div class="media-body">
-        <h3>Event erstellen und bearbeiten</h3>
+        <h3>Veranstaltungen erstellen und bearbeiten</h3>
         <p>Folgende Felder werden benötigt:</p>
         <ol>
           <li>
@@ -245,10 +247,10 @@
           </li>
           <li>
             <b>Slug:</b><br />Das Slug ist das Pfadsegment für die URL. Das Slug
-            muss im System einmalig sein. Falls ein Event nicht erstellt werden
-            kann liegt es zu 99% an einem Slug, der schon verwendet wird. Hier
-            ist also darauf zu achten, einen kurze, aber prägnante Bezeichnung
-            zu verwenden.<br /><br />Beispiel:
+            muss im System einmalig sein. Falls eine Veranstaltungen nicht
+            erstellt werden kann liegt es zu 99% an einem Slug, der schon
+            verwendet wird. Hier ist also darauf zu achten, einen kurze, aber
+            prägnante Bezeichnung zu verwenden.<br /><br />Beispiel:
             musterchor-musterstadt-jhv-2025<br /><br />Die Eingabe wird
             automatisch umformatiert in Kleinbuchstaben. Sonderzeichen werden
             entfernt und Leerezeilen mit "-" ersetzt.
@@ -268,11 +270,10 @@
             Automatismus in Bezug zum Start-Zeitpunkt
           </li>
           <li>
-            <b>Aktiv:</b><br />Aktiviert das gesamte Event. Wenn ein Event nicht
-            mehr aktiv ist können sich keine Teilnehmer oder Gäste unter der
-            Event-URL einloggen. Aktuell wird kein Hinweis gegeben, dass das
-            Event deaktiviert wurde. Es wird kommentarlos auf die Startseite der
-            Plattform umgeleitet.
+            <b>Aktiv:</b><br />Aktiviert die gesamte Veranstaltung. Wenn eine
+            Veranstaltung nicht mehr aktiv ist können sich keine Teilnehmer oder
+            Gäste unter der Veranstaltungens-URL einloggen. Aktuell wird ein
+            einfacher Hinweis gegeben, dass die Veranstaltung nicht aktiv ist.
           </li>
         </ol>
       </div>
@@ -288,9 +289,10 @@
         />
       </span>
       <div class="media-body">
-        <h3>Event Details</h3>
+        <h3>Veranstaltungs-Details</h3>
         <p>
-          Nach Klick auf die Event Details erscheint die Übersicht der Nutzer
+          Nach Klick auf die Veranstaltungens-Details erscheint die Übersicht
+          der Nutzer
         </p>
         <p>
           Im oberen Bereich sehen Sie zusammengefasst Nutzerinformationen.

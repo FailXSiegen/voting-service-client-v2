@@ -1,29 +1,17 @@
 <template>
-  <div class="create-new-container container-fluid">
+  <div class="create-new-container">
     <slot name="alerts"></slot>
-    <div class="row">
-      <div
-        class="col-12 col-md-3 col-xl-2 bg-dark text-white py-3 order-2 order-md-1"
-      >
-        <nav id="mainNavigation">
-          <span class="h5 my-3 d-block">{{ eventRecord.title }}</span>
-          <div class="list-group">
-            <router-link
-              :to="{ name: 'MemberList' }"
-              class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
-            >
-              {{ localize('view.event.navigation.members') }}
-            </router-link>
-          </div>
-        </nav>
-      </div>
-      <div class="col-12 col-md-6 py-3 order-1 order-md-2">
-        <h1>{{ headline }}</h1>
-        <hr />
-        <app-event-user-mask
-          :eventUserRecord="eventUserRecord"
-          @onUpdateOrCreateEventUser="onUpdateEventUser"
-        />
+    <app-navigation :eventUsers="eventUsers" :eventRecord="eventRecord" />
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 py-3 order-1 order-md-2">
+          <h1>{{ headline }}</h1>
+          <hr />
+          <app-event-user-mask
+            :eventUserRecord="eventUserRecord"
+            @onUpdateOrCreateEventUser="onUpdateEventUser"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -31,14 +19,21 @@
 
 <script>
 import AppEventUserMask from '@/organizer/components/events/EventUserMask'
+import AppNavigation from '@/organizer/components/events/detail/Navigation'
 import { localize } from '@/frame/lib/localization-helper'
 import { UPDATE_EVENT_USER } from '@/organizer/api/graphql/gql/mutations'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
 import { addDangerMessage, addSuccessMessage } from '@/frame/lib/alert-helper'
+import { EVENT_USERS_BY_EVENT } from '@/organizer/api/graphql/gql/queries'
+import {
+  EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+  NEW_EVENT_USER_SUBSCRIPTION
+} from '@/frame/api/graphql/gql/subscriptions'
 
 export default {
   components: {
-    AppEventUserMask
+    AppEventUserMask,
+    AppNavigation
   },
   props: {
     eventSlug: {
@@ -63,7 +58,46 @@ export default {
   data () {
     return {
       headline: 'Benutzer editieren',
-      eventRecord: {}
+      eventRecord: {},
+      eventUsers: []
+    }
+  },
+  apollo: {
+    eventUsers: {
+      fetchPolicy: 'network-only',
+      query: EVENT_USERS_BY_EVENT,
+      variables () {
+        return {
+          eventId: this.eventRecord.id
+        }
+      }
+    },
+    $subscribe: {
+      newEventUser: {
+        query: NEW_EVENT_USER_SUBSCRIPTION,
+        result ({ data }) {
+          if (parseInt(data.newEventUser.eventId) !== this.eventRecord.id) {
+            return
+          }
+          this.eventUsers.push({ ...data.newEventUser })
+        }
+      },
+      eventUserLifeCycle: {
+        query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
+        result ({ data }) {
+          let eventUserFound = false
+          const eventUserId = data.eventUserLifeCycle.eventUserId
+          this.eventUsers.forEach(eventUser => {
+            if (eventUserId === eventUser.id) {
+              eventUserFound = true
+              eventUser.online = data.eventUserLifeCycle.online
+            }
+          })
+          if (!eventUserFound && data.eventUserLifeCycle) {
+            this.eventUsers.push({ ...data.eventUserLifeCycle })
+          }
+        }
+      }
     }
   },
   methods: {

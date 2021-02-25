@@ -19,7 +19,10 @@
           class="btn btn-primary btn-block py-3 px-0"
         >
           <span class="nav-title">{{ localize('navigation.myProfile') }}</span>
-          <span class="nav-icon bi--2xl bi-person"></span>
+          <span
+            class="nav-icon bi--2xl bi-person"
+            :title="localize('navigation.myProfile')"
+          ></span>
         </router-link>
       </div>
       <ul class="list-group">
@@ -30,7 +33,11 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{ view.title }}</span>
-            <span class="nav-icon bi--2xl" :class="view.icon"></span>
+            <span
+              class="nav-icon bi--2xl"
+              :class="view.icon"
+              :title="view.title"
+            ></span>
           </router-link>
         </li>
       </ul>

@@ -1,4 +1,5 @@
 import { addDangerMessage } from '@/frame/lib/alert-helper'
+import { onResetLocalStorage } from '@/vue-apollo'
 
 export function handleGraphQlErrors (error) {
   if (!error.graphQLErrors) {
@@ -6,6 +7,7 @@ export function handleGraphQlErrors (error) {
   }
   for (const graphQLError of error.graphQLErrors) {
     console.error(graphQLError.message)
+    onResetLocalStorage()
     const message = 'Oops an error occurred!' // @TODO: Add error headline based on error type
     addDangerMessage(
       'Error', // @TODO: Add error headline based on error type

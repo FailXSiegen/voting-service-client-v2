@@ -10,6 +10,15 @@
         line-height: 1;
     }
 }
+.sortable {
+    .btn-sort,
+    th {
+        cursor: pointer;
+        &.active {
+            text-decoration: underline;
+        }
+    }
+}
 .router-link-exact-active {
     background-color: $primary;
 }

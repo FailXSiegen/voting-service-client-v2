@@ -7,10 +7,37 @@
         <div class="col-12 py-3 order-1 order-lg-2">
           <h1>{{ headline }}</h1>
           <hr />
+          <div class="form-group">
+            <label for="filterByUsername">Filter für Benutzernamen</label>
+            <input
+              type="text"
+              class="form-control"
+              id="filterByUsername"
+              value=""
+              placeholder="Filtern nach Benutzernamen"
+              v-model="filterByUsername"
+              @input="onFilter"
+            />
+          </div>
+          <div
+            class="filter-result"
+            v-if="filteredEventUsers && filterByUsername"
+          >
+            <app-pending-users
+              v-if="eventUsers"
+              :eventUsers="filteredEventUsers"
+              :eventRecord="eventRecord"
+              :sortParam="sortParam"
+              @onSort="sortTable"
+            />
+          </div>
+          <hr />
           <app-pending-users
             v-if="eventUsers"
-            :eventUsers="pendingUsers"
+            :eventUsers="sortedPendingUsers"
             :eventRecord="eventRecord"
+            :sortParam="sortParam"
+            @onSort="sortTable"
           />
         </div>
       </div>
@@ -127,7 +154,27 @@ export default {
     return {
       headline: 'Warteraum',
       eventRecord: {},
-      eventUsers: []
+      eventUsers: [],
+      filteredEventUsers: [],
+      filterByUsername: '',
+      sortParam: 'createDatetime',
+      sortOrderInvert: false
+    }
+  },
+  methods: {
+    sortTable (sortProperty) {
+      if (sortProperty === this.sortParam) {
+        this.sortOrderInvert = !this.sortOrderInvert
+      }
+      this.sortParam = sortProperty
+    },
+    onFilter () {
+      this.filteredEventUsers = this.eventUsers.filter(eventUser => {
+        return (
+          !eventUser.verified &&
+          eventUser.username.includes(this.filterByUsername)
+        )
+      })
     }
   },
   computed: {
@@ -138,6 +185,18 @@ export default {
       return this.eventUsers.filter(eventUser => {
         return !eventUser.verified
       })
+    },
+    sortedPendingUsers: function () {
+      const sortPendingUsers = this.eventUsers.filter(eventUser => {
+        return !eventUser.verified
+      })
+      const sortedArray = sortPendingUsers.sort((a, b) =>
+        a[this.sortParam] > b[this.sortParam] ? -1 : 0
+      )
+      if (this.sortOrderInvert) {
+        sortedArray.reverse()
+      }
+      return sortedArray
     }
   }
 }

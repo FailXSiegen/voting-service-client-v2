@@ -31,12 +31,19 @@ export default {
     return {
       headline: 'Teilnehmerliste',
       eventRecord: {},
-      eventUsers: []
+      eventUsers: [],
+      filteredEventUsers: [],
+      filterByUsername: ''
     }
   },
   methods: {
     localize (path) {
       return localize(path)
+    },
+    onFilter () {
+      this.filteredEventUsers = this.eventUsers.filter((eventUser) => {
+        return eventUser.verified && eventUser.username.includes(this.filterByUsername)
+      })
     }
   },
   apollo: {

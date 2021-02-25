@@ -3,6 +3,36 @@
     <small class="d-inline-block text-muted mb-3">
       Benutzer müssen offline sein zum löschen
     </small>
+    <h3>Sortieren nach:</h3>
+    <div class="row row-header sortable mb-3">
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('createDatetime')"
+          @click.prevent="sortTable('createDatetime')"
+        >
+          Erstellungsdatum
+        </span>
+      </div>
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('username')"
+          @click.prevent="sortTable('username')"
+        >
+          {{ localize('view.organizers.user') }}
+        </span>
+      </div>
+      <div class="col-auto">
+        <span
+          class="btn btn-info btn-sort"
+          :class="activeSortParam('publicName')"
+          @click.prevent="sortTable('publicName')"
+        >
+          Angezeigter Name
+        </span>
+      </div>
+    </div>
     <ul class="allowed-users list-group">
       <li
         v-for="(user, index) in eventUsers"
@@ -57,6 +87,7 @@ import {
   UPDATE_USER_TO_PARTICIPANT,
   DELETE_EVENT_USER
 } from '@/organizer/api/graphql/gql/mutations'
+import { createFormattedDateFromTimeStamp } from '@/frame/lib/time-stamp'
 
 export default {
   props: {
@@ -67,6 +98,9 @@ export default {
     eventUsers: {
       type: Array,
       required: true
+    },
+    sortParam: {
+      type: String
     }
   },
   data () {
@@ -77,6 +111,18 @@ export default {
   methods: {
     localize (path) {
       return localize(path)
+    },
+    sortTable (sortParam) {
+      this.$emit('onSort', sortParam)
+    },
+    activeSortParam (sortProperty) {
+      if (sortProperty !== this.sortParam) {
+        return
+      }
+      return 'active'
+    },
+    getCreateDatetimeFromTimestamp (item) {
+      return createFormattedDateFromTimeStamp(item.createDatetime)
     },
     updateUserToGuest (eventUserId) {
       this.$apollo
