@@ -1,25 +1,47 @@
 <template>
-  <nav id="mainNavigation">
-    <div class="mb-5">
-      <router-link to="/admin/profile" class="btn btn-primary btn-block py-3">
-        {{ localize('navigation.myProfile') }}
-      </router-link>
-    </div>
-    <ul class="list-group">
-      <li class="list-group-item" v-for="(view, index) in views" :key="index">
-        <router-link v-if="view.superAdmin && organizer.superAdmin || !view.superAdmin"
-                    :to="view.route"
-                    class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded">
-          {{ view.title }}
+  <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
+    <span class="h5 my-3 d-block text-white">Digitalwahl</span>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-toggle="collapse"
+      data-target="#navbarCollapse"
+      aria-controls="navbarCollapse"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse bg-dark" id="navbarCollapse">
+      <div class="mb-5">
+        <router-link
+          to="/admin/profile"
+          class="btn btn-primary btn-block py-3 px-0"
+        >
+          <span class="nav-title">{{ localize('navigation.myProfile') }}</span>
+          <span class="nav-icon bi--2xl bi-person"></span>
         </router-link>
-      </li>
-    </ul>
-    <!-- @todo: implement "organizers button" as single button to show it only to super admins? -->
-    <div class="mt-5">
-      <button @click="onLogout" class="logout btn btn-danger py-3 d-flex align-items-center">
-        <i class="mr-3 bi bi-x-square bi--2xl"></i> {{ localize('navigation.logOut') }}
-      </button>
+      </div>
+      <ul class="list-group">
+        <li class="list-group-item" v-for="(view, index) in views" :key="index">
+          <router-link
+            v-if="(view.superAdmin && organizer.superAdmin) || !view.superAdmin"
+            :to="view.route"
+            class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
+          >
+            <span class="nav-title">{{ view.title }}</span>
+            <span class="nav-icon bi--2xl" :class="view.icon"></span>
+          </router-link>
+        </li>
+      </ul>
     </div>
+    <button
+      @click="onLogout"
+      class="logout btn btn-danger py-1 d-flex align-items-center"
+    >
+      <i class="mr-3 bi bi-x-square bi--2xl"></i>
+      {{ localize('navigation.logOut') }}
+    </button>
   </nav>
 </template>
 
@@ -56,40 +78,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-
-.logout {
-  width: 100%;
-}
-#mainNavigation {
-  min-height: 100vh;
-}
-@media screen AND (min-width: 991px) {
-  .logout {
-    position: fixed;
-    bottom: 1.5rem;
-    left: 1.5rem;
-    width: auto;
-  }
-}
-.list-group-item {
-  border-color: transparent;
-  border-width: 3px;
-}
-.list-group-item.list-group-item-dark.router-link-exact-active,
-.list-group-item.list-group-item-dark:active,
-.list-group-item.list-group-item-dark:focus {
-  background-color: white;
-  border-color: var(--primary);
-  border-width: 3px;
-}
-.list-group-item.list-group-item-dark:hover {
-  border-color: transparent;
-  background-color: var(--primary);
-  color: white;
-}
-.list-group-item + .list-group-item {
-  border-top-width: initial;
-}
-</style>

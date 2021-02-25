@@ -1,18 +1,18 @@
 <template>
-  <div class="events-container container-fluid" v-if="organizer.superAdmin">
-    <slot name="alerts"></slot>
-    <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
-        <app-navigation />
-      </div>
-      <div class="col-12 col-md-9 py-3 order-1 order-md-2">
-        <h1>{{ headline }}</h1>
-        <app-event-listing
-          :headline="localize('view.event.upcoming')"
-          :events-detail="false"
-          :events="allUpcomingEvents"
-          :showOrganizer="true"
-        />
+  <div class="events-container" v-if="organizer.superAdmin">
+    <app-navigation />
+    <div class="container-fluid">
+      <slot name="alerts"></slot>
+      <div class="row">
+        <div class="col-12 py-3 order-1 order-md-2">
+          <h1>{{ headline }}</h1>
+          <app-event-listing
+            :headline="localize('view.event.upcoming')"
+            :events-detail="false"
+            :events="allUpcomingEvents"
+            :showOrganizer="true"
+          />
+        </div>
       </div>
     </div>
   </div>

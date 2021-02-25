@@ -2,13 +2,16 @@
   <div class="create-new-container container-fluid">
     <slot name="alerts"></slot>
     <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
+      <div
+        class="col-12 col-md-3 col-xl-2 bg-dark text-white py-3 order-2 order-md-1"
+      >
         <nav id="mainNavigation">
           <span class="h5 my-3 d-block">{{ eventRecord.title }}</span>
           <div class="list-group">
             <router-link
               :to="{ name: 'MemberList' }"
-              class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded">
+              class="list-group-item list-group-item-action list-group-item-dark mb-3 rounded"
+            >
               {{ localize('view.event.navigation.members') }}
             </router-link>
           </div>
@@ -17,14 +20,16 @@
       <div class="col-12 col-md-6 py-3 order-1 order-md-2">
         <h1>{{ headline }}</h1>
         <hr />
-        <app-event-user-mask :eventUserRecord="eventUserRecord" @onUpdateOrCreateEventUser="onUpdateEventUser" />
+        <app-event-user-mask
+          :eventUserRecord="eventUserRecord"
+          @onUpdateOrCreateEventUser="onUpdateEventUser"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script>
-
 import AppEventUserMask from '@/organizer/components/events/EventUserMask'
 import { localize } from '@/frame/lib/localization-helper'
 import { UPDATE_EVENT_USER } from '@/organizer/api/graphql/gql/mutations'
@@ -46,7 +51,11 @@ export default {
   },
   async created () {
     const response = await fetchEventBySlug(this.eventSlug)
-    if (response === null || response.success === false || response.event.organizerId !== this.$store.getters.getCurrentUserId) {
+    if (
+      response === null ||
+      response.success === false ||
+      response.event.organizerId !== this.$store.getters.getCurrentUserId
+    ) {
       await this.$router.push('/admin/events')
     }
     this.eventRecord = response.event
@@ -60,20 +69,31 @@ export default {
   methods: {
     onUpdateEventUser () {
       this.eventUserRecord.eventId = this.eventRecord.id
-      this.eventUserRecord.voteAmount = parseInt(this.eventUserRecord.voteAmount)
+      this.eventUserRecord.voteAmount = parseInt(
+        this.eventUserRecord.voteAmount
+      )
       if (!this.eventUserRecord.allowToVote) {
         this.eventUserRecord.voteAmount = 0
       }
-      this.$apollo.mutate({
-        mutation: UPDATE_EVENT_USER,
-        variables: { input: this.eventUserRecord }
-      }).then(() => {
-        addSuccessMessage('Erfolg', 'Der Nutzer wurde erfolgreich geupdated. ')
-        this.$router.push({ name: 'MemberList' })
-      }).catch((error) => {
-        addDangerMessage('Fehler', 'User konnte nicht geupdated werden. Für mehr Informationen lohnt ein Blick in die Console.')
-        console.error(error)
-      })
+      this.$apollo
+        .mutate({
+          mutation: UPDATE_EVENT_USER,
+          variables: { input: this.eventUserRecord }
+        })
+        .then(() => {
+          addSuccessMessage(
+            'Erfolg',
+            'Der Nutzer wurde erfolgreich geupdated. '
+          )
+          this.$router.push({ name: 'MemberList' })
+        })
+        .catch(error => {
+          addDangerMessage(
+            'Fehler',
+            'User konnte nicht geupdated werden. Für mehr Informationen lohnt ein Blick in die Console.'
+          )
+          console.error(error)
+        })
     },
     localize (path) {
       return localize(path)

@@ -1,3 +1,9 @@
+#app > div > .container-fluid {
+    padding-top: 75px;
+    @media(min-width: 768px) {
+        padding-left: 100px;
+    }
+}
 .organizers-container {
     th, td {
         vertical-align: middle;
@@ -6,4 +12,79 @@
 }
 .router-link-exact-active {
     background-color: $primary;
+}
+
+.navbar {
+    > .h5 {
+        margin-left: 100px;
+    }
+}
+.navbar.fixed-top {
+    position: fixed;
+}
+.navbar-toggler {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 99;
+}
+.navbar-collapse {
+    width: 100%;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: auto;
+    padding-bottom: 72px;
+}
+.navbar-toggler[aria-expanded="false"] + .navbar-collapse {
+    position: fixed;
+    top: 72px;
+    left: -75px;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 0;
+    display: -ms-flexbox!important;
+    display: flex !important;
+    -ms-flex-direction: column!important;
+    flex-direction: column!important;
+    -ms-flex-align: end!important;
+    align-items: flex-end!important;
+    transition: left 300ms ease-in-out;
+    > div, > ul {
+        width: 50px;
+    }
+    .nav-title {
+        display: none;
+    }
+    .list-group-item {
+        padding: 0;
+    }
+    @media(min-width: 768px) {
+        left: -300px;
+        max-width: 380px;
+    }
+}
+.navbar-toggler[aria-expanded="true"] + .navbar-collapse {
+    position: fixed;
+    max-width: 380px;
+    width: 100%;
+    top: 72px;
+    left: 0;
+    padding-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    transition: left 500ms ease-in-out;
+    .nav-icon {
+        display: none;
+    }
+}
+
+
+@media screen AND (min-width: 991px) {
+    .logout {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        width: auto;
+    }
 }

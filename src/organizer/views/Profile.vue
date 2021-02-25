@@ -1,13 +1,16 @@
 <template>
-  <div class="profile-container container-fluid">
-    <slot name="alerts"></slot>
-    <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
-        <app-navigation />
-      </div>
-      <div class="col-12 col-md-5 py-3 order-2 order-md-1">
-        <h1>{{ headline }}</h1>
-        <app-form :organizer="organizer" @onUpdateOrganizer="updateOrganizer" />
+  <div class="profile-container">
+    <app-navigation />
+    <div class="container-fluid">
+      <slot name="alerts"></slot>
+      <div class="row">
+        <div class="col-12 py-3 order-2 order-md-1">
+          <h1>{{ headline }}</h1>
+          <app-form
+            :organizer="organizer"
+            @onUpdateOrganizer="updateOrganizer"
+          />
+        </div>
       </div>
     </div>
   </div>

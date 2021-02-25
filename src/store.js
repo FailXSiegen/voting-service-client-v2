@@ -24,21 +24,25 @@ export default new Vuex.Store({
     views: [
       {
         title: 'Übersicht',
+        icon: 'bi-calendar4-week',
         route: '/admin',
         superAdmin: false
       },
       {
         title: 'Veranstaltungen',
+        icon: 'bi-card-list',
         route: '/admin/events',
         superAdmin: false
       },
       {
         title: 'Organisatoren',
+        icon: 'bi-people-fill',
         route: '/admin/organizers',
         superAdmin: true
       },
       {
         title: 'Alle Events',
+        icon: 'bi-calendar2-range-fill',
         route: '/admin/organizer/allevents',
         superAdmin: true
       }

@@ -1,18 +1,18 @@
 <template>
-  <div class="waitingroom-container container-fluid">
+  <div class="waitingroom-container">
     <slot name="alerts"></slot>
-    <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1">
-        <app-navigation :eventUsers="eventUsers" :eventRecord="eventRecord" />
-      </div>
-      <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
-        <h1>{{ headline }}</h1>
-        <hr />
-        <app-pending-users
-          v-if="eventUsers"
-          :eventUsers="pendingUsers"
-          :eventRecord="eventRecord"
-        />
+    <app-navigation :eventUsers="eventUsers" :eventRecord="eventRecord" />
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 py-3 order-1 order-lg-2">
+          <h1>{{ headline }}</h1>
+          <hr />
+          <app-pending-users
+            v-if="eventUsers"
+            :eventUsers="pendingUsers"
+            :eventRecord="eventRecord"
+          />
+        </div>
       </div>
     </div>
   </div>

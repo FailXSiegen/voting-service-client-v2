@@ -1,44 +1,56 @@
 <template>
-  <div class="results-container container-fluid">
-    <slot name="alerts"></slot>
-    <div class="row">
-      <div
-        class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-lg-1 d-print-none"
-      >
-        <app-navigation :eventUsers="eventUsers" :eventRecord="eventRecord" />
-      </div>
-      <div class="col-12 col-md-9 py-3 order-1 order-lg-2">
-        <h1>{{ headline }}</h1>
-        <div class="d-flex">
-          <button @click="exportPollOverview()" class="btn btn-success mr-3">
-            Export Übersicht
-          </button>
-          <button @click="exportPollResults" class="btn btn-success mr-3">
-            Export Ergebnisse
-          </button>
-          <button @click="exportPollResultsDetail" class="btn btn-success mr-3">
-            Export Ergebnisse mit Details
-          </button>
+  <div class="results-container ">
+    <app-navigation :eventUsers="eventUsers" :eventRecord="eventRecord" />
+    <div class="container-fluid">
+      <slot name="alerts"></slot>
+      <div class="row">
+        <div class="col-12 py-3 order-1 order-lg-2">
+          <h1>{{ headline }}</h1>
+          <div class="row">
+            <div class="col-6 col-md-3 mb-3">
+              <button
+                @click="exportPollOverview()"
+                class="btn btn-success mr-3"
+              >
+                Export Übersicht
+              </button>
+            </div>
+            <div class="col-6 col-md-3  mb-3">
+              <button @click="exportPollResults" class="btn btn-success mr-3">
+                Export Ergebnisse
+              </button>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+              <button
+                @click="exportPollResultsDetail"
+                class="btn btn-success mr-3"
+              >
+                Export Ergebnisse mit Details
+              </button>
+            </div>
+            <div class="col-6 col-md-3">
+              <button
+                @click="exportPollEventUsersVoted"
+                class="btn btn-success mr-3"
+              >
+                Export Teilnehmer mit abgegebener Stimmenanzahl
+              </button>
+            </div>
+          </div>
+          <hr />
+          <app-results :pollResult="pollResult" :eventRecord="eventRecord" />
           <button
-            @click="exportPollEventUsersVoted"
-            class="btn btn-success mr-3"
+            v-if="showMoreEnabled"
+            class="my-5 mx-auto btn btn-info py-2 d-flex align-items-center d-print-none"
+            @click="showMorePollResults"
           >
-            Export Teilnehmer mit abgegebener Stimmenanzahl
+            <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i>
+            {{ localize('view.results.showMore') }}
           </button>
+          <p v-if="!showMoreEnabled" class="alert alert-light mx-auto my-5">
+            {{ localize('view.results.noMoreResults') }}
+          </p>
         </div>
-        <hr />
-        <app-results :pollResult="pollResult" :eventRecord="eventRecord" />
-        <button
-          v-if="showMoreEnabled"
-          class="my-5 mx-auto btn btn-info py-2 d-flex align-items-center d-print-none"
-          @click="showMorePollResults"
-        >
-          <i class="mr-3 bi bi-plus-square-fill bi--2xl"></i>
-          {{ localize('view.results.showMore') }}
-        </button>
-        <p v-if="!showMoreEnabled" class="alert alert-light mx-auto my-5">
-          {{ localize('view.results.noMoreResults') }}
-        </p>
       </div>
     </div>
   </div>

@@ -2,7 +2,9 @@
   <div class="create-new-container container-fluid">
     <slot name="alerts"></slot>
     <div class="row">
-      <div class="col-12 col-md-3 bg-dark text-white py-3 order-2 order-md-1">
+      <div
+        class="col-12 col-md-3 col-xl-2 bg-dark text-white py-3 order-2 order-md-1"
+      >
         <nav id="mainNavigation">
           <span class="h5 my-3 d-block">{{ eventRecord.title }}</span>
           <div class="list-group">

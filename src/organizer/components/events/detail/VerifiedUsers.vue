@@ -132,10 +132,6 @@ export default {
 </script>
 
 <style scoped>
-.list-group-item:hover {
-  background-color: lightgrey;
-}
-
 .status-indicator {
   font-weight: initial;
   font-size: 0.7rem;
