@@ -130,7 +130,11 @@ export default {
         return eventUser.verified
       })
       const sortedArray = sortPendingUsers.sort((a, b) =>
-        a[this.sortParam] > b[this.sortParam] ? -1 : 0
+        a[this.sortParam] > b[this.sortParam]
+          ? -1
+          : a[this.sortParam] < b[this.sortParam]
+            ? 1
+            : 0
       )
       if (this.sortOrderInvert) {
         sortedArray.reverse()

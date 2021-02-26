@@ -267,7 +267,11 @@ export default {
     sortedOrganizers: function () {
       const sortOrganizerArray = this.organizers
       const sortedArray = sortOrganizerArray.sort((a, b) =>
-        a[this.sortParam] > b[this.sortParam] ? -1 : 0
+        a[this.sortParam] > b[this.sortParam]
+          ? -1
+          : a[this.sortParam] < b[this.sortParam]
+            ? 1
+            : 0
       )
       if (this.sortOrderInvert) {
         sortedArray.reverse()
