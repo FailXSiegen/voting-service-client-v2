@@ -169,6 +169,9 @@ export default {
       this.sortParam = sortProperty
     },
     onFilter () {
+      if (!this.eventUsers) {
+        return []
+      }
       this.filteredEventUsers = this.eventUsers.filter(eventUser => {
         return (
           !eventUser.verified &&
@@ -187,6 +190,9 @@ export default {
       })
     },
     sortedPendingUsers: function () {
+      if (!this.eventUsers) {
+        return []
+      }
       const sortPendingUsers = this.eventUsers.filter(eventUser => {
         return !eventUser.verified
       })

@@ -43,6 +43,9 @@ export default {
       return localize(path)
     },
     onFilter () {
+      if (!this.eventUsers) {
+        return []
+      }
       this.filteredEventUsers = this.eventUsers.filter((eventUser) => {
         return eventUser.verified && eventUser.username.includes(this.filterByUsername)
       })
@@ -120,6 +123,9 @@ export default {
       })
     },
     sortedVerifiedUsers: function () {
+      if (!this.eventUsers) {
+        return []
+      }
       const sortPendingUsers = this.eventUsers.filter(eventUser => {
         return eventUser.verified
       })
