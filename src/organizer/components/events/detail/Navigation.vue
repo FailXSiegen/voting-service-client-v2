@@ -104,7 +104,7 @@ export default {
   computed: {
     verifiedUsersCount () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter(eventUser => {
         return eventUser.verified
@@ -112,7 +112,7 @@ export default {
     },
     pendingUsersCount () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter(eventUser => {
         return !eventUser.verified

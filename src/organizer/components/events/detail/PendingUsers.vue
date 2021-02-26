@@ -48,42 +48,47 @@
         :key="index"
         class="list-group-item"
       >
-        <div class="d-flex w-100 justify-content-between mb-3">
-          <span class="user-information mb-1">
-            <h5 class="mb-0">{{ user.publicName }}</h5>
-            <small>{{ user.username }}</small>
-          </span>
-          <span
-            class="badge badge-success badge-pill status-indicator"
-            v-if="user.online"
+        <span class="user.wrapp" v-if="user.username">
+          <div
+            class="d-flex w-100 justify-content-between mb-3"
+            :data-eventuserid="user.id"
           >
-            online
-          </span>
-          <span class="badge badge-danger badge-pill status-indicator" v-else>
-            offline
-          </span>
-        </div>
-        <button
-          class="btn btn-success mr-2"
-          v-on:click="updateToParticipant(user.id)"
-        >
-          {{ localize('view.event.user.verifyAs') }}
-          {{ localize('view.event.user.member') }}
-        </button>
-        <button
-          class="btn btn-info mr-2"
-          v-on:click="updateUserToGuest(user.id)"
-        >
-          {{ localize('view.event.user.verifyAs') }}
-          {{ localize('view.event.user.visitor') }}
-        </button>
-        <button
-          class="btn btn-danger mr-2"
-          v-on:click="deletePendingUser(user.id)"
-          :disabled="user.online"
-        >
-          {{ localize('view.event.user.block') }}
-        </button>
+            <span class="user-information mb-1">
+              <h5 class="mb-0">{{ user.publicName }}</h5>
+              <small>{{ user.username }}</small>
+            </span>
+            <span
+              class="badge badge-success badge-pill status-indicator"
+              v-if="user.online"
+            >
+              online
+            </span>
+            <span class="badge badge-danger badge-pill status-indicator" v-else>
+              offline
+            </span>
+          </div>
+          <button
+            class="btn btn-success mr-2"
+            v-on:click="updateToParticipant(user.id)"
+          >
+            {{ localize('view.event.user.verifyAs') }}
+            {{ localize('view.event.user.member') }}
+          </button>
+          <button
+            class="btn btn-info mr-2"
+            v-on:click="updateUserToGuest(user.id)"
+          >
+            {{ localize('view.event.user.verifyAs') }}
+            {{ localize('view.event.user.visitor') }}
+          </button>
+          <button
+            class="btn btn-danger mr-2"
+            v-on:click="deletePendingUser(user.id)"
+            :disabled="user.online"
+          >
+            {{ localize('view.event.user.block') }}
+          </button>
+        </span>
       </li>
     </ul>
   </div>

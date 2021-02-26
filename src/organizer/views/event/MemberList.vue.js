@@ -99,15 +99,17 @@ export default {
         query: EVENT_USER_LIFE_CYCLE_SUBSCRIPTION,
         result ({ data }) {
           let eventUserFound = false
-          const eventUserId = data.eventUserLifeCycle.eventUserId
-          this.eventUsers.forEach(eventUser => {
-            if (eventUserId === eventUser.id) {
-              eventUserFound = true
-              eventUser.online = data.eventUserLifeCycle.online
+          if (data.eventUserLifeCycle) {
+            const eventUserId = data.eventUserLifeCycle.eventUserId
+            this.eventUsers.forEach(eventUser => {
+              if (eventUserId === eventUser.id) {
+                eventUserFound = true
+                eventUser.online = data.eventUserLifeCycle.online
+              }
+            })
+            if (!eventUserFound && data.eventUserLifeCycle) {
+              this.eventUsers.push({ ...data.eventUserLifeCycle })
             }
-          })
-          if (!eventUserFound && data.eventUserLifeCycle) {
-            this.eventUsers.push({ ...data.eventUserLifeCycle })
           }
         }
       }
@@ -143,7 +145,7 @@ export default {
     },
     verifiedUsersCount () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified
@@ -151,7 +153,7 @@ export default {
     },
     verifiedUsersCountOnline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && eventUser.online
@@ -159,7 +161,7 @@ export default {
     },
     verifiedUsersCountOffline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && !eventUser.online
@@ -167,7 +169,7 @@ export default {
     },
     verifiedUsersCountAllowToVote () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && eventUser.allowToVote
@@ -175,7 +177,7 @@ export default {
     },
     verifiedUsersCountAllowToVoteOnline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && eventUser.online && eventUser.allowToVote
@@ -183,7 +185,7 @@ export default {
     },
     verifiedUsersCountAllowToVoteOffline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && !eventUser.online && eventUser.allowToVote
@@ -191,7 +193,7 @@ export default {
     },
     verifiedUsersCountNotAllowToVote () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && !eventUser.allowToVote
@@ -199,7 +201,7 @@ export default {
     },
     verifiedUsersCountNotAllowToVoteOnline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && eventUser.online && !eventUser.allowToVote
@@ -207,7 +209,7 @@ export default {
     },
     verifiedUsersCountNotAllowToVoteOffline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter((eventUser) => {
         return eventUser.verified && !eventUser.online && !eventUser.allowToVote
@@ -215,7 +217,7 @@ export default {
     },
     verifiedUsersVoteCount () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       let voteCount = 0
       this.eventUsers.forEach(eventUser => {
@@ -227,7 +229,7 @@ export default {
     },
     verifiedUsersVoteCountOnline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       let voteCount = 0
       this.eventUsers.forEach(eventUser => {
@@ -239,7 +241,7 @@ export default {
     },
     verifiedUsersVoteCountOffline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       let voteCount = 0
       this.eventUsers.forEach(eventUser => {
