@@ -5,7 +5,7 @@
     </small>
     <h3>Sortieren nach:</h3>
     <div class="row row-header sortable mb-3">
-      <div class="col-auto">
+      <div class="col-auto mb-3">
         <span
           class="btn btn-info btn-sort"
           :class="activeSortParam('createDatetime')"
@@ -14,7 +14,7 @@
           Erstellungsdatum
         </span>
       </div>
-      <div class="col-auto">
+      <div class="col-auto mb-3">
         <span
           class="btn btn-info btn-sort"
           :class="activeSortParam('username')"
@@ -23,7 +23,7 @@
           {{ localize('view.organizers.user') }}
         </span>
       </div>
-      <div class="col-auto">
+      <div class="col-auto mb-3">
         <span
           class="btn btn-info btn-sort"
           :class="activeSortParam('publicName')"
@@ -32,7 +32,7 @@
           Angezeigter Name
         </span>
       </div>
-      <div class="col-auto">
+      <div class="col-auto mb-3">
         <span
           class="btn btn-info btn-sort"
           :class="activeSortParam('online')"
