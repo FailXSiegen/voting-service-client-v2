@@ -74,7 +74,7 @@
         id="active"
       />
       <label class="form-check-label" for="active">
-        Event aktiv
+        Veranstaltung aktiv
       </label>
     </div>
     <button class="btn btn-primary mt-5 mb-3">
