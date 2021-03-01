@@ -21,7 +21,7 @@
                     Responsive/mobile Navigation verbessert, Icons in die
                     Navigation integriert
                   </dd>
-                  <dt>Filern nach Benutzernamen</dt>
+                  <dt>Filtern nach Benutzernamen</dt>
                   <dd>
                     In der Teilnehmerliste und im Wartenraum lässt sich jetzt
                     nach Benutzernamen filtern für einen schnelleren Zugriff
