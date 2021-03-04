@@ -48,7 +48,7 @@
   z-index: 190;
 }
 
-button:disabled {
+button:disabled, .btn-disabled {
   cursor: not-allowed;
   pointer-events: all !important;
 }
