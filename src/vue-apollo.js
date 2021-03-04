@@ -42,6 +42,7 @@ const refreshTokenLink = new TokenRefreshLink({
       router.push('/').catch(() => {})
     }
     const decodedToken = jwtDecode(token)
+    console.log(decodedToken.payload.exp < getCurrentUnixTimeStamp())
     return decodedToken.payload.exp > getCurrentUnixTimeStamp()
   },
   fetchAccessToken: () => {
@@ -65,6 +66,9 @@ const errorLink = onError(error => {
   if (typeof error !== 'undefined') {
     if (error.graphQLErrors) {
       handleGraphQlErrors(error)
+      if (error.graphQLError.message.includes('authorized') > 0) {
+        onResetLocalStorage()
+      }
     }
     logErrorMessages(error)
   }
