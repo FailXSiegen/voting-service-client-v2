@@ -47,3 +47,8 @@
 .modal-backdrop {
   z-index: 190;
 }
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
