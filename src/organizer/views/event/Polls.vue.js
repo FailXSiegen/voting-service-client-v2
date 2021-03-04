@@ -213,7 +213,7 @@ export default {
         })
     },
     startPoll (pollId) {
-      if (this.verifiedUsersCountAllowToVoteOnline() === 0) {
+      if (this.verifiedUsersCountAllowToVoteOnline === 0) {
         addDangerMessage('Abgelehnt', 'Keine stimmberechtigten Teilnehmer anwesend')
         return
       }
