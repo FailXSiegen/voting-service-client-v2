@@ -6,6 +6,7 @@
         <div class="col-12 py-3 order-1 order-md-2">
           <h1>{{ headline }}</h1>
           <app-event-listing
+            v-if="upcomingEvents"
             :headline="localize('view.event.upcoming')"
             :events-detail="true"
             :events="upcomingEvents"
@@ -61,36 +62,36 @@
             </div>
             <div class="col-12 col-sm-6 order-1 order-sm-2">
               <div class="row">
-                <div class="col-6 col-sm-2 mb-4">
+                <div class="col-6 col-lg-4 col-xl-auto mb-4">
                   <router-link
                     to="/admin/profile"
-                    class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100"
+                    class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
                   >
                     <span
                       class="nav-icon bi--6xl bi-person mb-auto"
                       :title="localize('navigation.myProfile')"
                     ></span>
-                    <span class="nav-title mt-1">
+                    <span class="nav-title mt-1 px-2">
                       {{ localize('navigation.myProfile') }}
                     </span>
                   </router-link>
                 </div>
-                <div class="col-6 col-sm-2 mb-4">
+                <div class="col-6 col-lg-4 col-xl-auto mb-4">
                   <router-link
                     to="/anleitung"
                     target="_blank"
-                    class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100"
+                    class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100 px-xl-4"
                   >
                     <span
                       class="nav-icon bi--6xl bi-question-circle  mb-auto"
                       title="Anleitungen"
                     ></span>
-                    <span class="nav-title mt-1">
+                    <span class="nav-title mt-1 px-2">
                       Anleitungen
                     </span>
                   </router-link>
                 </div>
-                <div class="col-6 col-sm-2 mb-4">
+                <div class="col-12 col-lg-auto mb-4">
                   <span
                     class="btn btn-primary disabled btn-block py-3 px-0 d-flex flex-column h-100"
                   >
@@ -98,7 +99,7 @@
                       class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
                       title="Videokonferenzsystem einrichten"
                     ></span>
-                    <span class="nav-title mt-1">
+                    <span class="nav-title mt-1 px-2">
                       Videokonferenzsystem einrichten
                     </span>
                   </span>

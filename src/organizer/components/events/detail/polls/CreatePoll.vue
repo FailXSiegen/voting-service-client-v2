@@ -175,6 +175,7 @@
           <button
             type="submit"
             @click="instantStart = true"
+            :disabled="currentOnlineUserCount === 0"
             class="btn btn-success w-100"
           >
             <i class="bi-play bi--2xl align-middle"></i>
@@ -201,6 +202,7 @@
           <button
             type="button"
             @click="updatePoll(true)"
+            :disabled="currentOnlineUserCount === 0"
             class="btn btn-success w-100"
           >
             <i class="bi-play bi--2xl align-middle"></i>
@@ -240,6 +242,9 @@ export default {
     },
     newPoll: {
       type: Object
+    },
+    currentOnlineUserCount: {
+      type: Number
     }
   },
   data () {

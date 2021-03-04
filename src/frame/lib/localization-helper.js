@@ -136,6 +136,7 @@ const localizations = {
         latest: 'Letzte Veranstaltungen'
       },
       polls: {
+        noActiveUser: 'Keine aktiven Teilnehmer. Abstimmungen können nicht gestartet werden.',
         headlines: {
           createTitle: 'Neue Abstimmung erstellen',
           answerOptionsTitle: 'Antwortoptionen für Abstimmung',

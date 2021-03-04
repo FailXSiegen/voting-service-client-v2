@@ -3,14 +3,21 @@
     <app-create-poll
       :eventRecord="eventRecord"
       :newPoll="poll"
+      :currentOnlineUserCount="currentOnlineUserCount"
       @onCreatePoll="createPoll"
       @onUpdatePoll="updatePoll"
       @onReset="reset"
     />
     <hr class="divider my-5" />
+    <p v-if="currentOnlineUserCount === 0">
+      <u>
+        {{ localize('view.polls.noActiveUser') }}
+      </u>
+    </p>
     <app-polls-listing
       :pollsWithNoResults="pollsWithNoResults"
       :eventRecord="eventRecord"
+      :currentOnlineUserCount="currentOnlineUserCount"
       @onRemovePoll="removePoll"
       @onStartPoll="startPoll"
       @onCopyPoll="copyPoll"
@@ -31,6 +38,9 @@ export default {
     },
     pollsWithNoResults: {
       type: Array
+    },
+    currentOnlineUserCount: {
+      type: Number
     }
   },
   components: {

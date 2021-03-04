@@ -30,11 +30,17 @@
             Aktuelle Anzahl wahlberechtigter Teilnehmer:
             {{ verifiedUsersCountAllowToVoteOnline }}
           </span>
+          <p v-if="verifiedUsersCountAllowToVoteOnline === 0">
+            <u>
+              {{ localize('view.polls.noActiveUser') }}
+            </u>
+          </p>
           <hr v-if="pollsWithNoResults" />
           <app-polls
             v-if="!activePoll"
             :pollsWithNoResults="pollsWithNoResults"
             :eventRecord="eventRecord"
+            :currentOnlineUserCount="verifiedUsersCountAllowToVoteOnline"
             @onCreatePoll="createPoll"
             @onUpdatePoll="updatePoll"
             @onRemovePoll="removePoll"

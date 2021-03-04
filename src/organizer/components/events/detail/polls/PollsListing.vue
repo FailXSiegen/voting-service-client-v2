@@ -10,7 +10,11 @@
         class="list-group-item"
       >
         <h5 class="mb-1">{{ poll.title }}</h5>
-        <button class="btn btn-success my-2 mr-2" @click="startPoll(poll.id)">
+        <button
+          class="btn btn-success my-2 mr-2"
+          :disabled="currentOnlineUserCount === 0"
+          @click="startPoll(poll.id)"
+        >
           <i
             class="bi-play-fill bi--2xl"
             @title="
@@ -49,6 +53,9 @@ export default {
   props: {
     pollsWithNoResults: {
       type: Array
+    },
+    currentOnlineUserCount: {
+      type: Number
     }
   },
   methods: {

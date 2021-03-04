@@ -213,6 +213,10 @@ export default {
         })
     },
     startPoll (pollId) {
+      if (this.verifiedUsersCountAllowToVoteOnline() === 0) {
+        addDangerMessage('Abgelehnt', 'Keine stimmberechtigten Teilnehmer anwesend')
+        return
+      }
       this.$apollo
         .mutate({
           mutation: START_POLL,
@@ -253,7 +257,7 @@ export default {
   computed: {
     verifiedUsersCountAllowToVoteOnline () {
       if (!this.eventUsers) {
-        return []
+        return 0
       }
       return this.eventUsers.filter(eventUser => {
         return eventUser.verified && eventUser.online && eventUser.allowToVote

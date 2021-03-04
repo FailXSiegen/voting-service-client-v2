@@ -16,11 +16,13 @@
             }}</span>
           </router-link>
           <app-event-listing
+            v-if="upcomingEvents"
             :headline="localize('view.event.upcoming')"
             :events-detail="true"
             :events="upcomingEvents"
           />
           <app-event-listing
+            v-if="expiredEvents"
             :headline="localize('view.event.latest')"
             :events-detail="true"
             :events="expiredEvents"
