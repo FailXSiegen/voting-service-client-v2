@@ -66,7 +66,7 @@ const errorLink = onError(error => {
   if (typeof error !== 'undefined') {
     if (error.graphQLErrors) {
       handleGraphQlErrors(error)
-      if (error.graphQLError.message.includes('authorized') > 0) {
+      if (error.graphQLError.message.includes('authorized')) {
         onResetLocalStorage()
       }
     }
