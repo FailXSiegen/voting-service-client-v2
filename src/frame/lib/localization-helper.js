@@ -36,7 +36,7 @@ const localizations = {
         submitToEvent: 'In Veranstaltung einloggen',
         registerAsOrganizer: 'Als Organisator registrieren',
         invalidCredentials: 'Invalid credentials',
-        asOrganizerLoggedIn: 'Sie sind als Organisator eingeloggt. Bitte verwenden Sie als Teilnehmer einen anderen Browser oder ein anderes Endgerät.'
+        asOrganizerLoggedIn: 'Sie sind als Organisator eingeloggt. Bitte verwenden Sie zur Teilnahme an Abstimmungen einen anderen Browser oder ein anderes Endgerät.'
       },
       register: {
         headline: 'Registrierung',
