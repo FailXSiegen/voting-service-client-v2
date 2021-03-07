@@ -9,6 +9,8 @@ import AppUserAgreement from '@/frame/views/staticPages/UserAgreement'
 import AppFunctions from '@/frame/views/staticPages/Functions'
 import AppRegister from '@/frame/views/Register'
 import AppValidateEmail from '@/frame/views/ValidateEmail'
+import AppRequestPassword from '@/frame/views/RequestPassword'
+import AppFormPasswordForgot from '@/frame/views/ForgotPassword'
 import AppDashboard from '@/organizer/views/Dashboard'
 import AppEvents from '@/organizer/views/Events'
 import AppProfile from '@/organizer/views/Profile'
@@ -72,6 +74,12 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
+    path: '/passwort-vergessen',
+    name: 'Fogot Password',
+    component: AppRequestPassword,
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/register',
     name: 'Register Organizer',
     component: AppRegister,
@@ -82,6 +90,13 @@ const routes = [
     props: true,
     name: 'Validate Register Organizer',
     component: AppValidateEmail,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/password-forgot/:hash',
+    props: true,
+    name: 'Passwort ändern Formular',
+    component: AppFormPasswordForgot,
     meta: { requiresAuth: false }
   },
   {

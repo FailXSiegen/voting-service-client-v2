@@ -83,6 +83,11 @@
                     {{ localize('view.login.submit') }}
                   </button>
                 </div>
+                <small>
+                  <a href="/passwort-vergessen">
+                    Passwort vergessen? Hier Link anfordern
+                  </a>
+                </small>
               </form>
               <div class="login__organizer border border-secondary mt-3 p-3">
                 <h3 class="login__form--headline mb-4">
