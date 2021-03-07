@@ -21,6 +21,7 @@ export default {
     this.eventRecord = response.event
     if (this.$store.getters.isLoggedIn) {
       this.userRole = this.$store.getters.getCurrentUserRole
+      document.title = 'Login - digitalwahl.org'
     }
     // Fetch user record if already logged in.
     if (this.$store.getters.isLoggedIn && this.$store.getters.getCurrentUserRole === 'event-user') {
