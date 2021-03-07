@@ -1,11 +1,19 @@
 <template>
   <div :id="eventSlug">
     <slot name="alerts"></slot>
-    <component v-if="allowToRender"
-               :eventRecord="eventRecord"
-               v-bind:is="component"
-               @logout="onLogout"
-               @changeComponent="changeComponent" />
+    <component
+      v-if="allowToRender && userRole != 'organizer'"
+      :eventRecord="eventRecord"
+      v-bind:is="component"
+      @logout="onLogout"
+      @changeComponent="changeComponent"
+    />
+    <div
+      class="container alert alert-info text-center mt-5 h3"
+      v-if="userRole === 'organizer'"
+    >
+      <p>{{ localize('view.login.asOrganizerLoggedIn') }}</p>
+    </div>
   </div>
 </template>
 

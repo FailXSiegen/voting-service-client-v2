@@ -19,9 +19,11 @@ export default {
       await this.$router.push('/')
     }
     this.eventRecord = response.event
-
-    // Fetch user record if already logged in.
     if (this.$store.getters.isLoggedIn) {
+      this.userRole = this.$store.getters.getCurrentUserRole
+    }
+    // Fetch user record if already logged in.
+    if (this.$store.getters.isLoggedIn && this.$store.getters.getCurrentUserRole === 'event-user') {
       this.component = 'AppUserDashboard'
     }
     this.allowToRender = true
@@ -30,7 +32,8 @@ export default {
     return {
       eventRecord: null,
       component: 'AppUserLogin',
-      allowToRender: false
+      allowToRender: false,
+      userRole: ''
     }
   },
   methods: {

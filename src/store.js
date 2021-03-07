@@ -67,6 +67,9 @@ export default new Vuex.Store({
     getCurrentUserId: state => {
       return R.path(['currentUser', 'id'], state)
     },
+    getCurrentUserRole: state => {
+      return R.path(['currentUser', 'role'], state)
+    },
     isCurrentUserVerfied: state => {
       return R.path(['currentUser', 'verified'], state)
     }
