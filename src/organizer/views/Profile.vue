@@ -3,12 +3,17 @@
     <app-navigation />
     <div class="container-fluid">
       <slot name="alerts"></slot>
+      <div class="alert alert-success text-center" v-if="saveSuccess">
+        <h2>Erfolgreich gespeichert</h2>
+        <a href="/admin" class="btn btn-primary">Zurück zur Übersicht</a>
+      </div>
       <div class="row">
         <div class="col-12 py-3 order-2 order-md-1">
           <h1>{{ headline }}</h1>
           <app-form
             :organizer="organizer"
             @onUpdateOrganizer="updateOrganizer"
+            @onUpdateOrganizerError="updateOrganizerError"
           />
         </div>
       </div>
@@ -42,20 +47,28 @@ export default {
     }
   },
   methods: {
-    updateOrganizer (organizer) {
-      delete this.organizer.__typename
-      delete this.organizer.username
-      delete this.organizer.password
+    updateOrganizerError (data) {
+      addDangerMessage(data.title, data.message)
+    },
+    async updateOrganizer (returnUpdateOrganizer) {
+      const updatedOrganizerObject = JSON.parse(
+        JSON.stringify(returnUpdateOrganizer)
+      )
+      const updatedOrganizer = updatedOrganizerObject.organizer
+      delete updatedOrganizer.__typename
+      delete updatedOrganizer.createDatetime
+      delete updatedOrganizer.username
       this.$apollo
         .mutate({
           mutation: UPDATE_ORGANIZER,
-          variables: { input: this.organizer }
+          variables: { input: updatedOrganizer }
         })
         .then(() => {
           addSuccessMessage(
             'Erfolg',
             'Der Organisator wurde erfolgreich gespeichert. '
           )
+          this.saveSuccess = true
         })
         .catch(error => {
           addDangerMessage(
@@ -72,7 +85,8 @@ export default {
   data () {
     return {
       headline: 'Profil bearbeiten',
-      organizer: {}
+      organizer: {},
+      saveSuccess: false
     }
   }
 }
