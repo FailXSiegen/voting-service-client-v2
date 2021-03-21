@@ -60,6 +60,7 @@ export const POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION = gql`subscription{
     pollAnswersCount
     pollUserCount
     pollUserVotedCount
+    eventId
   }
 }
 `

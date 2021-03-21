@@ -105,6 +105,11 @@ export default {
       },
       pollAnswerLifeCycle: {
         query: POLL_ANSWER_LIVE_CYCLE_SUBSCRIPTION,
+        variables () {
+          return {
+            eventId: this.eventRecord.id
+          }
+        },
         result ({ data }) {
           this.activePollAnswerCount = data.pollAnswerLifeCycle.pollAnswersCount
           this.activePollMaxAnswer = data.pollAnswerLifeCycle.maxVotes
