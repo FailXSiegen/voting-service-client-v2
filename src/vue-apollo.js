@@ -42,7 +42,6 @@ const refreshTokenLink = new TokenRefreshLink({
       router.push('/').catch(() => {})
     }
     const decodedToken = jwtDecode(token)
-    console.log(decodedToken.payload.exp < getCurrentUnixTimeStamp())
     return decodedToken.payload.exp > getCurrentUnixTimeStamp()
   },
   fetchAccessToken: () => {
