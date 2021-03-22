@@ -40,6 +40,7 @@
         class="form-control"
         id="eventDescription"
         rows="3"
+        required="required"
         aria-describedby="eventDescriptionHelpBlock"
       ></textarea>
       <small id="eventDescriptionHelpBlock" class="form-text text-muted">
@@ -52,6 +53,7 @@
       }}</label>
       <date-picker
         v-model="eventRecord.scheduledDatetime"
+        required="required"
         :config="options"
       ></date-picker>
     </div>
@@ -131,7 +133,7 @@ export default {
       if (!this.eventRecord.slug) {
         this.eventRecord.slug = this.eventRecord.title
           .trim()
-          .replace(/[^a-zA-Z0-9 ]/g, '')
+          .replace(/[^a-zA-Z0-9\- ]/g, '')
           .replace(/\s+/g, '-')
           .toLowerCase()
       }
@@ -139,7 +141,7 @@ export default {
     validateSlug () {
       this.eventRecord.slug = this.eventRecord.slug
         .trim()
-        .replace(/[^a-zA-Z0-9 ]/g, '')
+        .replace(/[^a-zA-Z0-9\- ]/g, '')
         .replace(/\s+/g, '-')
         .toLowerCase()
     },
