@@ -59,26 +59,24 @@ export default {
   },
   methods: {
     updateEvent () {
-      delete this.eventRecord.createDatetime
-      delete this.eventRecord.__typename
-      delete this.eventRecord.modifiedDatetime
-      delete this.eventRecord.deleted
-      delete this.eventRecord.imagePath
-      delete this.eventRecord.organizerId
-      this.eventRecord.active =
-        this.eventRecord.active === true || this.eventRecord.active === 1
-      this.eventRecord.lobbyOpen =
-        this.eventRecord.lobbyOpen === true || this.eventRecord.lobbyOpen === 1
-      this.eventRecord.scheduledDatetime = this.convertScheduledDatetime()
+      const updateEvent = JSON.parse(JSON.stringify(this.eventRecord))
+      delete updateEvent.createDatetime
+      delete updateEvent.__typename
+      delete updateEvent.modifiedDatetime
+      delete updateEvent.deleted
+      delete updateEvent.imagePath
+      delete updateEvent.organizerId
+      updateEvent.active =
+        updateEvent.active === true || updateEvent.active === 1
+      updateEvent.lobbyOpen =
+        updateEvent.lobbyOpen === true || updateEvent.lobbyOpen === 1
+      updateEvent.scheduledDatetime = this.convertScheduledDatetime()
       this.$apollo
         .mutate({
           mutation: UPDATE_EVENT_MUTATION,
-          variables: { input: this.eventRecord }
+          variables: { input: updateEvent }
         })
         .then(() => {
-          this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
-            this.eventRecord.scheduledDatetime
-          )
           window.location = '/admin/events'
         })
         .catch(error => {
@@ -88,9 +86,6 @@ export default {
             true
           )
           console.error(error)
-          this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
-            this.eventRecord.scheduledDatetime
-          )
         })
     },
     convertScheduledDatetime () {

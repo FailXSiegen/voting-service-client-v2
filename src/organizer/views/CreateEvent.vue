@@ -54,11 +54,12 @@ export default {
   },
   methods: {
     createEvent () {
-      this.eventRecord.scheduledDatetime = this.convertScheduledDatetime()
+      const newEvent = JSON.parse(JSON.stringify(this.eventRecord))
+      newEvent.scheduledDatetime = this.convertScheduledDatetime()
       this.$apollo
         .mutate({
           mutation: CREATE_EVENT_MUTATION,
-          variables: { input: this.eventRecord }
+          variables: { input: newEvent }
         })
         .then(() => {
           window.location = '/admin/events'
@@ -70,9 +71,6 @@ export default {
             'Das Event konnte nicht erstellt werden. Für weitere Infos lohnt ein Blick in die Console.'
           )
           console.error(error)
-          this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
-            this.eventRecord.scheduledDatetime
-          )
         })
     },
     convertScheduledDatetime () {

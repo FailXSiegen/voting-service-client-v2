@@ -124,9 +124,11 @@ export default {
     }
   },
   async created () {
-    this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
-      this.eventRecord.scheduledDatetime
-    )
+    if (this.eventRecord.scheduledDatetime) {
+      this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
+        this.eventRecord.scheduledDatetime
+      )
+    }
   },
   methods: {
     generateSlug () {
@@ -135,6 +137,7 @@ export default {
           .trim()
           .replace(/[^a-zA-Z0-9\- ]/g, '')
           .replace(/\s+/g, '-')
+          .replace(/--/g, '')
           .toLowerCase()
       }
     },
@@ -143,6 +146,7 @@ export default {
         .trim()
         .replace(/[^a-zA-Z0-9\- ]/g, '')
         .replace(/\s+/g, '-')
+        .replace(/--/g, '')
         .toLowerCase()
     },
     convertScheduledDatetime () {
