@@ -6,6 +6,12 @@ import { fetchEventBySlug } from '@/user/api/fetch/event'
 import AppFooter from '@/frame/components/Footer'
 
 export default {
+  metaInfo: {
+    title: 'Einfach die Wahl haben',
+    meta: [
+      { name: 'description', content: 'Einfach die Wahl haben. Wahlanwendung für gemeinnützige Vereine und Verbände. Jetzt kostenlos nutzen!' }
+    ]
+  },
   components: {
     AppFooter
   },
@@ -18,9 +24,6 @@ export default {
       },
       eventSlug: ''
     }
-  },
-  created () {
-    document.title = 'digitalwahl.org'
   },
   methods: {
     validateInput (parentId) {
