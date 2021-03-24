@@ -52,7 +52,7 @@ export default {
       poll: {
         eventId: this.eventRecord.id,
         title: '',
-        type: 'PUBLIC',
+        type: 'SECRET',
         pollAnswer: 'yesNoAbstain',
         list: '',
         minVotes: 0,
@@ -90,7 +90,7 @@ export default {
       this.poll = {
         eventId: this.eventRecord.id,
         title: '',
-        type: 'PUBLIC',
+        type: 'SECRET',
         pollAnswer: 'yesNoAbstain',
         list: '',
         minVotes: 0,
