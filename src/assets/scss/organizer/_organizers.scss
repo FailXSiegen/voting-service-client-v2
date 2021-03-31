@@ -30,6 +30,7 @@
 .navbar.fixed-top {
     position: fixed;
     height: 72px;
+    z-index: 150;
 }
 .navbar-toggler {
     position: fixed;

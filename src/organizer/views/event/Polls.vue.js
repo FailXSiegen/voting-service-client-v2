@@ -133,6 +133,10 @@ export default {
           }
           if (data.pollLifeCycle.state === 'closed') {
             this.activePoll = undefined
+            this.activePollAnswerCount = 0
+            this.activePollMaxAnswer = 0
+            this.pollUserCount = 0
+            this.pollUserVotedCount = 0
           }
         }
       }

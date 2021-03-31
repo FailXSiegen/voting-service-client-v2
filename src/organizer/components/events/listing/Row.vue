@@ -51,16 +51,14 @@
       >
         <i class="bi-eye-fill bi--2xl"></i>
       </router-link>
-      <!--
-        @ToDo Add onClose
       <button
-        @click="onClose"
+        @click="onDelete(event.id)"
         class="btn btn-danger mx-1 my-2"
-        :title="localize('view.event.listing.actions.close')"
+        :title="localize('view.event.listing.actions.delete')"
+        :disabled="event.active"
       >
-        <i class="bi-shield-fill-exclamation bi--2xl"></i>
+        <i class="bi-trash bi--2xl"></i>
       </button>
-      -->
     </td>
   </tr>
 </template>
@@ -103,9 +101,13 @@ export default {
     onInviteLink () {
       alert('Copy invite link')
     },
-    onClose () {
-      if (confirm('Event schließen?')) {
-        alert('Close Event')
+    onDelete (eventId) {
+      if (
+        confirm(
+          'Veranstaltung wird komplett mit allen Informationen unwiederherstellbar gelöscht.\n\nSind Sie sich sicher?'
+        )
+      ) {
+        this.$emit('onDeleteEvent', eventId)
       }
     },
     fallbackCopyTextToClipboard (text) {

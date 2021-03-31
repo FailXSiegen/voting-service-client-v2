@@ -1,6 +1,9 @@
 <template>
   <div class="events-listing-container my-5">
     <h2 v-if="headline" class="mb-3">{{ headline }}</h2>
+    <p class="hint small">
+      Nur inaktive Veranstaltungen können gelöscht werden
+    </p>
     <table
       class="table table-responsive-md table-bordered table-hover table-sm"
     >
@@ -36,6 +39,7 @@
           :event="event"
           :eventsDetail="eventsDetail"
           :showOrganizer="showOrganizer"
+          @onDeleteEvent="deleteEvent"
         />
       </tbody>
     </table>
@@ -75,6 +79,9 @@ export default {
   methods: {
     localize (path) {
       return localize(path)
+    },
+    deleteEvent (eventId) {
+      this.$emit('onDeleteEvent', eventId)
     }
   }
 }

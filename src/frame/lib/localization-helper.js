@@ -130,7 +130,8 @@ const localizations = {
             edit: 'Bearbeiten',
             inviteLink: 'Einladungs-Link kopieren',
             newTab: 'Veranstaltungs-Organisation in neuem Tab öffnen',
-            close: 'Veranstaltungen beenden'
+            close: 'Veranstaltung beenden',
+            delete: 'Veranstaltung löschen'
           }
         },
         upcoming: 'Bevorstehende Veranstaltungen',

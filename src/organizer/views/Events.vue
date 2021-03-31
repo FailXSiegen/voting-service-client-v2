@@ -20,12 +20,14 @@
             :headline="localize('view.event.upcoming')"
             :events-detail="true"
             :events="upcomingEvents"
+            @onDeleteEvent="deleteEvent"
           />
           <app-event-listing
             v-if="expiredEvents"
             :headline="localize('view.event.latest')"
             :events-detail="true"
             :events="expiredEvents"
+            @onDeleteEvent="deleteEvent"
           />
         </div>
       </div>
@@ -36,8 +38,9 @@
 <script>
 import AppNavigation from '@/organizer/components/Navigation'
 import AppEventListing from '@/organizer/components/events/Listing'
-import { addSuccessMessage } from '@/frame/lib/alert-helper'
+import { addSuccessMessage, addDangerMessage } from '@/frame/lib/alert-helper'
 import { localize } from '@/frame/lib/localization-helper'
+import { REMOVE_EVENT_MUTATION } from '@/organizer/api/graphql/gql/mutations'
 import {
   UPCOMING_EVENTS,
   EXPIRED_EVENTS
@@ -85,6 +88,28 @@ export default {
         'Erfolg',
         'Keine Ahnung wie ich das gemacht habe.'
       )
+    },
+    deleteEvent (eventId) {
+      this.$apollo
+        .mutate({
+          mutation: REMOVE_EVENT_MUTATION,
+          variables: {
+            organizerId: this.$store.getters.getCurrentUserId,
+            id: parseInt(eventId)
+          }
+        })
+        .then(() => {
+          addSuccessMessage('Erfolg', 'Die Veranstaltung wurde gelöscht.')
+          this.$apollo.queries.upcomingEvents.refetch()
+          this.$apollo.queries.expiredEvents.refetch()
+        })
+        .catch(error => {
+          addDangerMessage(
+            'Fehler',
+            'Die Veranstaltung konnte nicht gelöscht werden.'
+          )
+          console.error(error)
+        })
     }
   }
 }

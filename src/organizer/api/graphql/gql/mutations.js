@@ -106,6 +106,11 @@ mutation UpdateEvent($input: UpdateEventInput!){
   }
 }`
 
+export const REMOVE_EVENT_MUTATION = gql`
+mutation RemoveEvent($organizerId: ID!, $id: ID! ){
+  removeEvent(organizerId: $organizerId, id: $id)
+}`
+
 export const UPDATE_ORGANIZER = gql`mutation updateOrganizer($input: UpdateOrganizerInput!){
   updateOrganizer(input: $input) {
     id
