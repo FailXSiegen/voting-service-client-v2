@@ -94,9 +94,6 @@ export const ORGANIZERS = gql`
       password
       publicName
       publicOrganisation
-      events {
-        id
-      }
       confirmedEmail
       superAdmin
       verified
