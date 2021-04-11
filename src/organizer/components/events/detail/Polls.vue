@@ -82,9 +82,9 @@ export default {
     startPoll (pollId) {
       this.$emit('onStartPoll', pollId)
     },
-    copyPoll (copyPoll) {
-      copyPoll.copy = true
-      this.poll = JSON.parse(JSON.stringify(copyPoll))
+    copyPoll (copiedPoll) {
+      copiedPoll.copy = true
+      this.poll = JSON.parse(JSON.stringify(copiedPoll))
     },
     reset () {
       this.poll = {

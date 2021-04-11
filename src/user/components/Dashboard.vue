@@ -220,10 +220,7 @@ export default {
           data.activePollEventUser.poll &&
           data.activePollEventUser.pollUserVoted.findIndex(
             x => x.eventUserId === this.eventUser.id
-          ) === -1 &&
-          data.activePollEventUser.pollUser.findIndex(
-            x => x.eventUserId === this.eventUser.id
-          ) >= 0
+          ) === -1
         ) {
           this.poll = data.activePollEventUser.poll
           this.pollState = data.activePollEventUser.state
@@ -344,7 +341,7 @@ export default {
       pollResultId: null,
       openModal: true,
       pollState: '',
-      activePollEventUser: null,
+      activePollEventUser: {},
       pollResult: [],
       page: 0,
       pageSize: 10,

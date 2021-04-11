@@ -10,7 +10,7 @@
           <app-active-poll
             v-if="activePoll"
             :activePoll="activePoll"
-            :copyPoll="copyPoll"
+            :activePollEventUser="activePollEventUser"
             :activePollAnswerCount="activePollAnswerCount"
             :activePollMaxAnswer="activePollMaxAnswer"
             :pollUserCount="pollUserCount"
@@ -45,6 +45,12 @@
             @onUpdatePoll="updatePoll"
             @onRemovePoll="removePoll"
             @onStartPoll="startPoll"
+          />
+          <hr />
+          <app-results
+            v-if="!activePoll"
+            :pollResult="pollResult"
+            :eventRecord="eventRecord"
           />
         </div>
       </div>

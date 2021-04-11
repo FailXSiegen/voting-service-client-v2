@@ -133,3 +133,21 @@ export const ACTIVE_POLL = gql`
     }
   }
 `
+
+export const ACTIVE_POLL_EVENT_USER = gql`
+  query findActivePollEventUser($eventId: ID) {
+    activePollEventUser(eventId: $eventId) {
+      pollUser {
+        id
+        eventUserId
+        publicName
+      }
+      pollUserVoted {
+        id
+        eventUserId
+        publicName
+        pollResultId
+      }
+    }
+  }
+`

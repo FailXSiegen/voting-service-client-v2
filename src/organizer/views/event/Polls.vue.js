@@ -2,13 +2,16 @@
 import AppNavigation from '@/organizer/components/events/detail/Navigation'
 import AppPolls from '@/organizer/components/events/detail/Polls'
 import AppActivePoll from '@/organizer/components/events/detail/polls/ActivePoll'
+import AppResults from '@/organizer/components/events/detail/ResultsListing'
 import { localize } from '@/frame/lib/localization-helper'
 import { addDangerMessage, addSuccessMessage } from '@/frame/lib/alert-helper'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
+import { POLLS_RESULTS } from '@/frame/api/graphql/gql/queries'
 import {
   EVENT_USERS_BY_EVENT,
   POLLS_NO_RESULTS,
-  ACTIVE_POLL
+  ACTIVE_POLL,
+  ACTIVE_POLL_EVENT_USER
 } from '@/organizer/api/graphql/gql/queries'
 import {
   CREATE_POLL,
@@ -45,7 +48,8 @@ export default {
   components: {
     AppNavigation,
     AppPolls,
-    AppActivePoll
+    AppActivePoll,
+    AppResults
   },
   apollo: {
     eventUsers: {
@@ -66,12 +70,37 @@ export default {
         }
       }
     },
+    activePollEventUser: {
+      fetchPolicy: 'network-only',
+      query: ACTIVE_POLL_EVENT_USER,
+      variables () {
+        return {
+          eventId: this.eventRecord.id
+        }
+      }
+    },
     pollsWithNoResults: {
       fetchPolicy: 'network-only',
       query: POLLS_NO_RESULTS,
       variables () {
         return {
           eventId: this.eventRecord.id
+        }
+      }
+    },
+    pollResult: {
+      fetchPolicy: 'network-only',
+      query: POLLS_RESULTS,
+      variables () {
+        return {
+          eventId: this.eventRecord.id,
+          page: 0,
+          pageSize: this.pageSize
+        }
+      },
+      result ({ data }) {
+        if (data.pollResult && data.pollResult.length === 10) {
+          this.showMoreEnabled = true
         }
       }
     },
@@ -111,10 +140,12 @@ export default {
           }
         },
         result ({ data }) {
-          this.activePollAnswerCount = data.pollAnswerLifeCycle.pollAnswersCount
-          this.activePollMaxAnswer = data.pollAnswerLifeCycle.maxVotes
-          this.pollUserCount = data.pollAnswerLifeCycle.pollUserCount
-          this.pollUserVotedCount = data.pollAnswerLifeCycle.pollUserVotedCount
+          if (parseInt(data.pollAnswerLifeCycle.eventId) === parseInt(this.eventRecord.id)) {
+            this.activePollAnswerCount = data.pollAnswerLifeCycle.pollAnswersCount
+            this.activePollMaxAnswer = data.pollAnswerLifeCycle.maxVotes
+            this.pollUserCount = data.pollAnswerLifeCycle.pollUserCount
+            this.pollUserVotedCount = data.pollAnswerLifeCycle.pollUserVotedCount
+          }
         }
       },
       pollLifeCycle: {
@@ -130,6 +161,8 @@ export default {
             data.pollLifeCycle.state !== 'closed'
           ) {
             this.activePoll = data.pollLifeCycle.poll
+            this.$apollo.queries.activePollEventUser.refetch()
+            this.$apollo.queries.activePollEventUser.startPolling(5000)
           }
           if (data.pollLifeCycle.state === 'closed') {
             this.activePoll = undefined
@@ -137,6 +170,8 @@ export default {
             this.activePollMaxAnswer = 0
             this.pollUserCount = 0
             this.pollUserVotedCount = 0
+            this.$apollo.queries.activePollEventUser.stopPolling()
+            this.$apollo.queries.pollResult.refetch()
           }
         }
       }
@@ -147,12 +182,16 @@ export default {
       headline: 'Abstimmungen',
       eventRecord: {},
       eventUsers: [],
+      activePollEventUser: {},
       pollsWithNoResults: [],
       activePoll: undefined,
       activePollAnswerCount: 0,
       activePollMaxAnswer: 0,
       pollUserCount: 0,
-      pollUserVotedCount: 0
+      pollUserVotedCount: 0,
+      page: 0,
+      pageSize: 1,
+      showMoreEnabled: false
     }
   },
   methods: {

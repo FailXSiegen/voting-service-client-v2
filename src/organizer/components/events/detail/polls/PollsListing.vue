@@ -69,7 +69,7 @@ export default {
         this.$emit('onRemovePoll', pollId)
       }
     },
-    copyPoll (poll) {
+    async copyPoll (poll) {
       this.$emit('onCopyPoll', poll)
     },
     localize (path) {
