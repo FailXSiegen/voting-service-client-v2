@@ -77,6 +77,18 @@ export default {
         return {
           eventId: this.eventRecord.id
         }
+      },
+      result ({ data }) {
+        console.log(data)
+        if (data.activePollEventUser.pollUserVoted) {
+          data.activePollEventUser.pollUserVoted.forEach(pollUserVoted => {
+            data.activePollEventUser.pollUser.forEach((pollUser, index) => {
+              if (pollUser.eventUserId === pollUserVoted.eventUserId) {
+                data.activePollEventUser.pollUser[index].voted = true
+              }
+            })
+          })
+        }
       }
     },
     pollsWithNoResults: {

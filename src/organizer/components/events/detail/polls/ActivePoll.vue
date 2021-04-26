@@ -35,11 +35,19 @@
           <li
             v-for="(pollUser, index) in activePollEventUser.pollUser"
             :key="index"
-            class="list-group-item d-block justify-content-between align-items-center"
+            class="list-group-item d-flex justify-content-between align-items-center align-content-center"
           >
             {{ index + 1 }} - {{ pollUser.publicName }} [{{
               pollUser.eventUserId
             }}]
+            <i
+              class="bi h2 mb-0"
+              :class="
+                pollUser.voted === true
+                  ? 'bi-check text-success'
+                  : 'bi-x text-danger'
+              "
+            ></i>
           </li>
         </ul>
       </div>
@@ -49,7 +57,7 @@
           <li
             v-for="(pollUserVoted, index) in activePollEventUser.pollUserVoted"
             :key="index"
-            class="list-group-item d-block justify-content-between align-items-center"
+            class="list-group-item d-flex justify-content-between align-items-center align-content-center"
           >
             {{ index + 1 }} - {{ pollUserVoted.publicName }} [{{
               pollUserVoted.eventUserId
