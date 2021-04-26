@@ -71,6 +71,7 @@ export default {
       updateEvent.lobbyOpen =
         updateEvent.lobbyOpen === true || updateEvent.lobbyOpen === 1
       updateEvent.scheduledDatetime = this.convertScheduledDatetime()
+      updateEvent.multivoteType = parseInt(updateEvent.multivoteType)
       this.$apollo
         .mutate({
           mutation: UPDATE_EVENT_MUTATION,

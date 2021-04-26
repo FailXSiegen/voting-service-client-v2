@@ -117,6 +117,7 @@
             v-if="pollState === 'new' && eventUser.allowToVote"
             :identifier="'poll' + poll.id"
             :poll="poll"
+            :multivoteType="eventRecord.multivoteType"
             :voteAmount="eventUser.voteAmount"
             :trigger="openModal"
             @onSubmitPoll="submitPoll"
@@ -442,7 +443,11 @@ export default {
           }
         })
         .then(response => {
-          if (voteCounter === this.eventUser.voteAmount) {
+          if (
+            voteCounter === this.eventUser.voteAmount ||
+            this.eventRecord.multivoteType === 2 ||
+            answer.multivote
+          ) {
             if (this.pollState === 'new') {
               this.pollState = 'voted'
             }

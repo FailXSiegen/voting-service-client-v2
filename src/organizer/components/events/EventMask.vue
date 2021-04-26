@@ -79,6 +79,46 @@
         Veranstaltung aktiv
       </label>
     </div>
+    <hr />
+    <h3>Mehrfachstimmenabgabe</h3>
+    <p class="text-muted">
+      Wahlmöglichkeit zur Vorgabe der stimmberechtigten Teilnehmer die mehr als
+      eine Stimme haben
+    </p>
+    <div class="form-check">
+      <input
+        class="form-check-input"
+        type="radio"
+        name="multivoteType"
+        id="multivoteType1"
+        value="1"
+        v-model="eventRecord.multivoteType"
+      />
+      <label class="form-check-label" for="multivoteType1">
+        Benutzer können unterschiedliche Stimmenabgabe durchführen
+      </label>
+      <small class="form-text text-muted"
+        >Bsp.: Stimme 1 von 2: Ja, Stimme 2 von 2: nein<br />Bsp. 2: Checkbox
+        ausgewählt vom Teilnehmer: Alle Stimmen auf einmal abgeben: Ja 2x</small
+      >
+    </div>
+    <div class="form-check mt-3">
+      <input
+        class="form-check-input"
+        type="radio"
+        name="multivoteType"
+        id="multivoteType2"
+        value="2"
+        v-model="eventRecord.multivoteType"
+      />
+      <label class="form-check-label" for="multivoteType2">
+        Benutzer geben IMMER alle Stimmen auf einmal ab
+      </label>
+      <small class="form-text text-muted"
+        >Bsp.: Teilnehmer hat 5 Stimmen. Bei Abstimmung wählt der Teilnehmer nur
+        einmal, es wird 5 fach gewertet.</small
+      >
+    </div>
     <button class="btn btn-primary mt-5 mb-3">
       <i class="bi-play bi--2xl align-middle"></i>
       <span class="align-middle">{{

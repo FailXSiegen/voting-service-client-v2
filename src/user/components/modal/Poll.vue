@@ -27,7 +27,7 @@
             <div class="modal-header">
               <h5 class="modal-title" :id="identifier + 'Title'">
                 {{ poll.title }}<br />
-                <small id="pollCounter">
+                <small id="pollCounter" v-if="multivoteType != 2">
                   <b>(Stimme {{ voteCounter }} von {{ voteAmount }})</b>
                 </small>
               </h5>
@@ -44,6 +44,7 @@
                 {{ localize('view.polls.modal.minVoteGreater0') }}
                 {{ poll.minVotes }}
               </p>
+
               <fieldset class="input-radios" v-if="poll.maxVotes === 1">
                 <div
                   v-for="(pollAnswer, index) in poll.possibleAnswers"
@@ -119,6 +120,28 @@
                   >
                 </div>
               </fieldset>
+              <fieldset
+                v-if="
+                  voteAmount > 1 && voteCounter === 1 && multivoteType === 1
+                "
+              >
+                <hr />
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="multivote"
+                    value="true"
+                    v-model="pollSubmitAnswerInput.multivote"
+                  />
+                  <label class="form-check-label mb-0" for="multivote">
+                    Alle {{ voteAmount }} Stimmen auf einmal abgeben
+                  </label>
+                  <small class="form-text text-muted">
+                    Nur bei der ersten Stimme möglich
+                  </small>
+                </div>
+              </fieldset>
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">
@@ -156,6 +179,10 @@ export default {
     trigger: {
       type: Boolean,
       required: true
+    },
+    multivoteType: {
+      type: Number,
+      required: true
     }
   },
   data () {
@@ -167,7 +194,8 @@ export default {
         answerContents: [],
         type: this.poll.type,
         eventUserId: this.$store.getters.getCurrentUserId,
-        voteCycle: 1
+        voteCycle: 1,
+        multivote: false
       },
       voteCounter: 1,
       abstain: false
@@ -247,7 +275,11 @@ export default {
           )
         }
         this.$emit('onSubmitPoll', this.pollSubmitAnswerInput)
-        if (this.voteCounter >= this.voteAmount) {
+        if (
+          this.voteCounter >= this.voteAmount ||
+          this.multivoteType === 2 ||
+          this.pollSubmitAnswerInput.multivote
+        ) {
           $('#' + this.identifier).modal('hide')
         }
         if (this.voteCounter < this.voteAmount) {

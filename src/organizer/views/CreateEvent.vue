@@ -45,7 +45,8 @@ export default {
         ),
         lobbyOpen: false,
         active: true,
-        organizerId: this.$store.getters.getCurrentUserId
+        organizerId: this.$store.getters.getCurrentUserId,
+        multivoteType: 1
       }
     }
   },
@@ -56,6 +57,7 @@ export default {
     createEvent () {
       const newEvent = JSON.parse(JSON.stringify(this.eventRecord))
       newEvent.scheduledDatetime = this.convertScheduledDatetime()
+      newEvent.multivoteType = parseInt(newEvent.multivoteType)
       this.$apollo
         .mutate({
           mutation: CREATE_EVENT_MUTATION,
