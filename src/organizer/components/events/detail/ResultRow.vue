@@ -130,8 +130,8 @@
 </template>
 
 <script>
-import { localize } from '@/frame/lib/localization-helper';
-import { createFormattedDateFromTimeStamp } from '@/frame/lib/time-stamp';
+import { localize } from '@/frame/lib/localization-helper'
+import { createFormattedDateFromTimeStamp } from '@/frame/lib/time-stamp'
 
 export default {
   props: {
@@ -148,44 +148,44 @@ export default {
       headline: 'Umfrage-Ergebnisse',
       eventUsers: [],
       pollResults: []
-    };
+    }
   },
   computed: {
     pollAnswerGroups () {
-      return this.groupBy(this.pollResult.pollAnswer, 'answerContent');
+      return this.groupBy(this.pollResult.pollAnswer, 'answerContent')
     },
     getCreateDatetime () {
-      return createFormattedDateFromTimeStamp(this.pollResult.createDatetime);
+      return createFormattedDateFromTimeStamp(this.pollResult.createDatetime)
     },
     pollAnswerGroupByUser () {
-      return this.groupBy(this.pollResult.pollAnswer, 'pollUserId');
+      return this.groupBy(this.pollResult.pollAnswer, 'pollUserId')
     }
   },
   methods: {
     localize (path) {
-      return localize(path);
+      return localize(path)
     },
     groupBy (array, key) {
-      const result = {};
+      const result = {}
       array.forEach(item => {
         if (!result[item[key]]) {
-          result[item[key]] = [];
+          result[item[key]] = []
         }
-        result[item[key]].push(item);
-      });
-      return result;
+        result[item[key]].push(item)
+      })
+      return result
     },
     getPublicName (pollUserId) {
       const userFound = this.pollResult.pollUser.find(
         user => user.id === pollUserId
-      );
+      )
       if (!userFound) {
-        return 'Unknown';
+        return 'Unknown'
       }
-      return userFound.publicName;
+      return userFound.publicName
     }
   }
-};
+}
 </script>
 <style scoped>
 @media print {
