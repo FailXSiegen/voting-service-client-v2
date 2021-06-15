@@ -27,26 +27,36 @@
                 class="list-group-item d-flex justify-content-between align-items-center"
               >
                 {{ index }}
-                <span
-                  v-if="index === 'Ja'"
-                  class="badge badge-pill"
-                  style="background-color: green; color: white"
-                >
-                  {{ answer.length }}
-                </span>
-                <span
-                  v-else-if="index === 'Nein'"
-                  class="badge badge-pill"
-                  style="background-color: red; color: white"
-                >
-                  {{ answer.length }}
-                </span>
-                <span
-                  v-else
-                  class="badge badge-pill"
-                  style="background-color: grey; color: white"
-                >
-                  {{ answer.length }}
+                <span class="result">
+                  <span
+                    v-if="index === 'Ja'"
+                    class="badge badge-pill"
+                    style="background-color: green; color: white"
+                  >
+                    {{ answer.length }}
+                  </span>
+                  <span
+                    v-else-if="index === 'Nein'"
+                    class="badge badge-pill"
+                    style="background-color: red; color: white"
+                  >
+                    {{ answer.length }}
+                  </span>
+                  <span
+                    v-else
+                    class="badge badge-pill"
+                    style="background-color: grey; color: white"
+                  >
+                    {{ answer.length }}
+                  </span>
+                  <span class="ml-2 small"
+                    >({{
+                      getAnswerPercentage(
+                        answer.length,
+                        pollResult.pollAnswer.length
+                      )
+                    }}%)</span
+                  >
                 </span>
               </li>
             </ul>
@@ -183,6 +193,11 @@ export default {
         return 'Unknown'
       }
       return userFound.publicName
+    },
+    getAnswerPercentage: function (answerLength, answerTotal) {
+      console.log(answerLength)
+      console.log(answerTotal)
+      return ((answerLength / answerTotal) * 100).toFixed(2)
     }
   }
 }
