@@ -210,9 +210,8 @@ export default {
     },
     getDaysSinceScheduledDateTime () {
       const $todayUnixTimeDate = Math.floor(Date.now() / 1000)
-      const $unixDifference = $todayUnixTimeDate - this.event.createDatetime
-      const $daysDifference = parseInt($unixDifference / 86400)
-      return $daysDifference
+      const $unixDifference = $todayUnixTimeDate - this.event.scheduledDatetime
+      return parseInt($unixDifference / 86400)
     }
   }
 }
