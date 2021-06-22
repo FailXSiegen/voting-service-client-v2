@@ -37,6 +37,29 @@ export const ALL_UPCOMING_EVENTS = gql`
      allUpcomingEvents {
         id
         organizer {
+          id
+          publicName
+          username
+          email
+        } 
+        createDatetime
+        modifiedDatetime
+        title
+        slug
+        description
+        scheduledDatetime
+        lobbyOpen
+        active
+     }
+  }
+`
+
+export const ALL_PAST_EVENTS = gql`
+  query allPastEvents($page: Int, $pageSize: Int) {
+     allPastEvents(page: $page, pageSize: $pageSize) {
+        id
+        organizer {
+          id
           publicName
           username
           email
@@ -67,6 +90,7 @@ export const EVENT_USERS_BY_EVENT = gql`
     }
   }
 `
+
 export const ORGANIZER = gql`
  query organizer($organizerId:ID!) {
   organizer(organizerId:$organizerId) {

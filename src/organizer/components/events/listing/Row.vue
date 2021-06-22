@@ -11,6 +11,32 @@
       ><br />
       <hr v-if="event.description" />
       <small>{{ event.description }}</small>
+      <br />
+      <button
+        @click="onDelete(event.id, event.organizer.id)"
+        class="btn btn-danger mx-1 my-2"
+        :title="localize('view.event.listing.actions.delete')"
+        v-if="eventsShowDelete"
+        :disabled="event.active"
+      >
+        <i class="bi-trash bi--2xl"></i>
+      </button>
+      <button
+        @click="onToggleActivate(event.id, true)"
+        class="btn btn-warning mx-1 my-2"
+        :title="localize('view.event.listing.actions.delete')"
+        v-if="eventsShowActivate && !event.active"
+      >
+        <i class="bi-eye bi--2xl"></i>
+      </button>
+      <button
+        @click="onToggleActivate(event.id, false)"
+        class="btn btn-info mx-1 my-2"
+        :title="localize('view.event.listing.actions.delete')"
+        v-if="eventsShowActivate && event.active"
+      >
+        <i class="bi-eye-slash bi--2xl"></i>
+      </button>
     </td>
     <td class="align-middle" v-if="showOrganizer">
       <b>{{ event.organizer.publicName }}</b> <br />
@@ -18,7 +44,17 @@
       {{ event.organizer.email }}<br />
     </td>
     <td class="align-middle">{{ getCreateDatetime }}</td>
-    <td class="align-middle">{{ getScheduledDatetime }}</td>
+    <td
+      :class="{
+        'bg-danger': getDaysSinceScheduledDateTime > 180 && showOrganizer
+      }"
+      class="align-middle"
+    >
+      {{ getScheduledDatetime }}
+      <span v-if="showOrganizer"
+        >- {{ getDaysSinceScheduledDateTime }} Tage</span
+      >
+    </td>
     <td
       class="text-center text-success text-uppercase align-middle"
       v-if="event.active"
@@ -29,6 +65,7 @@
     <td class="text-center text-danger text-uppercase align-middle" v-else>
       {{ localize('view.event.listing.stateLocked') }}
     </td>
+
     <td class="align-middle" v-if="eventsDetail">
       <router-link
         :to="{ name: 'updateEvent', params: { eventSlug: event.slug } }"
@@ -52,7 +89,7 @@
         <i class="bi-eye-fill bi--2xl"></i>
       </router-link>
       <button
-        @click="onDelete(event.id)"
+        @click="onDelete(event.id, event.organizer.id)"
         class="btn btn-danger mx-1 my-2"
         :title="localize('view.event.listing.actions.delete')"
         :disabled="event.active"
@@ -83,6 +120,18 @@ export default {
       default () {
         return false
       }
+    },
+    eventsShowDelete: {
+      type: Boolean,
+      default () {
+        return false
+      }
+    },
+    eventsShowActivate: {
+      type: Boolean,
+      default () {
+        return false
+      }
     }
   },
   data () {
@@ -101,13 +150,18 @@ export default {
     onInviteLink () {
       alert('Copy invite link')
     },
-    onDelete (eventId) {
+    onDelete (eventId, organizerId) {
       if (
         confirm(
           'Veranstaltung wird komplett mit allen Informationen unwiederherstellbar gelöscht.\n\nSind Sie sich sicher?'
         )
       ) {
-        this.$emit('onDeleteEvent', eventId)
+        this.$emit('onDeleteEvent', eventId, organizerId)
+      }
+    },
+    onToggleActivate (eventId, status) {
+      if (confirm('Veranstaltung wird bearbeitet.\n\nSind Sie sich sicher?')) {
+        this.$emit('onToggleActivate', eventId, status)
       }
     },
     fallbackCopyTextToClipboard (text) {
@@ -153,6 +207,12 @@ export default {
     },
     getScheduledDatetime () {
       return createFormattedDateFromTimeStamp(this.event.scheduledDatetime)
+    },
+    getDaysSinceScheduledDateTime () {
+      const $todayUnixTimeDate = Math.floor(Date.now() / 1000)
+      const $unixDifference = $todayUnixTimeDate - this.event.createDatetime
+      const $daysDifference = parseInt($unixDifference / 86400)
+      return $daysDifference
     }
   }
 }

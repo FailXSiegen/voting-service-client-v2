@@ -39,7 +39,10 @@
           :event="event"
           :eventsDetail="eventsDetail"
           :showOrganizer="showOrganizer"
+          :eventsShowDelete="eventsShowDelete"
+          :eventsShowActivate="eventsShowActivate"
           @onDeleteEvent="deleteEvent"
+          @onToggleActivate="toggleActivate"
         />
       </tbody>
     </table>
@@ -62,6 +65,12 @@ export default {
       type: Boolean,
       required: true
     },
+    eventsShowDelete: {
+      type: Boolean
+    },
+    eventsShowActivate: {
+      type: Boolean
+    },
     events: {
       type: Array,
       required: false,
@@ -80,8 +89,11 @@ export default {
     localize (path) {
       return localize(path)
     },
-    deleteEvent (eventId) {
-      this.$emit('onDeleteEvent', eventId)
+    deleteEvent (eventId, organizerId) {
+      this.$emit('onDeleteEvent', eventId, organizerId)
+    },
+    toggleActivate (eventId, status) {
+      this.$emit('onToggleActivate', eventId, status)
     }
   }
 }
