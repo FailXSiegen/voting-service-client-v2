@@ -19,8 +19,8 @@
 </style>
 
 <script>
-import { localize } from '@/frame/lib/localization-helper';
-import AppResultRow from '@/organizer/components/events/detail/ResultRow';
+import { localize } from '@/frame/lib/localization-helper'
+import AppResultRow from '@/organizer/components/events/detail/ResultRow'
 
 export default {
   props: {
@@ -36,8 +36,8 @@ export default {
   },
   methods: {
     localize (path) {
-      return localize(path);
+      return localize(path)
     }
   }
-};
+}
 </script>

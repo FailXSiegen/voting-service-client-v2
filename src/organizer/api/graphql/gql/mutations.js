@@ -90,6 +90,7 @@ mutation CreateEvent($input: CreateEventInput!){
     scheduledDatetime
     lobbyOpen
     active
+    multivoteType
   }
 }`
 
@@ -103,6 +104,7 @@ mutation UpdateEvent($input: UpdateEventInput!){
     scheduledDatetime
     lobbyOpen
     active
+    multivoteType
   }
 }`
 

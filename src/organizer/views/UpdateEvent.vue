@@ -66,6 +66,8 @@ export default {
       delete updateEvent.deleted
       delete updateEvent.imagePath
       delete updateEvent.organizerId
+      delete updateEvent.meetingType
+      delete updateEvent.meetingId
       updateEvent.active =
         updateEvent.active === true || updateEvent.active === 1
       updateEvent.lobbyOpen =
