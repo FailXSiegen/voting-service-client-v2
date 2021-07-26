@@ -195,8 +195,6 @@ export default {
       return userFound.publicName
     },
     getAnswerPercentage: function (answerLength, answerTotal) {
-      console.log(answerLength)
-      console.log(answerTotal)
       return ((answerLength / answerTotal) * 100).toFixed(2)
     }
   }

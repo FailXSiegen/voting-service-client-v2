@@ -79,7 +79,6 @@ export default {
         }
       },
       result ({ data }) {
-        console.log(data)
         if (data.activePollEventUser.pollUserVoted) {
           data.activePollEventUser.pollUserVoted.forEach(pollUserVoted => {
             data.activePollEventUser.pollUser.forEach((pollUser, index) => {
