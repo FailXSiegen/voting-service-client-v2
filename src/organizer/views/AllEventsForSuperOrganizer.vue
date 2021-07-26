@@ -139,7 +139,6 @@ export default {
       })
     },
     toggleActivate (eventId, status) {
-      console.log(status)
       const updateEvent = { id: parseInt(eventId), active: status }
       this.$apollo
         .mutate({
