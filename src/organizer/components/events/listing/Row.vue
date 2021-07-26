@@ -13,7 +13,7 @@
       <small>{{ event.description }}</small>
       <br />
       <button
-        @click="onDelete(event.id)"
+        @click="onDelete(event.id, event.organizer.id)"
         class="btn btn-danger mx-1 my-2"
         :title="localize('view.event.listing.actions.delete')"
         v-if="eventsShowDelete"
@@ -150,13 +150,17 @@ export default {
     onInviteLink () {
       alert('Copy invite link')
     },
-    onDelete (eventId) {
+    onDelete (eventId, organizerId) {
       if (
         confirm(
           'Veranstaltung wird komplett mit allen Informationen unwiederherstellbar gelöscht.\n\nSind Sie sich sicher?'
         )
       ) {
-        this.$emit('onDeleteEvent', eventId)
+        if (this.showOrganizer && organizerId) {
+          this.$emit('onDeleteEvent', eventId, organizerId)
+        } else {
+          this.$emit('onDeleteEvent', eventId, this.$store.state.currentUser.id)
+        }
       }
     },
     onToggleActivate (eventId, status) {

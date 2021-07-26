@@ -171,8 +171,25 @@ export default {
         })
         .then(() => {
           addSuccessMessage('Erfolg', 'Die Veranstaltung wurde gelöscht.')
-          this.$apollo.queries.allUpcomingEvents.refetch()
-          this.$apollo.queries.allPastEvents.refetch()
+          let removeItems = []
+          if (this.allUpcomingEvents !== null) {
+            removeItems = this.allUpcomingEvents.filter(function (item, index) {
+              return item.id === eventId
+            })
+            this.allUpcomingEvents.splice(
+              this.allUpcomingEvents.indexOf(removeItems[0]),
+              1
+            )
+          }
+          if (this.allPastEvents !== null) {
+            removeItems = this.allPastEvents.filter(function (item, index) {
+              return item.id === eventId
+            })
+            this.allPastEvents.splice(
+              this.allPastEvents.indexOf(removeItems[0]),
+              1
+            )
+          }
         })
         .catch(error => {
           addDangerMessage(

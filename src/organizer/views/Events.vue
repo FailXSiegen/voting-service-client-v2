@@ -100,8 +100,25 @@ export default {
         })
         .then(() => {
           addSuccessMessage('Erfolg', 'Die Veranstaltung wurde gelöscht.')
-          this.$apollo.queries.upcomingEvents.refetch()
-          this.$apollo.queries.expiredEvents.refetch()
+          let removeItems = []
+          if (this.upcomingEvents !== null) {
+            removeItems = this.upcomingEvents.filter(function (item, index) {
+              return item.id === eventId
+            })
+            this.upcomingEvents.splice(
+              this.upcomingEvents.indexOf(removeItems[0]),
+              1
+            )
+          }
+          if (this.expiredEvents !== null) {
+            removeItems = this.expiredEvents.filter(function (item, index) {
+              return item.id === eventId
+            })
+            this.expiredEvents.splice(
+              this.expiredEvents.indexOf(removeItems[0]),
+              1
+            )
+          }
         })
         .catch(error => {
           addDangerMessage(
