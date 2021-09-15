@@ -78,17 +78,20 @@
           <p class="d-print-none" v-if="eventRecord.description">
             {{ eventRecord.description }}
           </p>
-          <hr v-if="!openMeeting" />
+          <hr v-if="!openMeeting && eventRecord.meeting.credentials" />
 
           <button
             @click.prevent="onJoinMeeting"
-            v-if="!openMeeting"
+            v-if="!openMeeting && eventRecord.meeting.credentials"
             class="btn btn-primary"
           >
             An Videokonferenz teilnehmen
           </button>
 
-          <div class="meeting" v-if="openMeeting">
+          <div
+            class="meeting"
+            v-if="openMeeting && eventRecord.meeting.credentials"
+          >
             <div class="container-zoom">
               <div id="zoom-hook"></div>
               <ZoomFrame
@@ -110,7 +113,7 @@
             </div>
           </div>
 
-          <hr v-if="!openMeeting" />
+          <hr v-if="!openMeeting && eventRecord.meeting.credentials" />
           <hr class="d-print-none" />
           <div class="container-poll-status d-print-none">
             <div
