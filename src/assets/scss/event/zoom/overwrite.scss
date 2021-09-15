@@ -1,0 +1,105 @@
+.ReactModalPortal, 
+#zmmtg-root {
+    button {
+        &[aria-expanded='true'] + ul{
+            display: block !important;
+            z-index: 1200 !important;
+            li a {
+                padding: 0 35px;
+                font-size: 14px;
+                white-space: nowrap;
+            }
+        }
+    }
+}
+#zmmtg-root {
+    &.hidden ~ .meeting-info-container {
+        display:none;
+    }
+    span {
+        color: white !important;
+    }
+    .media-preview-icon-mic-option {
+        background-position: -272px -96px;
+    }
+    #wc-container-right {
+        span {
+            color: black !important;
+        }
+    }
+    .chat-item__left-container > span {
+        margin-right: 15px;
+    }
+    
+    .window-merge-disabled {
+        display: none !important;
+    }
+}
+@media(max-width: 768px) {
+    html, body {
+        min-width: 1px !important;
+    }
+    body.zoom-hidden {
+        overflow: auto !important;
+    }
+    h1.meeting-title {
+        font-size:1em;
+    }
+
+    .ReactModalPortal {
+        .window-merge-disabled {
+            display: none !important;
+        }
+        .window-close {
+            transform: scale(2);
+        }
+        #polling-window,
+        #chat-window,
+        #participant-window,
+        .ReactModal__Content--after-open,
+        .sharee-container__viewport,
+        .dialog-rename-container {
+            width: 95vw !important;
+            height: auto !important;
+            max-height: 80vh  !important;
+            overflow: auto;
+        }
+        .ReactVirtualized__Grid {
+            width: 100% !important;
+        }
+        #polling-window .common-window-2__container,
+        #polling-window .common-window-2__container .common-window-2__content {
+            height: auto;
+        }
+        .participants-section-container__participants-footer-bottom {
+            display: none !important;
+        }
+        .participants-li {
+            padding: 13px 10px 13px 10px !important;
+        }
+        .participants-item__buttons {
+            .btn {
+                font-size: 1em;
+            }
+        }
+        .zmu-paper,
+        .zm-modal {
+            width: 100% !important;
+        }
+        .zm-modal-join-dialog .zm-modal-body-title {
+            word-break: unset;
+        }
+    }
+    #zmmtg-root { 
+        overflow: hidden;
+        .more-button .dropdown-menu {
+            left: auto;
+            right: 0;
+        }
+    }
+    .sharee-container__viewport  {
+        width: 100% !important;
+        height: auto !important;
+        margin-right: 0 !important;
+    }
+}

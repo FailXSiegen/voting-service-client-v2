@@ -7,6 +7,7 @@
         <div class="col-12 py-3 order-1 order-md-2">
           <h1>{{ headline }}</h1>
           <app-event-mask
+            v-if="eventRecord.id"
             :eventRecord="eventRecord"
             @mutateEvent="updateEvent"
           />
@@ -22,7 +23,7 @@ import AppEventMask from '@/organizer/components/events/EventMask'
 import { localize } from '@/frame/lib/localization-helper'
 import { convertUnixTimeStampForDatetimeLocaleInput } from '@/frame/lib/time-stamp'
 import { fetchEventBySlug } from '@/user/api/fetch/event'
-import { addDangerMessage } from '@/frame/lib/alert-helper'
+import { addDangerMessage, addSuccessMessage } from '@/frame/lib/alert-helper'
 import { UPDATE_EVENT_MUTATION } from '@/organizer/api/graphql/gql/mutations'
 import moment from 'moment'
 
@@ -33,14 +34,23 @@ export default {
     if (
       response === null ||
       response.success === false ||
+      response.event === null ||
       response.event.organizerId !== this.$store.getters.getCurrentUserId
     ) {
-      await this.$router.push('/admin/events')
+      console.log(response)
+      // await this.$router.push('/admin/events')
     }
+
     this.eventRecord = response.event
-    this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
-      this.eventRecord.scheduledDatetime
-    )
+    if (
+      this.eventRecord &&
+      this.eventRecord.scheduledDatetime &&
+      Number.isInteger(this.eventRecord.scheduledDatetime)
+    ) {
+      this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
+        this.eventRecord.scheduledDatetime
+      )
+    }
   },
   props: {
     eventSlug: {
@@ -59,6 +69,7 @@ export default {
   },
   methods: {
     updateEvent () {
+      // @todo move converting to dedicated module!
       const updateEvent = JSON.parse(JSON.stringify(this.eventRecord))
       delete updateEvent.createDatetime
       delete updateEvent.__typename
@@ -66,21 +77,40 @@ export default {
       delete updateEvent.deleted
       delete updateEvent.imagePath
       delete updateEvent.organizerId
-      delete updateEvent.meetingType
-      delete updateEvent.meetingId
+      delete updateEvent.deletePlanned
+      delete updateEvent.deleteDatetime
       updateEvent.active =
         updateEvent.active === true || updateEvent.active === 1
       updateEvent.lobbyOpen =
         updateEvent.lobbyOpen === true || updateEvent.lobbyOpen === 1
-      updateEvent.scheduledDatetime = this.convertScheduledDatetime()
+      updateEvent.scheduledDatetime = this.convertScheduledDatetimeToTimestamp(
+        updateEvent.scheduledDatetime
+      )
       updateEvent.multivoteType = parseInt(updateEvent.multivoteType)
+
+      // Handle meeting data.
+      delete updateEvent.meeting
+      if (updateEvent.meetingId) {
+        updateEvent.meeting = {
+          meetingId: updateEvent.meetingId,
+          meetingType: updateEvent.meetingType
+        }
+      }
+      delete updateEvent.meetingId
+      delete updateEvent.meetingType
+
       this.$apollo
         .mutate({
           mutation: UPDATE_EVENT_MUTATION,
           variables: { input: updateEvent }
         })
         .then(() => {
-          window.location = '/admin/events'
+          addSuccessMessage(
+            'Gespeichert',
+            'Das Event wurde gespeichert.<br /><br /><a class="btn btn-primary" href="/admin/events">Zurück zu den Events</a>',
+            true
+          )
+          // window.location = '/admin/events'
         })
         .catch(error => {
           addDangerMessage(
@@ -91,7 +121,7 @@ export default {
           console.error(error)
         })
     },
-    convertScheduledDatetime () {
+    convertScheduledDatetimeToTimestamp () {
       if (this.eventRecord.scheduledDatetime) {
         return moment(
           this.eventRecord.scheduledDatetime,

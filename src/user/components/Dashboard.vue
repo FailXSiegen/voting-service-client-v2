@@ -78,6 +78,39 @@
           <p class="d-print-none" v-if="eventRecord.description">
             {{ eventRecord.description }}
           </p>
+          <hr v-if="!openMeeting" />
+
+          <button
+            @click.prevent="onJoinMeeting"
+            v-if="!openMeeting"
+            class="btn btn-primary"
+          >
+            An Videokonferenz teilnehmen
+          </button>
+
+          <div class="meeting" v-if="openMeeting">
+            <div class="container-zoom">
+              <div id="zoom-hook"></div>
+              <ZoomFrame
+                v-if="eventRecord.meeting.credentials"
+                :apiKey="eventRecord.meeting.apiKey"
+                :apiSecret="eventRecord.meeting.apiSecret"
+                :nickname="eventUser.publicName"
+                :meetingId="eventRecord.meeting.credentials.id"
+                :password="eventRecord.meeting.credentials.password"
+                :returnUrl="eventRecord.slug"
+              />
+              <div
+                class="btn btn-primary position-fixed sticky-top mt-2"
+                @click.prevent="onToggleVideoConference"
+                title="Ansicht wechseln"
+              >
+                <i class="bi bi-arrow-repeat bi--2xl"></i>
+              </div>
+            </div>
+          </div>
+
+          <hr v-if="!openMeeting" />
           <hr class="d-print-none" />
           <div class="container-poll-status d-print-none">
             <div
@@ -122,6 +155,15 @@
             :trigger="openModal"
             @onSubmitPoll="submitPoll"
             ref="pollModal"
+          />
+          <app-modal-poll-result
+            v-if="lastPollResult && pollState === 'closed'"
+            :identifier="'pollResult' + lastPollResult.id"
+            :pollResult="lastPollResult"
+            :eventRecord="eventRecord"
+            :trigger="openModalResult"
+            ref="pollResultModal"
+            @onCloseResultModal="closeResultModal"
           />
           <button
             v-if="showMoreEnabled && pollResult"
@@ -171,15 +213,19 @@ import {
   EVENT_USER_BY_ID
 } from '@/user/api/graphql/gql/queries'
 import AppModalPoll from '@/user/components/modal/Poll'
+import AppModalPollResult from '@/user/components/modal/PollResult'
 import AppResults from '@/organizer/components/events/detail/ResultsListing'
 import { onLogout as apolloOnLogout, wsLink } from '@/vue-apollo'
 import { CREATE_POLL_SUBMIT_ANSWER } from '@/user/api/graphql/gql/mutations'
 import $ from 'jquery'
+import ZoomFrame from '@/user/components/video-conference/ZoomFrame.vue'
 
 export default {
   components: {
     AppModalPoll,
-    AppResults
+    AppModalPollResult,
+    AppResults,
+    ZoomFrame
   },
   props: {
     eventRecord: {
@@ -242,6 +288,9 @@ export default {
         }
       },
       result ({ data }) {
+        if (data.pollResult && data.pollResult.length > 0) {
+          this.lastPollResult = data.pollResult[0]
+        }
         if (data.pollResult && data.pollResult.length === 1) {
           this.showMoreEnabled = true
         }
@@ -282,12 +331,19 @@ export default {
             ) {
               this.reloadPage()
             }
+
+            if (this.$refs.pollModal) {
+              this.$refs.pollModal.close()
+            }
             this.poll = data.pollLifeCycle.poll
           }
           if (data.pollLifeCycle.pollResultId) {
             this.pollResultId = data.pollLifeCycle.pollResultId
           }
           if (data.pollLifeCycle.state === 'closed') {
+            if (this.openMeeting) {
+              this.openModalResult = true
+            }
             this.$apollo.queries.pollResult.refetch()
             this.showMoreEnabled = true
             this.page = 0
@@ -341,14 +397,18 @@ export default {
       poll: null,
       pollResultId: null,
       openModal: true,
-      pollState: '',
+      openModalResult: false,
+      pollState: 'closed',
       activePollEventUser: {},
       pollResult: [],
+      lastPollResult: {},
       page: 0,
       pageSize: 10,
       showMoreEnabled: false,
       voteCounter: 1,
-      overlayError: false
+      overlayError: false,
+      openMeeting: false,
+      dashboardForeground: false
     }
   },
   computed: {
@@ -357,6 +417,9 @@ export default {
     }
   },
   methods: {
+    closeResultModal () {
+      this.openModalResult = false
+    },
     showMorePollResults () {
       // Fetch more data and transform the original result
       this.$apollo.queries.pollResult.fetchMore({
@@ -459,6 +522,23 @@ export default {
           console.error(error)
         })
     },
+    onJoinMeeting () {
+      this.openMeeting = true
+    },
+    onToggleVideoConference () {
+      if (!this.dashboardForeground) {
+        $('body').addClass('zoom-hidden')
+        $('#zmmtg-root')
+          .addClass('hidden')
+          .hide()
+      } else {
+        $('body').addClass('zoom-show')
+        $('#zmmtg-root')
+          .removeClass('hidden')
+          .show()
+      }
+      this.dashboardForeground = !this.dashboardForeground
+    },
     localize (path) {
       return localize(path, this.$store.state.language)
     }
@@ -507,5 +587,10 @@ export default {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
   }
+}
+
+.container-zoom {
+  width: 70%;
+  height: 100%;
 }
 </style>

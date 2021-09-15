@@ -55,9 +55,23 @@ export default {
   },
   methods: {
     createEvent () {
+      // @todo move converting to dedicated module!
       const newEvent = JSON.parse(JSON.stringify(this.eventRecord))
       newEvent.scheduledDatetime = this.convertScheduledDatetime()
       newEvent.multivoteType = parseInt(newEvent.multivoteType)
+
+      // Handle meeting data.
+      if (newEvent.meetingId) {
+        newEvent.meeting = {
+          meetingId: newEvent.meetingId,
+          meetingType: newEvent.meetingType
+        }
+      }
+      delete newEvent.meetingId
+      delete newEvent.meetingType
+      delete newEvent.deletePlanned
+      delete newEvent.deleteDatetime
+
       this.$apollo
         .mutate({
           mutation: CREATE_EVENT_MUTATION,

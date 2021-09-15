@@ -92,17 +92,18 @@
                   </router-link>
                 </div>
                 <div class="col-12 col-lg-auto mb-4">
-                  <span
-                    class="btn btn-primary disabled btn-block py-3 px-0 d-flex flex-column h-100"
-                  >
-                    <span
-                      class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
-                      title="Videokonferenzsystem einrichten"
-                    ></span>
-                    <span class="nav-title mt-1 px-2">
-                      Videokonferenzsystem einrichten
+                  <router-link to="/admin/video-conference"
+                    class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4">
+                    <span class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100">
+                      <span
+                        class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
+                        title="Videokonferenzsystem einrichten"
+                      ></span>
+                      <span class="nav-title mt-1 px-2">
+                        Videokonferenzsysteme einrichten
+                      </span>
                     </span>
-                  </span>
+                  </router-link>
                 </div>
               </div>
             </div>

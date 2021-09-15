@@ -2,7 +2,7 @@
   <div :id="eventSlug">
     <slot name="alerts"></slot>
     <component
-      v-if="allowToRender && userRole != 'organizer'"
+      v-if="allowToRender && userRole !== 'organizer'"
       :eventRecord="eventRecord"
       v-bind:is="component"
       @logout="onLogout"

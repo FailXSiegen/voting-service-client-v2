@@ -26,7 +26,9 @@ import AppUserEvent from '@/user/views/Event'
 import AppCreateEventUser from '@/organizer/views/event/event-user/CreateEventUser'
 import AppCreateEventMultipleUser from '@/organizer/views/event/event-user/CreateEventMultipleUser'
 import AppUpdateEventUser from '@/organizer/views/event/event-user/UpdateEventUser'
-// import store from '@/store'
+import AppVideoConferenceListing from '@/organizer/views/video-conference/Listing'
+import AppVideoConferenceZoomNew from '@/organizer/views/video-conference/zoom/New'
+import AppVideoConferenceZoomEdit from '@/organizer/views/video-conference/zoom/Edit'
 
 Vue.use(VueRouter)
 
@@ -115,6 +117,25 @@ const routes = [
     path: '/admin/profile',
     name: 'Profile',
     component: AppProfile,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/video-conference',
+    name: 'VideoConference',
+    component: AppVideoConferenceListing,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/video-conference/zoom/new',
+    name: 'NewZoomMeeting',
+    component: AppVideoConferenceZoomNew,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin/video-conference/zoom/edit/:id',
+    name: 'EditZoomMeeting',
+    component: AppVideoConferenceZoomEdit,
+    props: true,
     meta: { requiresAuth: true }
   },
   {

@@ -211,6 +211,9 @@ export default {
       return localize(path, this.$store.state.language)
     },
     onTriggerModal () {
+      if ($('#zmmtg-root .root-inner').length > 0) {
+        $('#' + this.identifier).removeClass('fade')
+      }
       $('#' + this.identifier).modal('show')
     },
     validateCheckboxes () {

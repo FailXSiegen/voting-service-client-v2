@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /dist
+/public/lib
 
 # local env files
 .env
@@ -23,3 +24,6 @@ pnpm-debug.log*
 *.sw?
 /deploy_rsa
 /deploy_rsa.pub
+
+cypress/screenshots/*
+cypress/videos/*

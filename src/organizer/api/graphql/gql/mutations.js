@@ -136,3 +136,25 @@ export const UPDATE_ORGANIZER_VERIFICATION = gql`mutation updateOrganizer($input
 export const DELETE_ORGANIZER = gql`mutation deleteOrganizer($id: ID!){
   deleteOrganizer(id: $id)
 }`
+
+export const CREATE_ZOOM_MEETING = gql`mutation CreateZoomMeeting($input: CreateZoomMeetingInput!){
+  createZoomMeeting(input: $input) {
+    id
+    title
+    apiKey
+    apiSecret
+  }
+}`
+
+export const UPDATE_ZOOM_MEETING = gql`mutation CreateZoomMeeting($input: UpdateZoomMeetingInput!){
+  updateZoomMeeting(input: $input) {
+    id
+    title
+    apiKey
+    apiSecret
+  }
+}`
+
+export const DELETE_ZOOM_MEETING = gql`mutation deleteZoomMeeting($id: ID!){
+  deleteZoomMeeting(id: $id)
+}`

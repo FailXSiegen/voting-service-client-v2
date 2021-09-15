@@ -63,7 +63,7 @@ export const ALL_PAST_EVENTS = gql`
           publicName
           username
           email
-        } 
+        }
         createDatetime
         modifiedDatetime
         title
@@ -104,6 +104,12 @@ export const ORGANIZER = gql`
     verified
     superAdmin
     createDatetime
+    zoomMeetings {
+      id
+      title
+      apiKey
+      apiSecret
+    }
   }
 }
 `
@@ -172,6 +178,17 @@ export const ACTIVE_POLL_EVENT_USER = gql`
         publicName
         pollResultId
       }
+    }
+  }
+`
+
+export const ZOOM_MEETING = gql`
+  query GetZoomMeeting($id: ID!) {
+    zoomMeeting(id: $id) {
+      id
+      title
+      apiKey
+      apiSecret
     }
   }
 `

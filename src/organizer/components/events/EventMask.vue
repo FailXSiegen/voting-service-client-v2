@@ -79,6 +79,28 @@
         Veranstaltung aktiv
       </label>
     </div>
+    <div v-if="organizer" class="form-group">
+      <label>Videokonferenz-System-Auswahl</label>
+      <select
+        v-model="selectedMeetingId"
+        class="form-control"
+        @change="onChangeMeeting"
+      >
+        <option value="0" selected="selected">---</option>
+        <option
+          v-for="(meeting, index) in meetings"
+          :key="index"
+          :value="meeting.id"
+          >{{ meeting.title }}</option
+        >
+      </select>
+      <component
+        v-if="selectedMeetingId"
+        v-bind:is="videoConferenceConfigComponent"
+        :config="eventRecord.videoConferenceConfig"
+        @update="onUpdateVideoConferenceConfig"
+      />
+    </div>
     <hr />
     <h3>Mehrfachstimmenabgabe</h3>
     <p class="text-muted">
@@ -132,16 +154,29 @@
 import { localize } from '@/frame/lib/localization-helper'
 import { convertUnixTimeStampForDatetimeLocaleInput } from '@/frame/lib/time-stamp'
 import datePicker from 'vue-bootstrap-datetimepicker'
-import moment from 'moment'
+import { ORGANIZER } from '@/organizer/api/graphql/gql/queries'
+import { VideoConferenceType } from '@/enum'
+import AppZoomConfig from '@/organizer/components/events/detail/video-conference-config/ZoomConfig'
 
 export default {
   components: {
-    datePicker
+    datePicker,
+    AppZoomConfig
   },
   props: {
     eventRecord: {
       type: Object,
       required: true
+    }
+  },
+  apollo: {
+    organizer: {
+      query: ORGANIZER,
+      variables () {
+        return {
+          organizerId: this.$store.getters.getCurrentUserId
+        }
+      }
     }
   },
   data () {
@@ -160,14 +195,29 @@ export default {
           clear: 'bi-trash',
           close: 'bi-x-circle'
         }
-      }
+      },
+      organizer: null,
+      selectedMeetingId: 0,
+      selectedMeetingType: null
     }
   },
-  async created () {
-    if (this.eventRecord.scheduledDatetime) {
+  created () {
+    if (
+      this.eventRecord.scheduledDatetime &&
+      Number.isInteger(this.eventRecord.scheduledDatetime)
+    ) {
       this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
         this.eventRecord.scheduledDatetime
       )
+    }
+
+    if (
+      this.eventRecord.videoConferenceConfig &&
+      this.eventRecord.videoConferenceConfig.length > 0
+    ) {
+      const config = JSON.parse(this.eventRecord.videoConferenceConfig)
+      this.selectedMeetingId = config.id
+      this.selectedMeetingType = config.type
     }
   },
   methods: {
@@ -189,22 +239,57 @@ export default {
         .replace(/--/g, '')
         .toLowerCase()
     },
-    convertScheduledDatetime () {
-      if (this.eventRecord.scheduledDatetime) {
-        return moment(
-          this.eventRecord.scheduledDatetime,
-          'DD.MM.YYYY, HH:mm'
-        ).unix()
-      }
-      return 0
-    },
     onMutateEvent () {
       this.$emit('mutateEvent', {
         eventRecord: this.eventRecord
       })
     },
+    onChangeMeeting () {
+      const selectedMeeting =
+        this.meetings.filter(
+          meeting => meeting.id === this.selectedMeetingId
+        )[0] || null
+      if (selectedMeeting === null) {
+        this.selectedMeetingType = null
+        this.eventRecord.videoConferenceConfig = null
+        return
+      }
+      this.selectedMeetingType = selectedMeeting.type
+      this.eventRecord.videoConferenceConfig = JSON.stringify({
+        id: selectedMeeting.id,
+        type: selectedMeeting.type,
+        credentials: {}
+      })
+    },
+    onUpdateVideoConferenceConfig (event) {
+      this.eventRecord.videoConferenceConfig = JSON.stringify(event.config)
+    },
     localize (path) {
       return localize(path)
+    }
+  },
+  computed: {
+    meetings () {
+      const meetings = []
+      for (const meeting of this.organizer.zoomMeetings) {
+        meetings.push({
+          id: meeting.id,
+          title: '[Zoom] ' + meeting.title,
+          type: VideoConferenceType.ZOOM
+        })
+      }
+      return meetings
+    },
+    videoConferenceConfigComponent () {
+      const config = JSON.parse(this.eventRecord.videoConferenceConfig)
+      if (!config || !config.type) {
+        return null
+      }
+      switch (config.type) {
+        case VideoConferenceType.ZOOM:
+          return AppZoomConfig
+      }
+      return null
     }
   }
 }

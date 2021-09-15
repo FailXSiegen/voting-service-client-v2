@@ -176,7 +176,8 @@ export default {
 
 <style scoped>
 .status-indicator {
-  display: table;
+  display: inline-block;
   font-weight: initial;
+  margin: auto 0;
 }
 </style>

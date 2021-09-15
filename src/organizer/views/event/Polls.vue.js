@@ -299,7 +299,7 @@ export default {
           if (response.data.stopPoll) {
             location.reload()
           } else {
-            console.log('Could not close poll')
+            console.warn('Could not close poll')
           }
         })
         .catch(error => {
