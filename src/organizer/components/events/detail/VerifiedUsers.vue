@@ -110,6 +110,12 @@
             >
               <i class="bi-pencil align-middle"></i>
             </router-link>
+            <button
+              v-on:click="updateUserToWaitingroom(user)"
+              class="h-100 btn btn-danger"
+            >
+              <i class="bi-person-x align-middle"></i>
+            </button>
           </div>
         </div>
       </li>
@@ -121,7 +127,8 @@
 import { localize } from '@/frame/lib/localization-helper'
 import {
   UPDATE_USER_TO_GUEST,
-  UPDATE_USER_TO_PARTICIPANT
+  UPDATE_USER_TO_PARTICIPANT,
+  UPDATE_EVENT_USER
 } from '@/organizer/api/graphql/gql/mutations'
 
 export default {
@@ -150,6 +157,29 @@ export default {
         return
       }
       return 'active'
+    },
+    updateUserToWaitingroom (user) {
+      if (
+        confirm(
+          'Freischaltung deaktivieren? Nutzer wird in den Warteraum verschoben'
+        )
+      ) {
+        const eventUser = user
+        eventUser.verified = false
+        delete eventUser.online
+        delete eventUser.__typename
+        this.$apollo
+          .mutate({
+            mutation: UPDATE_EVENT_USER,
+            variables: { input: eventUser }
+          })
+          .then(() => {
+            user.verified = false
+          })
+          .catch(error => {
+            console.error(error)
+          })
+      }
     },
     updateUserToGuest (user) {
       const eventUserId = user.id
