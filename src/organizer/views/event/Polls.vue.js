@@ -79,7 +79,7 @@ export default {
         }
       },
       result ({ data }) {
-        if (data.activePollEventUser.pollUserVoted) {
+        if (data.activePollEventUser && data.activePollEventUser.pollUserVoted) {
           data.activePollEventUser.pollUserVoted.forEach(pollUserVoted => {
             data.activePollEventUser.pollUser.forEach((pollUser, index) => {
               if (pollUser.eventUserId === pollUserVoted.eventUserId) {
