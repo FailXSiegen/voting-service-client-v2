@@ -43,6 +43,9 @@ export const CREATE_POLL = gql`mutation createPoll($input: CreateNewPollInput!, 
     pollAnswer
     list
     type
+    maxVotes
+    minVotes
+    allowAbstain
     possibleAnswers {
       content
     }
