@@ -324,7 +324,7 @@ export default {
     setPossibleAnswerIds (pollAnswerId, pollAnswerContent) {
       this.abstain = false
       $('.form-check-input[name*="pollAllowAbstain"]').prop('checked', false)
-      this.validateCheckboxes()
+      // this.validateCheckboxes()
       if (
         this.pollSubmitAnswerInput.possibleAnswerIds.filter(
           possibleAnswerId => {
@@ -359,10 +359,10 @@ export default {
 .form-check-input {
   margin-left: -2.25rem;
   width: 30px;
-  height: 30px;
+  min-height: 30px;
 }
 .form-check-label {
-  height: 30px;
+  min-height: 30px;
   font-size: 24px;
   margin: 0 0 25px 0;
 }
