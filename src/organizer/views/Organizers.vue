@@ -143,7 +143,6 @@
 
 <script>
 import AppNavigation from '@/organizer/components/Navigation'
-import { addSuccessMessage } from '@/frame/lib/alert-helper'
 import { localize } from '@/frame/lib/localization-helper'
 import { ORGANIZER, ORGANIZERS } from '@/organizer/api/graphql/gql/queries'
 import {
@@ -189,12 +188,6 @@ export default {
     getCreateDatetimeFromTimestamp (item) {
       return createFormattedDateFromTimeStamp(item.createDatetime)
     },
-    emittedAlert () {
-      return addSuccessMessage(
-        'Erfolg',
-        'Keine Ahnung wie ich das gemacht habe.'
-      )
-    },
     activeSortParam (sortProperty) {
       if (sortProperty !== this.sortParam) {
         return
@@ -222,7 +215,7 @@ export default {
           .then(() => {
             this.$apollo.queries.organizers.refetch()
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(error)
           })
       }
@@ -243,7 +236,7 @@ export default {
           variables: { input: input }
         })
         .then(() => {})
-        .catch(error => {
+        .catch((error) => {
           console.error(error)
         })
     },
@@ -258,7 +251,7 @@ export default {
           variables: { input: input }
         })
         .then(() => {})
-        .catch(error => {
+        .catch((error) => {
           console.error(error)
         })
     }

@@ -75,9 +75,7 @@
         type="checkbox"
         id="active"
       />
-      <label class="form-check-label" for="active">
-        Veranstaltung aktiv
-      </label>
+      <label class="form-check-label" for="active"> Veranstaltung aktiv </label>
     </div>
     <div v-if="organizer" class="form-group">
       <label>Videokonferenz-System-Auswahl</label>
@@ -91,8 +89,9 @@
           v-for="(meeting, index) in meetings"
           :key="index"
           :value="meeting.id"
-          >{{ meeting.title }}</option
         >
+          {{ meeting.title }}
+        </option>
       </select>
       <component
         v-if="selectedMeetingId"
@@ -206,9 +205,10 @@ export default {
       this.eventRecord.scheduledDatetime &&
       Number.isInteger(this.eventRecord.scheduledDatetime)
     ) {
-      this.eventRecord.scheduledDatetime = convertUnixTimeStampForDatetimeLocaleInput(
-        this.eventRecord.scheduledDatetime
-      )
+      this.eventRecord.scheduledDatetime =
+        convertUnixTimeStampForDatetimeLocaleInput(
+          this.eventRecord.scheduledDatetime
+        )
     }
 
     if (
@@ -247,7 +247,7 @@ export default {
     onChangeMeeting () {
       const selectedMeeting =
         this.meetings.filter(
-          meeting => meeting.id === this.selectedMeetingId
+          (meeting) => meeting.id === this.selectedMeetingId
         )[0] || null
       if (selectedMeeting === null) {
         this.selectedMeetingType = null

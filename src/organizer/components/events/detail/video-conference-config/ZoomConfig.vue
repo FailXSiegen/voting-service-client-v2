@@ -1,7 +1,7 @@
 <template>
   <div v-if="resolvedConfig">
     <div class="form-group">
-      <label for="meetingId">Meeting id*</label>
+      <label for="meetingId">Meeting ID*</label>
       <input
         id="meetingId"
         v-model="resolvedConfig.credentials.id"
@@ -39,6 +39,8 @@ export default {
   },
   methods: {
     onChange () {
+      this.resolvedConfig.credentials.id =
+        this.resolvedConfig.credentials.id.replace(/\s+/g, '')
       this.$emit('update', {
         config: this.resolvedConfig
       })

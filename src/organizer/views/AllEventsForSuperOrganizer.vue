@@ -111,12 +111,6 @@ export default {
     localize (path) {
       return localize(path)
     },
-    emittedAlert () {
-      return addSuccessMessage(
-        'Erfolg',
-        'Keine Ahnung wie ich das gemacht habe.'
-      )
-    },
     showMorePastEvents () {
       this.page++
       // Fetch more data and transform the original result
@@ -150,7 +144,7 @@ export default {
           this.$apollo.queries.allUpcomingEvents.refetch()
           this.$apollo.queries.allPastEvents.refetch()
         })
-        .catch(error => {
+        .catch((error) => {
           addDangerMessage(
             'Fehler',
             'Das Event konnte nicht geupdated werden. Für weitere Informationen lohnt ein Blick in die Console.',
@@ -190,7 +184,7 @@ export default {
             )
           }
         })
-        .catch(error => {
+        .catch((error) => {
           addDangerMessage(
             'Fehler',
             'Die Veranstaltung konnte nicht gelöscht werden.'

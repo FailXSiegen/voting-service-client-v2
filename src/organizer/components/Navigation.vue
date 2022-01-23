@@ -46,8 +46,8 @@
       @click="onLogout"
       class="logout btn btn-danger py-1 d-flex align-items-center"
     >
-      <i class="mr-3 bi bi-x-square bi--2xl"></i>
-      {{ localize('navigation.logOut') }}
+      <i class="mr-md-3 bi bi-x-square bi--2xl"></i>
+      <span class="d-none d-md-block">{{ localize('navigation.logOut') }}</span>
     </button>
   </nav>
 </template>

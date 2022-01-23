@@ -41,6 +41,10 @@
 @import 'organizer/organizers';
 @import "~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.min.css";
 
+$bootstrap-icons-font-src: url("../fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
+url("../fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");
+@import '~bootstrap-icons/font/bootstrap-icons';
+
 .form-group {
   margin: .5rem 0;
 }
@@ -52,4 +56,24 @@
 button:disabled, .btn-disabled, .disabled {
   cursor: not-allowed;
   pointer-events: all !important;
+}
+span, i {
+  &[class*="bi"] {
+    font-size:14px;
+    &.bi--2xl {
+      font-size:28px;
+    }
+    &.bi--3xl {
+      font-size:36px;
+    }
+    &.bi--4xl {
+      font-size:48px;
+    }
+    &.bi--5xl {
+      font-size:54px;
+    }
+    &.bi--6xl {
+      font-size:60px;
+    }
+  }
 }

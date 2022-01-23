@@ -28,7 +28,7 @@
         <div class="col-12 text-center">
           <div
             class="spinner-border mb-5"
-            style="width: 3rem; height: 3rem;"
+            style="width: 3rem; height: 3rem"
             role="status"
           >
             <span class="sr-only">Loading...</span>
@@ -180,14 +180,14 @@
       </div>
       <button
         @click="onLogout"
-        class="logout btn btn-danger py-2 d-flex align-items-center d-print-none"
+        class="logout btn btn-danger py-1 d-flex align-items-center d-print-none"
       >
         <i class="mr-3 bi bi-x-square bi--2xl"></i>
         {{ localize('navigation.logOut') }}
       </button>
       <button
         @click="reloadPage"
-        class="reload btn btn-info py-2 d-flex align-items-center d-print-none"
+        class="reload btn btn-info py-1 d-flex align-items-center d-print-none"
       >
         <i class="mr-3 bi bi-arrow-repeat bi--1xl"></i>
         {{ localize('navigation.reload') }}
@@ -266,7 +266,7 @@ export default {
           data.activePollEventUser &&
           data.activePollEventUser.poll &&
           data.activePollEventUser.pollUserVoted.findIndex(
-            x => x.eventUserId === this.eventUser.id
+            (x) => x.eventUserId === this.eventUser.id
           ) === -1
         ) {
           this.poll = data.activePollEventUser.poll
@@ -505,7 +505,7 @@ export default {
             input: answer
           }
         })
-        .then(response => {
+        .then((response) => {
           if (
             voteCounter === this.eventUser.voteAmount ||
             this.eventRecord.multivoteType === 2 ||
@@ -517,7 +517,7 @@ export default {
             this.voteCounter = 1
           }
         })
-        .catch(error => {
+        .catch((error) => {
           addDangerMessage('Fehler', 'Die Stimmenabgabe war nicht erfolgreich')
           console.error(error)
         })
@@ -528,14 +528,10 @@ export default {
     onToggleVideoConference () {
       if (!this.dashboardForeground) {
         $('body').addClass('zoom-hidden')
-        $('#zmmtg-root')
-          .addClass('hidden')
-          .hide()
+        $('#zmmtg-root').addClass('hidden').hide()
       } else {
         $('body').addClass('zoom-show')
-        $('#zmmtg-root')
-          .removeClass('hidden')
-          .show()
+        $('#zmmtg-root').removeClass('hidden').show()
       }
       this.dashboardForeground = !this.dashboardForeground
     },

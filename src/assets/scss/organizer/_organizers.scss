@@ -24,7 +24,10 @@
 }
 .navbar {
     > .h5 {
-        margin-left: 100px;
+        margin-left: 70px;
+        @media screen AND (min-width: 991px) {
+            margin-left: 90px;
+        }
     }
 }
 .navbar.fixed-top {
@@ -93,8 +96,8 @@
 @media screen AND (min-width: 991px) {
     .logout {
         position: fixed;
-        top: 1rem;
-        right: 1rem;
+        top: 10px;
+        right: 10px;
         width: auto;
     }
 }

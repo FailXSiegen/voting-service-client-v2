@@ -83,12 +83,6 @@ export default {
     localize (path) {
       return localize(path)
     },
-    emittedAlert () {
-      return addSuccessMessage(
-        'Erfolg',
-        'Keine Ahnung wie ich das gemacht habe.'
-      )
-    },
     deleteEvent (eventId) {
       this.$apollo
         .mutate({
@@ -120,7 +114,7 @@ export default {
             )
           }
         })
-        .catch(error => {
+        .catch((error) => {
           addDangerMessage(
             'Fehler',
             'Die Veranstaltung konnte nicht gelöscht werden.'

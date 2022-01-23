@@ -1,4 +1,6 @@
 const path = require('path')
+const CopyPlugin = require('copy-webpack-plugin')
+
 module.exports = {
   pluginOptions: {
     'style-resources-loader': {
@@ -10,26 +12,37 @@ module.exports = {
     }
   },
   css: {
-    extract: { filename: 'styles.css' }
+    extract: { filename: 'style.[name].css' }
   },
-  chainWebpack: config => {
-    config.module
-      .rule('fonts')
-      .use('url-loader')
-      .loader('url-loader')
-      .tap(options => {
-        options.fallback.options.name = '../../fonts/[name].[ext]'
-        return options
+  configureWebpack: {
+    performance: {
+      hints: false
+    },
+    module: {
+      rules: [
+        {
+          test: /\.(png|jpg|gif)$/i,
+          use: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: 8192
+              }
+            }
+          ]
+        }
+      ]
+    },
+    watch: true,
+    plugins: [
+      new CopyPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'node_modules/@zoomus/websdk/dist/lib'),
+            to: path.resolve(__dirname, 'dist/lib/zoom/lib')
+          }
+        ]
       })
-    config.plugin('copy')
-      .tap(args => {
-        args[0].push({
-          from: path.resolve(__dirname, 'node_modules/@zoomus/websdk/dist/lib'),
-          to: path.resolve(__dirname, 'dist/lib/zoom/lib'),
-          toType: 'dir',
-          ignore: ['.DS_Store']
-        })
-        return args
-      })
+    ]
   }
 }

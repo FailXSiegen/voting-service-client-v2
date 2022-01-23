@@ -169,7 +169,7 @@ export default {
       }
     },
     fallbackCopyTextToClipboard (text) {
-      var textArea = document.createElement('textarea')
+      const textArea = document.createElement('textarea')
       textArea.value = text
 
       // Avoid scrolling to bottom

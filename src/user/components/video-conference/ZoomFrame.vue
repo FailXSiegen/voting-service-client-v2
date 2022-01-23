@@ -35,7 +35,7 @@ export default {
     ZoomMtg.i18n.load('de-DE')
     ZoomMtg.i18n.reload('de-DE')
 
-    var me = this
+    const me = this
     // Meeting config object
     this.meetConfig = {
       apiKey: this.apiKey,
@@ -65,10 +65,10 @@ export default {
   },
   methods: {
     setCookie (cname, cvalue) {
-      var exdays = 1
-      var d = new Date()
+      const exdays = 1
+      const d = new Date()
       d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000)
-      var expires = 'expires=' + d.toUTCString()
+      const expires = 'expires=' + d.toUTCString()
       document.cookie = cname + '=' + cvalue + ';' + expires + ';path=/'
     },
     join (me, res) {
