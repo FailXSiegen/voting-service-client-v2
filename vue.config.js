@@ -18,22 +18,6 @@ module.exports = {
     performance: {
       hints: false
     },
-    module: {
-      rules: [
-        {
-          test: /\.(png|jpg|gif)$/i,
-          use: [
-            {
-              loader: 'url-loader',
-              options: {
-                encoding: false
-              }
-            }
-          ]
-        }
-      ]
-    },
-    watch: true,
     plugins: [
       new CopyPlugin({
         patterns: [
