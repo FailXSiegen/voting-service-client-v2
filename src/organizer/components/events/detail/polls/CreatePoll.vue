@@ -86,6 +86,7 @@
           <input
             v-model="newPoll.maxVotes"
             type="number"
+            min="0"
             class="form-control w-auto"
             id="pollAnswerPossibilitiesCustomListMaximal"
             aria-describedby="pollAnswerPossibilitiesCustomListMaximalHelpBlock"
@@ -104,6 +105,7 @@
           <input
             v-model="newPoll.minVotes"
             type="number"
+            min="0"
             class="form-control w-auto"
             id="pollAnswerPossibilitiesCustomListMinimal"
             aria-describedby="pollAnswerPossibilitiesCustomListMinimalHelpBlock"
@@ -264,11 +266,26 @@ export default {
     }
   },
   methods: {
-    createPoll () {
-      let createPollObject = JSON.parse(JSON.stringify(this.newPoll))
-      if (createPollObject.maxVotes < createPollObject.minVotes) {
+    validateVotesCounter (pollObject) {
+      let isValid = true
+      if (pollObject.maxVotes < 0) {
+        $('#pollAnswerPossibilitiesCustomListMaximal').addClass('is-invalid')
+        isValid = false
+      }
+      if (pollObject.minVotes < 0) {
+        $('#pollAnswerPossibilitiesCustomListMinimal').addClass('is-invalid')
+        isValid = false
+      }
+      if (pollObject.maxVotes < pollObject.minVotes) {
         $('#pollAnswerPossibilitiesCustomListMinimal').addClass('is-invalid')
         $('#pollAnswerPossibilitiesCustomListMaximal').addClass('is-invalid')
+        isValid = false
+      }
+      return isValid
+    },
+    createPoll () {
+      let createPollObject = JSON.parse(JSON.stringify(this.newPoll))
+      if (!this.validateVotesCounter(createPollObject)) {
         return false
       }
       createPollObject = convertPollAnswers(createPollObject)
@@ -282,9 +299,7 @@ export default {
     },
     updatePoll (instantStart) {
       let updatePollObject = JSON.parse(JSON.stringify(this.newPoll))
-      if (updatePollObject.maxVotes < updatePollObject.minVotes) {
-        $('#pollAnswerPossibilitiesCustomListMinimal').addClass('is-invalid')
-        $('#pollAnswerPossibilitiesCustomListMaximal').addClass('is-invalid')
+      if (!this.validateVotesCounter(instantStart)) {
         return false
       }
       updatePollObject = convertPollAnswers(updatePollObject)

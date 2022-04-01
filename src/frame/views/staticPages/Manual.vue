@@ -4,7 +4,7 @@
     <div class="alert alert-info">
       <div class="row">
         <div class="col-2 text-center">
-          <i class="bi bi-exclamation-circle display-2"></i>
+          <i class="bi bi-exclamation-circle bi--6xl"></i>
         </div>
         <div class="col d-flex align-items-center">
           <p>
@@ -197,9 +197,7 @@
       </span>
       <div class="media-body">
         <h3>Dashboard</h3>
-        <p>
-          Übersicht aller bevorstehenden Veranstaltungen
-        </p>
+        <p>Übersicht aller bevorstehenden Veranstaltungen</p>
       </div>
     </div>
     <hr />
@@ -294,9 +292,7 @@
           Nach Klick auf die Veranstaltungens-Details erscheint die Übersicht
           der Nutzer
         </p>
-        <p>
-          Im oberen Bereich sehen Sie zusammengefasst Nutzerinformationen.
-        </p>
+        <p>Im oberen Bereich sehen Sie zusammengefasst Nutzerinformationen.</p>
         <p>
           Es besteht die Möglichkeit, Nutzer zu bearbeiten. Sie können die Rolle
           (Teilnehmer/Gast) eines Nutzer mit einem Klick auf den Button "Setzen
@@ -469,9 +465,7 @@
               <span aria-hidden="true">&times;</span
               ><span class="sr-only">Schließen</span>
             </button>
-            <h4 class="modal-title" id="popLoginLabel">
-              Vergrößerung
-            </h4>
+            <h4 class="modal-title" id="popLoginLabel">Vergrößerung</h4>
           </div>
           <div class="modal-body text-center">
             <img src="" alt="" id="imagepreview" class="img img-fluid" />
@@ -499,12 +493,7 @@ export default {
   },
   mounted () {
     $('.pop').on('click', function () {
-      $('#imagepreview').attr(
-        'src',
-        $(this)
-          .find('.img-thumbnail')
-          .attr('src')
-      )
+      $('#imagepreview').attr('src', $(this).find('.img-thumbnail').attr('src'))
       $('#imagemodal').modal('show')
     })
   }

@@ -23,7 +23,12 @@
     >
       <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-          <form @submit.prevent="submitPoll">
+          <form
+            id="poll-form"
+            @submit.prevent="submitPoll"
+            class="needs-validation"
+            novalidate
+          >
             <div class="modal-header">
               <h5 class="modal-title" :id="identifier + 'Title'">
                 {{ poll.title }}<br />
@@ -236,7 +241,7 @@ export default {
             }
           })
         } else {
-          if (checkCounter > 0) {
+          if (checkCounter > 0 && checkCounter >= this.poll.maxVotes) {
             validateCheckbox.each(function (index, element) {
               if (!$(element).prop('checked')) {
                 $(element).attr('disabled', 'disabled')
@@ -253,6 +258,12 @@ export default {
       }
     },
     submitPoll () {
+      const form = $('#poll-form')
+      if (form.get(0).checkValidity() === false) {
+        form.addClass('was-validated')
+        return false
+      }
+
       if (
         this.poll.minVotes > 0 &&
         this.poll.minVotes > this.pollSubmitAnswerInput.answerContents.length &&
@@ -324,17 +335,17 @@ export default {
     setPossibleAnswerIds (pollAnswerId, pollAnswerContent) {
       this.abstain = false
       $('.form-check-input[name*="pollAllowAbstain"]').prop('checked', false)
-      // this.validateCheckboxes()
+      this.validateCheckboxes()
       if (
         this.pollSubmitAnswerInput.possibleAnswerIds.filter(
-          possibleAnswerId => {
+          (possibleAnswerId) => {
             return possibleAnswerId.id === pollAnswerId
           }
         ).length > 0
       ) {
         this.pollSubmitAnswerInput.possibleAnswerIds.splice(
           this.pollSubmitAnswerInput.possibleAnswerIds.findIndex(
-            possibleAnswerId => possibleAnswerId.id === pollAnswerId
+            (possibleAnswerId) => possibleAnswerId.id === pollAnswerId
           ),
           1
         )
