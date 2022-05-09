@@ -112,6 +112,11 @@ export default {
       }
     }
   },
+  mounted () {
+    const urlParams = new URLSearchParams(window.location.search)
+    const getUsername = urlParams.get('username')
+    this.eventUser.username = getUsername
+  },
   methods: {
     localize (path) {
       return localize(path, this.$store.state.language)
