@@ -20,7 +20,7 @@
       <h2 class="mb-3">Unterstützt und gefördert von:</h2>
       <hr class="d-none d-sm-block" />
       <div class="row align-items-baseline">
-        <div class="col-sm-auto col-12">
+        <div class="col-sm col-12">
           <figure class="figure">
             <a
               href="https://www.zusammenhalt-durch-teilhabe.de/"
@@ -39,7 +39,7 @@
             </figcaption>
           </figure>
         </div>
-        <div class="col-sm-auto col-12">
+        <div class="col-sm col-12">
           <figure class="figure">
             <a
               href="https://www.bmi.bund.de/"
@@ -55,7 +55,7 @@
             <figcaption class="figure-caption">BMI</figcaption>
           </figure>
         </div>
-        <div class="col-sm-auto col-12">
+        <div class="col-sm col-12">
           <figure class="figure">
             <a
               href="https://www.deutsche-chorjugend.de/"
@@ -74,7 +74,7 @@
       </div>
       <hr class="d-none d-sm-block" />
       <div class="row align-items-baseline">
-        <div class="col-sm-auto col-12">
+        <div class="col-sm col-12">
           <figure class="figure">
             <a
               href="https://www.s-chorverband.de/"
@@ -110,7 +110,7 @@
             </figcaption>
           </figure>
         </div>
-        <div class="col-sm-auto col-12">
+        <div class="col-sm col-12">
           <figure class="figure">
             <a
               href="http://www.saengerjugend.de/"
@@ -125,6 +125,27 @@
             </a>
             <figcaption class="figure-caption">
               Sängerjugend im Chorverband NRW e. V.
+            </figcaption>
+          </figure>
+        </div>
+        </div>
+        <hr class="d-none d-sm-block" />
+        <div class="row align-items-baseline">
+         <div class="col-sm-4 col-12">
+          <figure class="figure">
+            <a
+              href="https://www.pro-stimme.de/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="../../../assets/images/logos/ProStimme.jpg"
+                class="figure-img img-fluid"
+                alt="proStimme GmbH"
+              />
+            </a>
+            <figcaption class="figure-caption">
+              proStimme GmbH
             </figcaption>
           </figure>
         </div>
