@@ -12,8 +12,8 @@ const localizations = {
     view: {
       login: {
         label: {
-          username: 'E-Mail oder Mitgliedsnummer*',
-          usernameHelp: 'Als Benutzername dient Ihre Mitgliedsnummer oder Ihre E-Mail Adresse. Die Informationen dienen zur Akkreditierung.',
+          username: 'Benutzername, E-Mail oder Mitgliedsnummer*',
+          usernameHelp: 'Als Benutzername dient Ihre Mitgliedsnummer, Ihre E-Mail Adresse oder eine individuelle Kennung. Die Informationen dienen zur Akkreditierung.<br /><b>Bitte beachten Sie die Vorgaben Ihres Veranstalters</b>',
           email: 'E-Mail*',
           password: 'Passwort*',
           passwordHelp: 'Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zur Veranstaltung benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.',

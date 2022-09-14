@@ -18,7 +18,7 @@
                 @submit.prevent="onLogin"
                 autocomplete="off"
               >
-                <div class="form-group">
+                <div class="form-group mb-5">
                   <label for="username">{{
                     localize('view.login.label.username')
                   }}</label>
@@ -30,9 +30,9 @@
                     class="form-control"
                     required="required"
                   />
-                  <small>{{ localize('view.login.label.usernameHelp') }}</small>
+                  <small v-html="localize('view.login.label.usernameHelp')"></small>
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-5">
                   <label for="password">{{
                     localize('view.login.label.password')
                   }}</label>
@@ -47,7 +47,7 @@
                   />
                   <small>{{ localize('view.login.label.passwordHelp') }}</small>
                 </div>
-                <div class="form-group">
+                <div class="form-group  mb-5">
                   <label for="publicName">{{
                     localize('view.login.label.publicName')
                   }}</label>
