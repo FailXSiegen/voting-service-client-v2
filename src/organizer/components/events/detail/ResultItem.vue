@@ -52,9 +52,10 @@
                   >({{
                     getAnswerPercentage(
                       answer.length,
-                      pollResult.pollAnswer.length
+                      pollResult.pollAnswer.length,
+                      pollResult
                     )
-                  }}%)</span
+                  }})</span
                 >
               </span>
             </li>
@@ -183,8 +184,12 @@ export default {
       }
       return userFound.publicName
     },
-    getAnswerPercentage: function (answerLength, answerTotal) {
-      return ((answerLength / answerTotal) * 100).toFixed(2)
+    getAnswerPercentage: function (answerLength, answerTotal, pollResult) {
+      if (pollResult.poll.pollAnswer !== 'custom') {
+        return ((answerLength / answerTotal) * 100).toFixed(2) + '%'
+      } else {
+        return ((answerLength / pollResult.maxVoteCycles) * 100).toFixed(2) + '% // ' + ((answerLength / answerTotal) * 100).toFixed(2) + '%'
+      }
     }
   }
 }

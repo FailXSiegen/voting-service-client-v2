@@ -6,9 +6,11 @@ export const POLLS_RESULTS = gql`
       id
       type
       maxVotes
+      maxVoteCycles
       createDatetime
       poll {
         title
+        pollAnswer
       }
       pollAnswer {
         id
