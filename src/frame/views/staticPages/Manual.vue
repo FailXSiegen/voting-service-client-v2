@@ -50,7 +50,7 @@
     </ul>
     <hr />
     <h2 id="teilnehmer" class="mb-3">Für Teilnehmer</h2>
-    <div id="loginmaske" class="media">
+    <div id="loginmaske" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/teilnehmer/loginmaske.png"
@@ -90,7 +90,7 @@
       </div>
     </div>
     <hr />
-    <div id="warteraum" class="media">
+    <div id="warteraum" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/teilnehmer/warteraum.png"
@@ -114,7 +114,7 @@
       </div>
     </div>
     <hr />
-    <div id="gast" class="media">
+    <div id="gast" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/teilnehmer/gast.png"
@@ -133,7 +133,7 @@
       </div>
     </div>
     <hr />
-    <div id="stimmrecht" class="media">
+    <div id="stimmrecht" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/teilnehmer/stimmrecht.png"
@@ -155,7 +155,7 @@
       </div>
     </div>
     <hr />
-    <div id="demoabstimmung" class="media">
+    <div id="demoabstimmung" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/teilnehmer/demoabstimmung.png"
@@ -186,7 +186,7 @@
     </div>
     <hr />
     <h2 id="organisator" class="mb-3">Für Organisatoren</h2>
-    <div id="dashboard" class="media">
+    <div id="dashboard" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/dashboard.png"
@@ -201,7 +201,7 @@
       </div>
     </div>
     <hr />
-    <div id="uebersicht" class="media">
+    <div id="uebersicht" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/uebersicht.png"
@@ -226,7 +226,7 @@
       </div>
     </div>
     <hr />
-    <div id="eventerstellen" class="media">
+    <div id="eventerstellen" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/eventerstellen.png"
@@ -277,7 +277,7 @@
       </div>
     </div>
     <hr />
-    <div id="event-teilnehmer" class="media">
+    <div id="event-teilnehmer" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/event-teilnehmer.png"
@@ -287,7 +287,7 @@
         />
       </span>
       <div class="media-body">
-        <h3>Veranstaltungs-Details</h3>
+        <h3>Veranstaltungs-Details<br />Nutzer anlegen</h3>
         <p>
           Nach Klick auf die Veranstaltungens-Details erscheint die Übersicht
           der Nutzer
@@ -304,10 +304,32 @@
           Stimme. Falls der Teilnehmer mehrere Stimmen vertritt muss der Nutzer
           im Detail geändert werden.
         </p>
+
       </div>
     </div>
+    <div class="alert alert-primary">
+          <div class="row">
+            <div class="col-1 text-center d-flex align-items-center">
+              <i class="bi bi-exclamation-circle bi--6xl"></i>
+            </div>
+            <div class="col d-flex align-items-center flex-column">
+              <p class="mb-0">
+                <b>Tipp</b>: Um den Nutzern einen komfortablen Einstieg zu ermöglichen kann man den Link zum Versenden individualisieren. Nutzen Sie hierzu die Serienmail-Funktion von Google oder Microsoft mit einer Tabelle aller Empfänger.
+
+              </p>
+              <ul>
+                <li>Parameter username - Füllt das Feld "Benutzername" aus</li>
+                <li>Parameter publicname - Füllt das Feld "Anzeige-Name" aus</li>
+              </ul>
+              <code class="py-3">
+                digitalwahl.org/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
+              </code>
+              <p>Wichtig ist, dass der Link Encodiert ist. Dafür gibt es Funktionen wie URLCODIEREN in Excel, die automatisch aus einem zusammengefügten Satz einen sauberen klickbaren Link generiert</p>
+            </div>
+          </div>
+        </div>
     <hr />
-    <div id="teilnehmer-editieren" class="media">
+    <div id="teilnehmer-editieren" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/teilnehmer-editieren.png"
@@ -329,7 +351,7 @@
       </div>
     </div>
     <hr />
-    <div id="event-warteraum" class="media">
+    <div id="event-warteraum" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/event-warteraum.png"
@@ -352,7 +374,7 @@
       </div>
     </div>
     <hr />
-    <div id="event-abstimmung" class="media">
+    <div id="event-abstimmung" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/abstimmung-erstellen.png"
@@ -365,8 +387,8 @@
         <h3>Abstimmung erstellen und starten</h3>
         <div class="alert alert-primary">
           <div class="row">
-            <div class="col-2 text-center">
-              <i class="bi bi-exclamation-circle display-4"></i>
+            <div class="col-1 text-center d-flex align-items-center">
+              <i class="bi bi-exclamation-circle bi--3xl"></i>
             </div>
             <div class="col d-flex align-items-center">
               <p class="mb-0">
@@ -404,7 +426,7 @@
       </div>
     </div>
     <hr />
-    <div id="event-abstimmung-beenden" class="media">
+    <div id="event-abstimmung-beenden" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/abstimmung-beenden.png"
@@ -428,7 +450,7 @@
       </div>
     </div>
     <hr />
-    <div id="event-ergebnisse" class="media">
+    <div id="event-ergebnisse" class="media flex-column flex-lg-row">
       <span class="btn pop">
         <img
           src="../../../assets/images/organisator/ergebnisliste.png"
