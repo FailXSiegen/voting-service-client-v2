@@ -115,7 +115,9 @@ export default {
   mounted () {
     const urlParams = new URLSearchParams(window.location.search)
     const getUsername = urlParams.get('username')
+    const getPublicName = urlParams.get('publicname')
     this.eventUser.username = getUsername
+    this.eventUser.publicName = getPublicName
   },
   methods: {
     localize (path) {
