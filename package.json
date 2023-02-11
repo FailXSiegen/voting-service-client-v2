@@ -1,71 +1,37 @@
 {
   "name": "voting-service-client",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "fix": "node_modules/.bin/eslint --fix ."
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "start-server-and-test preview :4173 'cypress run --e2e'",
+    "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' :4173 'cypress open --e2e'",
+    "test:unit": "cypress run --component",
+    "test:unit:dev": "cypress open --component",
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "format": "eslint --fix"
   },
   "dependencies": {
-    "@graphql-yoga/node": "^2.13.4",
-    "@vue/apollo-util": "^4.0.0-alpha.18",
-    "@zoomus/websdk": "^2",
-    "apollo-link-error": "^1.1.13",
-    "apollo-link-token-refresh": "^0.4",
-    "bootstrap": "^4.5",
-    "bootstrap-icons": "^1.7.2",
-    "chart.js": "^3.7.0",
-    "core-js": "^3.20.1",
-    "graphql": "^15",
-    "graphql-sse": "^1.3.0",
-    "jquery": "^3.5",
-    "popper.js": "^1.16.1",
-    "ramda": "^0.28",
-    "vue": "^2.6.14",
-    "vue-apollo": "^3.1.0",
-    "vue-bootstrap-datetimepicker": "^5.0.1",
-    "vue-chartjs": "^3.5.1",
-    "vue-meta": "^2.4.0",
-    "vue-router": "^3.5.3",
-    "vuex": "^3.6.2"
+    "@apollo/client": "^3.7.7",
+    "@popperjs/core": "^2.11.6",
+    "@vue/apollo-option": "^4.0.0-beta.2",
+    "@vueuse/head": "^1.0.24",
+    "bootstrap": "^4.6.2",
+    "bootstrap-icons": "^1.10.3",
+    "pinia": "^2.0.30",
+    "vue": "^3.2.45",
+    "vue-i18n": "^9.2.2",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^5.0.6",
-    "@vue/cli-plugin-eslint": "^5.0.6",
-    "@vue/cli-plugin-router": "^5.0.6",
-    "@vue/cli-plugin-vuex": "^5.0.6",
-    "@vue/cli-service": "^5.0.6",
-    "@vue/eslint-config-standard": "^6",
-    "babel-eslint": "^10.1.0",
-    "copy-webpack-plugin": "^11",
-    "cypress": "^9.2.0",
-    "eslint": "^7.32.0",
-    "eslint-plugin-cypress": "^2.11.3",
-    "eslint-plugin-import": "^2.20.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.0",
-    "eslint-plugin-vue": "^7.0.0",
-    "file-loader": "^6.2.0",
-    "graphql-tag": "^2.9.0",
-    "lint-staged": "^12.1.4",
-    "node-sass": "^7.0.1",
-    "sass-loader": "^12.4.0",
-    "style-resources-loader": "^1.5.0",
-    "url-loader": "^4.1.1",
-    "vue-cli-plugin-apollo": "^0.21.3",
-    "vue-cli-plugin-style-resources-loader": "~0.1.4",
-    "vue-template-compiler": "^2.6.14"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,jsx,vue}": [
-      "vue-cli-service lint",
-      "git add"
-    ]
+    "@vitejs/plugin-vue": "^4.0.0",
+    "cypress": "^12.0.2",
+    "eslint": "8.22.0",
+    "eslint-plugin-vue": "^9.9.0",
+    "sass": "^1.58.0",
+    "start-server-and-test": "^1.15.2",
+    "vite": "^4.0.0"
   }
 }
