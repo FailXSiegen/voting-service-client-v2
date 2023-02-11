@@ -1,13 +1,14 @@
 <template>
   <div
-    v-if="show"
-    class="to-top position-fixed bg-white"
+      v-if="show"
+      class="to-top position-fixed bg-white"
   >
     <button
-      class="btn btn-secondary"
-      @click.prevent="onClickToTopButton"
+        data-cy="to-top-btn"
+        class="btn btn-secondary"
+        @click.prevent="onClickToTopButton"
     >
-      <i class="bi bi-arrow-up-circle display-5" />
+      <i class="bi bi-arrow-up-circle display-5"/>
     </button>
   </div>
 </template>
