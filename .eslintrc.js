@@ -17,5 +17,9 @@ module.exports = {
     ],
     parserOptions: {
         ecmaVersion: 'latest'
+    },
+    rules: {
+        semi: [2, 'always'],
+        "no-multiple-empty-lines": [2, {"max": 1, "maxEOF": 0}]
     }
-}
+};

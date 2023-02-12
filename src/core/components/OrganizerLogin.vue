@@ -14,7 +14,7 @@
       >{{ $t('view.organizers.username') }}</label>
       <input
         id="username"
-        v-model="user.username"
+        v-model="username"
         name="username"
         class="login__form-control form-control"
         required="required"
@@ -29,7 +29,7 @@
       </label>
       <input
         id="password"
-        v-model="user.password"
+        v-model="password"
         class="login__form-control form-control"
         type="password"
         name="password"
@@ -51,11 +51,20 @@
 </template>
 
 <script setup>
-const user = {
-  password: ''
-}
+import {loginOrganizer} from "@/core/auth/login";
+import {handleError} from "@/core/error/error-handler";
+import {ref} from "vue";
+
+const username = ref('');
+const password = ref('');
 
 function onLogin() {
-  throw new Error('yet not implemented')
+  loginOrganizer(username.value, password.value)
+      .then((data) => {
+        console.log(data);
+        alert('Success');
+      })
+      .catch(error => handleError(error, {autoClose: false}));
+  // throw new Error('yet not implemented')
 }
 </script>

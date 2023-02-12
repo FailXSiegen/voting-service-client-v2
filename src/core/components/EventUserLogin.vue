@@ -33,9 +33,9 @@
 </template>
 
 <script setup>
-const eventSlug = ''
+const eventSlug = '';
 
 function onLogin() {
-  throw new Error('yet not implemented')
+  throw new Error('yet not implemented');
 }
 </script>

@@ -5,6 +5,6 @@ const l18n = createI18n({
     locale: 'de',
     fallbackLocale: 'de',
     messages
-})
+});
 
 export default l18n;

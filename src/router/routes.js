@@ -1,7 +1,7 @@
 import {useRouter} from "vue-router";
 
-export const RouteMainLogin = 'mainLogin'
-export const RouteOrganizerDashboard = 'organizerDashboard'
+export const RouteMainLogin = 'mainLogin';
+export const RouteOrganizerDashboard = 'organizerDashboard';
 
 /**
  * @param {String[]} routeNames Use constants in router.js
@@ -13,8 +13,8 @@ export function getRoutesByName(routeNames) {
     routeNames.forEach((targetName) => {
         const route = router.getRoutes().find(route => route.name === targetName);
         if (route) {
-            result.push(route)
+            result.push(route);
         }
-    })
-    return result
+    });
+    return result;
 }
