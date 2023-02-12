@@ -1,44 +1,38 @@
 <template>
   <form
-    id="organizer-form"
-    class="login__form login__form--organizer card p-3 border-primary"
+    id="organizer-login-form"
+    class="card p-3 border-primary"
     @submit.prevent="onLogin"
   >
-    <h2 class="login__form--headline mb-4">
+    <h2 class=" mb-4">
       {{ $t('view.login.headline.orgaLogin') }}
     </h2>
-    <div class="login__form-group form-group">
-      <label
-        class="login__label"
-        for="username"
-      >{{ $t('view.organizers.username') }}</label>
-      <input
-        id="username"
-        v-model="username"
-        name="username"
-        class="login__form-control form-control"
-        required="required"
-      >
+    <div class="form-group">
+      <BaseInput
+        id="organizer-login-username"
+        :label="$t('view.login.label.onlyUsername')"
+        :errors="v$.username.$errors"
+        :has-errors="v$.username.$errors.length > 0"
+        @change="({value}) => {formData.username = value;}"
+      />
     </div>
-    <div class="login__form-group form-group">
-      <label
-        class="login__label"
-        for="password"
-      >
-        {{ $t('view.login.label.password') }}
-      </label>
-      <input
-        id="password"
-        v-model="password"
-        class="login__form-control form-control"
-        type="password"
-        name="password"
-        required="required"
+    <div class="form-group">
+      <BaseInput
+        id="organizer-login-password"
+        :label="$t('view.login.label.password')"
+        :errors="v$.password.$errors"
+        :has-errors="v$.password.$errors.length > 0"
         autocomplete="new-password"
-      >
+        type="password"
+        @change="({value}) => {formData.password = value;}"
+      />
     </div>
-    <div class="login__form-group form-group">
-      <button class="login__button btn btn-primary w-100">
+    <div class="form-group">
+      <button
+        id="organizer-login-submit"
+        type="submit"
+        class="btn btn-primary w-100"
+      >
         {{ $t('view.login.submit') }}
       </button>
     </div>
@@ -52,19 +46,35 @@
 
 <script setup>
 import {loginOrganizer} from "@/core/auth/login";
+import BaseInput from '@/core/components/form/BaseInput.vue';
 import {handleError} from "@/core/error/error-handler";
-import {ref} from "vue";
+import {reactive} from "vue";
+import {useVuelidate} from '@vuelidate/core';
+import {required} from '@vuelidate/validators';
+import {InvalidFormError} from "@/core/error/InvalidFormError";
 
-const username = ref('');
-const password = ref('');
+// Form and validation setup.
+const formData = reactive({
+  username: '',
+  password: '',
+});
+const rules = {
+  username: {required},
+  password: {required},
+};
+const v$ = useVuelidate(rules, formData);
 
-function onLogin() {
-  loginOrganizer(username.value, password.value)
+async function onLogin() {
+  const result = await v$.value.$validate();
+  if (!result) {
+    handleError(new InvalidFormError());
+    return;
+  }
+  loginOrganizer(formData.username, formData.password)
       .then((data) => {
         console.log(data);
         alert('Success');
       })
       .catch(error => handleError(error, {autoClose: false}));
-  // throw new Error('yet not implemented')
 }
 </script>

@@ -59,31 +59,32 @@ button:disabled, .btn-disabled, .disabled {
   pointer-events: all !important;
 }
 
-span, i {
-  &[class*="bi"] {
-    font-size: 14px;
-
-    &.bi--2xl {
-      font-size: 28px;
-    }
-
-    &.bi--3xl {
-      font-size: 36px;
-    }
-
-    &.bi--4xl {
-      font-size: 48px;
-    }
-
-    &.bi--5xl {
-      font-size: 54px;
-    }
-
-    &.bi--6xl {
-      font-size: 60px;
-    }
-  }
-}
+//// @todo is this really necessary?
+//span, i {
+//  &[class*="bi"] {
+//    font-size: 14px;
+//
+//    &.bi--2xl {
+//      font-size: 28px;
+//    }
+//
+//    &.bi--3xl {
+//      font-size: 36px;
+//    }
+//
+//    &.bi--4xl {
+//      font-size: 48px;
+//    }
+//
+//    &.bi--5xl {
+//      font-size: 54px;
+//    }
+//
+//    &.bi--6xl {
+//      font-size: 60px;
+//    }
+//  }
+//}
 
 .was-validated .form-check-input:valid ~ .form-check-label, .form-check-input.is-valid ~ .form-check-label {
   color: inherit;
