@@ -34,7 +34,7 @@
         "submitToEvent": "In Veranstaltung einloggen",
         "registerAsOrganizer": "Als Organisator registrieren",
         "registerAsOrganizerInfo": "ACHTUNG: Betastatus!",
-        "invalidCredentials": "Invalid credentials",
+        "invalidCredentials": "Die Anmeldung ist wegen ungültiger Anmeldedaten fehlgeschlagen.",
         "asOrganizerLoggedIn": "Sie sind als Organisator eingeloggt. Bitte verwenden Sie zur Teilnahme an Abstimmungen einen anderen Browser oder ein anderes Endgerät."
       },
       "register": {
@@ -246,7 +246,10 @@
     },
     "error": {
       "network": {
-        "internalServerError": "Internal server error"
+        "internalServerError": "Interner Serverfehler.",
+        "consumerError": "Ihre Anfrage ist fehlerhaft.",
+        "undefinedError": "Ihre Anfrage ist fehlgeschlagen.",
+        "genericError": "Es tut uns leid, etwas ist schief gelaufen."
       }
     }
   },
