@@ -9,15 +9,16 @@
     "view": {
       "login": {
         "label": {
-          "username": "Benutzername, E-Mail oder Mitgliedsnummer*",
+          "username": "Benutzername, E-Mail oder Mitgliedsnummer *",
           "usernameHelp": "Als Benutzername dient Ihre Mitgliedsnummer, Ihre E-Mail Adresse oder eine individuelle Kennung. Die Informationen dienen zur Akkreditierung.<br /><b>Bitte beachten Sie die Vorgaben Ihres Veranstalters</b>",
-          "email": "E-Mail*",
-          "password": "Passwort*",
+          "email": "E-Mail *",
+          "password": "Passwort *",
           "passwordHelp": "Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zur Veranstaltung benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.",
           "lostPassword": "Passwort vergessen? Hier Link anfordern",
-          "publicName": "Anzeige-Name*",
+          "publicName": "Anzeige-Name *",
           "publicNameHelp": "Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die oberen 2 Felder.",
-          "eventIdent": "Veranstaltungs-ID eingeben*"
+          "eventIdent": "Veranstaltungs-ID eingeben *",
+          "onlyUsername": "Benutzername *"
         },
         "headline": {
           "title": "digitalwahl.org",
@@ -250,6 +251,10 @@
         "consumerError": "Ihre Anfrage ist fehlerhaft.",
         "undefinedError": "Ihre Anfrage ist fehlgeschlagen.",
         "genericError": "Es tut uns leid, etwas ist schief gelaufen."
+      },
+      "formValidation": {
+        "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
+        "required": "Dieses Feld muss ausgefüllt werden."
       }
     }
   },

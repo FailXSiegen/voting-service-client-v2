@@ -34,9 +34,3 @@ import OrganizerLogin from '@/core/components/OrganizerLogin.vue';
 import OrganizerRegister from '@/core/components/OrganizerRegister.vue';
 import LoginFooter from '@/core/components/LoginFooter.vue';
 </script>
-
-<style lang="scss">
-#main-login .form-group {
-  margin: .5rem 0;
-}
-</style>

@@ -1,6 +1,7 @@
 import {NetworkError} from "@/core/error/NetworkError";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
+import {InvalidFormError} from "@/core/error/InvalidFormError";
 
 /**
  * @param {Error|string} error
@@ -9,6 +10,8 @@ import i18n from "@/l18n";
 export function handleError(error, toastOptions = {}) {
     let errorMessage = i18n.global.tc('error.network.genericError');
     if (error instanceof NetworkError) {
+        errorMessage = error.message;
+    } else if (error instanceof InvalidFormError) {
         errorMessage = error.message;
     } else if (error instanceof Error && import.meta.env.PROD) {
         errorMessage = i18n.global.tc('error.network.genericError');

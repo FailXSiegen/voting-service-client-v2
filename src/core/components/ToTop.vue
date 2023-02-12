@@ -1,14 +1,15 @@
 <template>
+  <div id="test" />
   <div
-      v-if="show"
-      class="to-top position-fixed bg-white"
+    v-if="show"
+    class="to-top position-fixed bg-white"
   >
     <button
-        data-cy="to-top-btn"
-        class="btn btn-secondary"
-        @click.prevent="onClickToTopButton"
+      data-cy="to-top-btn"
+      class="btn btn-secondary"
+      @click.prevent="onClickToTopButton"
     >
-      <i class="bi bi-arrow-up-circle display-5"/>
+      <i class="bi bi-arrow-up-circle display-5" />
     </button>
   </div>
 </template>
@@ -17,7 +18,7 @@
 import {onMounted, ref} from "vue";
 
 const minHeight = 250;
-const show = ref(false)
+const show = ref(false);
 
 let lastKnownScrollPosition = 0;
 let ticking = false;
@@ -32,7 +33,7 @@ function onScroll() {
     window.requestAnimationFrame(() => {
       const shouldShowToTopButton = lastKnownScrollPosition >= minHeight;
       if (shouldShowToTopButton !== show.value) {
-        show.value = shouldShowToTopButton
+        show.value = shouldShowToTopButton;
       }
       ticking = false;
     });
@@ -42,7 +43,7 @@ function onScroll() {
 
 onMounted(() => {
   document.addEventListener("scroll", onScroll);
-})
+});
 
 </script>
 
