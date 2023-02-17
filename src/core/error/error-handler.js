@@ -2,6 +2,7 @@ import {NetworkError} from "@/core/error/NetworkError";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import {InvalidFormError} from "@/core/error/InvalidFormError";
+import {UnauthorizedError} from "@/core/error/UnauthorizedError";
 
 /**
  * @param {Error|string} error
@@ -13,6 +14,8 @@ export function handleError(error, toastOptions = {}) {
         errorMessage = error.message;
     } else if (error instanceof InvalidFormError) {
         errorMessage = error.message;
+    } else if (error instanceof UnauthorizedError) {
+        errorMessage = i18n.global.tc('error.network.unauthorized');
     } else if (error instanceof Error && import.meta.env.PROD) {
         errorMessage = i18n.global.tc('error.network.genericError');
     } else if (error instanceof Error && import.meta.env.DEV) {
