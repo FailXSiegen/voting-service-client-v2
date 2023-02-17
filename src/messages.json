@@ -36,6 +36,7 @@
         "registerAsOrganizer": "Als Organisator registrieren",
         "registerAsOrganizerInfo": "ACHTUNG: Betastatus!",
         "invalidCredentials": "Die Anmeldung ist wegen ungültiger Anmeldedaten fehlgeschlagen.",
+        "invalidRefreshToken": "Ihre Nutzersession ist abgelaufen. Bitte melden Sie sich erneut an.",
         "asOrganizerLoggedIn": "Sie sind als Organisator eingeloggt. Bitte verwenden Sie zur Teilnahme an Abstimmungen einen anderen Browser oder ein anderes Endgerät."
       },
       "register": {
@@ -250,7 +251,8 @@
         "internalServerError": "Interner Serverfehler.",
         "consumerError": "Ihre Anfrage ist fehlerhaft.",
         "undefinedError": "Ihre Anfrage ist fehlgeschlagen.",
-        "genericError": "Es tut uns leid, etwas ist schief gelaufen."
+        "genericError": "Es tut uns leid, etwas ist schief gelaufen.",
+        "unauthorized": "Leider ist ein Fehler aufgetreten. Möglicherweise ist Ihre Nutzersession ist abgelaufen. Bitte melden Sie sich erneut an."
       },
       "formValidation": {
         "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
