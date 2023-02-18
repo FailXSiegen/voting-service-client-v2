@@ -1,8 +1,9 @@
 import {defineStore} from "pinia";
-import {AUTH_TOKEN, resetClient} from "@/apollo-client";
+import {AUTH_TOKEN, resetClient, terminateClient} from "@/apollo-client";
 import {decodeJsonWebToken} from "@/core/auth/jwt-util";
-import {RouteOrganizerDashboard} from "@/router/routes";
+import {USER_TYPE_EVENT_USER, USER_TYPE_ORGANIZER} from "@/core/auth/login";
 import {router} from "@/router/router";
+import {RouteMainLogin} from "@/router/routes";
 
 export const useCore = defineStore('core', {
     state: () => ({
@@ -14,25 +15,45 @@ export const useCore = defineStore('core', {
             expiresAt: null
         },
     }),
+    getters: {
+        isActiveOrganiserSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER,
+        isActiveEventUserSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_EVENT_USER,
+        getActiveUserRole: (state) => state.user?.role,
+        getActiveUserName: (state) => state.user,
+    },
     actions: {
+        async init() {
+            // Check if window.localStorage is available.
+            if (typeof window.localStorage === 'undefined') {
+                throw new Error("Missing LocalStorage object, but it is required.");
+            }
+
+            if (this.user?.id) {
+                // Do not need to initialize, because we already have an active session.
+                return;
+            }
+
+            // Check if we have a token, but no active user session.
+            const token = localStorage.getItem(AUTH_TOKEN);
+            if (token && !this.user?.id) {
+                // Create a user session
+                return this.loginUser(token);
+            }
+        },
+
         /**
-         * @param {string} token
-         * @returns {Promise<NavigationFailure | void | undefined>}
+         * @param {String} token
+         * @returns {Promise<void>}
          */
-        async loginUser({token}) {
+        async loginUser(token) {
             // Validate token.
             if (typeof token !== 'string' || token.length === 0) {
                 throw new Error("Token can not be empty!");
             }
-            console.log('before', localStorage.getItem(AUTH_TOKEN));
+
             // Store token in local storage.
-            if (typeof window.localStorage === 'undefined') {
-                throw new Error("Missing LocalStorage object, but it is required.");
-            }
             localStorage.setItem(AUTH_TOKEN, token);
 
-            console.log('after', localStorage.getItem(AUTH_TOKEN));
-            
             // Decode jwt.
             const {payload} = decodeJsonWebToken(token);
 
@@ -48,11 +69,26 @@ export const useCore = defineStore('core', {
             };
 
             // Reset apollo client.
-            await resetClient();
+            return resetClient();
+        },
+        async logoutUser() {
+            // Store token in local storage.
+            localStorage.removeItem(AUTH_TOKEN);
 
-            // Redirect user.
-            // @todo Handle redirect depending on user type?
-            // return router.push({name: RouteOrganizerDashboard});
+            // Unset user data.
+            this.user = {
+                type: null,
+                id: null,
+                verified: null,
+                role: null,
+                expiresAt: null
+            };
+
+            // Reset apollo client.
+            await terminateClient();
+
+            // Redirect to start page.
+            await router.push({name: RouteMainLogin});
         },
     },
 });

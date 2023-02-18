@@ -257,6 +257,17 @@
       "formValidation": {
         "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
         "required": "Dieses Feld muss ausgefüllt werden."
+      },
+      "routing": {
+        "404Headline": "Die angeforderte Seite konnte leider nicht gefunden werden."
+      }
+    },
+    "success": {
+      "login": {
+        "organizer": "Willkommen im Adminbereich."
+      },
+      "logout": {
+        "organizer": "Sie haben sich erfolgreich abgemeldet."
       }
     }
   },

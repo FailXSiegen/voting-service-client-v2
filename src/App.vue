@@ -6,8 +6,7 @@
 <script setup>
 import ToTop from '@/core/components/ToTop.vue';
 import {useHead} from '@vueuse/head';
-import {loginOrganizer} from "@/core/auth/login";
-import {handleError} from "@/core/error/error-handler";
+import {useCore} from "@/core/store/core";
 
 useHead({
   title: 'Einfach die Wahl haben',
@@ -21,5 +20,6 @@ useHead({
   ]
 });
 
-
+// Initialise the core store.
+useCore().init();
 </script>

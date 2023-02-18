@@ -9,6 +9,10 @@ import {UnauthorizedError} from "@/core/error/UnauthorizedError";
  * @param {Object} toastOptions @see https://vue3-toastify.netlify.app/api/toast.html
  */
 export function handleError(error, toastOptions = {}) {
+    // Log error to console in DEV environments.
+    if (import.meta.env.DEV) {
+        console.error(error);
+    }
     let errorMessage = i18n.global.tc('error.network.genericError');
     if (error instanceof NetworkError) {
         errorMessage = error.message;

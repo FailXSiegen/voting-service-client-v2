@@ -63,18 +63,22 @@
 </template>
 
 <script setup>
-import {inject} from 'vue'
+import {inject} from 'vue';
+import {logout} from "@/core/auth/login";
+import {toast} from "vue3-toastify";
+import {useI18n} from "vue-i18n";
 
-const appVersion = inject('appVersion')
+const appVersion = inject('appVersion');
 const props = defineProps({
   routes: {
     type: Array,
     required: true
   }
-})
+});
+const {t} = useI18n({});
 
 function onLogout() {
-  throw new Error("Yet not implemented!");
+  logout().then(() => toast(t('success.logout.organizer'), {type: 'success'}));
 }
 </script>
 
