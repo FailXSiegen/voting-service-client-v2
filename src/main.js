@@ -7,10 +7,15 @@ import i18n from "./l18n";
 import store from "./store";
 import {createHead} from "@vueuse/head";
 import {version} from './../package';
+import {createApolloProvider} from '@vue/apollo-option';
 
 import 'vue3-toastify/dist/index.css';
 import "bootstrap";
 import "./scss/main.scss";
+
+const apolloProvider = createApolloProvider({
+    defaultClient: apolloClient,
+});
 
 const app = createApp({
     setup() {
@@ -22,6 +27,7 @@ const head = createHead();
 
 app.use(store);
 app.use(i18n);
+app.use(apolloProvider);
 app.use(router);
 app.use(head);
 app.provide('appVersion', version);

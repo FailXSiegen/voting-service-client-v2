@@ -1,9 +1,15 @@
 import i18n from "@/l18n";
 import {NetworkError} from "@/core/error/NetworkError";
+import {useCore} from "@/core/store/core";
+import {handleError} from "@/core/error/error-handler";
 
-const LOGIN_TYPE_ORGANIZER = 'organizer';
-
+export const LOGIN_TYPE_ORGANIZER = 'organizer';
 // const LOGIN_TYPE_EVENT_USER = '?';
+
+export const USER_TYPE_ORGANIZER = 'organizer';
+export const USER_TYPE_EVENT_USER = 'event-user';
+
+export const USER_ROLE_ORGANIZER = 'organizer';
 
 /**
  * @param {string} username
@@ -57,6 +63,9 @@ function login(username, password, loginType, displayName = '', eventId = null) 
         .then(data => data);
 }
 
+/**
+ * @returns {Promise<any>}
+ */
 export function refreshLogin() {
     const endpoint = import.meta.env.VITE_REFRESH_LOGIN_ENDPOINT;
     const requestOptions = {
@@ -86,24 +95,26 @@ export function refreshLogin() {
         })
         .then(response => response.json())
         .then(data => data);
+}
 
-    // if (response.status >= 500) {
-    //     throw new Error(localize('error.network.internalServerError'))
-    // }
-    // // @todo handle event user and organizer different!
-    // if (response.status !== 201) {
-    //     addDangerMessage('Fehler', 'Lokale Daten sind nicht mehr valide. Es wird ein Logout-Versuch unternommen.<br />Bei wiederauftretendem Fehler den lokalen Browser-Cache leeren')
-    //     await onLogout(defaultClient)
-    //     await router.push('/').catch(() => {})
-    //     console.error(localize('view.login.invalidCredentials'))
-    //     return
-    // }
-    // const result = await response.json()
-    // if (!result.token) {
-    //     addDangerMessage('Fehler', localize('error.network.internalServerError'))
-    //     await onLogout(defaultClient)
-    //     await router.push('/').catch(() => {})
-    //     console.error(localize('error.network.internalServerError'))
-    // }
-    // return result
+/**
+ * @returns {Promise<void>}
+ */
+export function logout() {
+    const endpoint = import.meta.env.VITE_LOGOUT_ENDPOINT;
+    const requestOptions = {
+        method: 'GET',
+        redirect: 'follow',
+        referrerPolicy: 'no-referrer',
+        cache: 'no-cache',
+        credentials: 'include',
+        mode: 'cors'
+    };
+    return fetch(endpoint, requestOptions)
+        .then(() => {
+            return useCore().logoutUser();
+        })
+        .catch((error) => {
+            handleError(error);
+        });
 }

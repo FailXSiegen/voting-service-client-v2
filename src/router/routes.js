@@ -2,6 +2,7 @@ import {useRouter} from "vue-router";
 
 export const RouteMainLogin = 'mainLogin';
 export const RouteOrganizerDashboard = 'organizerDashboard';
+export const NotFound = '404';
 
 /**
  * @param {String[]} routeNames Use constants in router.js

@@ -99,12 +99,10 @@
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue'
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue'
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {getRoutesByName, RouteMainLogin, RouteOrganizerDashboard} from "@/router/routes";
 
 // Define navigation items.
-const routes = getRoutesByName([RouteMainLogin, RouteOrganizerDashboard])
-console.log(import.meta.env)
+const routes = getRoutesByName([RouteMainLogin, RouteOrganizerDashboard]);
 </script>
-

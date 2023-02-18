@@ -1,10 +1,4 @@
 <template>
-  <button
-    class="btn btn-primary"
-    @click.prevent="test"
-  >
-    TEST
-  </button>
   <form
     id="organizer-login-form"
     class="card p-3 border-primary"
@@ -54,17 +48,17 @@
 import {loginOrganizer} from "@/core/auth/login";
 import BaseInput from '@/core/components/form/BaseInput.vue';
 import {handleError} from "@/core/error/error-handler";
-import {reactive, computed} from "vue";
+import {reactive} from "vue";
 import {useVuelidate} from '@vuelidate/core';
 import {required} from '@vuelidate/validators';
 import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {useCore} from "@/core/store/core";
+import {useRouter} from "vue-router";
+import {RouteOrganizerDashboard} from "@/router/routes";
+import {toast} from "vue3-toastify";
+import {useI18n} from "vue-i18n";
 
-import {apolloClient} from "@/apollo-client";
-import {useQuery} from "@vue/apollo-composable";
-import {gql} from "graphql-tag";
-import {provideApolloClient} from "@vue/apollo-composable";
-
+const {t} = useI18n({});
 const coreStore = useCore();
 
 // Form and validation setup.
@@ -77,12 +71,7 @@ const rules = {
   password: {required},
 };
 const v$ = useVuelidate(rules, formData);
-
-function test() {
-  apolloClient.cache.reset();
-  const {value} = getExpiredEvents();
-  console.log(value, 'getExpiredEvents');
-}
+const router = useRouter();
 
 async function onLogin() {
   const result = await v$.value.$validate();
@@ -91,32 +80,9 @@ async function onLogin() {
     return;
   }
   loginOrganizer(formData.username, formData.password)
-      .then((jwtResponse) => coreStore.loginUser(jwtResponse)).then(() => getExpiredEvents()).then(({value}) => console.log(value, 'getExpiredEvents'))
+      .then(({token}) => coreStore.loginUser(token))
+      .then(() => router.push({name: RouteOrganizerDashboard}))
+      .then(() => toast(t('success.login.organizer'), {type: 'success'}))
       .catch(error => handleError(error, {autoClose: false}));
 }
-
-function getExpiredEvents() {
-  apolloClient.cache.reset();
-
-  provideApolloClient(apolloClient);
-  const EVENT_USER_BY_ID = gql`
-  query expiredEvents($organizerId: ID!) {
-    expiredEvents(organizerId: $organizerId) {
-      id
-      createDatetime
-      modifiedDatetime
-      title
-      slug
-      description
-      scheduledDatetime
-      lobbyOpen
-      active
-      __typename
-    }
-  }
-  `;
-  const userQueryResult = useQuery(EVENT_USER_BY_ID, {organizerId: 1});
-  return computed(() => userQueryResult.result.value?.expiredEvents ?? []);
-}
-
 </script>

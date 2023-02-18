@@ -72,11 +72,11 @@ const refreshTokenLink = setContext(async () => {
     }
 
     // The token is invalid, so we request a new one.
-    const refreshTokenResponse = await refreshLogin();
+    const {token} = await refreshLogin();
 
     // Login the user width the new token.
     const coreStore = useCore();
-    await coreStore.loginUser(refreshTokenResponse);
+    await coreStore.loginUser(token);
 });
 
 // Create the http link.
@@ -163,6 +163,16 @@ export const apolloClient = new ApolloClient({
 export async function resetClient() {
     try {
         await apolloClient.resetStore();
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+    }
+}
+
+export async function terminateClient() {
+    try {
+        await wsLink.client.terminate();
+        await resetClient();
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
