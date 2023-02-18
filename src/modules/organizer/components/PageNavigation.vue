@@ -66,7 +66,7 @@
 import {inject} from 'vue';
 import {logout} from "@/core/auth/login";
 import {toast} from "vue3-toastify";
-import {useI18n} from "vue-i18n";
+import i18n from "@/l18n";
 
 const appVersion = inject('appVersion');
 const props = defineProps({
@@ -75,10 +75,9 @@ const props = defineProps({
     required: true
   }
 });
-const {t} = useI18n({});
 
 function onLogout() {
-  logout().then(() => toast(t('success.logout.organizer'), {type: 'success'}));
+  logout().then(() => toast(i18n.global.tc('success.logout.organizer'), {type: 'success'}));
 }
 </script>
 
