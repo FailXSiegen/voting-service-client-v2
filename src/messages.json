@@ -54,7 +54,13 @@
           "dataProtection": "* Ich bestätige, dass ich die <a href=\"/datenschutz\" target=\"_blank\">Datenschutzerklärung</a> gelesen habe, zur Kenntnis nehme und mit den <a href=\"/nutzervereinbarung\" target=\"_blank\">Nutzungsbedigungen</a> einverstanden bin.",
           "beta": "* Ich nehme zur Kenntnis, dass die Plattform sich im Entwicklungszustand befindet und es dadurch zu Einschränkungen kommen kann."
         },
-        "submit": "Registrierung abschicken"
+        "verify": {
+          "processing": "Der Validierungsprozess ist noch im Gange.",
+          "failed": "Der Validierungsprozess war leider nicht erfolgreich.",
+          "success": "Sie haben sich Erfolgreich verifiziert. Der Administrator wurde informiert."
+        },
+        "submit": "Registrierung abschicken",
+        "success": "Sie haben sich Erfolgreich registriert! Bitte bestätigen Sie Ihre E-Mail Adresse. Nach Ihrer Bestätigung wird der Account von einem Administrator geprüft und freigeschaltet. Sie erhalten eine Bestätigung nach Freischaltung!"
       },
       "profile": {
         "headline": "",
@@ -231,6 +237,17 @@
         "deny": "deaktivieren",
         "edit": "bearbeiten",
         "delete": "löschen"
+      },
+      "changeOrganizerPassword": {
+        "title": "Passwort vergessen",
+        "backToStartpage": "Zum Login",
+        "emailHasBeenSent": "E-Mail wurde erfolgreich versendet. Bitte folgen Sie den Anweisungen der E-Mail um fortzufahren.",
+        "form": {
+          "username": "Benutzernamen eingeben *",
+          "requestChangePasswordSubmit": "Passwort vergessen-Link anfordern",
+          "changePasswordSubmit": "Neues passwort speichern",
+          "passwordChangedSuccessfully": "Passwort erfolgreich geändert"
+        }
       }
     },
     "pagination": {
@@ -242,8 +259,17 @@
       "logOut": "Ausloggen",
       "reload": "Aktualisieren",
       "views": {
+        "startPage": "Startseite",
         "mainLogin": "Login",
-        "organizerDashboard": "Dashboard"
+        "organizerDashboard": "Dashboard",
+        "staticPages": {
+          "dataProtection": "Datenschutz",
+          "faq": "Häufige Fragen",
+          "functions": "Funktionen und Planung",
+          "imprint": "Impressum",
+          "manual": "Anleitung",
+          "userAgreement": "Nutzervereinbarung"
+        }
       }
     },
     "error": {
@@ -252,10 +278,12 @@
         "consumerError": "Ihre Anfrage ist fehlerhaft.",
         "undefinedError": "Ihre Anfrage ist fehlgeschlagen.",
         "genericError": "Es tut uns leid, etwas ist schief gelaufen.",
-        "unauthorized": "Leider ist ein Fehler aufgetreten. Möglicherweise ist Ihre Nutzersession ist abgelaufen. Bitte melden Sie sich erneut an."
+        "unauthorized": "Leider ist ein Fehler aufgetreten. Möglicherweise ist Ihre Nutzersession ist abgelaufen. Bitte melden Sie sich erneut an.",
+        "organizerUserNameNotFound": "Leider ist ein Fehler aufgetreten. Der Benutzername konnte nicht im  System gefunden werden."
       },
       "formValidation": {
         "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
+        "sameAs": "Die Werte müssen identisch sein.",
         "required": "Dieses Feld muss ausgefüllt werden."
       },
       "routing": {

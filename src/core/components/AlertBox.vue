@@ -1,6 +1,6 @@
 <template>
   <div
-    :class="'alert ' + config.wrapperClass"
+    :class="'alert text-left ' + config.wrapperClass"
     role="alert"
   >
     <i
@@ -8,7 +8,10 @@
       :class="'bi flex-shrink-0 me-2 ' + config.icon + ' mr-2'"
     />
     <div class="d-inline">
-      {{ message }}
+      <template v-if="message">
+        {{ message }}
+      </template>
+      <slot v-else />
     </div>
   </div>
 </template>
@@ -31,14 +34,15 @@ const types = {
   },
   info: {
     wrapperClass: 'alert-info',
-    icon: 'bi-info-fill'
+    icon: 'bi-info-circle-fill'
   }
 };
 
 const props = defineProps({
   message: {
     type: String,
-    required: true
+    required: false,
+    default: ''
   },
   type: {
     type: String,

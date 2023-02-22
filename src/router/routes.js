@@ -2,7 +2,19 @@ import {useRouter} from "vue-router";
 
 export const RouteMainLogin = 'mainLogin';
 export const RouteOrganizerDashboard = 'organizerDashboard';
-export const NotFound = '404';
+export const RouteNotFound = '404';
+export const RouteRequestChangeOrganizerPassword = 'requestChangeOrganizerPassword';
+export const RouteChangeOrganizerPassword = 'changeOrganizerPassword';
+export const RouteRegisterOrganizer = 'registerOrganizer';
+export const RouteVerifyRegisteredOrganizer = 'verifyRegisteredOrganizer';
+
+// Static pages.
+export const RouteStaticDataProtection = 'dataProtection';
+export const RouteStaticFaq = 'faq';
+export const RouteStaticFunctions = 'functions';
+export const RouteStaticImprint = 'imprint';
+export const RouteStaticManual = 'manual';
+export const RouteStaticUserAgreement = 'userAgreement';
 
 /**
  * @param {String[]} routeNames Use constants in router.js
