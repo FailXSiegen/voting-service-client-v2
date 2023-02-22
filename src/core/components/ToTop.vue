@@ -6,7 +6,7 @@
   >
     <button
       data-cy="to-top-btn"
-      class="btn btn-secondary"
+      class="btn btn-primary"
       @click.prevent="onClickToTopButton"
     >
       <i class="bi bi-arrow-up-circle display-5" />
@@ -50,7 +50,7 @@ onMounted(() => {
 <style scoped>
 .to-top {
   z-index: 1100;
-  right: 10px;
-  bottom: 10px;
+  right: 20px;
+  bottom: 20px;
 }
 </style>

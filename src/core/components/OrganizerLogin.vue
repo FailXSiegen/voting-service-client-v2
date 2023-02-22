@@ -37,9 +37,9 @@
       </button>
     </div>
     <small>
-      <a href="/passwort-vergessen">
+      <router-link :to="{name: forgotPasswordRouteName}">
         {{ $t('view.login.label.lostPassword') }}
-      </a>
+      </router-link>
     </small>
   </form>
 </template>
@@ -54,11 +54,12 @@ import {required} from '@vuelidate/validators';
 import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {useCore} from "@/core/store/core";
 import {useRouter} from "vue-router";
-import {RouteOrganizerDashboard} from "@/router/routes";
+import {RouteOrganizerDashboard, RouteRequestChangeOrganizerPassword} from "@/router/routes";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 
 const coreStore = useCore();
+const forgotPasswordRouteName = RouteRequestChangeOrganizerPassword;
 
 // Form and validation setup.
 const formData = reactive({

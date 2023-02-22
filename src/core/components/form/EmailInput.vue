@@ -5,19 +5,26 @@
   >
     {{ label }}
   </label>
-  <input
-    :id="id"
-    v-model="inputValue"
-    :name="name"
-    :class="[
-      'form-control',
-      (hasErrors ? 'is-invalid': null),
-      ...classes
-    ]"
-    :autocomplete="autocomplete"
-    :type="type"
-    @keyup="onChange"
-  >
+  <div class="input-group">
+    <div class="input-group-prepend">
+      <div class="input-group-text">
+        @
+      </div>
+    </div>
+    <input
+      :id="id"
+      v-model="inputValue"
+      :name="name"
+      :class="[
+        'form-control',
+        (hasErrors ? 'is-invalid': null),
+        ...classes
+      ]"
+      :autocomplete="autocomplete"
+      type="email"
+      @keyup="onChange"
+    >
+  </div>
   <span
     v-for="error in errors"
     :key="error.uid"
@@ -37,8 +44,6 @@ const props = defineProps({
   label: String,
   // eslint-disable-next-line vue/require-default-prop
   id: String,
-  // eslint-disable-next-line vue/require-default-prop
-  type: String,
   // eslint-disable-next-line vue/require-default-prop
   name: String,
   // eslint-disable-next-line vue/require-default-prop
