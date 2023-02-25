@@ -34,104 +34,31 @@
           </router-link>
         </div>
       </div>
-
-      <div
-        v-if="zoomvideoConferences?.length > 0"
-        class="video-conference-list"
+      <DataTable
+        :headers="headers"
+        :items="zoomvideoConferences"
       >
-        <div class="list-group-item list-group-item-action active">
-          <div class="row">
-            <div class="col-1">
-              <span>{{ $t('view.videoConference.type') }}</span>
-            </div>
-            <div class="col-9">
-              <span>{{ $t('view.videoConference.title') }}</span>
-            </div>
-            <div class="col-2" />
+        <template #actions="slotProps">
+          <div
+            class="btn-group float-right"
+            role="group"
+          >
+            <router-link
+              :to="{name: RouteOrganizerVideoConferenceEdit, params: { id: slotProps.item.id }}"
+              class="btn btn-secondary"
+            >
+              <i class="bi-pencil bi--xl" />
+            </router-link>
+            <button
+              type="button"
+              class="btn btn-danger"
+              @click.prevent="onDelete(slotProps.item.id)"
+            >
+              <i class="bi-trash bi--xl" />
+            </button>
           </div>
-        </div>
-        <div
-          v-for="(videoConference, index) in zoomvideoConferences"
-          :key="index"
-          class="list-group-item list-group-item-action"
-        >
-          <div class="row">
-            <div class="col-1">
-              Zoom
-            </div>
-            <div class="col-9">
-              {{ videoConference.title }}
-            </div>
-            <div class="col-2">
-              <div
-                class="btn-group float-right"
-                role="group"
-              >
-                <router-link
-                  :to="{name: RouteOrganizerVideoConferenceEdit, params: { id: videoConference.id }}"
-                  class="btn btn-secondary"
-                >
-                  <i class="bi-pencil bi--xl" />
-                </router-link>
-                <button
-                  type="button"
-                  class="btn btn-danger"
-                  @click.prevent="onDelete(videoConference)"
-                >
-                  <i class="bi-trash bi--xl" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <AlertBox
-        v-else
-        type="info"
-      >
-        {{ $t('view.videoConference.noRecords') }}
-      </AlertBox>
-
-      <div
-        class="modal"
-        tabindex="-1"
-      >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">
-                Modal title
-              </h5>
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <p>Modal body text goes here.</p>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                class="btn btn-primary"
-              >
-                Save changes
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        </template>
+      </DataTable>
     </template>
   </PageLayout>
 </template>
@@ -139,6 +66,7 @@
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import DataTable from '@/core/components/DataTable.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -152,13 +80,17 @@ import {
 import {ref, watch} from "vue";
 import {useCore} from "@/core/store/core";
 import {storeToRefs} from "pinia";
-import AlertBox from "@/core/components/AlertBox.vue";
 import {useMutation} from "@vue/apollo-composable";
 import {DELETE_ZOOM_MEETING} from "@/modules/organizer/graphql/mutation/delete-zoom-meeting";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import ConfirmModal from '@/core/components/ConfirmModal.vue';
 import {createConfirmDialog} from 'vuejs-confirm-dialog';
+
+const headers = [
+  {text: i18n.global.tc('view.videoConference.title'), value: "title", sortable: true},
+  {text: "", value: "id"},
+];
 
 const coreStore = useCore();
 
@@ -173,6 +105,7 @@ const routes = getRoutesByName([
 
 const {organizer} = storeToRefs(coreStore);
 const zoomvideoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
+
 // Currently we only support zoom. So this is static
 const meetingTypes = [
   {
@@ -185,7 +118,7 @@ watch(organizer, ({zoomMeetings}) => {
   zoomvideoConferences.value = zoomMeetings;
 });
 
-async function onDelete(videoConference) {
+async function onDelete(id) {
   const dialog = createConfirmDialog(ConfirmModal, {
     message: i18n.global.tc('view.videoConference.confirmDelete')
   });
@@ -193,7 +126,7 @@ async function onDelete(videoConference) {
     // Update new zoom meeting.
     const {mutate: updateZoomMeeting} = useMutation(DELETE_ZOOM_MEETING, {
       variables: {
-        id: videoConference?.id,
+        id,
       },
     });
     await updateZoomMeeting();
@@ -211,6 +144,6 @@ async function onDelete(videoConference) {
 
 <style lang="scss" scoped>
 .new-meeting-button-group {
-  max-width: 400px;
+  max-width: 640px;
 }
 </style>
