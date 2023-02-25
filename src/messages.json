@@ -4,7 +4,9 @@
       "yes": "Ja",
       "no": "Nein",
       "abstention": "Enthaltung",
-      "member": "Teilnehmer"
+      "member": "Teilnehmer",
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen"
     },
     "view": {
       "login": {
@@ -71,6 +73,20 @@
           "email": "E-Mail",
           "fullName": "Voller Name",
           "submit": "Speichern"
+        }
+      },
+      "videoConference": {
+        "addNew": "Neu anlegen",
+        "type": "Software",
+        "title": "Titel",
+        "noRecords": "Es existieren noch keine Datensätze.",
+        "confirmDelete": "Möchten Sie den Datensatz wirklich löschen?.",
+        "formData": {
+          "title": "Titel",
+          "apiKey": "API Key",
+          "apiSecret": "API Secret",
+          "submitNew": "Datensatz anlegen",
+          "submitEdit": "Speichern"
         }
       },
       "event": {
@@ -263,6 +279,9 @@
         "mainLogin": "Login",
         "organizerDashboard": "Dashboard",
         "organizerEvents": "Veranstaltungen",
+        "organizerVideoConference": "Videokonferenzsysteme",
+        "organizerVideoConferenceNew": "Neue Videokonferenzsysteme",
+        "organizerVideoConferenceEdit": "Videokonferenzsysteme Bearbeiten",
         "organizerManagement": "Organisatoren",
         "organizerAllEvents": "Alle Veranstaltungen",
         "staticPages": {
@@ -306,6 +325,11 @@
       "organizer": {
         "profile": {
           "savedSuccessfully": "Ihre Daten wurde erfolgreich gespeichert."
+        },
+        "videoConference": {
+          "createdSuccessfully": "Der Datensatz wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
         }
       }
     },

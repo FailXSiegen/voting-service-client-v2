@@ -8,6 +8,7 @@ import store from "./store";
 import {createHead} from "@vueuse/head";
 import {version} from './../package';
 import {createApolloProvider} from '@vue/apollo-option';
+import * as ConfirmDialog from 'vuejs-confirm-dialog';
 
 import 'vue3-toastify/dist/index.css';
 import "bootstrap";
@@ -30,5 +31,6 @@ app.use(store);
 app.use(i18n);
 app.use(apolloProvider);
 app.use(head);
+app.use(ConfirmDialog);
 app.provide('appVersion', version);
 app.mount("#app");
