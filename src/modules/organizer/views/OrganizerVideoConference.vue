@@ -7,15 +7,34 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      <router-link
-        :to="{name: RouteOrganizerVideoConferenceNew}"
-        class="btn btn-secondary mb-5"
+      <div
+        class="input-group new-meeting-button-group mb-5"
+        role="group"
       >
-        <i class="bi-plus bi--1xl align-middle" />
-        <span class="align-middle">
-          {{ $t('view.videoConference.addNew') }}
-        </span>
-      </router-link>
+        <select
+          class="custom-select"
+        >
+          <option
+            v-for="type in meetingTypes"
+            :key="type.id"
+            :value="type.id"
+          >
+            {{ type.title }}
+          </option>
+        </select>
+        <div class="input-group-append">
+          <router-link
+            :to="{name: RouteOrganizerVideoConferenceNew}"
+            class="btn btn-secondary"
+          >
+            <i class="bi-plus bi--1xl align-middle" />
+            <span class="align-middle">
+              {{ $t('view.videoConference.addNew') }}
+            </span>
+          </router-link>
+        </div>
+      </div>
+
       <div
         v-if="zoomvideoConferences?.length > 0"
         class="video-conference-list"
@@ -154,7 +173,13 @@ const routes = getRoutesByName([
 
 const {organizer} = storeToRefs(coreStore);
 const zoomvideoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
-
+// Currently we only support zoom. So this is static
+const meetingTypes = [
+  {
+    id: 1,
+    title: 'Zoom Meeting'
+  }
+];
 // Watch changes to organizer in the store.
 watch(organizer, ({zoomMeetings}) => {
   zoomvideoConferences.value = zoomMeetings;
@@ -183,3 +208,9 @@ async function onDelete(videoConference) {
   dialog.reveal();
 }
 </script>
+
+<style lang="scss" scoped>
+.new-meeting-button-group {
+  max-width: 400px;
+}
+</style>

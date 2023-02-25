@@ -2,6 +2,15 @@
   <PageLayout :meta-title="$t('navigation.views.organizerVideoConferenceEdit')">
     <template #title>
       {{ $t('navigation.views.organizerVideoConferenceEdit') }}
+      <router-link
+        :to="{name: RouteOrganizerVideoConference}"
+        class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
+      >
+        <i class="bi-arrow-left bi--1xl mr-1" />
+        <span class="align-middle">
+          {{ $t('view.videoConference.backToListView') }}
+        </span>
+      </router-link>
     </template>
     <template #header>
       <PageNavigation :routes="routes" />

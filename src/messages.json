@@ -81,6 +81,7 @@
         "title": "Titel",
         "noRecords": "Es existieren noch keine Datensätze.",
         "confirmDelete": "Möchten Sie den Datensatz wirklich löschen?.",
+        "backToListView": "Zur Listenansicht",
         "formData": {
           "title": "Titel",
           "apiKey": "API Key",
