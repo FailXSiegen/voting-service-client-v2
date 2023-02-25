@@ -3,6 +3,8 @@ import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {UnauthorizedError} from "@/core/error/UnauthorizedError";
+import {ApiError} from "@/core/error/ApiError";
+import {GraphQLError} from "@/core/error/GraphQLError";
 
 /**
  * @param {Error|string} error
@@ -16,6 +18,15 @@ export function handleError(error, toastOptions = {}) {
     let errorMessage = i18n.global.tc('error.network.genericError');
     if (error instanceof NetworkError) {
         errorMessage = error.message;
+    } else if (error instanceof ApiError) {
+        errorMessage = error.message;
+    } else if (error instanceof GraphQLError) {
+        // Only show graphQl errors in DEV.
+        if (import.meta.env.DEV) {
+            errorMessage = error.message;
+        } else {
+            errorMessage = i18n.global.tc('error.network.genericError');
+        }
     } else if (error instanceof InvalidFormError) {
         errorMessage = error.message;
     } else if (error instanceof UnauthorizedError) {

@@ -1,9 +1,12 @@
 import {defineStore} from "pinia";
-import {AUTH_TOKEN, resetClient, terminateClient} from "@/apollo-client";
+import {apolloClient, AUTH_TOKEN, resetClient, terminateClient} from "@/apollo-client";
 import {decodeJsonWebToken} from "@/core/auth/jwt-util";
 import {USER_TYPE_EVENT_USER, USER_TYPE_ORGANIZER} from "@/core/auth/login";
-import {router} from "@/router/router";
-import {RouteMainLogin} from "@/router/routes";
+import {provideApolloClient, useQuery} from "@vue/apollo-composable";
+import {QUERY_ORGANIZER} from "@/modules/organizer/graphql/queries/organizer";
+import {reactive, watch} from "vue";
+
+// WATCH OUT: You can not use the router here. This will result in errors.
 
 export const useCore = defineStore('core', {
     state: () => ({
@@ -14,12 +17,16 @@ export const useCore = defineStore('core', {
             verified: null,
             expiresAt: null
         },
+        organizer: reactive({})
+
     }),
     getters: {
-        isActiveOrganiserSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER,
+        isActiveOrganizerSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER,
         isActiveEventUserSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_EVENT_USER,
         getActiveUserRole: (state) => state.user?.role,
         getActiveUserName: (state) => state.user,
+        getOrganizer: (state) => state.organizer,
+        isSuperOrganizer: (state) => state.organizer?.superAdmin === true,
     },
     actions: {
         async init() {
@@ -68,9 +75,18 @@ export const useCore = defineStore('core', {
                 expiresAt: payload?.exp
             };
 
+            // Query organizer record, if this if an organizer session.
+            if (this.user?.type === USER_TYPE_ORGANIZER) {
+                await this.queryOrganizer();
+            }
+
             // Reset apollo client.
             return resetClient();
         },
+
+        /**
+         * @returns {Promise<void>}
+         */
         async logoutUser() {
             // Store token in local storage.
             localStorage.removeItem(AUTH_TOKEN);
@@ -86,9 +102,18 @@ export const useCore = defineStore('core', {
 
             // Reset apollo client.
             await terminateClient();
-
-            // Redirect to start page.
-            await router.push({name: RouteMainLogin});
         },
+
+        /**
+         * @returns void
+         */
+        async queryOrganizer() {
+            provideApolloClient(apolloClient);
+            const {result} = await useQuery(QUERY_ORGANIZER, {organizerId: this.user?.id});
+            watch(result, value => {
+                this.organizer = {};
+                this.organizer = value?.organizer;
+            });
+        }
     },
 });

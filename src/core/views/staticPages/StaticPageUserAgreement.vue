@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="Nutzungsvereinbarung">
     <div class="user-agreement">
       <h1>Nutzervereinbarung</h1>
       <div class="alert alert-primary">
@@ -114,10 +114,4 @@
 
 <script setup>
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {useHead} from "@vueuse/head";
-
-useHead({
-  title: 'Nutzungsvereinbarung',
-  titleTemplate: '%s - digitalwahl.org',
-});
 </script>

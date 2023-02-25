@@ -1,7 +1,7 @@
 <template>
-  <PageLayout>
+  <PageLayout :meta-title="$t('navigation.views.organizerDashboard')">
     <template #title>
-      Dashboard
+      {{ $t('navigation.views.organizerDashboard') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -63,21 +63,21 @@
           <div class="row">
             <div class="col-6 col-lg-4 col-xl-auto mb-4">
               <router-link
-                to="/admin/profile"
-                class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
+                :to="{name: RouteOrganizerProfile}"
+                class="btn btn-primary tn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
               >
                 <span
                   class="nav-icon bi--6xl bi-person mb-auto"
-                  :title="$t('navigation.myProfile')"
+                  :title="$t('navigation.views.' + RouteOrganizerProfile)"
                 />
                 <span class="nav-title mt-1 px-2">
-                  {{ $t('navigation.myProfile') }}
+                  {{ $t('navigation.views.' + RouteOrganizerProfile) }}
                 </span>
               </router-link>
             </div>
             <div class="col-6 col-lg-4 col-xl-auto mb-4">
               <router-link
-                to="/anleitung"
+                :to="{name: RouteStaticManual}"
                 target="_blank"
                 class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100 px-xl-4"
               >
@@ -101,8 +101,16 @@
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
-import {getRoutesByName, RouteMainLogin, RouteOrganizerDashboard} from "@/router/routes";
+import {
+  getRoutesByName,
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteStaticManual,
+  RouteOrganizerAllEvents,
+  RouteOrganizerManagement,
+  RouteOrganizerProfile
+} from "@/router/routes";
 
 // Define navigation items.
-const routes = getRoutesByName([RouteMainLogin, RouteOrganizerDashboard]);
+const routes = getRoutesByName([RouteOrganizerDashboard, RouteOrganizerEvents, RouteOrganizerManagement, RouteOrganizerAllEvents]);
 </script>

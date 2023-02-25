@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="Häufige Fragen">
     <div class="faq">
       <h1>Häufige Fragen</h1>
       <div
@@ -176,12 +176,6 @@
 
 <script setup>
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {useHead} from "@vueuse/head";
-
-useHead({
-  title: 'Häufige Fragen',
-  titleTemplate: '%s - digitalwahl.org',
-});
 
 // @todo add icon switch via vue!
 // import AppFooter from '@/frame/components/Footer'

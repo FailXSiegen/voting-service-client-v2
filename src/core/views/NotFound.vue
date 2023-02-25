@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="404">
     <div class="container-fluid min-vh-100">
       <div class="container">
         <h1 class="d-block text-center mb-5 mt-5">

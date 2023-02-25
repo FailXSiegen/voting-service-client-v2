@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="Impressum">
     <div class="imprint">
       <h1>Impressum</h1>
       <p>Felix Herrmann<br>Hambergstraße 27<br>57074 Siegen</p>
@@ -164,10 +164,4 @@
 
 <script setup>
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {useHead} from "@vueuse/head";
-
-useHead({
-  title: 'Impressum',
-  titleTemplate: '%s - digitalwahl.org',
-});
 </script>

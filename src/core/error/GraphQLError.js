@@ -1,5 +1,5 @@
 export class GraphQLError extends Error {
     constructor(error) {
-        super();
+        super(error.message);
     }
 }

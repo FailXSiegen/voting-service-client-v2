@@ -1,7 +1,6 @@
 import {useRouter} from "vue-router";
 
 export const RouteMainLogin = 'mainLogin';
-export const RouteOrganizerDashboard = 'organizerDashboard';
 export const RouteNotFound = '404';
 export const RouteRequestChangeOrganizerPassword = 'requestChangeOrganizerPassword';
 export const RouteChangeOrganizerPassword = 'changeOrganizerPassword';
@@ -15,6 +14,13 @@ export const RouteStaticFunctions = 'functions';
 export const RouteStaticImprint = 'imprint';
 export const RouteStaticManual = 'manual';
 export const RouteStaticUserAgreement = 'userAgreement';
+
+// Module organizer routes.
+export const RouteOrganizerDashboard = 'organizerDashboard';
+export const RouteOrganizerProfile = 'organizerProfile';
+export const RouteOrganizerEvents = 'organizerEvents';
+export const RouteOrganizerManagement = 'organizerManagement';
+export const RouteOrganizerAllEvents = 'organizerAllEvents';
 
 /**
  * @param {String[]} routeNames Use constants in router.js

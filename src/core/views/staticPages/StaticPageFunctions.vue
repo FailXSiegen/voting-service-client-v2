@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="Funktionen">
     <div class="functions">
       <h1>Funktionen und Planung</h1>
       <hr>
@@ -36,10 +36,4 @@
 
 <script setup>
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {useHead} from "@vueuse/head";
-
-useHead({
-  title: 'Funktionen',
-  titleTemplate: '%s - digitalwahl.org',
-});
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="Anleitung">
     <div class="manual">
       <h1>Anleitungen</h1>
       <div class="alert alert-info">
@@ -598,14 +598,8 @@
 
 <script setup>
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {useHead} from "@vueuse/head";
 import * as bootstrap from 'bootstrap';
 import {onMounted, ref} from "vue";
-
-useHead({
-  title: 'Anleitung',
-  titleTemplate: '%s - digitalwahl.org',
-});
 
 let modal;
 const modalImageSrc = ref('');
