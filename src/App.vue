@@ -1,6 +1,7 @@
 <template>
   <router-view />
   <ToTop />
+  <DialogsWrapper />
 </template>
 
 <script setup>

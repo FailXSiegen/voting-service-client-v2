@@ -4,7 +4,7 @@ import {decodeJsonWebToken} from "@/core/auth/jwt-util";
 import {USER_TYPE_EVENT_USER, USER_TYPE_ORGANIZER} from "@/core/auth/login";
 import {provideApolloClient, useQuery} from "@vue/apollo-composable";
 import {QUERY_ORGANIZER} from "@/modules/organizer/graphql/queries/organizer";
-import {reactive, watch} from "vue";
+import {reactive} from "vue";
 
 // WATCH OUT: You can not use the router here. This will result in errors.
 
@@ -18,7 +18,6 @@ export const useCore = defineStore('core', {
             expiresAt: null
         },
         organizer: reactive({})
-
     }),
     getters: {
         isActiveOrganizerSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER,
@@ -77,7 +76,7 @@ export const useCore = defineStore('core', {
 
             // Query organizer record, if this if an organizer session.
             if (this.user?.type === USER_TYPE_ORGANIZER) {
-                await this.queryOrganizer();
+                this.queryOrganizer();
             }
 
             // Reset apollo client.
@@ -107,13 +106,12 @@ export const useCore = defineStore('core', {
         /**
          * @returns void
          */
-        async queryOrganizer() {
+        queryOrganizer() {
             provideApolloClient(apolloClient);
-            const {result} = await useQuery(QUERY_ORGANIZER, {organizerId: this.user?.id});
-            watch(result, value => {
-                this.organizer = {};
-                this.organizer = value?.organizer;
+            const {onResult} = useQuery(QUERY_ORGANIZER, {organizerId: this.user?.id}, {fetchPolicy: "no-cache"});
+            onResult((result) => {
+                this.organizer = result?.data?.organizer;
             });
-        }
+        },
     },
 });

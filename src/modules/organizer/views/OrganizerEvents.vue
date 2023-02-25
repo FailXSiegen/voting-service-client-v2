@@ -56,12 +56,17 @@ import {
   RouteOrganizerAllEvents,
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
-  RouteOrganizerManagement
+  RouteOrganizerManagement, RouteOrganizerVideoConference
 } from "@/router/routes";
 
 // Define navigation items.
-const routes = getRoutesByName([RouteOrganizerDashboard, RouteOrganizerEvents, RouteOrganizerManagement, RouteOrganizerAllEvents]);
-
+const routes = getRoutesByName([
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents
+]);
 // import AppNavigation from '@/organizer/components/Navigation';
 // import AppEventListing from '@/organizer/components/events/Listing';
 // import {addSuccessMessage, addDangerMessage} from '@/frame/lib/alert-helper';

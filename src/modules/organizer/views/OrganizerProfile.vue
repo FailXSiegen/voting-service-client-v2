@@ -98,7 +98,7 @@ import {
   RouteOrganizerAllEvents,
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
-  RouteOrganizerManagement
+  RouteOrganizerManagement, RouteOrganizerVideoConference
 } from "@/router/routes";
 import {computed, ref, watch} from "vue";
 import {useCore} from "@/core/store/core";
@@ -121,7 +121,13 @@ import i18n from "@/l18n";
 const coreStore = useCore();
 
 // Define navigation items.
-const routes = getRoutesByName([RouteOrganizerDashboard, RouteOrganizerEvents, RouteOrganizerManagement, RouteOrganizerAllEvents]);
+const routes = getRoutesByName([
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents
+]);
 
 // Form and validation setup.
 const formData = reactive({

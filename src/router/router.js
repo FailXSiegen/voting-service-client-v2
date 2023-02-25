@@ -11,6 +11,9 @@ import VerifyRegisteredOrganizer from "@/core/views/VerifyRegisteredOrganizer.vu
 import OrganizerDashboard from "@/modules/organizer/views/OrganizerDashboard.vue";
 import OrganizerProfile from "@/modules/organizer/views/OrganizerProfile.vue";
 import OrganizerEvents from "@/modules/organizer/views/OrganizerEvents.vue";
+import OrganizerVideoConference from "@/modules/organizer/views/OrganizerVideoConference.vue";
+import EditVideoConference from "@/modules/organizer/views/video-conference/EditVideoConference.vue";
+import NewVideoConference from "@/modules/organizer/views/video-conference/NewVideoConference.vue";
 import OrganizerManagement from "@/modules/organizer/views/OrganizerManagement.vue";
 import OrganizerAllEvents from "@/modules/organizer/views/OrganizerAllEvents.vue";
 import {
@@ -28,7 +31,11 @@ import {
     RouteRegisterOrganizer,
     RouteVerifyRegisteredOrganizer,
     RouteOrganizerEvents,
-    RouteOrganizerProfile, RouteOrganizerManagement, RouteOrganizerAllEvents
+    RouteOrganizerProfile,
+    RouteOrganizerManagement,
+    RouteOrganizerAllEvents,
+    RouteOrganizerVideoConference,
+    RouteOrganizerVideoConferenceNew, RouteOrganizerVideoConferenceEdit
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {USER_ROLE_ORGANIZER} from "@/core/auth/login";
@@ -74,6 +81,16 @@ const routes = [
         bootstrapIcon: 'bi-card-list',
         requireOrganizerRole: true
     }),
+    new Route("/admin/video-conference", RouteOrganizerVideoConference, OrganizerVideoConference, {
+        bootstrapIcon: 'bi-camera-video-fill',
+        requireOrganizerRole: true
+    }),
+    new Route("/admin/video-conference/new", RouteOrganizerVideoConferenceNew, NewVideoConference, {
+        requireOrganizerRole: true
+    }),
+    new Route("/admin/video-conference/edit/:id", RouteOrganizerVideoConferenceEdit, EditVideoConference, {
+        requireOrganizerRole: true
+    }, null, true),
     new Route("/admin/organizers", RouteOrganizerManagement, OrganizerManagement, {
         bootstrapIcon: 'bi-people-fill',
         requireOrganizerRole: true,

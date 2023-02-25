@@ -90,7 +90,22 @@
                 </span>
               </router-link>
             </div>
-            <div class="col-12 col-lg-auto mb-4" />
+            <div class="col-12 col-lg-auto mb-4">
+              <router-link
+                :to="{name: RouteOrganizerVideoConference}"
+                class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
+              >
+                <span class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100">
+                  <span
+                    class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
+                    title="Videokonferenzsystem einrichten"
+                  />
+                  <span class="nav-title mt-1 px-2">
+                    Videokonferenzsysteme einrichten
+                  </span>
+                </span>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
@@ -105,6 +120,7 @@ import {
   getRoutesByName,
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
   RouteStaticManual,
   RouteOrganizerAllEvents,
   RouteOrganizerManagement,
@@ -112,5 +128,11 @@ import {
 } from "@/router/routes";
 
 // Define navigation items.
-const routes = getRoutesByName([RouteOrganizerDashboard, RouteOrganizerEvents, RouteOrganizerManagement, RouteOrganizerAllEvents]);
+const routes = getRoutesByName([
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents
+]);
 </script>
