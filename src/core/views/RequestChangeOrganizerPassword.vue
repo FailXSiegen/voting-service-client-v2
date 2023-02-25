@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout :meta-title="$t('view.changeOrganizerPassword.title')">
     <div class="request-password-change-organizer">
       <div class="container">
         <h2 class="mb-4 text-center d-block">

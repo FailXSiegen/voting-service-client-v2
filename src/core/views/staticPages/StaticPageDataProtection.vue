@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout meta-title="Datenschutz">
     <div class="dataprotection">
       <h1>Datenschutzerklärung</h1>
       <hr>
@@ -159,10 +159,4 @@
 
 <script setup>
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {useHead} from "@vueuse/head";
-
-useHead({
-  title: 'Datenschutz',
-  titleTemplate: '%s - digitalwahl.org',
-});
 </script>

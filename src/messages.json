@@ -255,13 +255,16 @@
       "previous": "<"
     },
     "navigation": {
-      "myProfile": "Mein Profil",
       "logOut": "Ausloggen",
       "reload": "Aktualisieren",
       "views": {
+        "organizerProfile": "Mein Profil",
         "startPage": "Startseite",
         "mainLogin": "Login",
         "organizerDashboard": "Dashboard",
+        "organizerEvents": "Veranstaltungen",
+        "organizerManagement": "Organisatoren",
+        "organizerAllEvents": "Alle Veranstaltungen",
         "staticPages": {
           "dataProtection": "Datenschutz",
           "faq": "Häufige Fragen",
@@ -288,6 +291,9 @@
       },
       "routing": {
         "404Headline": "Die angeforderte Seite konnte leider nicht gefunden werden."
+      },
+      "api": {
+        "InvalidPasswordError": "Bitte prüfen Sie das eingegebene Passwort."
       }
     },
     "success": {
@@ -296,6 +302,16 @@
       },
       "logout": {
         "organizer": "Sie haben sich erfolgreich abgemeldet."
+      },
+      "organizer": {
+        "profile": {
+          "savedSuccessfully": "Ihre Daten wurde erfolgreich gespeichert."
+        }
+      }
+    },
+    "router": {
+      "redirect": {
+        "activeOrganizerSession": "Sie wurden automatisch weitergeleitet, da Sie noch als Organisator angemeldet sind."
       }
     }
   },

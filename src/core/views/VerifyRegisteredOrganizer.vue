@@ -1,5 +1,5 @@
 <template>
-  <CorePageLayout>
+  <CorePageLayout :meta-title="$t('view.register.headline')">
     <div class="verify-registered-organizer">
       <div class="align-items-center justify-content-center">
         <div class="verify-registered-organizer-wrapper text-center m-auto">

@@ -1,5 +1,6 @@
 import {NetworkError} from "@/core/error/NetworkError";
 import i18n from "@/l18n";
+import {ApiError} from "@/core/error/ApiError";
 
 /**
  * @param {String} endpoint
@@ -22,6 +23,9 @@ export function standaloneRequest(endpoint, requestOptions) {
         })
         .then((response) => response.json())
         .then((data) => {
+            if (!data?.success && data?.error?.name) {
+                throw new ApiError(i18n.global.tc('error.api.' + data?.error?.name));
+            }
             if (!data?.success) {
                 throw new NetworkError(i18n.global.tc('error.network.consumerError'));
             }

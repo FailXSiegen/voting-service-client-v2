@@ -11,8 +11,15 @@
 import {useHead} from '@vueuse/head';
 import LoginFooter from '@/core/components/LoginFooter.vue';
 
+const props = defineProps({
+  metaTitle: {
+    type: String,
+    default: 'Einfach die Wahl haben',
+  },
+});
+
 useHead({
-  title: 'Einfach die Wahl haben',
+  title: props.metaTitle ?? 'Einfach die Wahl haben',
   titleTemplate: '%s - digitalwahl.org',
   htmlAttrs: {
     lang: 'de'

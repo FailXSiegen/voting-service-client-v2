@@ -55,6 +55,7 @@ import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {useCore} from "@/core/store/core";
 import {useRouter} from "vue-router";
 import {RouteOrganizerDashboard, RouteRequestChangeOrganizerPassword} from "@/router/routes";
+
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 
@@ -81,6 +82,7 @@ async function onLogin() {
   }
   loginOrganizer(formData.username, formData.password)
       .then(({token}) => coreStore.loginUser(token))
+      .then(() => coreStore.queryOrganizer())
       .then(() => router.push({name: RouteOrganizerDashboard}))
       .then(() => toast(i18n.global.tc('success.login.organizer'), {type: 'success'}))
       .catch(error => handleError(error, {autoClose: false}));

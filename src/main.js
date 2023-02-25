@@ -25,10 +25,10 @@ const app = createApp({
 });
 const head = createHead();
 
+app.use(router);
 app.use(store);
 app.use(i18n);
 app.use(apolloProvider);
-app.use(router);
 app.use(head);
 app.provide('appVersion', version);
 app.mount("#app");
