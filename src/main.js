@@ -9,7 +9,9 @@ import {createHead} from "@vueuse/head";
 import {version} from './../package';
 import {createApolloProvider} from '@vue/apollo-option';
 import * as ConfirmDialog from 'vuejs-confirm-dialog';
+import Vue3EasyDataTable from 'vue3-easy-data-table';
 
+import 'vue3-easy-data-table/dist/style.css';
 import 'vue3-toastify/dist/index.css';
 import "bootstrap";
 import "./scss/main.scss";
@@ -33,4 +35,5 @@ app.use(apolloProvider);
 app.use(head);
 app.use(ConfirmDialog);
 app.provide('appVersion', version);
+app.component('EasyDataTable', Vue3EasyDataTable);
 app.mount("#app");
