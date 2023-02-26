@@ -34,17 +34,21 @@
           </router-link>
         </div>
       </div>
-      <DataTable
+
+      <EasyDataTable
+        v-if="zoomvideoConferences?.length > 0"
         :headers="headers"
         :items="zoomvideoConferences"
+        table-class-name="data-table"
+        theme-color="#007bff"
       >
-        <template #actions="slotProps">
+        <template #item-id="item">
           <div
             class="btn-group float-right"
             role="group"
           >
             <router-link
-              :to="{name: RouteOrganizerVideoConferenceEdit, params: { id: slotProps.item.id }}"
+              :to="{name: RouteOrganizerVideoConferenceEdit, params: { id: item.id }}"
               class="btn btn-secondary"
             >
               <i class="bi-pencil bi--xl" />
@@ -52,13 +56,19 @@
             <button
               type="button"
               class="btn btn-danger"
-              @click.prevent="onDelete(slotProps.item.id)"
+              @click.prevent="onDelete(item.id)"
             >
               <i class="bi-trash bi--xl" />
             </button>
           </div>
         </template>
-      </DataTable>
+      </EasyDataTable>
+      <AlertBox
+        v-else
+        type="info"
+      >
+        {{ $t('view.videoConference.noRecords') }}
+      </AlertBox>
     </template>
   </PageLayout>
 </template>
@@ -66,7 +76,6 @@
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
-import DataTable from '@/core/components/DataTable.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -86,6 +95,7 @@ import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import ConfirmModal from '@/core/components/ConfirmModal.vue';
 import {createConfirmDialog} from 'vuejs-confirm-dialog';
+import AlertBox from "@/core/components/AlertBox.vue";
 
 const headers = [
   {text: i18n.global.tc('view.videoConference.title'), value: "title", sortable: true},
@@ -143,6 +153,14 @@ async function onDelete(id) {
 </script>
 
 <style lang="scss" scoped>
+.data-table {
+  max-width: 640px;
+  --easy-table-header-font-size: 1.25rem;
+  --easy-table-header-font-color: white;
+  --easy-table-header-background-color: #007bff;
+  --easy-table-body-row-font-size: 1rem;
+}
+
 .new-meeting-button-group {
   max-width: 640px;
 }

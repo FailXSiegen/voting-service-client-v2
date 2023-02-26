@@ -244,8 +244,8 @@
         "createDatetime": "Erstellungsdatum",
         "organisation": "Organisation",
         "state": "Status",
-        "mail": "E-Mail",
-        "confirmedMail": "E-Mail bestätigt",
+        "email": "E-Mail",
+        "confirmedEmail": "E-Mail bestätigt",
         "actions": "Aktionen",
         "username": "Benutzername",
         "verified": "aktiv",
@@ -253,7 +253,8 @@
         "denied": "inaktiv",
         "deny": "deaktivieren",
         "edit": "bearbeiten",
-        "delete": "löschen"
+        "delete": "löschen",
+        "confirmDelete": "Möchten Sie den Organisator wirklich löschen?"
       },
       "changeOrganizerPassword": {
         "title": "Passwort vergessen",
@@ -329,6 +330,10 @@
         },
         "videoConference": {
           "createdSuccessfully": "Der Datensatz wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
+        },
+        "organizers": {
           "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
         }
