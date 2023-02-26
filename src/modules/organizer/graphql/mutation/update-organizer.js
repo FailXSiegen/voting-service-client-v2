@@ -5,5 +5,6 @@ export const UPDATE_ORGANIZER = gql`mutation updateOrganizer($input: UpdateOrgan
         id
         publicName
         email
+        verified
     }
 }`;

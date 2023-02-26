@@ -1,39 +1,4 @@
 <template>
-  <!--  <div class="events-container">-->
-  <!--    <app-navigation />-->
-  <!--    <div class="container-fluid">-->
-  <!--      <slot name="alerts"></slot>-->
-  <!--      <div class="row">-->
-  <!--        <div class="col-12 py-3 order-1 order-md-2">-->
-  <!--          <h1>{{ headline }}</h1>-->
-  <!--          <router-link-->
-  <!--            to="/admin/event/new"-->
-  <!--            class="btn btn-success btn-lg my-3"-->
-  <!--          >-->
-  <!--            <i class="bi-plus bi&#45;&#45;2xl align-middle"></i>-->
-  <!--            <span class="align-middle">{{-->
-  <!--              localize('view.event.create.createNew')-->
-  <!--            }}</span>-->
-  <!--          </router-link>-->
-  <!--          <app-event-listing-->
-  <!--            v-if="upcomingEvents"-->
-  <!--            :headline="localize('view.event.upcoming')"-->
-  <!--            :events-detail="true"-->
-  <!--            :events="upcomingEvents"-->
-  <!--            @onDeleteEvent="deleteEvent"-->
-  <!--          />-->
-  <!--          <app-event-listing-->
-  <!--            v-if="expiredEvents"-->
-  <!--            :headline="localize('view.event.latest')"-->
-  <!--            :events-detail="true"-->
-  <!--            :events="expiredEvents"-->
-  <!--            @onDeleteEvent="deleteEvent"-->
-  <!--          />-->
-  <!--        </div>-->
-  <!--      </div>-->
-  <!--    </div>-->
-  <!--  </div>-->
-
   <PageLayout :meta-title="$t('navigation.views.organizerManagement')">
     <template #title>
       {{ $t('navigation.views.organizerManagement') }}
@@ -42,13 +7,77 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      OrganizerManagement.vue
+      <EasyDataTable
+        v-if="organizers?.length > 0"
+        :headers="headers"
+        :items="organizers"
+        table-class-name="data-table"
+        theme-color="#007bff"
+      >
+        <template #item-createDatetime="item">
+          {{ createFormattedDateFromTimeStamp(item.createDatetime) }}
+        </template>
+        <template #item-confirmedEmail="item">
+          <span
+            v-if="item.confirmedEmail"
+            class="text-success text-uppercase"
+          >
+            <i class="bi-envelope-open bi--xl" />
+          </span>
+          <span
+            v-else
+            class="text-danger text-uppercase"
+          >
+            <i class="bi-envelope-fill bi--xl" />
+          </span>
+        </template>
+        <template #item-verified="item">
+          <span
+            v-if="item.verified"
+            class="text-success text-uppercase"
+          >
+            {{ $t('view.organizers.verified') }}
+          </span>
+          <span
+            v-else
+            class="text-danger text-uppercase"
+          >
+            <strong>{{ $t('view.organizers.denied') }}</strong>
+          </span>
+        </template>
+        <template #item-id="item">
+          <div v-if="currentOrganizerSessionId != item.id">
+            <button
+              v-if="item.verified"
+              class="btn btn-danger d-inline-block mx-1"
+              :title="$t('view.organizers.deny')"
+              @click.prevent="onVerify(item, false)"
+            >
+              <i class="bi-dash-square bi--xl" />
+            </button>
+            <button
+              v-else
+              class="btn btn-success d-inline-block mx-1"
+              :title="$t('view.organizers.verify')"
+              @click.prevent="onVerify(item, true)"
+            >
+              <i class="bi-check2-square bi--xl" />
+            </button>
+            <button
+              class="btn btn-danger d-inline-block mx-1"
+              :title="$t('view.organizers.delete')"
+              @click.prevent="onDelete(item)"
+            >
+              <i class="bi-trash bi--xl" />
+            </button>
+          </div>
+        </template>
+      </EasyDataTable>
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {
@@ -57,6 +86,21 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement, RouteOrganizerVideoConference
 } from "@/router/routes";
+import {useMutation, useQuery} from "@vue/apollo-composable";
+import {ORGANIZERS} from "@/modules/organizer/graphql/queries/organizers";
+import {computed, ref} from "vue";
+import i18n from "@/l18n";
+import {createFormattedDateFromTimeStamp} from '@/core/util/time-stamp';
+import {UPDATE_ORGANIZER} from "@/modules/organizer/graphql/mutation/update-organizer";
+import {toast} from "vue3-toastify";
+import {handleError} from "@/core/error/error-handler";
+import {createConfirmDialog} from "vuejs-confirm-dialog";
+import ConfirmModal from "@/core/components/ConfirmModal.vue";
+import {DELETE_ORGANIZER} from "@/modules/organizer/graphql/mutation/delete-organizer";
+import {useCore} from "@/core/store/core";
+
+const coreStore = useCore();
+const currentOrganizerSessionId = computed(() => coreStore?.user?.id);
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -66,92 +110,73 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents
 ]);
-// import AppNavigation from '@/organizer/components/Navigation';
-// import AppEventListing from '@/organizer/components/events/Listing';
-// import {addSuccessMessage, addDangerMessage} from '@/frame/lib/alert-helper';
-// import {localize} from '@/frame/lib/localization-helper';
-// import {REMOVE_EVENT_MUTATION} from '@/organizer/api/graphql/gql/mutations';
-// import {
-//   UPCOMING_EVENTS,
-//   EXPIRED_EVENTS
-// } from '@/organizer/api/graphql/gql/queries';
-//
-// export default {
-//   components: {
-//     AppNavigation,
-//     AppEventListing
-//   },
-//   apollo: {
-//     upcomingEvents: {
-//       query: UPCOMING_EVENTS,
-//       variables() {
-//         return {
-//           organizerId: this.$store.getters.getCurrentUserId
-//         };
-//       }
-//     },
-//     expiredEvents: {
-//       query: EXPIRED_EVENTS,
-//       variables() {
-//         return {
-//           organizerId: this.$store.getters.getCurrentUserId
-//         };
-//       }
-//     }
-//   },
-//   data() {
-//     return {
-//       headline: 'Veranstaltungen',
-//       expiredEvents: [],
-//       upcomingEvents: []
-//     };
-//   },
-//   created() {
-//     document.title = 'Meine Veranstaltungen - digitalwahl.org';
-//   },
-//   methods: {
-//     localize(path) {
-//       return localize(path);
-//     },
-//     deleteEvent(eventId) {
-//       this.$apollo
-//           .mutate({
-//             mutation: REMOVE_EVENT_MUTATION,
-//             variables: {
-//               organizerId: this.$store.getters.getCurrentUserId,
-//               id: parseInt(eventId)
-//             }
-//           })
-//           .then(() => {
-//             addSuccessMessage('Erfolg', 'Die Veranstaltung wurde gelöscht.');
-//             let removeItems = [];
-//             if (this.upcomingEvents !== null) {
-//               removeItems = this.upcomingEvents.filter(function (item, index) {
-//                 return item.id === eventId;
-//               });
-//               this.upcomingEvents.splice(
-//                   this.upcomingEvents.indexOf(removeItems[0]),
-//                   1
-//               );
-//             }
-//             if (this.expiredEvents !== null) {
-//               removeItems = this.expiredEvents.filter(function (item, index) {
-//                 return item.id === eventId;
-//               });
-//               this.expiredEvents.splice(
-//                   this.expiredEvents.indexOf(removeItems[0]),
-//                   1
-//               );
-//             }
-//           })
-//           .catch((error) => {
-//             addDangerMessage(
-//                 'Fehler',
-//                 'Die Veranstaltung konnte nicht gelöscht werden.'
-//             );
-//             console.error(error);
-//           });
-//     }
-//   }
-// };
+
+const headers = [
+  {text: i18n.global.tc('view.organizers.user'), value: "username", sortable: true},
+  {text: i18n.global.tc('view.organizers.createDatetime'), value: "createDatetime", sortable: true},
+  {text: i18n.global.tc('view.organizers.organisation'), value: "publicOrganisation", sortable: true},
+  {text: i18n.global.tc('view.organizers.email'), value: "email", sortable: true},
+  {text: i18n.global.tc('view.organizers.confirmedEmail'), value: "confirmedEmail", sortable: true},
+  {text: i18n.global.tc('view.organizers.verified'), value: "verified", sortable: true},
+  {text: i18n.global.tc('view.organizers.actions'), value: "id"},
+];
+
+const organizers = ref([]);
+const {onResult, refetch} = useQuery(ORGANIZERS, null, {fetchPolicy: "no-cache"});
+onResult(({data}) => {
+  organizers.value = data?.organizers ?? [];
+});
+
+function onVerify({id}, verified) {
+  const {mutate: updateOrganizer} = useMutation(UPDATE_ORGANIZER, {
+    variables: {
+      input: {
+        id,
+        verified: verified
+      },
+    },
+  });
+  updateOrganizer()
+      .then(() => {
+        return refetch();
+      })
+      .then(() => {
+        toast(i18n.global.tc('success.organizer.organizers.updatedSuccessfully'), {type: 'success'});
+      })
+      .catch((error) => handleError(error));
+}
+
+function onDelete({id}) {
+  const dialog = createConfirmDialog(ConfirmModal, {
+    message: i18n.global.tc('view.organizers.confirmDelete')
+  });
+  dialog.onConfirm(() => {
+    // Delete organizer
+    const {mutate: deleteOrganizer} = useMutation(DELETE_ORGANIZER, {
+      variables: {
+        id,
+      },
+    });
+    deleteOrganizer()
+        .then(() => {
+          return refetch();
+        })
+        .then(() => {
+          toast(i18n.global.tc('success.organizer.organizers.deletedSuccessfully'), {type: 'success'});
+        })
+        .catch((error) => handleError(error));
+  });
+
+  // Show confirm dialog.
+  dialog.reveal();
+}
 </script>
+
+<style lang="scss" scoped>
+.data-table {
+  --easy-table-header-font-size: 1.25rem;
+  --easy-table-header-font-color: white;
+  --easy-table-header-background-color: #007bff;
+  --easy-table-body-row-font-size: 1rem;
+}
+</style>
