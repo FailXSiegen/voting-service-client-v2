@@ -1,40 +1,4 @@
 <template>
-  <!--  <div class="events-container">-->
-  <!--    <app-navigation />-->
-  <!--    <div class="container-fluid">-->
-  <!--      <slot name="alerts"></slot>-->
-  <!--      <div class="row">-->
-  <!--        <div class="col-12 py-3 order-1 order-md-2">-->
-  <!--          <h1>{{ headline }}</h1>-->
-  <!--          <router-link-->
-  <!--            to="/admin/event/new"-->
-  <!--            class="btn btn-success btn-lg my-3"-->
-  <!--          >-->
-  <!--            <i class="bi-plus bi&#45;&#45;2xl align-middle"></i>-->
-  <!--            <span class="align-middle">{{-->
-  <!--              localize('view.event.create.createNew')-->
-  <!--            }}</span>-->
-  <!--          </router-link>-->
-  <!--          <app-event-listing-->
-  <!--            v-if="upcomingEvents"-->
-  <!--            :headline="localize('view.event.upcoming')"-->
-  <!--            :events-detail="true"-->
-  <!--            :events="upcomingEvents"-->
-  <!--            @onDeleteEvent="deleteEvent"-->
-  <!--          />-->
-  <!--          <app-event-listing-->
-  <!--            v-if="expiredEvents"-->
-  <!--            :headline="localize('view.event.latest')"-->
-  <!--            :events-detail="true"-->
-  <!--            :events="expiredEvents"-->
-  <!--            @onDeleteEvent="deleteEvent"-->
-  <!--          />-->
-  <!--        </div>-->
-  <!--      </div>-->
-  <!--    </div>-->
-
-  <!--  </div>-->
-
   <PageLayout :meta-title="$t('navigation.views.organizerEvents')">
     <template #title>
       {{ $t('navigation.views.organizerEvents') }}
@@ -43,7 +7,31 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      Events!
+      <div class="events-container">
+        <router-link
+          :to="{name: RouteOrganizerEventsNew}"
+          class="btn btn-success btn-lg my-3"
+        >
+          <i class="bi-plus bi--2xl align-middle" />
+          <span class="align-middle">{{
+            $t('view.event.create.createNew')
+          }}</span>
+        </router-link>
+        <EventListing
+          v-if="upcomingEvents"
+          :headline="$t('view.event.upcoming')"
+          :events-detail="true"
+          :events="upcomingEvents"
+          @delete="onDelete"
+        />
+        <EventListing
+          v-if="expiredEvents"
+          :headline="$t('view.event.latest')"
+          :events-detail="true"
+          :events="expiredEvents"
+          @delete="onDelete"
+        />
+      </div>
     </template>
   </PageLayout>
 </template>
@@ -51,13 +39,26 @@
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventListing from '@/modules/organizer/components/events/EventListing.vue';
+import {ref} from 'vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
-  RouteOrganizerManagement, RouteOrganizerVideoConference
+  RouteOrganizerManagement,
+  RouteOrganizerVideoConference,
+  RouteOrganizerEventsNew,
 } from "@/router/routes";
+import {UPCOMING_EVENTS} from '@/modules/organizer/graphql/queries/upcoming-events';
+import {EXPIRED_EVENTS} from '@/modules/organizer/graphql/queries/expired-events';
+import {useMutation, useQuery} from "@vue/apollo-composable";
+import {useCore} from "@/core/store/core";
+import i18n from "@/l18n";
+import {toast} from "vue3-toastify";
+import {REMOVE_EVENT} from "@/modules/organizer/graphql/mutation/remove-event";
+
+const coreStore = useCore();
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -67,92 +68,40 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents
 ]);
-// import AppNavigation from '@/organizer/components/Navigation';
-// import AppEventListing from '@/organizer/components/events/Listing';
-// import {addSuccessMessage, addDangerMessage} from '@/frame/lib/alert-helper';
-// import {localize} from '@/frame/lib/localization-helper';
-// import {REMOVE_EVENT_MUTATION} from '@/organizer/api/graphql/gql/mutations';
-// import {
-//   UPCOMING_EVENTS,
-//   EXPIRED_EVENTS
-// } from '@/organizer/api/graphql/gql/queries';
-//
-// export default {
-//   components: {
-//     AppNavigation,
-//     AppEventListing
-//   },
-//   apollo: {
-//     upcomingEvents: {
-//       query: UPCOMING_EVENTS,
-//       variables() {
-//         return {
-//           organizerId: this.$store.getters.getCurrentUserId
-//         };
-//       }
-//     },
-//     expiredEvents: {
-//       query: EXPIRED_EVENTS,
-//       variables() {
-//         return {
-//           organizerId: this.$store.getters.getCurrentUserId
-//         };
-//       }
-//     }
-//   },
-//   data() {
-//     return {
-//       headline: 'Veranstaltungen',
-//       expiredEvents: [],
-//       upcomingEvents: []
-//     };
-//   },
-//   created() {
-//     document.title = 'Meine Veranstaltungen - digitalwahl.org';
-//   },
-//   methods: {
-//     localize(path) {
-//       return localize(path);
-//     },
-//     deleteEvent(eventId) {
-//       this.$apollo
-//           .mutate({
-//             mutation: REMOVE_EVENT_MUTATION,
-//             variables: {
-//               organizerId: this.$store.getters.getCurrentUserId,
-//               id: parseInt(eventId)
-//             }
-//           })
-//           .then(() => {
-//             addSuccessMessage('Erfolg', 'Die Veranstaltung wurde gelöscht.');
-//             let removeItems = [];
-//             if (this.upcomingEvents !== null) {
-//               removeItems = this.upcomingEvents.filter(function (item, index) {
-//                 return item.id === eventId;
-//               });
-//               this.upcomingEvents.splice(
-//                   this.upcomingEvents.indexOf(removeItems[0]),
-//                   1
-//               );
-//             }
-//             if (this.expiredEvents !== null) {
-//               removeItems = this.expiredEvents.filter(function (item, index) {
-//                 return item.id === eventId;
-//               });
-//               this.expiredEvents.splice(
-//                   this.expiredEvents.indexOf(removeItems[0]),
-//                   1
-//               );
-//             }
-//           })
-//           .catch((error) => {
-//             addDangerMessage(
-//                 'Fehler',
-//                 'Die Veranstaltung konnte nicht gelöscht werden.'
-//             );
-//             console.error(error);
-//           });
-//     }
-//   }
-// };
+
+const upcomingEvents = ref([]);
+const expiredEvents = ref([]);
+
+// Query upcoming event.
+const upcomingEventsQuery = useQuery(UPCOMING_EVENTS, {organizerId: coreStore?.user?.id ?? 0}, {fetchPolicy: "no-cache"});
+upcomingEventsQuery.onResult(({data}) => {
+  upcomingEvents.value = data?.upcomingEvents ?? [];
+});
+
+// Query upcoming event.
+const expiredEventsQuery = useQuery(EXPIRED_EVENTS, {organizerId: coreStore?.user?.id ?? 0}, {fetchPolicy: "no-cache"});
+expiredEventsQuery.onResult(({data}) => {
+  expiredEvents.value = data?.expiredEvents ?? [];
+});
+
+async function onDelete({eventId, organizerId}) {
+  // Update new zoom meeting.
+  const {mutate: removeEvent} = useMutation(REMOVE_EVENT, {
+    variables: {
+      organizerId,
+      id: eventId,
+    },
+  });
+  await removeEvent();
+
+  // Refetch organizer record.
+  coreStore.queryOrganizer();
+
+  // Refetch event record.
+  upcomingEventsQuery.refetch();
+  expiredEventsQuery.refetch();
+
+  // Show success message.
+  toast(i18n.global.tc('success.organizer.events.deletedSuccessfully'), {type: 'success'});
+}
 </script>

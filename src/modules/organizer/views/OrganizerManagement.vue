@@ -47,29 +47,31 @@
         </template>
         <template #item-id="item">
           <div v-if="currentOrganizerSessionId != item.id">
-            <button
-              v-if="item.verified"
-              class="btn btn-danger d-inline-block mx-1"
-              :title="$t('view.organizers.deny')"
-              @click.prevent="onVerify(item, false)"
-            >
-              <i class="bi-dash-square bi--xl" />
-            </button>
-            <button
-              v-else
-              class="btn btn-success d-inline-block mx-1"
-              :title="$t('view.organizers.verify')"
-              @click.prevent="onVerify(item, true)"
-            >
-              <i class="bi-check2-square bi--xl" />
-            </button>
-            <button
-              class="btn btn-danger d-inline-block mx-1"
-              :title="$t('view.organizers.delete')"
-              @click.prevent="onDelete(item)"
-            >
-              <i class="bi-trash bi--xl" />
-            </button>
+            <div class="float-right">
+              <button
+                v-if="item.verified"
+                class="btn btn-danger d-inline-block mx-1"
+                :title="$t('view.organizers.deny')"
+                @click.prevent="onVerify(item, false)"
+              >
+                <i class="bi-dash-square bi--xl" />
+              </button>
+              <button
+                v-else
+                class="btn btn-success d-inline-block mx-1"
+                :title="$t('view.organizers.verify')"
+                @click.prevent="onVerify(item, true)"
+              >
+                <i class="bi-check2-square bi--xl" />
+              </button>
+              <button
+                class="btn btn-danger d-inline-block mx-1"
+                :title="$t('view.organizers.delete')"
+                @click.prevent="onDelete(item)"
+              >
+                <i class="bi-trash bi--xl" />
+              </button>
+            </div>
           </div>
         </template>
       </EasyDataTable>
@@ -178,5 +180,7 @@ function onDelete({id}) {
   --easy-table-header-font-color: white;
   --easy-table-header-background-color: #007bff;
   --easy-table-body-row-font-size: 1rem;
+  --easy-table-body-item-padding: 1rem;
+  --easy-table-header-item-padding: 1rem;
 }
 </style>

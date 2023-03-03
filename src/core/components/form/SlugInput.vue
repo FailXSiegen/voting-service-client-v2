@@ -5,12 +5,8 @@
   >
     {{ label }}
   </label>
+
   <div class="input-group">
-    <div class="input-group-prepend">
-      <div class="input-group-text">
-        @
-      </div>
-    </div>
     <input
       :id="id"
       v-model="inputValue"
@@ -21,9 +17,17 @@
         ...classes
       ]"
       :autocomplete="autocomplete"
-      type="email"
+      :type="type"
       @keyup="onChange"
     >
+    <div class="input-group-append">
+      <button
+        class="btn btn-secondary"
+        @click.prevent="onGenerateSlug"
+      >
+        <i class="bi bi-arrow-clockwise" />
+      </button>
+    </div>
   </div>
   <small
     v-if="helpText"
@@ -42,6 +46,7 @@
 
 <script setup>
 import {ref} from "vue";
+import {slugify} from "@/core/services/slugify-service";
 
 const emit = defineEmits(['change']);
 
@@ -50,6 +55,8 @@ const props = defineProps({
   label: String,
   // eslint-disable-next-line vue/require-default-prop
   id: String,
+  // eslint-disable-next-line vue/require-default-prop
+  type: String,
   // eslint-disable-next-line vue/require-default-prop
   name: String,
   // eslint-disable-next-line vue/require-default-prop
@@ -66,14 +73,21 @@ const props = defineProps({
     default: []
   },
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String,
+  value: String,
   // eslint-disable-next-line vue/require-default-prop
-  value: String
+  baseValue: String,
+  // eslint-disable-next-line vue/require-default-prop
+  helpText: String
 });
 
 const inputValue = ref(props.value);
 
 function onChange() {
   emit('change', {value: inputValue.value});
+}
+
+function onGenerateSlug() {
+  inputValue.value = slugify(props.baseValue);
+  onChange();
 }
 </script>

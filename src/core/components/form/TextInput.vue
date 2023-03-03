@@ -5,26 +5,19 @@
   >
     {{ label }}
   </label>
-  <div class="input-group">
-    <div class="input-group-prepend">
-      <div class="input-group-text">
-        @
-      </div>
-    </div>
-    <input
-      :id="id"
-      v-model="inputValue"
-      :name="name"
-      :class="[
-        'form-control',
-        (hasErrors ? 'is-invalid': null),
-        ...classes
-      ]"
-      :autocomplete="autocomplete"
-      type="email"
-      @keyup="onChange"
-    >
-  </div>
+  <textarea
+    :id="id"
+    v-model="inputValue"
+    :rows="rows"
+    :name="name"
+    :class="[
+      'form-control',
+      (hasErrors ? 'is-invalid': null),
+      ...classes
+    ]"
+    :autocomplete="autocomplete"
+    @keyup="onChange"
+  />
   <small
     v-if="helpText"
     class="form-text text-muted"
@@ -51,6 +44,8 @@ const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
   id: String,
   // eslint-disable-next-line vue/require-default-prop
+  type: String,
+  // eslint-disable-next-line vue/require-default-prop
   name: String,
   // eslint-disable-next-line vue/require-default-prop
   autocomplete: String,
@@ -66,9 +61,11 @@ const props = defineProps({
     default: []
   },
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String,
+  value: String,
   // eslint-disable-next-line vue/require-default-prop
-  value: String
+  rows: Number,
+  // eslint-disable-next-line vue/require-default-prop
+  helpText: String
 });
 
 const inputValue = ref(props.value);
