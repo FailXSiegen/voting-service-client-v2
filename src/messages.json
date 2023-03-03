@@ -172,7 +172,9 @@
             "inviteLink": "Einladungs-Link kopieren",
             "newTab": "Veranstaltungs-Organisation in neuem Tab öffnen",
             "close": "Veranstaltung beenden",
-            "delete": "Veranstaltung löschen"
+            "delete": "Veranstaltung löschen",
+            "activate": "Veranstaltung aktivieren",
+            "deactivate": "Veranstaltung deaktivieren"
           },
           "confirm": {
             "deleteQuestion": "Veranstaltung wird komplett mit allen Informationen unwiederherstellbar gelöscht. Sind Sie sich sicher?",

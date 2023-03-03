@@ -24,7 +24,7 @@
       <button
         v-if="eventsShowActivate && !event.active"
         class="btn btn-warning mx-1 my-2"
-        :title="$t('view.event.listing.actions.delete')"
+        :title="$t('view.event.listing.actions.activate')"
         @click="onToggleActivate(event.id, true)"
       >
         <i class="bi-eye bi--2xl" />
@@ -32,8 +32,8 @@
       <button
         v-if="eventsShowActivate && event.active"
         class="btn btn-info mx-1 my-2"
-        :title="$t('view.event.listing.actions.delete')"
-        @click="onToggleActivate(event, false)"
+        :title="$t('view.event.listing.actions.deactivate')"
+        @click="onToggleActivate(event.id, false)"
       >
         <i class="bi-eye-slash bi--2xl" />
       </button>
@@ -90,7 +90,7 @@
         <i class="bi-link-45deg bi--2xl" />
       </span>
       <!-- @todo add missing link to member list! -->
-      
+
       <!--      <router-link-->
       <!--        :to="{ name: 'MemberList', params: { eventSlug: event.slug } }"-->
       <!--        class="btn btn-info mx-1 my-2"-->
