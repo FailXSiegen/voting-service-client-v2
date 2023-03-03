@@ -159,6 +159,8 @@ async function onDelete(id) {
   --easy-table-header-font-color: white;
   --easy-table-header-background-color: #007bff;
   --easy-table-body-row-font-size: 1rem;
+  --easy-table-body-item-padding: 1rem;
+  --easy-table-header-item-padding: 1rem;
 }
 
 .new-meeting-button-group {

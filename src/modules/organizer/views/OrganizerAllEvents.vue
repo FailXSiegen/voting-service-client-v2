@@ -1,5 +1,5 @@
 <template>
-  <!--  <div class="events-container">-->
+  <!--  <div class="event-container">-->
   <!--    <app-navigation />-->
   <!--    <div class="container-fluid">-->
   <!--      <slot name="alerts"></slot>-->
@@ -18,15 +18,15 @@
   <!--          <app-event-listing-->
   <!--            v-if="upcomingEvents"-->
   <!--            :headline="localize('view.event.upcoming')"-->
-  <!--            :events-detail="true"-->
-  <!--            :events="upcomingEvents"-->
+  <!--            :event-detail="true"-->
+  <!--            :event="upcomingEvents"-->
   <!--            @onDeleteEvent="deleteEvent"-->
   <!--          />-->
   <!--          <app-event-listing-->
   <!--            v-if="expiredEvents"-->
   <!--            :headline="localize('view.event.latest')"-->
-  <!--            :events-detail="true"-->
-  <!--            :events="expiredEvents"-->
+  <!--            :event-detail="true"-->
+  <!--            :event="expiredEvents"-->
   <!--            @onDeleteEvent="deleteEvent"-->
   <!--          />-->
   <!--        </div>-->
@@ -67,7 +67,7 @@ const routes = getRoutesByName([
   RouteOrganizerAllEvents
 ]);
 // import AppNavigation from '@/organizer/components/Navigation';
-// import AppEventListing from '@/organizer/components/events/Listing';
+// import AppEventListing from '@/organizer/components/event/Listing';
 // import {addSuccessMessage, addDangerMessage} from '@/frame/lib/alert-helper';
 // import {localize} from '@/frame/lib/localization-helper';
 // import {REMOVE_EVENT_MUTATION} from '@/organizer/api/graphql/gql/mutations';

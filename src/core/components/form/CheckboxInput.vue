@@ -17,6 +17,12 @@
       :for="id"
       v-html="label"
     />
+    <small
+      v-if="helpText"
+      class="form-text text-muted"
+    >
+      <span v-html="helpText" />
+    </small>
     <span
       v-for="error in errors"
       :key="error.uid"
@@ -47,6 +53,8 @@ defineProps({
     // eslint-disable-next-line vue/require-valid-default-prop
     default: []
   },
+  // eslint-disable-next-line vue/require-default-prop
+  helpText: String,
   // eslint-disable-next-line vue/require-default-prop
   checked: Boolean,
 });

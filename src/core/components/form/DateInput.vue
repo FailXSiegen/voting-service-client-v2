@@ -5,26 +5,16 @@
   >
     {{ label }}
   </label>
-  <div class="input-group">
-    <div class="input-group-prepend">
-      <div class="input-group-text">
-        @
-      </div>
-    </div>
-    <input
-      :id="id"
-      v-model="inputValue"
-      :name="name"
-      :class="[
-        'form-control',
-        (hasErrors ? 'is-invalid': null),
-        ...classes
-      ]"
-      :autocomplete="autocomplete"
-      type="email"
-      @keyup="onChange"
-    >
-  </div>
+  <VueDatePicker
+    :id="id"
+    v-model="inputValue"
+    :name="name"
+    :format="format"
+    locale="de"
+    cancel-text="abbrechen"
+    select-text="auswählen"
+    @update:model-value="onChange"
+  />
   <small
     v-if="helpText"
     class="form-text text-muted"
@@ -36,12 +26,13 @@
     :key="error.uid"
     class="form-field-error text-danger"
   >
-    {{ $t('error.formValidation.' + error.$validator) }}<br>
+    <!--    {{ $t('error.formValidation.' + error.$validator) }}<br>-->
   </span>
 </template>
 
 <script setup>
 import {ref} from "vue";
+import VueDatePicker from '@vuepic/vue-datepicker';
 
 const emit = defineEmits(['change']);
 
@@ -50,6 +41,8 @@ const props = defineProps({
   label: String,
   // eslint-disable-next-line vue/require-default-prop
   id: String,
+  // eslint-disable-next-line vue/require-default-prop
+  type: String,
   // eslint-disable-next-line vue/require-default-prop
   name: String,
   // eslint-disable-next-line vue/require-default-prop
@@ -66,14 +59,24 @@ const props = defineProps({
     default: []
   },
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String,
+  value: Number,
   // eslint-disable-next-line vue/require-default-prop
-  value: String
+  helpText: String
 });
 
-const inputValue = ref(props.value);
+const inputValue = ref(props.value > 0 ? new Date(props.value * 1000) : new Date());
 
 function onChange() {
-  emit('change', {value: inputValue.value});
+  emit('change', {value: Math.floor(inputValue.value.getTime() / 1000)});
 }
+
+const format = (date) => {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  const hour = date.getHours();
+  const minutes = date.getUTCMinutes();
+
+  return `${day}.${month}.${year} - ${hour}:${minutes}`;
+};
 </script>

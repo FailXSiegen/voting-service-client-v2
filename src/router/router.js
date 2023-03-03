@@ -16,6 +16,9 @@ import EditVideoConference from "@/modules/organizer/views/video-conference/Edit
 import NewVideoConference from "@/modules/organizer/views/video-conference/NewVideoConference.vue";
 import OrganizerManagement from "@/modules/organizer/views/OrganizerManagement.vue";
 import OrganizerAllEvents from "@/modules/organizer/views/OrganizerAllEvents.vue";
+import EventNew from "@/modules/organizer/views/event/EventNew.vue";
+import EventEdit from "@/modules/organizer/views/event/EventEdit.vue";
+
 import {
     RouteMainLogin,
     RouteOrganizerDashboard,
@@ -35,7 +38,10 @@ import {
     RouteOrganizerManagement,
     RouteOrganizerAllEvents,
     RouteOrganizerVideoConference,
-    RouteOrganizerVideoConferenceNew, RouteOrganizerVideoConferenceEdit
+    RouteOrganizerVideoConferenceNew,
+    RouteOrganizerVideoConferenceEdit,
+    RouteOrganizerEventsNew,
+    RouteOrganizerEventsEdit
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {USER_ROLE_ORGANIZER} from "@/core/auth/login";
@@ -77,14 +83,20 @@ const routes = [
         bootstrapIcon: 'bi-calendar4-week',
         requireOrganizerRole: true
     }),
-    new Route("/admin/events", RouteOrganizerEvents, OrganizerEvents, {
+    new Route("/admin/event", RouteOrganizerEvents, OrganizerEvents, {
         bootstrapIcon: 'bi-card-list',
         requireOrganizerRole: true
     }),
     new Route("/admin/video-conference", RouteOrganizerVideoConference, OrganizerVideoConference, {
-        bootstrapIcon: 'bi-camera-video-fill',
+        bootstrapIcon: 'bi-camera-video',
         requireOrganizerRole: true
     }),
+    new Route("/admin/event/new", RouteOrganizerEventsNew, EventNew, {
+        requireOrganizerRole: true
+    }),
+    new Route("/admin/event/edit/:id", RouteOrganizerEventsEdit, EventEdit, {
+        requireOrganizerRole: true
+    }, null, true),
     new Route("/admin/video-conference/new", RouteOrganizerVideoConferenceNew, NewVideoConference, {
         requireOrganizerRole: true
     }),
@@ -96,7 +108,7 @@ const routes = [
         requireOrganizerRole: true,
         requireSuperOrganizerRole: true
     }),
-    new Route("/admin/all-events", RouteOrganizerAllEvents, OrganizerAllEvents, {
+    new Route("/admin/all-event", RouteOrganizerAllEvents, OrganizerAllEvents, {
         bootstrapIcon: 'bi-calendar2-range-fill',
         requireOrganizerRole: true,
         requireSuperOrganizerRole: true

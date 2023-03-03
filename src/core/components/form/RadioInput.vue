@@ -1,36 +1,36 @@
 <template>
-  <label
-    v-if="label"
-    :for="id"
+  <template
+    v-for="item in items"
+    :key="item.value"
   >
-    {{ label }}
-  </label>
-  <div class="input-group">
-    <div class="input-group-prepend">
-      <div class="input-group-text">
-        @
-      </div>
+    <div class="form-check mb-3">
+      <input
+        :id="id"
+        v-model="inputValue"
+        :name="name"
+        :class="[
+          'form-check-input',
+          (hasErrors ? 'is-invalid': null),
+          ...classes
+        ]"
+        type="radio"
+        :value="item.value"
+        @change="onChange"
+      >
+      <label
+        v-if="item.label"
+      >
+        {{ item.label }}
+      </label>
+      <small
+        v-if="item.helpText"
+        class="form-text text-muted"
+      >
+        <span v-html="item.helpText" />
+      </small>
     </div>
-    <input
-      :id="id"
-      v-model="inputValue"
-      :name="name"
-      :class="[
-        'form-control',
-        (hasErrors ? 'is-invalid': null),
-        ...classes
-      ]"
-      :autocomplete="autocomplete"
-      type="email"
-      @keyup="onChange"
-    >
-  </div>
-  <small
-    v-if="helpText"
-    class="form-text text-muted"
-  >
-    <span v-html="helpText" />
-  </small>
+  </template>
+
   <span
     v-for="error in errors"
     :key="error.uid"
@@ -66,9 +66,13 @@ const props = defineProps({
     default: []
   },
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String,
+  value: String,
   // eslint-disable-next-line vue/require-default-prop
-  value: String
+  helpText: String,
+  items: {
+    type: Array,
+    default: () => []
+  },
 });
 
 const inputValue = ref(props.value);

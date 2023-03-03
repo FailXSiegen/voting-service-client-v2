@@ -5,31 +5,37 @@
   >
     {{ label }}
   </label>
-  <div class="input-group">
-    <div class="input-group-prepend">
-      <div class="input-group-text">
-        @
-      </div>
-    </div>
-    <input
-      :id="id"
-      v-model="inputValue"
-      :name="name"
-      :class="[
-        'form-control',
-        (hasErrors ? 'is-invalid': null),
-        ...classes
-      ]"
-      :autocomplete="autocomplete"
-      type="email"
-      @keyup="onChange"
+  <select
+    v-if="videoConferences"
+    :id="id"
+    v-model="inputValue"
+    :name="name"
+    :class="[
+      'custom-select',
+      (hasErrors ? 'is-invalid': null),
+      ...classes
+    ]"
+    @change="onChange"
+  >
+    <option
+      value="0"
+      selected="selected"
     >
-  </div>
+      ---
+    </option>
+    <option
+      v-for="videoConference in videoConferences"
+      :key="videoConference.id"
+      :value="videoConference.id"
+    >
+      {{ videoConference.title }}
+    </option>
+  </select>
   <small
     v-if="helpText"
     class="form-text text-muted"
   >
-    <span v-html="helpText" />
+    {{ helpText }}
   </small>
   <span
     v-for="error in errors"
@@ -41,7 +47,9 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
+import {ref, watch} from "vue";
+import {storeToRefs} from "pinia";
+import {useCore} from "@/core/store/core";
 
 const emit = defineEmits(['change']);
 
@@ -50,6 +58,8 @@ const props = defineProps({
   label: String,
   // eslint-disable-next-line vue/require-default-prop
   id: String,
+  // eslint-disable-next-line vue/require-default-prop
+  type: String,
   // eslint-disable-next-line vue/require-default-prop
   name: String,
   // eslint-disable-next-line vue/require-default-prop
@@ -66,14 +76,24 @@ const props = defineProps({
     default: []
   },
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String,
+  value: String,
   // eslint-disable-next-line vue/require-default-prop
-  value: String
+  helpText: String
 });
 
 const inputValue = ref(props.value);
 
 function onChange() {
-  emit('change', {value: inputValue.value});
+  emit('change', {value: videoConferences.value.find(({id}) => inputValue.value === id)});
 }
+
+const coreStore = useCore();
+
+const {organizer} = storeToRefs(coreStore);
+const videoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
+// Watch changes to organizer in the store.
+watch(organizer, ({zoomMeetings}) => {
+  videoConferences.value = zoomMeetings;
+});
+
 </script>

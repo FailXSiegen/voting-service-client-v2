@@ -18,6 +18,12 @@
     :type="type"
     @keyup="onChange"
   >
+  <small
+    v-if="helpText"
+    class="form-text text-muted"
+  >
+    {{ helpText }}
+  </small>
   <span
     v-for="error in errors"
     :key="error.uid"
@@ -55,7 +61,9 @@ const props = defineProps({
     default: []
   },
   // eslint-disable-next-line vue/require-default-prop
-  value: String
+  value: String,
+  // eslint-disable-next-line vue/require-default-prop
+  helpText: String
 });
 
 const inputValue = ref(props.value);

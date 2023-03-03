@@ -24,6 +24,8 @@ export const RouteOrganizerAllEvents = 'organizerAllEvents';
 export const RouteOrganizerVideoConference = 'organizerVideoConference';
 export const RouteOrganizerVideoConferenceNew = 'organizerVideoConferenceNew';
 export const RouteOrganizerVideoConferenceEdit = 'organizerVideoConferenceEdit';
+export const RouteOrganizerEventsNew = 'organizerEventsNew';
+export const RouteOrganizerEventsEdit = 'organizerEventsEdit';
 
 /**
  * @param {String[]} routeNames Use constants in router.js

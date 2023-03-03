@@ -119,7 +119,15 @@
             "descriptionHelp": "Veranstaltungsbeschreibung",
             "scheduledDatetime": "Start-Datum",
             "lobbyOpen": "Lobby aktivieren / vorzeitiger Login und Anzeige der Veranstaltung auf der Startseite",
+            "active": "Veranstaltung direct aktiv schalten?",
             "submit": "Diese Veranstaltungen speichern",
+            "videoConferenceSelect": "Videokonferenz-System-Auswahl",
+            "multivoteTypeTitle": "Mehrfachstimmenabgabe",
+            "multivoteTypeInfo": "Wahlmöglichkeit zur Vorgabe der stimmberechtigten Teilnehmer die mehr als eine Stimme haben",
+            "multivoteRadio1Label": "Benutzer können unterschiedliche Stimmenabgabe durchführen",
+            "multivoteRadio1Help": "Bsp.: Stimme 1 von 2: Ja, Stimme 2 von 2: nein<br>Bsp. 2: Checkbox ausgewählt vom Teilnehmer: Alle Stimmen auf einmal abgeben: Ja 2x",
+            "multivoteRadio2Label": "Benutzer geben IMMER alle Stimmen auf einmal ab",
+            "multivoteRadio2Help": "Bsp.: Teilnehmer hat 5 Stimmen. Bei Abstimmung wählt der Teilnehmer nur einmal, es wird 5 fach gewertet.",
             "eventUser": {
               "submit": "Benutzer speichern",
               "createNew": "Neuen Benutzer erstellen",
@@ -137,6 +145,12 @@
               "usernames": "Benutzernamen",
               "usernamesHint": "Immer ein Benutzer pro Zeile. Keine Leerzeichen im Benutzernamen. Keine leeren Zeilen",
               "voteAmount": "Anzahl der Stimmen"
+            },
+            "videoConferenceConfig": {
+              "zoom": {
+                "meetingId": "Meeting ID",
+                "password": "Passwort"
+              }
             }
           }
         },
@@ -149,6 +163,9 @@
           "stateActive": "Aktiv",
           "stateLocked": "Inaktiv",
           "voteAmount": "Stimmen",
+          "deleteInfo": "Nur inaktive Veranstaltungen können gelöscht werden",
+          "organizer": "Veranstalter",
+          "textCopiedToClipboard": "Der Veranstaltungslink wurde in die Zwischenablage kopiert.",
           "actions": {
             "label": "Aktionen",
             "edit": "Bearbeiten",
@@ -156,6 +173,10 @@
             "newTab": "Veranstaltungs-Organisation in neuem Tab öffnen",
             "close": "Veranstaltung beenden",
             "delete": "Veranstaltung löschen"
+          },
+          "confirm": {
+            "deleteQuestion": "Veranstaltung wird komplett mit allen Informationen unwiederherstellbar gelöscht. Sind Sie sich sicher?",
+            "updateActiveStateQuestion": "Veranstaltung wird bearbeitet. Sind Sie sich sicher?"
           }
         },
         "upcoming": "Bevorstehende Veranstaltungen",
@@ -281,6 +302,8 @@
         "mainLogin": "Login",
         "organizerDashboard": "Dashboard",
         "organizerEvents": "Veranstaltungen",
+        "organizerEventsNew": "Neue Veranstaltung",
+        "organizerEventsEdit": "Veranstaltung Bearbeiten",
         "organizerVideoConference": "Videokonferenzsysteme",
         "organizerVideoConferenceNew": "Neue Videokonferenzsysteme",
         "organizerVideoConferenceEdit": "Videokonferenzsysteme Bearbeiten",
@@ -336,6 +359,11 @@
         "organizers": {
           "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
+        },
+        "events": {
+          "createdSuccessfully": "Die Veranstaltung wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Die Veranstaltung wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Die Veranstaltung wurde erfolgreich entfernt."
         }
       }
     },
