@@ -19,7 +19,10 @@
       id="navbarCollapse"
       class="collapse navbar-collapse bg-dark"
     >
-      <div class="mb-5">
+      <div
+        v-if="showProfileLink"
+        class="mb-5"
+      >
         <router-link
           :to="{name: RouteOrganizerProfile}"
           class="btn btn-secondary btn-block py-3 px-0"
@@ -33,19 +36,30 @@
       </div>
       <ul class="list-group">
         <li
-          v-for="(route, index) in props.routes"
+          v-for="(navigationItemRoute, index) in props.routes"
           :key="index"
           class="navigation-item list-group-item"
         >
           <router-link
-            v-if="isRouteAccessible(route)"
-            :to="route.path"
+            v-if="isRouteAccessible(navigationItemRoute) && passParams"
+            :to="{name: navigationItemRoute.name, params}"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{ $t('navigation.views.' + route.name) }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + navigationItemRoute.name) }}</span>
             <span
-              :class="['nav-icon','bi', 'bi--2xl', route.meta.bootstrapIcon]"
-              :title="$t('navigation.views.' + route.name) "
+              :class="['nav-icon','bi', 'bi--2xl', navigationItemRoute.meta.bootstrapIcon]"
+              :title="$t('navigation.views.' + navigationItemRoute.name) "
+            />
+          </router-link>
+          <router-link
+            v-else-if="isRouteAccessible(navigationItemRoute)"
+            :to="{name: navigationItemRoute.name}"
+            class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
+          >
+            <span class="nav-title">{{ $t('navigation.views.' + navigationItemRoute.name) }}</span>
+            <span
+              :class="['nav-icon','bi', 'bi--2xl', navigationItemRoute.meta.bootstrapIcon]"
+              :title="$t('navigation.views.' + navigationItemRoute.name) "
             />
           </router-link>
         </li>
@@ -68,7 +82,9 @@ import {logout} from "@/core/auth/login";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import {useCore} from "@/core/store/core";
-import {useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
+
+// @todo dd possibility to add badges to nav links.
 
 const coreStore = useCore();
 const router = useRouter();
@@ -77,8 +93,21 @@ const props = defineProps({
   routes: {
     type: Array,
     required: true
+  },
+  passParams: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  showProfileLink: {
+    type: Boolean,
+    required: false,
+    default: true
   }
 });
+
+const params = useRoute().params;
+console.log(params, 'params');
 
 function onLogout() {
   logout()
