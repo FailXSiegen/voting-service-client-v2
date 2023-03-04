@@ -2,23 +2,6 @@ import {createRouter, createWebHistory} from "vue-router";
 import {Route} from "@/core/model/Route";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
-import MainLogin from "@/core/views/MainLogin.vue";
-import NotFound from "@/core/views/NotFound.vue";
-import RequestChangeOrganizerPassword from "@/core/views/RequestChangeOrganizerPassword.vue";
-import ChangeOrganizerPassword from "@/core/views/ChangeOrganizerPassword.vue";
-import RegisterOrganizer from "@/core/views/RegisterOrganizer.vue";
-import VerifyRegisteredOrganizer from "@/core/views/VerifyRegisteredOrganizer.vue";
-import OrganizerDashboard from "@/modules/organizer/views/OrganizerDashboard.vue";
-import OrganizerProfile from "@/modules/organizer/views/OrganizerProfile.vue";
-import OrganizerEvents from "@/modules/organizer/views/OrganizerEvents.vue";
-import OrganizerVideoConference from "@/modules/organizer/views/OrganizerVideoConference.vue";
-import EditVideoConference from "@/modules/organizer/views/video-conference/EditVideoConference.vue";
-import NewVideoConference from "@/modules/organizer/views/video-conference/NewVideoConference.vue";
-import OrganizerManagement from "@/modules/organizer/views/OrganizerManagement.vue";
-import OrganizerAllEvents from "@/modules/organizer/views/OrganizerAllEvents.vue";
-import EventNew from "@/modules/organizer/views/event/EventNew.vue";
-import EventEdit from "@/modules/organizer/views/event/EventEdit.vue";
-
 import {
     RouteMainLogin,
     RouteOrganizerDashboard,
@@ -41,10 +24,34 @@ import {
     RouteOrganizerVideoConferenceNew,
     RouteOrganizerVideoConferenceEdit,
     RouteOrganizerEventsNew,
-    RouteOrganizerEventsEdit
+    RouteOrganizerEventsEdit,
+    RouteOrganizerMemberRoom,
+    RouteOrganizerLobbyRoom,
+    RouteOrganizerPolls,
+    RouteOrganizerPollResults
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {USER_ROLE_ORGANIZER} from "@/core/auth/login";
+import MainLogin from "@/core/views/MainLogin.vue";
+import NotFound from "@/core/views/NotFound.vue";
+import RequestChangeOrganizerPassword from "@/core/views/RequestChangeOrganizerPassword.vue";
+import ChangeOrganizerPassword from "@/core/views/ChangeOrganizerPassword.vue";
+import RegisterOrganizer from "@/core/views/RegisterOrganizer.vue";
+import VerifyRegisteredOrganizer from "@/core/views/VerifyRegisteredOrganizer.vue";
+import OrganizerDashboard from "@/modules/organizer/views/OrganizerDashboard.vue";
+import OrganizerProfile from "@/modules/organizer/views/OrganizerProfile.vue";
+import OrganizerEvents from "@/modules/organizer/views/OrganizerEvents.vue";
+import OrganizerVideoConference from "@/modules/organizer/views/OrganizerVideoConference.vue";
+import EditVideoConference from "@/modules/organizer/views/video-conference/EditVideoConference.vue";
+import NewVideoConference from "@/modules/organizer/views/video-conference/NewVideoConference.vue";
+import OrganizerManagement from "@/modules/organizer/views/OrganizerManagement.vue";
+import OrganizerAllEvents from "@/modules/organizer/views/OrganizerAllEvents.vue";
+import EventNew from "@/modules/organizer/views/event/EventNew.vue";
+import EventEdit from "@/modules/organizer/views/event/EventEdit.vue";
+import MemeberRoom from "@/modules/organizer/views/event/MemeberRoom.vue";
+import LobbyRoom from "@/modules/organizer/views/event/LobbyRoom.vue";
+import PollResultListing from "@/modules/organizer/views/event/PollResultListing.vue";
+import PollListing from "@/modules/organizer/views/event/PollListing.vue";
 import StaticPageImprint from "@/core/views/staticPages/StaticPageImprint.vue";
 import StaticPageDataProtection from "@/core/views/staticPages/StaticPageDataProtection.vue";
 import StaticPageFaq from "@/core/views/staticPages/StaticPageFaq.vue";
@@ -95,6 +102,22 @@ const routes = [
         requireOrganizerRole: true
     }),
     new Route("/admin/event/edit/:id", RouteOrganizerEventsEdit, EventEdit, {
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/member-room/:id", RouteOrganizerMemberRoom, MemeberRoom, {
+        bootstrapIcon: 'bi-people-fill',
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/lobby-room/:id", RouteOrganizerLobbyRoom, LobbyRoom, {
+        bootstrapIcon: 'bi-person-plus-fill',
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/polls/:id", RouteOrganizerPolls, PollListing, {
+        bootstrapIcon: 'bi-collection-fill',
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/poll-results/:id", RouteOrganizerPollResults, PollResultListing, {
+        bootstrapIcon: 'bi-card-checklist',
         requireOrganizerRole: true
     }, null, true),
     new Route("/admin/video-conference/new", RouteOrganizerVideoConferenceNew, NewVideoConference, {

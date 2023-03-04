@@ -6,6 +6,7 @@ export class Route {
      * @param {String|null} redirect
      * @param {Object|null} meta @see meta.bootstrapIcon is used in navigations https://icons.getbootstrap.com/#icons
      * @param {Object|Boolean|null} props
+     * @param {Route[]|null} children
      */
     constructor(
         path,
@@ -13,7 +14,8 @@ export class Route {
         component,
         meta = null,
         redirect = null,
-        props = null
+        props = null,
+        children = null
     ) {
         this.path = path;
         this.name = name;
@@ -21,5 +23,6 @@ export class Route {
         this.redirect = redirect;
         this.meta = meta;
         this.props = props;
+        this.children = children;
     }
 }

@@ -298,6 +298,7 @@
     "navigation": {
       "logOut": "Ausloggen",
       "reload": "Aktualisieren",
+      "backToDashboard": "Zurück zum Dashboard",
       "views": {
         "organizerProfile": "Mein Profil",
         "startPage": "Startseite",
@@ -311,6 +312,10 @@
         "organizerVideoConferenceEdit": "Videokonferenzsysteme Bearbeiten",
         "organizerManagement": "Organisatoren",
         "organizerAllEvents": "Alle Veranstaltungen",
+        "organizerMemberRoom": "Teilnehmer",
+        "organizerLobbyRoom": "Warteraum",
+        "organizerPolls": "Abstimmungen",
+        "organizerPollResults": "Ergebnisse",
         "staticPages": {
           "dataProtection": "Datenschutz",
           "faq": "Häufige Fragen",
@@ -367,6 +372,23 @@
           "updatedSuccessfully": "Die Veranstaltung wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Die Veranstaltung wurde erfolgreich entfernt."
         }
+      }
+    },
+    "eventUser": {
+      "publicName": "Öffentlicher Name",
+      "verified": "Freigeschaltet",
+      "allowToVote": "Abstimmrecht",
+      "online": "Online",
+      "username": "Nutzername",
+      "voteAmount": "Anzahl der Stimmen",
+      "createDatetime": "Erstellungsdatum",
+      "onlineState": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "filter": {
+        "byUsername": "Filter für Benutzernamen",
+        "reset": "Filter zurücksetzen"
       }
     },
     "router": {

@@ -91,13 +91,13 @@
       </span>
       <!-- @todo add missing link to member list! -->
 
-      <!--      <router-link-->
-      <!--        :to="{ name: 'MemberList', params: { eventSlug: event.slug } }"-->
-      <!--        class="btn btn-info mx-1 my-2"-->
-      <!--        :title="$t('view.event.listing.actions.newTab')"-->
-      <!--      >-->
-      <!--        <i class="bi-eye-fill bi&#45;&#45;2xl" />-->
-      <!--      </router-link>-->
+      <router-link
+        :to="{ name: RouteOrganizerMemberRoom, params: { id: event.id } }"
+        class="btn btn-info mx-1 my-2"
+        :title="$t('view.event.listing.actions.newTab')"
+      >
+        <i class="bi-eye-fill bi--2xl" />
+      </router-link>
       <button
         class="btn btn-danger mx-1 my-2"
         :title="$t('view.event.listing.actions.delete')"
@@ -119,7 +119,7 @@ import {handleError} from "@/core/error/error-handler";
 import {useCore} from "@/core/store/core";
 import {createConfirmDialog} from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import {RouteOrganizerEventsEdit} from "@/router/routes";
+import {RouteOrganizerEventsEdit, RouteOrganizerMemberRoom} from "@/router/routes";
 
 const coreStore = useCore();
 
