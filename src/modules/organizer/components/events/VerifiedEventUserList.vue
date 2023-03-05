@@ -70,7 +70,7 @@
           </button>
           <button
             v-else-if="item.allowToVote"
-            class="h-100 btn btn-info"
+            class="btn btn-info"
             @click="onUpdateToGuest(item.id)"
           >
             {{ $t('view.event.user.setTo') }}
@@ -81,15 +81,17 @@
               name: RouteOrganizerEventUserEdit,
               params: { eventUserId: item.id }
             }"
-            class="btn h-100 btn-warning d-flex justify-content-center align-items-center"
+            :title="$t('view.event.user.edit')"
+            class="btn btn-warning d-flex justify-content-center align-items-center"
           >
             <i class="bi-pencil align-middle" />
           </router-link>
           <button
-            class="h-100 btn btn-danger"
+            class="btn btn-danger"
+            :title="$t('view.event.user.unverfify')"
             @click="onUnverfifyEventUser(item.id)"
           >
-            <i class="bi-person-x align-middle" /> {{ $t('view.event.user.unverfify') }}
+            <i class="bi-person-x align-middle" />
           </button>
         </div>
       </template>

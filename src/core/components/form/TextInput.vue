@@ -9,6 +9,7 @@
     :id="id"
     v-model="inputValue"
     :rows="rows"
+    :cols="cols"
     :name="name"
     :class="[
       'form-control',
@@ -64,6 +65,8 @@ const props = defineProps({
   value: String,
   // eslint-disable-next-line vue/require-default-prop
   rows: Number,
+  // eslint-disable-next-line vue/require-default-prop
+  cols: Number,
   // eslint-disable-next-line vue/require-default-prop
   helpText: String
 });

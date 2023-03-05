@@ -31,15 +31,15 @@
           {{ $t('view.event.create.labels.eventUser.createNew') }}
         </span>
       </router-link>
-      <!--      <router-link-->
-      <!--        :to="{ name: 'CreateEventMultipleUser' }"-->
-      <!--        class="btn btn-info my-3"-->
-      <!--      >-->
-      <!--        <i class="bi-list bi&#45;&#45;2xl align-middle" />-->
-      <!--        <span class="align-middle">-->
-      <!--          {{ $t('view.event.create.labels.eventMultipleUser.createNew') }}-->
-      <!--        </span>-->
-      <!--      </router-link>-->
+      <router-link
+        :to="{ name: RouteOrganizerEventUserMultipleNew }"
+        class="btn btn-info my-3"
+      >
+        <i class="bi-list bi--2xl align-middle" />
+        <span class="align-middle">
+          {{ $t('view.event.create.labels.eventMultipleUser.createNew') }}
+        </span>
+      </router-link>
       <hr>
       <VerifiedEventUserList
         :event-users="verifiedEventUsers"
@@ -62,7 +62,8 @@ import {
   RouteOrganizerMemberRoom,
   RouteOrganizerPollResults,
   RouteOrganizerPolls,
-  RouteOrganizerEventUserNew
+  RouteOrganizerEventUserNew,
+  RouteOrganizerEventUserMultipleNew
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
