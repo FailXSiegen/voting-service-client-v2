@@ -127,7 +127,6 @@ function onShowMorePastEvents() {
 }
 
 async function onDelete({eventId, organizerId}) {
-  console.log('onDelete');
   // Update new zoom meeting.
   const {mutate: removeEvent} = useMutation(REMOVE_EVENT, {
     variables: {
@@ -149,7 +148,6 @@ async function onDelete({eventId, organizerId}) {
 }
 
 async function onToggleActive({eventId, status}) {
-  console.log('onToggleActive');
   // Update update event status.
   const {mutate: updateEventStatus} = useMutation(UPDATE_EVENT_STATUS, {
     variables: {

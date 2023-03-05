@@ -107,7 +107,6 @@ const props = defineProps({
 });
 
 const params = useRoute().params;
-console.log(params, 'params');
 
 function onLogout() {
   logout()
