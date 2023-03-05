@@ -110,7 +110,10 @@
           "offline": "Offline",
           "all": "Gesamt",
           "allVoteAmount": "Gesamtstimmen",
-          "info": "Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren -> Haken bei \"Freigeschaltet\" entfernen. Benutzer erscheint wieder im Warteraum"
+          "info": "Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren -> Haken bei \"Freigeschaltet\" entfernen. Benutzer erscheint wieder im Warteraum",
+          "confirm": {
+            "unverify": "Freischaltung deaktivieren? Nutzer wird in den Warteraum verschoben."
+          }
         },
         "create": {
           "createNew": "Neue Veranstaltung erstellen",
