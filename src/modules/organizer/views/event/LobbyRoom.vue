@@ -57,6 +57,10 @@ import {UPDATE_EVENT_USER_TO_GUEST} from "@/modules/organizer/graphql/mutation/u
 import {DELETE_EVENT_USER} from "@/modules/organizer/graphql/mutation/delete-event-user";
 import {useSubscription} from "@vue/apollo-composable";
 import {NEW_EVENT_USER} from "@/modules/organizer/graphql/subscription/new-event-user";
+import {
+  UPDATE_EVENT_USER_ACCESS_RIGHTS
+} from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
+import {EVENT_USER_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -97,9 +101,69 @@ eventQuery.onResult(({data}) => {
   });
 });
 
+// Handle new users.
 const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
-newEventUserSubscription.onResult((data) => {
-  console.log(data);
+newEventUserSubscription.onResult(({data}) => {
+  if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
+    // This event user does not belong to our event.
+    return;
+  }
+
+  // We have to make a copy to add a new entry to the event users array.
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  copyOfEventUsers.push({...data?.newEventUser});
+
+  eventUsers.value = copyOfEventUsers;
+});
+
+// Handle update of event user access rights.
+const updateEventUserAccessRightsSubscription = useSubscription(UPDATE_EVENT_USER_ACCESS_RIGHTS);
+updateEventUserAccessRightsSubscription.onResult(({data}) => {
+  const {
+    eventUserId,
+    eventId,
+    verified,
+    allowToVote,
+    voteAmount
+  } = data.updateEventUserAccessRights;
+
+  if (parseInt(eventId, 10) !== parseInt(id, 10)) {
+    // This event user does not belong to our event.
+    return;
+  }
+
+  // We have to make a copy to add a new entry to the event users array.
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  const eventUser = copyOfEventUsers.find(user => {
+    return user.id === eventUserId;
+  });
+
+  if (!eventUser) {
+    // No event user found. So we ignore this.
+    return;
+  }
+
+  eventUser.verified = verified;
+  eventUser.allowToVote = allowToVote;
+  eventUser.voteAmount = voteAmount;
+  eventUsers.value = copyOfEventUsers;
+});
+
+// Handle event user life cycle updates.
+const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE);
+eventUserLifeCycleSubscription.onResult(({data}) => {
+  // We have to make a copy to add a new entry to the event users array.
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  const eventUser = copyOfEventUsers.find(user => {
+    return parseInt(user.id, 10) === parseInt(data?.eventUserLifeCycle?.eventUserId, 10);
+  });
+  if (!eventUser) {
+    // No event user found. So we ignore this.
+    console.log('user not found');
+    return;
+  }
+  eventUser.online = data?.eventUserLifeCycle?.online;
+  eventUsers.value = copyOfEventUsers;
 });
 
 async function onUpdateToParticipant(eventUserId) {
