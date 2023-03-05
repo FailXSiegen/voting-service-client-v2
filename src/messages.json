@@ -100,6 +100,7 @@
         },
         "user": {
           "verifyAs": "Verifizieren als:",
+          "unverfify": "In den Warteraum",
           "setTo": "Setzen auf:",
           "block": "Benutzer löschen",
           "member": "Teilnehmer",
@@ -107,7 +108,8 @@
           "online": "Online",
           "offline": "Offline",
           "all": "Gesamt",
-          "allVoteAmount": "Gesamtstimmen"
+          "allVoteAmount": "Gesamtstimmen",
+          "info": "Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren -> Haken bei \"Freigeschaltet\" entfernen. Benutzer erscheint wieder im Warteraum"
         },
         "create": {
           "createNew": "Neue Veranstaltung erstellen",
@@ -182,7 +184,8 @@
           }
         },
         "upcoming": "Bevorstehende Veranstaltungen",
-        "latest": "Letzte Veranstaltungen"
+        "latest": "Letzte Veranstaltungen",
+        "backToMemeberRoom": "Zurück zur Teilnehmeransicht"
       },
       "polls": {
         "noActiveUser": "Keine aktiven Teilnehmer. Abstimmungen können nicht gestartet werden.",
@@ -316,6 +319,7 @@
         "organizerLobbyRoom": "Warteraum",
         "organizerPolls": "Abstimmungen",
         "organizerPollResults": "Ergebnisse",
+        "organizerEventUserNew": "Neuen Nutzer anlegen",
         "staticPages": {
           "dataProtection": "Datenschutz",
           "faq": "Häufige Fragen",
@@ -371,6 +375,11 @@
           "createdSuccessfully": "Die Veranstaltung wurde erfolgreich erstellt.",
           "updatedSuccessfully": "Die Veranstaltung wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Die Veranstaltung wurde erfolgreich entfernt."
+        },
+        "eventUser": {
+          "createdSuccessfully": "Der Nutzer wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Der Nutzer wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Der Nutzer wurde erfolgreich entfernt."
         }
       }
     },
