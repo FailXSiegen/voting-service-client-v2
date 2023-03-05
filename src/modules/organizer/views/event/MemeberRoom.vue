@@ -67,7 +67,7 @@ import {
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
-import {useMutation, useQuery} from "@vue/apollo-composable";
+import {useMutation, useQuery, useSubscription} from "@vue/apollo-composable";
 import {EVENT} from "@/modules/organizer/graphql/queries/event";
 import {handleError} from "@/core/error/error-handler";
 import {NetworkError} from "@/core/error/NetworkError";
@@ -75,6 +75,15 @@ import {computed, ref} from "vue";
 import {UPDATE_EVENT_USER_TO_PARTICIPANT} from "@/modules/organizer/graphql/mutation/update-event-user-to-participant";
 import {UPDATE_EVENT_USER_TO_GUEST} from "@/modules/organizer/graphql/mutation/update-event-user-to-guest";
 import {EVENT_USERS} from "@/modules/organizer/graphql/queries/event-users";
+import {createConfirmDialog} from "vuejs-confirm-dialog";
+import ConfirmModal from "@/core/components/ConfirmModal.vue";
+import i18n from "@/l18n";
+import {UPDATE_EVENT_USER} from "@/modules/organizer/graphql/mutation/update-event-user";
+import {NEW_EVENT_USER} from "@/modules/organizer/graphql/subscription/new-event-user";
+import {
+  UPDATE_EVENT_USER_ACCESS_RIGHTS
+} from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
+import {EVENT_USER_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -115,31 +124,117 @@ eventQuery.onResult(({data}) => {
   });
 });
 
+// Handle new users.
+const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
+newEventUserSubscription.onResult(({data}) => {
+  if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
+    // This event user does not belong to our event.
+    return;
+  }
+
+  // We have to make a copy to add a new entry to the event users array.
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  copyOfEventUsers.push({...data?.newEventUser});
+
+  eventUsers.value = copyOfEventUsers;
+});
+
+// Handle update of event user access rights.
+const updateEventUserAccessRightsSubscription = useSubscription(UPDATE_EVENT_USER_ACCESS_RIGHTS);
+updateEventUserAccessRightsSubscription.onResult(({data}) => {
+  const {
+    eventUserId,
+    eventId,
+    verified,
+    allowToVote,
+    voteAmount
+  } = data.updateEventUserAccessRights;
+
+  if (parseInt(eventId, 10) !== parseInt(id, 10)) {
+    // This event user does not belong to our event.
+    return;
+  }
+
+  // We have to make a copy to add a new entry to the event users array.
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  const eventUser = copyOfEventUsers.find(user => {
+    return user.id === eventUserId;
+  });
+
+  if (!eventUser) {
+    // No event user found. So we ignore this.
+    return;
+  }
+
+  eventUser.verified = verified;
+  eventUser.allowToVote = allowToVote;
+  eventUser.voteAmount = voteAmount;
+  eventUsers.value = copyOfEventUsers;
+});
+
+// Handle event user life cycle updates.
+const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE);
+eventUserLifeCycleSubscription.onResult(({data}) => {
+  // We have to make a copy to add a new entry to the event users array.
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  const eventUser = copyOfEventUsers.find(user => {
+    return parseInt(user.id, 10) === parseInt(data?.eventUserLifeCycle?.eventUserId, 10);
+  });
+  if (!eventUser) {
+    // No event user found. So we ignore this.
+    return;
+  }
+  eventUser.online = data?.eventUserLifeCycle?.online;
+  eventUsers.value = copyOfEventUsers;
+});
+
 async function onUpdateToParticipant(eventUserId) {
-  console.log('onUpdateToParticipant', eventUserId);
-  // const {mutate: updateEventUserToParticipant} = useMutation(UPDATE_EVENT_USER_TO_PARTICIPANT, {
-  //   variables: {
-  //     eventUserId,
-  //   },
-  // });
-  // await updateEventUserToParticipant();
-  // await eventUsersQuery.refetch();
+  const {mutate: updateEventUserToParticipant} = useMutation(UPDATE_EVENT_USER_TO_PARTICIPANT, {
+    variables: {
+      eventUserId,
+    },
+  });
+  await updateEventUserToParticipant();
+  await eventUsersQuery.refetch();
 }
 
 async function onUpdateToGuest(eventUserId) {
-  console.log('onUpdateToGuest', eventUserId);
-
-  // const {mutate: updateEventUserToGuest} = useMutation(UPDATE_EVENT_USER_TO_GUEST, {
-  //   variables: {
-  //     eventUserId,
-  //   },
-  // });
-  // await updateEventUserToGuest();
-  // await eventUsersQuery.refetch();
+  const {mutate: updateEventUserToGuest} = useMutation(UPDATE_EVENT_USER_TO_GUEST, {
+    variables: {
+      eventUserId,
+    },
+  });
+  await updateEventUserToGuest();
+  await eventUsersQuery.refetch();
 }
 
 async function onUnverfifyEventUser(eventUserId) {
-  console.log('onUnverfifyEventUser', eventUserId);
+  const eventUser = eventUsers.value.find((eventUser) => parseInt(eventUser?.id, 10) === parseInt(eventUserId, 10));
+  if (!eventUser) {
+    return;
+  }
+
+  const dialog = createConfirmDialog(ConfirmModal, {
+    message: i18n.global.tc('view.event.user.confirm.unverify')
+  });
+  dialog.onConfirm(async () => {
+    const {mutate: updateEventUser} = useMutation(UPDATE_EVENT_USER, {
+      variables: {
+        input: {
+          id: eventUser?.id,
+          eventId: id,
+          username: eventUser?.username,
+          verified: false,
+          allowToVote: eventUser?.allowToVote
+        }
+      },
+    });
+    await updateEventUser();
+    await eventUsersQuery.refetch();
+  });
+
+  // Show confirm dialog.
+  dialog.reveal();
 }
 
 </script>

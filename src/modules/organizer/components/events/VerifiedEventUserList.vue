@@ -100,7 +100,7 @@
 </template>
 
 <script setup>
-import {computed, reactive} from "vue";
+import {computed, reactive, ref} from "vue";
 import i18n from "@/l18n";
 import {createFormattedDateFromTimeStamp} from "@/core/util/time-stamp";
 import VerifiedEventUserLegend from "@/modules/organizer/components/events/VerifiedEventUserLegend.vue";
@@ -123,7 +123,8 @@ const headers = [
   {text: '', value: "id", sortable: true},
 ];
 
-const eventUserFiltered = computed(() => JSON.parse(JSON.stringify(props.eventUsers)));
+const eventUsersCopy = ref(null);
+const eventUserFiltered = computed(() => eventUsersCopy.value ? eventUsersCopy.value : JSON.parse(JSON.stringify(props.eventUsers)));
 const filter = reactive({username: ''});
 
 function formatTimestamp(timestamp) {
@@ -131,15 +132,14 @@ function formatTimestamp(timestamp) {
 }
 
 function onFilter() {
-  eventUserFiltered.value = props.eventUsers.filter(eventUser => (
-      !eventUser.verified &&
+  eventUsersCopy.value = props.eventUsers.filter(eventUser => (
       eventUser.username.includes(filter.username)
   ));
 }
 
 function onResetFilter() {
   filter.username = '';
-  eventUserFiltered.value = JSON.parse(JSON.stringify(props.eventUsers));
+  eventUsersCopy.value = JSON.parse(JSON.stringify(props.eventUsers));
 }
 
 function onUpdateToParticipant(eventUserId) {
@@ -154,7 +154,6 @@ function onUnverfifyEventUser(eventUserId) {
   emit('unverfifyEventUser', eventUserId);
 
 }
-
 </script>
 
 <style lang="scss" scoped>
