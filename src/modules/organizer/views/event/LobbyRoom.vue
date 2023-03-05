@@ -35,6 +35,7 @@
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import PendingEventUserList from "@/modules/organizer/components/events/PendingEventUserList.vue";
 import {
   getRoutesByName,
   RouteOrganizerDashboard,
@@ -50,7 +51,6 @@ import {EVENT} from "@/modules/organizer/graphql/queries/event";
 import {handleError} from "@/core/error/error-handler";
 import {NetworkError} from "@/core/error/NetworkError";
 import {computed, ref} from "vue";
-import PendingEventUserList from "@/modules/organizer/components/events/PendingEventUserList.vue";
 import {EVENT_USERS} from "@/modules/organizer/graphql/queries/event-users";
 import {UPDATE_EVENT_USER_TO_PARTICIPANT} from "@/modules/organizer/graphql/mutation/update-event-user-to-participant";
 import {UPDATE_EVENT_USER_TO_GUEST} from "@/modules/organizer/graphql/mutation/update-event-user-to-guest";

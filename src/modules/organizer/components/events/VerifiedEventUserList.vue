@@ -26,6 +26,12 @@
       </div>
     </div>
     <hr>
+    <VerifiedEventUserLegend :event-users="eventUsers" />
+    <hr>
+    <small
+      class="d-inline-block text-muted mb-3"
+      v-html="$t('view.event.user.info')"
+    />
     <EasyDataTable
       :headers="headers"
       :items="eventUserFiltered"
@@ -55,25 +61,35 @@
           role="group"
         >
           <button
-            class="btn btn-success mr-2"
+            v-if="!item.allowToVote"
+            class="h-100 btn btn-success"
             @click="onUpdateToParticipant(item.id)"
           >
-            {{ $t('view.event.user.verifyAs') }}
+            {{ $t('view.event.user.setTo') }}
             {{ $t('view.event.user.member') }}
           </button>
           <button
-            class="btn btn-info mr-2"
+            v-else-if="item.allowToVote"
+            class="h-100 btn btn-info"
             @click="onUpdateToGuest(item.id)"
           >
-            {{ $t('view.event.user.verifyAs') }}
+            {{ $t('view.event.user.setTo') }}
             {{ $t('view.event.user.visitor') }}
           </button>
-          <button
-            class="btn btn-danger mr-2"
-            :disabled="item.online"
-            @click="onDelete(item.id)"
+          <router-link
+            :to="{
+              name: RouteOrganizerEventUserEdit,
+              params: { eventUserId: item.id }
+            }"
+            class="btn h-100 btn-warning d-flex justify-content-center align-items-center"
           >
-            {{ $t('view.event.user.block') }}
+            <i class="bi-pencil align-middle" />
+          </router-link>
+          <button
+            class="h-100 btn btn-danger"
+            @click="onUnverfifyEventUser(item.id)"
+          >
+            <i class="bi-person-x align-middle" /> {{ $t('view.event.user.unverfify') }}
           </button>
         </div>
       </template>
@@ -85,10 +101,10 @@
 import {computed, reactive} from "vue";
 import i18n from "@/l18n";
 import {createFormattedDateFromTimeStamp} from "@/core/util/time-stamp";
-import {createConfirmDialog} from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
+import VerifiedEventUserLegend from "@/modules/organizer/components/events/VerifiedEventUserLegend.vue";
+import {RouteOrganizerEventUserEdit} from "@/router/routes";
 
-const emit = defineEmits(['delete', 'updateToGuest', 'updateToParticipant']);
+const emit = defineEmits(['updateToGuest', 'updateToParticipant', 'unverfifyEventUser']);
 
 const props = defineProps({
   eventUsers: {
@@ -132,17 +148,11 @@ function onUpdateToGuest(eventUserId) {
   emit('updateToGuest', eventUserId);
 }
 
-function onDelete(eventUserId) {
-  const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.event.listing.confirm.deleteQuestion')
-  });
-  dialog.onConfirm(() => {
-    emit('delete', eventUserId);
-  });
+function onUnverfifyEventUser(eventUserId) {
+  emit('unverfifyEventUser', eventUserId);
 
-  // Show confirm dialog.
-  dialog.reveal();
 }
+
 </script>
 
 <style lang="scss" scoped>
