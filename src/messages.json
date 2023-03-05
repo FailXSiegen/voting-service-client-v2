@@ -100,6 +100,7 @@
         },
         "user": {
           "verifyAs": "Verifizieren als:",
+          "edit": "Bearbeiten",
           "unverfify": "In den Warteraum",
           "setTo": "Setzen auf:",
           "block": "Benutzer löschen",
@@ -320,6 +321,7 @@
         "organizerPolls": "Abstimmungen",
         "organizerPollResults": "Ergebnisse",
         "organizerEventUserNew": "Neuen Nutzer anlegen",
+        "organizerEventUserMultipleNew": "Neue Nutzer anlegen",
         "staticPages": {
           "dataProtection": "Datenschutz",
           "faq": "Häufige Fragen",
@@ -342,7 +344,8 @@
       "formValidation": {
         "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
         "sameAs": "Die Werte müssen identisch sein.",
-        "required": "Dieses Feld muss ausgefüllt werden."
+        "required": "Dieses Feld muss ausgefüllt werden.",
+        "valueAlreadyExist": "Der Wert existiert bereits."
       },
       "routing": {
         "404Headline": "Die angeforderte Seite konnte leider nicht gefunden werden."

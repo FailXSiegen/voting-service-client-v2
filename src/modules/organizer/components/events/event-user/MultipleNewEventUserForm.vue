@@ -1,15 +1,6 @@
 <template>
-  <div class="mutate-event-user">
+  <div class="multiple-event-user-new">
     <form @submit.prevent="onSubmit">
-      <div class="form-group">
-        <CheckboxInput
-          v-model:checked="formData.verified"
-          :label="$t('view.event.create.labels.eventUser.verified')"
-          :errors="v$.verified?.$errors"
-          :has-errors="v$.verified?.$errors?.length > 0"
-          @update="({value}) => {formData.verified = value;}"
-        />
-      </div>
       <div class="form-group">
         <CheckboxInput
           v-model:checked="formData.allowToVote"
@@ -17,24 +8,6 @@
           :errors="v$.allowToVote?.$errors"
           :has-errors="v$.allowToVote?.$errors?.length > 0"
           @update="({value}) => {formData.allowToVote = value;}"
-        />
-      </div>
-      <div class="form-group">
-        <BaseInput
-          :label="$t('view.event.create.labels.eventUser.username')"
-          :errors="v$.username?.$errors"
-          :has-errors="v$.username?.$errors?.length > 0"
-          :value="formData.username"
-          @change="({value}) => {formData.username = value;}"
-        />
-      </div>
-      <div class="form-group">
-        <BaseInput
-          :label="$t('view.event.create.labels.eventUser.publicName')"
-          :errors="v$.publicName?.$errors"
-          :has-errors="v$.publicName?.$errors?.length > 0"
-          :value="formData.publicName"
-          @change="({value}) => {formData.publicName = value;}"
         />
       </div>
       <div
@@ -48,6 +21,17 @@
           :value="formData.voteAmount?.toString()"
           type="number"
           @change="({value}) => {formData.voteAmount = value;}"
+        />
+      </div>
+      <div class="form-group">
+        <TextInput
+          :label="$t('view.event.create.labels.eventMultipleUser.usernames')"
+          :help-text="$t('view.event.create.labels.eventMultipleUser.usernamesHint')"
+          :errors="v$.usernames?.$errors"
+          :has-errors="v$.usernames?.$errors?.length > 0"
+          :rows="20"
+          :cols="5"
+          @change="onChangeText"
         />
       </div>
       <button class="btn btn-primary mt-5 mb-3">
@@ -68,34 +52,44 @@ import {handleError} from "@/core/error/error-handler";
 import {InvalidFormError} from "@/core/error/InvalidFormError";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import BaseInput from "@/core/components/form/BaseInput.vue";
+import TextInput from "@/core/components/form/TextInput.vue";
+import {NetworkError} from "@/core/error/NetworkError";
 
 const emit = defineEmits(['submit']);
-const props = defineProps({
-  prefillData: {
-    type: Object,
-    required: false,
-    default: null
-  }
-});
 
 // Form and validation setup.
 const formData = reactive({
-  verified: props.prefillData?.verified ?? false,
-  allowToVote: props.prefillData?.allowToVote ?? false,
-  username: props.prefillData?.username ?? '',
-  publicName: props.prefillData?.publicName ?? '',
-  voteAmount: props.prefillData?.voteAmount ?? 1,
+  allowToVote: false,
+  voteAmount: 1,
+  usernames: []
 });
 const rules = computed(() => {
   return {
-    username: {required},
-    publicName: {required},
+    usernames: {required},
     voteAmount: {
       requiredIf: requiredIf(formData.allowToVote),
     }
   };
 });
 const v$ = useVuelidate(rules, formData);
+
+function onChangeText({value}) {
+  const usernames = value?.split('\n') ?? [];
+  try {
+    usernames.forEach((username, index) => {
+      if (username === '' || username.trim().indexOf(' ') >= 0) {
+        throw index;
+      }
+    });
+    formData.usernames = usernames;
+
+  } catch (index) {
+    const numberOfRow = index + 1;
+    handleError(new NetworkError(
+        'Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ' + numberOfRow
+    ));
+  }
+}
 
 async function onSubmit() {
   const result = await v$.value.$validate();
@@ -104,17 +98,13 @@ async function onSubmit() {
     return;
   }
 
-  // Reset vote amount if not allowed to vote.
-  if (!formData.allowToVote) {
-    formData.voteAmount = 0;
-  }
-
   emit('submit', formData);
 }
+
 </script>
 
 <style lang="scss" scoped>
-.mutate-event-user {
+.multiple-event-user-new {
   max-width: 840px;
 }
 </style>

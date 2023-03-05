@@ -29,7 +29,7 @@ import {
     RouteOrganizerLobbyRoom,
     RouteOrganizerPolls,
     RouteOrganizerPollResults,
-    RouteOrganizerEventUserNew, RouteOrganizerEventUserEdit
+    RouteOrganizerEventUserNew, RouteOrganizerEventUserEdit, RouteOrganizerEventUserMultipleNew
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {USER_ROLE_ORGANIZER} from "@/core/auth/login";
@@ -54,6 +54,7 @@ import LobbyRoom from "@/modules/organizer/views/event/LobbyRoom.vue";
 import PollResultListing from "@/modules/organizer/views/event/PollResultListing.vue";
 import PollListing from "@/modules/organizer/views/event/PollListing.vue";
 import NewEventUser from "@/modules/organizer/views/event/event-user/NewEventUser.vue";
+import NewMultipleEventUser from "@/modules/organizer/views/event/event-user/NewMultipleEventUser.vue";
 import EditEventUser from "@/modules/organizer/views/event/event-user/EditEventUser.vue";
 import StaticPageImprint from "@/core/views/staticPages/StaticPageImprint.vue";
 import StaticPageDataProtection from "@/core/views/staticPages/StaticPageDataProtection.vue";
@@ -112,6 +113,9 @@ const routes = [
         requireOrganizerRole: true
     }, null, true),
     new Route("/admin/event/member-room/:id/event-user/new", RouteOrganizerEventUserNew, NewEventUser, {
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/member-room/:id/event-user/multiple-new", RouteOrganizerEventUserMultipleNew, NewMultipleEventUser, {
         requireOrganizerRole: true
     }, null, true),
     new Route("/admin/event/member-room/:id/event-user/edit/:eventUserId", RouteOrganizerEventUserEdit, EditEventUser, {
