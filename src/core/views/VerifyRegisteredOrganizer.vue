@@ -47,7 +47,6 @@ const requestFailed = ref(false);
 
 onMounted(() => {
   validateHash(hash).then((response) => {
-    console.log(response);
     requestFinished.value = true;
   }).catch((error) => {
     requestFailed.value = true;

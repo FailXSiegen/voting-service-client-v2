@@ -1,7 +1,6 @@
 import {standaloneRequest} from "@/core/request/standalone-request";
 
 export function validatePassword({username, password}) {
-    console.log({username, password});
     const endpoint = import.meta.env.VITE_VALIDATE_PASSWORD_ENDPOINT;
     const requestOptions = {
         method: 'POST',

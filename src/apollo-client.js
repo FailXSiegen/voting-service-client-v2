@@ -129,7 +129,6 @@ const errorLink = onError((error) => {
 
     // Handle network errors.
     if (error?.networkError) {
-        console.log(error);
         if (error.networkError?.statusCode === 401) {
             handleError(new UnauthorizedError());
         }
