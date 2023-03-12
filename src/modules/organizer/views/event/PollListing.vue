@@ -3,15 +3,6 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerPolls') }}
-        <router-link
-          :to="{name: RouteOrganizerDashboard}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('navigation.backToDashboard') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
@@ -99,12 +90,9 @@ import ActivePoll from "@/modules/organizer/components/events/poll/ActivePoll.vu
 import ResultListing from "@/modules/organizer/components/events/poll/ResultListing.vue";
 import InactivePollListing from "@/modules/organizer/components/events/poll/InactivePollListing.vue";
 import {
-  getRoutesByName,
   RouteOrganizerDashboard,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerMemberRoom,
-  RouteOrganizerPollResults,
-  RouteOrganizerPolls, RouteOrganizerPollsCopy, RouteOrganizerPollsEdit,
+  RouteOrganizerPollsCopy,
+  RouteOrganizerPollsEdit,
   RouteOrganizerPollsNew
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
@@ -130,14 +118,6 @@ import {NEW_EVENT_USER} from "@/modules/organizer/graphql/subscription/new-event
 import {EVENT_USER_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
 import {POLL_ANSWER_LIVE_CYCLE} from "@/modules/organizer/graphql/subscription/poll-answer-life-cycle";
 import {POLL_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/poll-life-cycle";
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerMemberRoom,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerPolls,
-  RouteOrganizerPollResults,
-]);
 
 const coreStore = useCore();
 const router = useRouter();

@@ -3,15 +3,6 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerEventsEdit') }}
-        <router-link
-          :to="{name: RouteOrganizerEvents}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('view.videoConference.backToListView') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
@@ -31,14 +22,7 @@
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import EventForm from '@/modules/organizer/components/events/EventForm.vue';
-import {
-  getRoutesByName,
-  RouteOrganizerAllEvents,
-  RouteOrganizerDashboard,
-  RouteOrganizerEvents,
-  RouteOrganizerManagement,
-  RouteOrganizerVideoConference
-} from "@/router/routes";
+import {RouteOrganizerEvents} from "@/router/routes";
 import {reactive, ref} from "vue";
 import {handleError} from "@/core/error/error-handler";
 import {toast} from "vue3-toastify";
@@ -107,15 +91,6 @@ eventQuery.onResult(({data}) => {
     loaded.value = true;
   });
 });
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerDashboard,
-  RouteOrganizerEvents,
-  RouteOrganizerVideoConference,
-  RouteOrganizerManagement,
-  RouteOrganizerAllEvents
-]);
 
 async function onSubmit(formData) {
   // Update Events.

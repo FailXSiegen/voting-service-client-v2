@@ -3,15 +3,6 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerEventUserMultipleNew') }}
-        <router-link
-          :to="{name: RouteOrganizerMemberRoom, params: {id}}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('view.event.backToMemeberRoom') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
@@ -27,15 +18,7 @@
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import MultipleNewEventUserForm from '@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue';
-
-import {
-  getRoutesByName,
-  RouteOrganizerDashboard,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerMemberRoom,
-  RouteOrganizerPollResults,
-  RouteOrganizerPolls,
-} from "@/router/routes";
+import {RouteOrganizerDashboard, RouteOrganizerMemberRoom} from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
 import {ref} from "vue";
@@ -66,14 +49,6 @@ eventQuery.onResult(({data}) => {
   event.value = data?.event;
   loaded.value = true;
 });
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerMemberRoom,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerPolls,
-  RouteOrganizerPollResults,
-]);
 
 async function onSubmit({usernames, allowToVote, voteAmount}) {
   // Create new Event users.

@@ -3,15 +3,6 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerPollResults') }}
-        <router-link
-          :to="{name: RouteOrganizerDashboard}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('navigation.backToDashboard') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
@@ -81,14 +72,7 @@
 // @todo add missing messages!
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
-import {
-  getRoutesByName,
-  RouteOrganizerDashboard,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerMemberRoom,
-  RouteOrganizerPollResults,
-  RouteOrganizerPolls,
-} from "@/router/routes";
+import {RouteOrganizerDashboard} from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
 import {useQuery} from "@vue/apollo-composable";
@@ -101,14 +85,6 @@ import {POLLS_RESULTS} from "@/modules/organizer/graphql/queries/poll-results";
 import {toast} from "vue3-toastify";
 import l18n from "@/l18n";
 import {exportPollResultsCsv} from "@/modules/organizer/requests/export-results-csv";
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerMemberRoom,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerPolls,
-  RouteOrganizerPollResults,
-]);
 
 const coreStore = useCore();
 const router = useRouter();

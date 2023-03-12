@@ -3,15 +3,6 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerPollsNew') }}
-        <router-link
-          :to="{name: RouteOrganizerPolls}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('navigation.backToPolls') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
@@ -30,14 +21,7 @@
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import PollForm from "@/modules/organizer/components/events/poll/PollForm.vue";
-import {
-  getRoutesByName,
-  RouteOrganizerDashboard,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerMemberRoom,
-  RouteOrganizerPollResults,
-  RouteOrganizerPolls,
-} from "@/router/routes";
+import {RouteOrganizerDashboard, RouteOrganizerPolls} from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
 import {useMutation, useQuery} from "@vue/apollo-composable";
@@ -48,14 +32,6 @@ import {ref} from "vue";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import {CREATE_POLL} from "@/modules/organizer/graphql/mutation/create-poll";
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerMemberRoom,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerPolls,
-  RouteOrganizerPollResults,
-]);
 
 const coreStore = useCore();
 const router = useRouter();
