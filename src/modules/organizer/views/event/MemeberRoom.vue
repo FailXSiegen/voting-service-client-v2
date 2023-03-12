@@ -43,12 +43,7 @@ import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import VerifiedEventUserList from "@/modules/organizer/components/events/VerifiedEventUserList.vue";
 import {
-  getRoutesByName,
   RouteOrganizerDashboard,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerMemberRoom,
-  RouteOrganizerPollResults,
-  RouteOrganizerPolls,
   RouteOrganizerEventUserNew,
   RouteOrganizerEventUserMultipleNew
 } from "@/router/routes";
@@ -71,14 +66,6 @@ import {
   UPDATE_EVENT_USER_ACCESS_RIGHTS
 } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
 import {EVENT_USER_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerMemberRoom,
-  RouteOrganizerLobbyRoom,
-  RouteOrganizerPolls,
-  RouteOrganizerPollResults,
-]);
 
 const coreStore = useCore();
 const router = useRouter();

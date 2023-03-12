@@ -3,15 +3,6 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerEventsNew') }}
-        <router-link
-          :to="{name: RouteOrganizerEvents}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('view.videoConference.backToListView') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
@@ -30,14 +21,7 @@
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import EventForm from '@/modules/organizer/components/events/EventForm.vue';
-import {
-  getRoutesByName,
-  RouteOrganizerAllEvents,
-  RouteOrganizerDashboard,
-  RouteOrganizerEvents,
-  RouteOrganizerManagement,
-  RouteOrganizerVideoConference
-} from "@/router/routes";
+import {RouteOrganizerEvents} from "@/router/routes";
 import {toast} from "vue3-toastify";
 import i18n from "@/l18n";
 import {useCore} from "@/core/store/core";
@@ -47,15 +31,6 @@ import {CREATE_EVENT} from "@/modules/organizer/graphql/mutation/create-event";
 
 const coreStore = useCore();
 const router = useRouter();
-
-// Define navigation items.
-const routes = getRoutesByName([
-  RouteOrganizerDashboard,
-  RouteOrganizerEvents,
-  RouteOrganizerVideoConference,
-  RouteOrganizerManagement,
-  RouteOrganizerAllEvents
-]);
 
 async function onSubmit(formData) {
   // Create new Events.
