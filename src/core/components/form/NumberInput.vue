@@ -16,7 +16,9 @@
     ]"
     :placeholder="placeholder"
     :autocomplete="autocomplete"
-    :type="type"
+    type="number"
+    :min="min"
+    :max="max"
     @keyup="onChange"
   >
   <small
@@ -40,6 +42,16 @@ import {ref} from "vue";
 const emit = defineEmits(['change']);
 
 const props = defineProps({
+  min: {
+    type: Number,
+    required: false,
+    default: Number.MIN_SAFE_INTEGER
+  },
+  max: {
+    type: Number,
+    required: false,
+    default: Number.MAX_SAFE_INTEGER
+  },
   // eslint-disable-next-line vue/require-default-prop
   label: String,
   // eslint-disable-next-line vue/require-default-prop
@@ -63,8 +75,10 @@ const props = defineProps({
     // eslint-disable-next-line vue/require-valid-default-prop
     default: []
   },
-  // eslint-disable-next-line vue/require-default-prop
-  value: String,
+  value: {
+    type: Number,
+    required: true
+  },
   // eslint-disable-next-line vue/require-default-prop
   helpText: String
 });

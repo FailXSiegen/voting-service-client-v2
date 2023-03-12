@@ -192,6 +192,8 @@
         "backToMemeberRoom": "Zurück zur Teilnehmeransicht"
       },
       "polls": {
+        "userCountText": "Aktuelle Anzahl wahlberechtigter Teilnehmer",
+        "createNewDisabledInfo": "Da gerade eine Abstimmung durchgeführt wird kann keine neue Abstimmung angelegt werden.",
         "noActiveUser": "Keine aktiven Teilnehmer. Abstimmungen können nicht gestartet werden.",
         "headlines": {
           "createTitle": "Neue Abstimmung erstellen",
@@ -213,8 +215,8 @@
             "abstention": "Enthaltungsfeld anzeigen",
             "openPoll": "Offene Abstimmung",
             "secretPoll": "Geheime Abstimmung",
-            "saveOnly": "Neue Abstimmung speichern",
-            "saveAndStart": "Neue Abstimmung speichern & sofort starten",
+            "saveOnly": "Abstimmung speichern",
+            "saveAndStart": "Abstimmung speichern & sofort starten",
             "replaceOnly": "Abstimmung ersetzen",
             "replaceAndStart": "Abstimmung ersetzen & sofort starten",
             "reset": "Abbrechen"
@@ -222,9 +224,12 @@
         },
         "listing": {
           "start": "Abstimmung starten",
+          "edit": "Abstimmung bearbeiten",
+          "copy": "Abstimmung kopieren",
           "startConfirm": "Möchtest du die Abstimmung starten?",
           "delete": "Abstimmung löschen",
-          "deleteConfirm": "Möchtest du die Abstimmung wirklich löschen?"
+          "deleteConfirm": "Möchtest du die Abstimmung wirklich löschen?",
+          "stopConfirm": "Möchtest du die Abstimmung wirklich stoppen?"
         },
         "modal": {
           "submitPoll": "Jetzt abstimmen",
@@ -237,7 +242,8 @@
         },
         "active": {
           "title": "Aktuelle Abstimmung",
-          "close": "Abstimmung beenden erzwingen"
+          "close": "Abstimmung beenden erzwingen",
+          "closeDialog": "Abstimmung schließen?"
         }
       },
       "results": {
@@ -306,6 +312,7 @@
       "logOut": "Ausloggen",
       "reload": "Aktualisieren",
       "backToDashboard": "Zurück zum Dashboard",
+      "backToPolls": "Zurück zu Abstimmungen",
       "views": {
         "organizerProfile": "Mein Profil",
         "startPage": "Startseite",
@@ -325,6 +332,9 @@
         "organizerPollResults": "Ergebnisse",
         "organizerEventUserNew": "Neuen Nutzer anlegen",
         "organizerEventUserMultipleNew": "Neue Nutzer anlegen",
+        "organizerPollsNew": "Neue Abstimmung anlegen",
+        "organizerPollsEdit": "Abstimmung bearbeiten",
+        "organizerPollsCopy": "Abstimmung kopieren",
         "staticPages": {
           "dataProtection": "Datenschutz",
           "faq": "Häufige Fragen",
@@ -348,6 +358,7 @@
         "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
         "sameAs": "Die Werte müssen identisch sein.",
         "required": "Dieses Feld muss ausgefüllt werden.",
+        "requiredIf": "Dieses Feld muss ausgefüllt werden.",
         "valueAlreadyExist": "Der Wert existiert bereits."
       },
       "routing": {
@@ -386,6 +397,15 @@
           "createdSuccessfully": "Der Nutzer wurde erfolgreich erstellt.",
           "updatedSuccessfully": "Der Nutzer wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Der Nutzer wurde erfolgreich entfernt."
+        },
+        "poll": {
+          "createdSuccessfully": "Die Abstimmung wurde erfolgreich erstellt.",
+          "createdAndStartedSuccessfully": "Die Abstimmung wurde erfolgreich erstellt und gestartet.",
+          "updatedSuccessfully": "Die Abstimmung wurde erfolgreich aktualisiert.",
+          "updatedAndStartedSuccessfully": "Die Abstimmung wurde erfolgreich aktualisiert und gestartet.",
+          "deletedSuccessfully": "Die Abstimmung wurde erfolgreich entfernt.",
+          "startedSuccessfully": "Die Abstimmung wurde erfolgreich gestartet.",
+          "stoppedSuccessfully": "Die Abstimmung wurde erfolgreich gestoppt."
         }
       }
     },

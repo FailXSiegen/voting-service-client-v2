@@ -6,10 +6,10 @@
   >
     <button
       data-cy="to-top-btn"
-      class="btn btn-primary"
+      class="btn btn-secondary"
       @click.prevent="onClickToTopButton"
     >
-      <i class="bi bi-arrow-up-circle display-5" />
+      <i class="bi bi-arrow-up-circle bi--3xl" />
     </button>
   </div>
 </template>

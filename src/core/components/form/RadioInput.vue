@@ -3,9 +3,9 @@
     v-for="item in items"
     :key="item.value"
   >
-    <div class="form-check mb-3">
+    <div class="form-check">
       <input
-        :id="id"
+        :id="id+'-'+item.value"
         v-model="inputValue"
         :name="name"
         :class="[
@@ -19,6 +19,7 @@
       >
       <label
         v-if="item.label"
+        :for="id+'-'+item.value"
       >
         {{ item.label }}
       </label>

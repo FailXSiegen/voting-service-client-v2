@@ -12,4 +12,5 @@ export const NEW_EVENT_USER = gql`subscription{
         voteAmount
         createDatetime
     }
-}`;
+}
+`;
