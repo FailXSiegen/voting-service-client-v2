@@ -29,7 +29,11 @@ import {
     RouteOrganizerLobbyRoom,
     RouteOrganizerPolls,
     RouteOrganizerPollResults,
-    RouteOrganizerEventUserNew, RouteOrganizerEventUserEdit, RouteOrganizerEventUserMultipleNew
+    RouteOrganizerEventUserNew,
+    RouteOrganizerEventUserEdit,
+    RouteOrganizerEventUserMultipleNew,
+    RouteOrganizerPollsNew,
+    RouteOrganizerPollsEdit, RouteOrganizerPollsCopy
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {USER_ROLE_ORGANIZER} from "@/core/auth/login";
@@ -53,6 +57,9 @@ import MemeberRoom from "@/modules/organizer/views/event/MemeberRoom.vue";
 import LobbyRoom from "@/modules/organizer/views/event/LobbyRoom.vue";
 import PollResultListing from "@/modules/organizer/views/event/PollResultListing.vue";
 import PollListing from "@/modules/organizer/views/event/PollListing.vue";
+import NewPoll from "@/modules/organizer/views/event/poll/NewPoll.vue";
+import EditPoll from "@/modules/organizer/views/event/poll/EditPoll.vue";
+import CopyPoll from "@/modules/organizer/views/event/poll/CopyPoll.vue";
 import NewEventUser from "@/modules/organizer/views/event/event-user/NewEventUser.vue";
 import NewMultipleEventUser from "@/modules/organizer/views/event/event-user/NewMultipleEventUser.vue";
 import EditEventUser from "@/modules/organizer/views/event/event-user/EditEventUser.vue";
@@ -127,6 +134,15 @@ const routes = [
     }, null, true),
     new Route("/admin/event/polls/:id", RouteOrganizerPolls, PollListing, {
         bootstrapIcon: 'bi-collection-fill',
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/polls/:id/poll/new", RouteOrganizerPollsNew, NewPoll, {
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/polls/:id/poll/edit/:pollId", RouteOrganizerPollsEdit, EditPoll, {
+        requireOrganizerRole: true
+    }, null, true),
+    new Route("/admin/event/polls/:id/poll/copy/:pollId", RouteOrganizerPollsCopy, CopyPoll, {
         requireOrganizerRole: true
     }, null, true),
     new Route("/admin/event/poll-results/:id", RouteOrganizerPollResults, PollResultListing, {

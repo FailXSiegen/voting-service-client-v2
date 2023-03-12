@@ -2,6 +2,7 @@ import i18n from "@/l18n";
 import {NetworkError} from "@/core/error/NetworkError";
 import {useCore} from "@/core/store/core";
 import {handleError} from "@/core/error/error-handler";
+import {ExpiredSessionError} from "@/core/error/ExpiredSessionError";
 
 export const LOGIN_TYPE_ORGANIZER = 'organizer';
 // const LOGIN_TYPE_EVENT_USER = '?';
@@ -86,7 +87,7 @@ export function refreshLogin() {
                 throw new NetworkError(i18n.global.tc('error.network.consumerError'));
             }
             if ((response?.status >= 200 && response?.status < 300) && response?.status !== 201) {
-                throw new NetworkError(i18n.global.tc('view.login.invalidRefreshToken'));
+                throw new ExpiredSessionError(i18n.global.tc('view.login.invalidRefreshToken'));
             }
             if (response?.status === 201) {
                 return response;

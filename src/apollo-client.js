@@ -6,13 +6,16 @@ import {GraphQLWsLink} from '@apollo/client/link/subscriptions';
 import {createClient} from 'graphql-ws';
 import {decodeJsonWebToken} from "@/core/auth/jwt-util";
 import {getCurrentUnixTimeStamp} from "@/core/util/time-stamp";
-import {refreshLogin} from "@/core/auth/login";
+import {logout, refreshLogin} from "@/core/auth/login";
 import {handleError} from "@/core/error/error-handler";
 import {setContext} from "apollo-link-context";
 import {useCore} from "@/core/store/core";
 import {NetworkError} from "@/core/error/NetworkError";
 import {UnauthorizedError} from "@/core/error/UnauthorizedError";
 import {GraphQLError} from "@/core/error/GraphQLError";
+import {RouteMainLogin} from "@/router/routes";
+import {ExpiredSessionError} from "@/core/error/ExpiredSessionError";
+// import {router} from "@/router/router";
 
 export const AUTH_TOKEN = 'apollo-token';
 export const REFRESH_TOKEN = 'refreshToken';
@@ -113,7 +116,7 @@ wsLink.client.on('closed', () => {
 });
 
 // Create the Error link.
-const errorLink = onError((error) => {
+const errorLink = onError(async (error) => {
     // Log errors to console in DEV environments.
     if (import.meta.env.DEV) {
         logErrorMessages(error);
@@ -132,6 +135,16 @@ const errorLink = onError((error) => {
         if (error.networkError?.statusCode === 401) {
             handleError(new UnauthorizedError());
         }
+
+        if (error.networkError?.type === ExpiredSessionError.type) {
+            // Session is invalid, so return to main login.
+            handleError(new NetworkError(error.networkError.message));
+            // @todo move routing to different place to avoid errors.
+            // await logout();
+            // await router.push({name: RouteMainLogin});
+            return;
+        }
+
         handleError(new NetworkError(error.networkError.message));
         return;
     }
