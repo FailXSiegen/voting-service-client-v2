@@ -15,7 +15,7 @@
       </div>
     </template>
     <template #header>
-      <PageNavigation :routes="routes" />
+      <EventNavigation :routes="routes" />
     </template>
     <template #content>
       <EventForm
@@ -29,7 +29,7 @@
 
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import EventForm from '@/modules/organizer/components/events/EventForm.vue';
 import {
   getRoutesByName,

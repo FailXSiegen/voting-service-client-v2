@@ -15,11 +15,7 @@
       </div>
     </template>
     <template #header>
-      <PageNavigation
-        :routes="routes"
-        :pass-params="true"
-        :show-profile-link="false"
-      />
+      <EventNavigation />
     </template>
     <template #content>
       <PollForm
@@ -34,7 +30,7 @@
 
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import PollForm from "@/modules/organizer/components/events/poll/PollForm.vue";
 import {
   getRoutesByName,
