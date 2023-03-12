@@ -313,6 +313,7 @@
       "reload": "Aktualisieren",
       "backToDashboard": "Zurück zum Dashboard",
       "backToPolls": "Zurück zu Abstimmungen",
+      "backToEvents": "Zurück zur Übersicht",
       "views": {
         "organizerProfile": "Mein Profil",
         "startPage": "Startseite",

@@ -3,23 +3,10 @@
     <template #title>
       <div class="events-new-title">
         {{ $t('navigation.views.organizerMemberRoom') }}
-        <router-link
-          :to="{name: RouteOrganizerDashboard}"
-          class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
-        >
-          <i class="bi-arrow-left bi--1xl mr-1" />
-          <span class="align-middle">
-            {{ $t('navigation.backToDashboard') }}
-          </span>
-        </router-link>
       </div>
     </template>
     <template #header>
-      <PageNavigation
-        :routes="routes"
-        :pass-params="true"
-        :show-profile-link="false"
-      />
+      <EventNavigation />
     </template>
     <template #content>
       <router-link
@@ -53,7 +40,7 @@
 
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import VerifiedEventUserList from "@/modules/organizer/components/events/VerifiedEventUserList.vue";
 import {
   getRoutesByName,

@@ -52,3 +52,12 @@ export function getRoutesByName(routeNames) {
     });
     return result;
 }
+
+/**
+ * @param {String} routeName Use constants in router.js
+ * @returns {Route}
+ */
+export function getRouteByName(routeName) {
+    const router = useRouter();
+    return router.getRoutes().find(route => route.name === routeName);
+}

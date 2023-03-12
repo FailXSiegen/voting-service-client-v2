@@ -15,11 +15,7 @@
       </div>
     </template>
     <template #header>
-      <PageNavigation
-        :routes="routes"
-        :pass-params="true"
-        :show-profile-link="false"
-      />
+      <EventNavigation />
     </template>
     <template #content>
       <div class="row">
@@ -84,7 +80,7 @@
 <script setup>
 // @todo add missing messages!
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import {
   getRoutesByName,
   RouteOrganizerDashboard,
