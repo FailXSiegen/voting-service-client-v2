@@ -125,7 +125,7 @@
             "descriptionHelp": "Veranstaltungsbeschreibung",
             "scheduledDatetime": "Start-Datum",
             "lobbyOpen": "Lobby aktivieren / vorzeitiger Login und Anzeige der Veranstaltung auf der Startseite",
-            "active": "Veranstaltung direct aktiv schalten?",
+            "active": "Veranstaltung direkt aktiv schalten?",
             "submit": "Diese Veranstaltungen speichern",
             "videoConferenceSelect": "Videokonferenz-System-Auswahl",
             "multivoteTypeTitle": "Mehrfachstimmenabgabe",
@@ -189,7 +189,13 @@
         },
         "upcoming": "Bevorstehende Veranstaltungen",
         "latest": "Letzte Veranstaltungen",
-        "backToMemeberRoom": "Zurück zur Teilnehmeransicht"
+        "backToMemeberRoom": "Zurück zur Teilnehmeransicht",
+        "meeting": {
+          "join": "An Videokonferenz teilnehmen",
+          "backToMeeting": "Zurück zur Videokonferenz",
+          "backToDashboard": "Zurück zum Dashboard",
+          "switchView": "Ansicht wechseln"
+        }
       },
       "polls": {
         "userCountText": "Aktuelle Anzahl wahlberechtigter Teilnehmer",
@@ -247,6 +253,7 @@
         }
       },
       "results": {
+        "pastResults": "Vergangene Abstimmungen",
         "givenVotes": "Anzahl abgegebener Stimmen:",
         "voters": "Maximale Stimmenanzahl:",
         "mainResult": "Gesamtergebnis",
@@ -348,6 +355,7 @@
     },
     "error": {
       "network": {
+        "connectionLost": "Serververbindung unterbrochen",
         "internalServerError": "Interner Serverfehler.",
         "consumerError": "Ihre Anfrage ist fehlerhaft.",
         "undefinedError": "Ihre Anfrage ist fehlgeschlagen.",
@@ -371,10 +379,12 @@
     },
     "success": {
       "login": {
-        "organizer": "Willkommen im Adminbereich."
+        "organizer": "Willkommen im Adminbereich.",
+        "eventUser": "Willkommen {userName}!"
       },
       "logout": {
-        "organizer": "Sie haben sich erfolgreich abgemeldet."
+        "organizer": "Sie haben sich erfolgreich abgemeldet.",
+        "eventUser": "Sie haben sich erfolgreich abgemeldet."
       },
       "organizer": {
         "profile": {
@@ -429,7 +439,8 @@
     },
     "router": {
       "redirect": {
-        "activeOrganizerSession": "Sie wurden automatisch weitergeleitet, da Sie noch als Organisator angemeldet sind."
+        "activeOrganizerSession": "Sie wurden automatisch weitergeleitet, da Sie noch als Organisator angemeldet sind.",
+        "invalidEventSlug": "Das event mit der URL \"{slug}\" existiert nicht."
       }
     }
   },

@@ -32,7 +32,7 @@ import {handleError} from "@/core/error/error-handler";
 import {NetworkError} from "@/core/error/NetworkError";
 import {useMutation} from "@vue/apollo-composable";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {EVENT_USER} from "@/modules/organizer/graphql/queries/event-user";
 import {UPDATE_EVENT_USER} from "@/modules/organizer/graphql/mutation/update-event-user";
 
@@ -104,6 +104,6 @@ async function onSubmit({username, verified, allowToVote, publicName, voteAmount
   await router.push({name: RouteOrganizerMemberRoom});
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.eventUser.updatedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.eventUser.updatedSuccessfully'), {type: 'success'});
 }
 </script>

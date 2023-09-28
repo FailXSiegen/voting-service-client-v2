@@ -83,7 +83,7 @@
 
 <script setup>
 import {computed, reactive, ref} from "vue";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {createFormattedDateFromTimeStamp} from "@/core/util/time-stamp";
 import {createConfirmDialog} from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
@@ -98,15 +98,15 @@ const props = defineProps({
 });
 
 const headers = [
-  {text: i18n.global.tc('eventUser.online'), value: "online", sortable: true},
-  {text: i18n.global.tc('eventUser.createDatetime'), value: "createDatetime", sortable: true},
-  {text: i18n.global.tc('eventUser.username'), value: "username", sortable: true},
-  {text: i18n.global.tc('eventUser.publicName'), value: "publicName", sortable: true},
+  {text: t('eventUser.online'), value: "online", sortable: true},
+  {text: t('eventUser.createDatetime'), value: "createDatetime", sortable: true},
+  {text: t('eventUser.username'), value: "username", sortable: true},
+  {text: t('eventUser.publicName'), value: "publicName", sortable: true},
   {text: '', value: "id", sortable: true},
 ];
 
 const eventUsersCopy = ref(null);
-const eventUserFiltered = computed(() => eventUsersCopy.value?.length > 0 ? eventUsersCopy.value : JSON.parse(JSON.stringify(props.eventUsers)));
+const eventUserFiltered = computed(() => eventUsersCopy.value ? eventUsersCopy.value : JSON.parse(JSON.stringify(props.eventUsers)));
 const filter = reactive({username: ''});
 
 function formatTimestamp(timestamp) {
@@ -135,7 +135,7 @@ function onUpdateToGuest(eventUserId) {
 
 function onDelete(eventUserId) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.event.listing.confirm.deleteQuestion')
+    message: t('view.event.listing.confirm.deleteQuestion')
   });
   dialog.onConfirm(() => {
     emit('delete', eventUserId);

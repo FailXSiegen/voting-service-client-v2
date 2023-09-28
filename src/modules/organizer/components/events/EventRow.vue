@@ -7,7 +7,7 @@
       <b>{{ event.title }}</b> <br>
       <small><u
         class="btn p-0"
-        @click="copyTextToClipboard(location + '/' + event.slug)"
+        @click="copyTextToClipboard(getEventInvitationLink(event.slug))"
       >{{ event.slug }}</u></small><br>
       <hr v-if="event.description">
       <small>{{ event.description }}</small>
@@ -85,7 +85,7 @@
       <span
         class="btn btn-secondary mx-1 my-2"
         :title="$t('view.event.listing.actions.inviteLink')"
-        @click="copyTextToClipboard(location + '/' + event.slug)"
+        @click="copyTextToClipboard(getEventInvitationLink(event.slug))"
       >
         <i class="bi-link-45deg bi--2xl" />
       </span>
@@ -114,7 +114,7 @@
 import {createFormattedDateFromTimeStamp} from '@/core/util/time-stamp';
 import {computed} from "vue";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {handleError} from "@/core/error/error-handler";
 import {useCore} from "@/core/store/core";
 import {createConfirmDialog} from "vuejs-confirm-dialog";
@@ -166,7 +166,7 @@ const getDaysSinceScheduledDateTime = computed(() => {
 
 function onDelete(eventId, organizerId) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.event.listing.confirm.deleteQuestion')
+    message: t('view.event.listing.confirm.deleteQuestion')
   });
   dialog.onConfirm(() => {
     if (props.showOrganizer && organizerId) {
@@ -185,7 +185,7 @@ function onDelete(eventId, organizerId) {
 
 function onToggleActivate(eventId, status) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.event.listing.confirm.updateActiveStateQuestion')
+    message: t('view.event.listing.confirm.updateActiveStateQuestion')
   });
   dialog.onConfirm(() => {
     emit('toggleActive', {eventId, status});
@@ -208,7 +208,7 @@ function fallbackCopyTextToClipboard(text) {
   textArea.select();
   try {
     document.execCommand('copy');
-    toast(i18n.global.tc('view.event.listing.textCopiedToClipboard'), {type: 'success'});
+    toast(t('view.event.listing.textCopiedToClipboard'), {type: 'success'});
   } catch (error) {
     handleError(error);
   }
@@ -223,7 +223,7 @@ function copyTextToClipboard(text) {
   navigator.clipboard.writeText(text).then(
       function () {
         // @todo show copied text?
-        toast(i18n.global.tc('view.event.listing.textCopiedToClipboard'), {type: 'success'});
+        toast(t('view.event.listing.textCopiedToClipboard'), {type: 'success'});
       },
       function (error) {
         handleError(error);
@@ -231,4 +231,7 @@ function copyTextToClipboard(text) {
   );
 }
 
+function getEventInvitationLink(slug) {
+  return location + '/event/' + slug;
+}
 </script>

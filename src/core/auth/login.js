@@ -1,11 +1,11 @@
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {NetworkError} from "@/core/error/NetworkError";
 import {useCore} from "@/core/store/core";
 import {handleError} from "@/core/error/error-handler";
 import {ExpiredSessionError} from "@/core/error/ExpiredSessionError";
 
 export const LOGIN_TYPE_ORGANIZER = 'organizer';
-// const LOGIN_TYPE_EVENT_USER = '?';
+export const LOGIN_TYPE_EVENT_USER = 'event-user';
 
 export const USER_TYPE_ORGANIZER = 'organizer';
 export const USER_TYPE_EVENT_USER = 'event-user';
@@ -19,6 +19,17 @@ export const USER_ROLE_ORGANIZER = 'organizer';
  */
 export function loginOrganizer(username, password) {
     return login(username, password, LOGIN_TYPE_ORGANIZER);
+}
+
+/**
+ * @param {string} username
+ * @param {string} password
+ * @param {string} publicName
+ * @param {number} eventId
+ * @returns {Promise<any>}
+ */
+export function loginEventUser(username, password, publicName, eventId) {
+    return login(username, password, LOGIN_TYPE_EVENT_USER, publicName, eventId);
 }
 
 /**
@@ -47,18 +58,18 @@ function login(username, password, loginType, displayName = '', eventId = null) 
     return fetch(endpoint, requestOptions)
         .then((response) => {
             if (response?.status >= 500) {
-                throw new NetworkError(i18n.global.tc('error.network.internalServerError'));
+                throw new NetworkError(t('error.network.internalServerError'));
             }
             if (response?.status >= 400) {
-                throw new NetworkError(i18n.global.tc('error.network.consumerError'));
+                throw new NetworkError(t('error.network.consumerError'));
             }
             if ((response?.status >= 200 && response?.status < 300) && response?.status !== 201) {
-                throw new NetworkError(i18n.global.tc('view.login.invalidCredentials'));
+                throw new NetworkError(t('view.login.invalidCredentials'));
             }
             if (response?.status === 201) {
                 return response;
             }
-            throw new NetworkError(i18n.global.tc('error.network.undefinedError'));
+            throw new NetworkError(t('error.network.undefinedError'));
         })
         .then(response => response.json())
         .then(data => data);
@@ -81,18 +92,18 @@ export function refreshLogin() {
     return fetch(endpoint, requestOptions)
         .then((response) => {
             if (response?.status >= 500) {
-                throw new NetworkError(i18n.global.tc('error.network.internalServerError'));
+                throw new NetworkError(t('error.network.internalServerError'));
             }
             if (response?.status >= 400) {
-                throw new NetworkError(i18n.global.tc('error.network.consumerError'));
+                throw new NetworkError(t('error.network.consumerError'));
             }
             if ((response?.status >= 200 && response?.status < 300) && response?.status !== 201) {
-                throw new ExpiredSessionError(i18n.global.tc('view.login.invalidRefreshToken'));
+                throw new ExpiredSessionError(t('view.login.invalidRefreshToken'));
             }
             if (response?.status === 201) {
                 return response;
             }
-            throw new NetworkError(i18n.global.tc('error.network.undefinedError'));
+            throw new NetworkError(t('error.network.undefinedError'));
         })
         .then(response => response.json())
         .then(data => data);

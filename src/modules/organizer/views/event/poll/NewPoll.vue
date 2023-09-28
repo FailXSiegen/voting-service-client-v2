@@ -30,7 +30,7 @@ import {handleError} from "@/core/error/error-handler";
 import {NetworkError} from "@/core/error/NetworkError";
 import {ref} from "vue";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {CREATE_POLL} from "@/modules/organizer/graphql/mutation/create-poll";
 
 const coreStore = useCore();
@@ -59,7 +59,7 @@ async function onSubmit(formData) {
   // Back to polls view.
   await router.push({name: RouteOrganizerPolls});
   // Show success message.
-  toast(i18n.global.tc('success.organizer.poll.createdSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.poll.createdSuccessfully'), {type: 'success'});
 }
 
 async function onSubmitAndStart(formData) {
@@ -68,7 +68,7 @@ async function onSubmitAndStart(formData) {
   // Back to polls view.
   await router.push({name: RouteOrganizerPolls});
   // Show success message.
-  toast(i18n.global.tc('success.organizer.poll.createdAndStartedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.poll.createdAndStartedSuccessfully'), {type: 'success'});
 }
 
 /**

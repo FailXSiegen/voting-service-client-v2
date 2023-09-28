@@ -23,7 +23,7 @@
     v-if="helpText"
     class="form-text text-muted"
   >
-    {{ helpText }}
+    <span v-html="helpText" />
   </small>
   <span
     v-for="error in errors"

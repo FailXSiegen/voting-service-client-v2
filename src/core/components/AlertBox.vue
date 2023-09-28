@@ -3,11 +3,13 @@
     :class="'alert text-left ' + config.wrapperClass"
     role="alert"
   >
-    <i
-      v-if="useIcon"
-      :class="'bi flex-shrink-0 me-2 ' + config.icon + ' mr-2'"
-    />
-    <div class="d-inline">
+    <div class="icon">
+      <i
+        v-if="useIcon"
+        :class="'bi flex-shrink-0 me-2 ' + config.icon + ' mr-2'"
+      />
+    </div>
+    <div class="message">
       <template v-if="message">
         {{ message }}
       </template>
@@ -65,3 +67,15 @@ const config = computed(() => {
   throw new Error("Invalid type used for AlertBox. Allowed types are: " + Object.keys(types).join(', '));
 });
 </script>
+
+<style scoped>
+.alert .icon {
+  display: table-cell;
+}
+
+.alert div,
+.alert span {
+  padding-left: 5px;
+  display: table-cell;
+}
+</style>

@@ -1,7 +1,7 @@
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 
 export class InvalidFormError extends Error {
     constructor() {
-        super(i18n.global.tc('error.formValidation.invalidForm'));
+        super(t('error.formValidation.invalidForm'));
     }
 }

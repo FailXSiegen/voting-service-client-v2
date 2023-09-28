@@ -60,7 +60,7 @@ import {
 } from "@/router/routes";
 import {useMutation, useQuery} from "@vue/apollo-composable";
 import {useCore} from "@/core/store/core";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {toast} from "vue3-toastify";
 import {REMOVE_EVENT} from "@/modules/organizer/graphql/mutation/remove-event";
 import {ALL_UPCOMING_EVENTS} from "@/modules/organizer/graphql/queries/all-upcoming-events";
@@ -144,7 +144,7 @@ async function onDelete({eventId, organizerId}) {
   allPastEventsQuery.refetch();
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.events.deletedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.events.deletedSuccessfully'), {type: 'success'});
 }
 
 async function onToggleActive({eventId, status}) {
@@ -167,6 +167,6 @@ async function onToggleActive({eventId, status}) {
   allPastEventsQuery.refetch();
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.events.updatedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.events.updatedSuccessfully'), {type: 'success'});
 }
 </script>

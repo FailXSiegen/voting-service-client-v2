@@ -1,6 +1,6 @@
 <template>
   <div class="results-listing">
-    <h2>Vergangene Abstimmungen</h2>
+    <h2>{{ $t('view.results.pastResults') }}</h2>
     <ul
       v-if="pollResults?.length > 0"
       class="created-polls list-group"

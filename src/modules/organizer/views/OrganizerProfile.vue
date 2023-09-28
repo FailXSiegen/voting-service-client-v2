@@ -116,7 +116,7 @@ import {validatePassword} from "@/core/auth/validate-password";
 import {useMutation} from '@vue/apollo-composable';
 import {UPDATE_ORGANIZER} from "@/modules/organizer/graphql/mutation/update-organizer";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 
 const coreStore = useCore();
 
@@ -135,8 +135,8 @@ const formData = reactive({
   currentPassword: '',
   newPassword: '',
   newPasswordRepeated: '',
-  email: coreStore.organizer?.email ?? '',
-  publicName: coreStore.organizer?.publicName ?? '',
+  email: coreStore.getOrganizer?.email ?? '',
+  publicName: coreStore.getOrganizer?.publicName ?? '',
 });
 const rules = computed(() => {
   return {
@@ -153,13 +153,13 @@ const v$ = useVuelidate(rules, formData);
 const {organizer} = storeToRefs(coreStore);
 
 // let organizer = reactive({});
-const organizerLoaded = ref(coreStore.organizer?.id);
+const organizerLoaded = computed(() => coreStore.getOrganizer?.id);
 
 // Watch changes to organizer in the store.
 watch(organizer, (value) => {
   formData.email = value.email;
   formData.publicName = value.publicName;
-  organizerLoaded.value = true;
+  // organizerLoaded.value = true;
 });
 
 // Refetch organizer To make sure we really have the current organizer data.
@@ -197,7 +197,7 @@ async function onSubmit() {
   await updateOrganizer();
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.profile.savedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.profile.savedSuccessfully'), {type: 'success'});
 }
 
 </script>

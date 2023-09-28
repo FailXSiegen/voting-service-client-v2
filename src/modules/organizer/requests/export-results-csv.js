@@ -1,5 +1,5 @@
 import {NetworkError} from "@/core/error/NetworkError";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 
 export function exportPollResultsCsv(eventId, exportType) {
     const endpoint = import.meta.env.VITE_REQUEST_ORGANIZER_EXPORT_RESULTS;
@@ -18,14 +18,14 @@ export function exportPollResultsCsv(eventId, exportType) {
 
     return fetch(endpoint, requestOptions).then((response) => {
         if (response?.status >= 500) {
-            throw new NetworkError(i18n.global.tc('error.network.internalServerError'));
+            throw new NetworkError(t('error.network.internalServerError'));
         }
         if (response?.status >= 400) {
-            throw new NetworkError(i18n.global.tc('error.network.consumerError'));
+            throw new NetworkError(t('error.network.consumerError'));
         }
         if (response?.status === 200) {
             return response;
         }
-        throw new NetworkError(i18n.global.tc('error.network.undefinedError'));
+        throw new NetworkError(t('error.network.undefinedError'));
     });
 }

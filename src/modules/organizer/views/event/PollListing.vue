@@ -109,7 +109,7 @@ import {POLLS_RESULTS} from "@/modules/organizer/graphql/queries/poll-results";
 import {POLLS_WITH_NO_RESULTS} from "@/modules/organizer/graphql/queries/polls-with-no-results";
 import {createConfirmDialog} from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {REMOVE_POLL} from "@/modules/organizer/graphql/mutation/remove-poll";
 import {toast} from "vue3-toastify";
 import {START_POLL} from "@/modules/organizer/graphql/mutation/start-poll";
@@ -235,7 +235,7 @@ const verifiedUsersCountAllowToVoteOnline = computed(() => {
 
 function onCloseActivePoll() {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.polls.listing.stopConfirm')
+    message: t('view.polls.listing.stopConfirm')
   });
   dialog.onConfirm(async () => {
     const startPollMutation = useMutation(STOP_POLL, {variables: {id: activePoll.value.id}});
@@ -243,7 +243,7 @@ function onCloseActivePoll() {
     // Reset state.
     resetActivePoll();
     // Show success message.
-    toast(i18n.global.tc('success.organizer.poll.stoppedSuccessfully'), {type: 'success'});
+    toast(t('success.organizer.poll.stoppedSuccessfully'), {type: 'success'});
   });
 
   // Show confirm dialog.
@@ -260,7 +260,7 @@ function onEditPoll(pollId) {
 
 function onRemovePoll(pollId) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.polls.listing.deleteConfirm')
+    message: t('view.polls.listing.deleteConfirm')
   });
   dialog.onConfirm(async () => {
     const removePollMutation = useMutation(REMOVE_POLL, {variables: {pollId}});
@@ -268,7 +268,7 @@ function onRemovePoll(pollId) {
     // Refresh queries.
     await pollsWithNoResultsQuery.refetch();
     // Show success message.
-    toast(i18n.global.tc('success.organizer.poll.deletedSuccessfully'), {type: 'success'});
+    toast(t('success.organizer.poll.deletedSuccessfully'), {type: 'success'});
   });
 
   // Show confirm dialog.
@@ -277,7 +277,7 @@ function onRemovePoll(pollId) {
 
 function onStartPoll(pollId) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.polls.listing.startConfirm')
+    message: t('view.polls.listing.startConfirm')
   });
   dialog.onConfirm(async () => {
     const startPollMutation = useMutation(START_POLL, {variables: {pollId}});
@@ -287,7 +287,7 @@ function onStartPoll(pollId) {
     await activePollEventUserQuery.refetch();
     await pollsWithNoResultsQuery.refetch();
     // Show success message.
-    toast(i18n.global.tc('success.organizer.poll.startedSuccessfully'), {type: 'success'});
+    toast(t('success.organizer.poll.startedSuccessfully'), {type: 'success'});
   });
 
   // Show confirm dialog.
