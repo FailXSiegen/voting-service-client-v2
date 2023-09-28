@@ -4,13 +4,13 @@ import {apolloClient} from "./apollo-client";
 import App from "./App.vue";
 import {router} from "./router/router";
 import i18n from "./l18n";
-import store from "./store";
 import {createHead} from "@vueuse/head";
 import {version} from './../package';
 import {createApolloProvider} from '@vue/apollo-option';
 import * as ConfirmDialog from 'vuejs-confirm-dialog';
 import Vue3EasyDataTable from 'vue3-easy-data-table';
 import VueDatePicker from '@vuepic/vue-datepicker';
+import {createPinia} from "pinia";
 
 import 'vue3-easy-data-table/dist/style.css';
 import 'vue3-toastify/dist/index.css';
@@ -31,7 +31,7 @@ const app = createApp({
 const head = createHead();
 
 app.use(router);
-app.use(store);
+app.use(createPinia());
 app.use(i18n);
 app.use(apolloProvider);
 app.use(head);

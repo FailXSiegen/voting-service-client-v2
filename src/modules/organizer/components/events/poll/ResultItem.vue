@@ -151,7 +151,7 @@
 
 <script setup>
 // @todo refactor this mess.
-import {computed, defineProps} from "vue";
+import {computed} from "vue";
 import {createFormattedDateFromTimeStamp} from "@/core/util/time-stamp";
 
 const props = defineProps({

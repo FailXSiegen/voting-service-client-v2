@@ -54,7 +54,7 @@ import {UPCOMING_EVENTS} from '@/modules/organizer/graphql/queries/upcoming-even
 import {EXPIRED_EVENTS} from '@/modules/organizer/graphql/queries/expired-events';
 import {useMutation, useQuery} from "@vue/apollo-composable";
 import {useCore} from "@/core/store/core";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {toast} from "vue3-toastify";
 import {REMOVE_EVENT} from "@/modules/organizer/graphql/mutation/remove-event";
 
@@ -102,6 +102,6 @@ async function onDelete({eventId, organizerId}) {
   expiredEventsQuery.refetch();
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.events.deletedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.events.deletedSuccessfully'), {type: 'success'});
 }
 </script>

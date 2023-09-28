@@ -112,7 +112,7 @@ import {useVuelidate} from "@vuelidate/core";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import {handleError} from "@/core/error/error-handler";
 import {InvalidFormError} from "@/core/error/InvalidFormError";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {useCore} from "@/core/store/core";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import SlugInput from "@/core/components/form/SlugInput.vue";
@@ -137,13 +137,13 @@ const coreStore = useCore();
 
 const radioOptions = [
   {
-    label: i18n.global.tc('view.event.create.labels.multivoteRadio1Label'),
-    helpText: i18n.global.tc('view.event.create.labels.multivoteRadio1Help'),
+    label: t('view.event.create.labels.multivoteRadio1Label'),
+    helpText: t('view.event.create.labels.multivoteRadio1Help'),
     value: '1'
   },
   {
-    label: i18n.global.tc('view.event.create.labels.multivoteRadio2Label'),
-    helpText: i18n.global.tc('view.event.create.labels.multivoteRadio2Help'),
+    label: t('view.event.create.labels.multivoteRadio2Label'),
+    helpText: t('view.event.create.labels.multivoteRadio2Help'),
     value: '2'
   },
 ];

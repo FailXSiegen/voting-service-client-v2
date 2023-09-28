@@ -12,7 +12,7 @@
       'form-control',
       ...classes
     ]"
-  >
+  ></textarea>
   <small
     v-if="helpText"
     class="form-text text-muted"
@@ -26,15 +26,13 @@
   >
     {{ $t('error.formValidation.' + error.$validator) }}<br>
   </span>
-  </div>
-  </div>
 </template>
 
 <script setup>
 import {ref} from "vue";
 import {handleError} from "@/core/error/error-handler";
 import {NetworkError} from "@/core/error/NetworkError";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 
 const emit = defineEmits(['change']);
 
@@ -71,7 +69,7 @@ function onAddUsername() {
   const copyOfItems = JSON.parse(JSON.stringify(items.value));
   const hit = copyOfItems.find((username) => username === processedNewUsername);
   if (hit) {
-    handleError(new NetworkError(i18n.global.tc('error.formValidation.valueAlreadyExist')));
+    handleError(new NetworkError(t('error.formValidation.valueAlreadyExist')));
     return;
   }
   copyOfItems.push(processedNewUsername);
@@ -89,4 +87,3 @@ function onChange() {
   emit('change', {value: items.value});
 }
 </script>
-</template></template></template></template></template></template></template></template></template></template>

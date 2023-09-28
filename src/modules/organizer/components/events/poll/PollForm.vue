@@ -114,7 +114,7 @@ import {useVuelidate} from "@vuelidate/core";
 import {handleError} from "@/core/error/error-handler";
 import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {useRoute} from "vue-router";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {useQuery} from "@vue/apollo-composable";
 import {EVENT_USERS} from "@/modules/organizer/graphql/queries/event-users";
 
@@ -186,25 +186,25 @@ const v$ = useVuelidate(rules, formData);
 
 const answerOptions = [
   {
-    label: i18n.global.tc('view.polls.create.labels.yesNo'),
+    label: t('view.polls.create.labels.yesNo'),
     value: 'yesNo'
   },
   {
-    label: i18n.global.tc('view.polls.create.labels.yesNoAbstain'),
+    label: t('view.polls.create.labels.yesNoAbstain'),
     value: 'yesNoAbstain'
   },
   {
-    label: i18n.global.tc('view.polls.create.labels.custom'),
+    label: t('view.polls.create.labels.custom'),
     value: 'custom'
   },
 ];
 const pollTypes = [
   {
-    label: i18n.global.tc('view.polls.create.labels.openPoll'),
+    label: t('view.polls.create.labels.openPoll'),
     value: 'PUBLIC'
   },
   {
-    label: i18n.global.tc('view.polls.create.labels.secretPoll'),
+    label: t('view.polls.create.labels.secretPoll'),
     value: 'SECRET'
   },
 ];

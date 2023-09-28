@@ -36,6 +36,7 @@ export const RouteOrganizerPollResults = 'organizerPollResults';
 export const RouteOrganizerEventUserNew = 'organizerEventUserNew';
 export const RouteOrganizerEventUserEdit = 'organizerEventUserEdit';
 export const RouteOrganizerEventUserMultipleNew = 'organizerEventUserMultipleNew';
+export const RouteEventUserFrame = 'eventUserFrame';
 
 /**
  * @param {String[]} routeNames Use constants in router.js

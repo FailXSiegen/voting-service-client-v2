@@ -78,7 +78,7 @@ import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {useMutation} from '@vue/apollo-composable';
 import {UPDATE_ZOOM_MEETING} from "@/modules/organizer/graphql/mutation/update-zoom-meeting";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {useCore} from "@/core/store/core";
 import {useRouter, useRoute} from "vue-router";
 import {useQuery} from "@vue/apollo-composable";
@@ -152,7 +152,7 @@ async function onSubmit() {
   await router.push({name: RouteOrganizerVideoConference});
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.videoConference.updatedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.videoConference.updatedSuccessfully'), {type: 'success'});
 }
 </script>
 

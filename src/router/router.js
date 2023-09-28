@@ -1,7 +1,7 @@
 import {createRouter, createWebHistory} from "vue-router";
 import {Route} from "@/core/model/Route";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {
     RouteMainLogin,
     RouteOrganizerDashboard,
@@ -33,16 +33,20 @@ import {
     RouteOrganizerEventUserEdit,
     RouteOrganizerEventUserMultipleNew,
     RouteOrganizerPollsNew,
-    RouteOrganizerPollsEdit, RouteOrganizerPollsCopy
+    RouteOrganizerPollsEdit,
+    RouteOrganizerPollsCopy,
+    RouteEventUserFrame
 } from "@/router/routes";
 import {useCore} from "@/core/store/core";
 import {USER_ROLE_ORGANIZER} from "@/core/auth/login";
+
 import MainLogin from "@/core/views/MainLogin.vue";
 import NotFound from "@/core/views/NotFound.vue";
 import RequestChangeOrganizerPassword from "@/core/views/RequestChangeOrganizerPassword.vue";
 import ChangeOrganizerPassword from "@/core/views/ChangeOrganizerPassword.vue";
 import RegisterOrganizer from "@/core/views/RegisterOrganizer.vue";
 import VerifyRegisteredOrganizer from "@/core/views/VerifyRegisteredOrganizer.vue";
+
 import OrganizerDashboard from "@/modules/organizer/views/OrganizerDashboard.vue";
 import OrganizerProfile from "@/modules/organizer/views/OrganizerProfile.vue";
 import OrganizerEvents from "@/modules/organizer/views/OrganizerEvents.vue";
@@ -63,12 +67,16 @@ import CopyPoll from "@/modules/organizer/views/event/poll/CopyPoll.vue";
 import NewEventUser from "@/modules/organizer/views/event/event-user/NewEventUser.vue";
 import NewMultipleEventUser from "@/modules/organizer/views/event/event-user/NewMultipleEventUser.vue";
 import EditEventUser from "@/modules/organizer/views/event/event-user/EditEventUser.vue";
+
+import EventUserFrame from "@/modules/eventUser/views/EventUserFrame.vue";
+
 import StaticPageImprint from "@/core/views/staticPages/StaticPageImprint.vue";
 import StaticPageDataProtection from "@/core/views/staticPages/StaticPageDataProtection.vue";
 import StaticPageFaq from "@/core/views/staticPages/StaticPageFaq.vue";
 import StaticPageUserAgreement from "@/core/views/staticPages/StaticPageUserAgreement.vue";
 import StaticPageManual from "@/core/views/staticPages/StaticPageManual.vue";
 import StaticPageFunctions from "@/core/views/staticPages/StaticPageFunctions.vue";
+import {fetchEventBySlug} from "@/modules/eventUser/requests/fetch-event-by-slug";
 
 const routes = [
     // 404
@@ -165,6 +173,24 @@ const routes = [
         requireOrganizerRole: true,
         requireSuperOrganizerRole: true
     }),
+
+    // Module event user.
+    // @todo Use regex to allow "/:eventSlug" urls, which are not clashing with 404 and other first level urls.
+    new Route("/event/:eventSlug", RouteEventUserFrame, EventUserFrame, null, null, null, null,
+        async (to) => {
+            const slug = to.params?.eventSlug ?? '';
+            try {
+                const event = await fetchEventBySlug(slug);
+                const coreStore = useCore();
+                coreStore.setEvent(event);
+            } catch (error) {
+                toast(t('router.redirect.invalidEventSlug', {slug}), {type: "error"});
+                return {
+                    name: RouteMainLogin,
+                };
+            }
+        }
+    ),
 ];
 
 export const router = createRouter({
@@ -182,7 +208,7 @@ router.beforeEach((to, from) => {
 
     // Redirect logged in organizer to dashboard, if they visit a route with "meta.redirectOrganizer".
     if (to.meta.redirectOrganizer && coreStore.isActiveOrganizerSession) {
-        toast(i18n.global.tc('router.redirect.activeOrganizerSession'), {type: "info"});
+        toast(t('router.redirect.activeOrganizerSession'), {type: "info"});
         return {
             name: RouteOrganizerDashboard,
         };

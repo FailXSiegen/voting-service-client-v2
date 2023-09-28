@@ -1,12 +1,19 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerEventsNew')">
     <template #title>
-      <div class="events-new-title">
-        {{ $t('navigation.views.organizerEventsNew') }}
-      </div>
+      {{ $t('navigation.views.organizerEventsNew') }}
+      <router-link
+        :to="{name: RouteOrganizerEvents}"
+        class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
+      >
+        <i class="bi-arrow-left bi--1xl mr-1" />
+        <span class="align-middle">
+          {{ $t('navigation.backToEvents') }}
+        </span>
+      </router-link>
     </template>
     <template #header>
-      <EventNavigation :routes="routes" />
+      <PageNavigation :routes="routes" />
     </template>
     <template #content>
       <EventForm
@@ -19,15 +26,29 @@
 
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import EventForm from '@/modules/organizer/components/events/EventForm.vue';
-import {RouteOrganizerEvents} from "@/router/routes";
+import {
+  getRoutesByName, RouteOrganizerAllEvents,
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents, RouteOrganizerManagement,
+  RouteOrganizerVideoConference
+} from "@/router/routes";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {useCore} from "@/core/store/core";
 import {useRouter} from "vue-router";
 import {useMutation} from "@vue/apollo-composable";
 import {CREATE_EVENT} from "@/modules/organizer/graphql/mutation/create-event";
+
+// Define navigation items.
+const routes = getRoutesByName([
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents
+]);
 
 const coreStore = useCore();
 const router = useRouter();
@@ -58,7 +79,7 @@ async function onSubmit(formData) {
   await router.push({name: RouteOrganizerEvents});
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.events.createdSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.events.createdSuccessfully'), {type: 'success'});
 }
 </script>
 

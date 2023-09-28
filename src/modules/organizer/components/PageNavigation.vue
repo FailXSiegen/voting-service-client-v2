@@ -80,11 +80,11 @@ import {RouteOrganizerProfile, RouteMainLogin} from "@/router/routes";
 import {inject} from 'vue';
 import {logout} from "@/core/auth/login";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
 
-// @todo dd possibility to add badges to nav links.
+// @todo add possibility to add badges to nav links.
 
 const coreStore = useCore();
 const router = useRouter();
@@ -111,7 +111,7 @@ const params = useRoute().params;
 function onLogout() {
   logout()
       .then(() => router.push({name: RouteMainLogin}))
-      .then(() => toast(i18n.global.tc('success.logout.organizer'), {type: 'success'}));
+      .then(() => toast(t('success.logout.organizer'), {type: 'success'}));
 }
 
 function isRouteAccessible(route) {

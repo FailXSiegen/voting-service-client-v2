@@ -3,8 +3,9 @@ import {apolloClient, AUTH_TOKEN, resetClient, terminateClient} from "@/apollo-c
 import {decodeJsonWebToken} from "@/core/auth/jwt-util";
 import {USER_TYPE_EVENT_USER, USER_TYPE_ORGANIZER} from "@/core/auth/login";
 import {provideApolloClient, useQuery} from "@vue/apollo-composable";
-import {QUERY_ORGANIZER} from "@/modules/organizer/graphql/queries/organizer";
-import {reactive} from "vue";
+import {ORGANIZER} from "@/modules/organizer/graphql/queries/organizer";
+import {EVENT_USER} from "@/modules/eventUser/graphql/queries/event-user";
+import {reactive, ref} from "vue";
 
 // WATCH OUT: You can not use the router here. This will result in errors.
 
@@ -17,15 +18,19 @@ export const useCore = defineStore('core', {
             verified: null,
             expiresAt: null
         },
-        organizer: reactive({})
+        event: reactive({}),
+        organizer: ref({}),
+        eventUser: ref({}),
     }),
     getters: {
         isActiveOrganizerSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER,
         isActiveEventUserSession: (state) => state.user?.id > 0 && state.user?.type === USER_TYPE_EVENT_USER,
         getActiveUserRole: (state) => state.user?.role,
         getActiveUserName: (state) => state.user,
-        getOrganizer: (state) => state.organizer,
-        isSuperOrganizer: (state) => state.organizer?.superAdmin === true,
+        getOrganizer: (state) => state.organizer.value,
+        getEventUser: (state) => state.eventUser.value,
+        getEvent: (state) => state.event,
+        isSuperOrganizer: (state) => state.user?.type === USER_TYPE_ORGANIZER && state.organizer.value?.superAdmin === true,
     },
     actions: {
         async init() {
@@ -65,7 +70,6 @@ export const useCore = defineStore('core', {
 
             // Update user data.
             // @todo Add a validation of the response, so we can be sure to fetch real and good user data.
-            // @todo Do we need the property `verified`?
             this.user = {
                 type: payload?.user?.type,
                 id: payload?.user?.id,
@@ -74,9 +78,14 @@ export const useCore = defineStore('core', {
                 expiresAt: payload?.exp
             };
 
-            // Query organizer record, if this if an organizer session.
+            // Query organizer record, if this is an organizer session.
             if (this.user?.type === USER_TYPE_ORGANIZER) {
                 this.queryOrganizer();
+            }
+
+            // Query event user record, if this is an event user session.
+            if (this.user?.type === USER_TYPE_EVENT_USER) {
+                this.queryEventUser();
             }
 
             // Reset apollo client.
@@ -99,6 +108,10 @@ export const useCore = defineStore('core', {
                 expiresAt: null
             };
 
+            // Reset organizer and event user data.
+            this.organizer.value = {};
+            this.eventUser.value = {};
+
             // Reset apollo client.
             await terminateClient();
         },
@@ -108,10 +121,56 @@ export const useCore = defineStore('core', {
          */
         queryOrganizer() {
             provideApolloClient(apolloClient);
-            const {onResult} = useQuery(QUERY_ORGANIZER, {organizerId: this.user?.id}, {fetchPolicy: "no-cache"});
-            onResult((result) => {
-                this.organizer = result?.data?.organizer;
+            const organizerQuery = useQuery(ORGANIZER, {organizerId: this.user?.id}, {fetchPolicy: "no-cache"});
+            organizerQuery.onResult((result) => {
+                this.organizer.value = result?.data?.organizer;
             });
+        },
+
+        /**
+         * @returns void
+         */
+        queryEventUser() {
+            provideApolloClient(apolloClient);
+            const eventUserQuery = useQuery(EVENT_USER, {id: this.user?.id}, {fetchPolicy: "no-cache"});
+            eventUserQuery.onResult((result) => {
+                console.log('queryEventUser');
+                this.eventUser.value = result?.data?.eventUser;
+            });
+        },
+
+        /**
+         * @param {Object} event
+         * @returns void
+         */
+        setEvent(event) {
+            this.event = event;
+        },
+
+        /**
+         * @param {boolean} verified
+         * @param {number} voteAmount
+         * @param {boolean} allowToVote
+         * @returns void
+         */
+        updateEventUserAccessRights(verified, voteAmount, allowToVote) {
+            if (!this.eventUser.value?.id) {
+                return;
+            }
+            this.eventUser.value.verified = verified;
+            this.eventUser.value.voteAmount = voteAmount;
+            this.eventUser.value.allowToVote = allowToVote;
+        },
+
+        /**
+         * @param {boolean} isOnline
+         * @returns void
+         */
+        setEventUserOnlineState(isOnline) {
+            if (!this.eventUser.value?.id) {
+                return;
+            }
+            this.eventUser.value.online = isOnline;
         },
     },
 });

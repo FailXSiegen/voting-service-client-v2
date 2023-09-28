@@ -92,13 +92,13 @@ import {storeToRefs} from "pinia";
 import {useMutation} from "@vue/apollo-composable";
 import {DELETE_ZOOM_MEETING} from "@/modules/organizer/graphql/mutation/delete-zoom-meeting";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import ConfirmModal from '@/core/components/ConfirmModal.vue';
 import {createConfirmDialog} from 'vuejs-confirm-dialog';
 import AlertBox from "@/core/components/AlertBox.vue";
 
 const headers = [
-  {text: i18n.global.tc('view.videoConference.title'), value: "title", sortable: true},
+  {text: t('view.videoConference.title'), value: "title", sortable: true},
   {text: "", value: "id"},
 ];
 
@@ -130,7 +130,7 @@ watch(organizer, ({zoomMeetings}) => {
 
 async function onDelete(id) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.videoConference.confirmDelete')
+    message: t('view.videoConference.confirmDelete')
   });
   dialog.onConfirm(async () => {
     // Update new zoom meeting.
@@ -144,7 +144,7 @@ async function onDelete(id) {
     coreStore.queryOrganizer();
 
     // Show success message.
-    toast(i18n.global.tc('success.organizer.videoConference.deletedSuccessfully'), {type: 'success'});
+    toast(t('success.organizer.videoConference.deletedSuccessfully'), {type: 'success'});
   });
 
   // Show confirm dialog.

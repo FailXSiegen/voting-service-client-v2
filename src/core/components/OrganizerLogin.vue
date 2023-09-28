@@ -57,7 +57,7 @@ import {useRouter} from "vue-router";
 import {RouteOrganizerDashboard, RouteRequestChangeOrganizerPassword} from "@/router/routes";
 
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 
 const coreStore = useCore();
 const forgotPasswordRouteName = RouteRequestChangeOrganizerPassword;
@@ -82,9 +82,8 @@ async function onLogin() {
   }
   loginOrganizer(formData.username, formData.password)
       .then(({token}) => coreStore.loginUser(token))
-      .then(() => coreStore.queryOrganizer())
       .then(() => router.push({name: RouteOrganizerDashboard}))
-      .then(() => toast(i18n.global.tc('success.login.organizer'), {type: 'success'}))
+      .then(() => toast(t('success.login.organizer'), {type: 'success'}))
       .catch(error => handleError(error, {autoClose: false}));
 }
 </script>

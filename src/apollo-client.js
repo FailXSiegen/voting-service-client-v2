@@ -15,6 +15,8 @@ import {UnauthorizedError} from "@/core/error/UnauthorizedError";
 import {GraphQLError} from "@/core/error/GraphQLError";
 import {RouteMainLogin} from "@/router/routes";
 import {ExpiredSessionError} from "@/core/error/ExpiredSessionError";
+import {useSubscription} from "@vue/apollo-composable";
+import {EVENT_USER_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
 // import {router} from "@/router/router";
 
 export const AUTH_TOKEN = 'apollo-token';
@@ -92,15 +94,13 @@ const httpLink = new HttpLink({
 });
 
 // Create the webSocket link.
+// @info The server side authentication is done via refreshToken (cookie).
 const wsLink = new GraphQLWsLink(createClient({
     url: import.meta.env.VITE_SUBSCRIPTION_ENDPOINT,
     reconnect: true,
     lazy: true,
     timeout: 30000,
     inactivityTimeout: 30000,
-    // connectionParams() {
-    //     return {headers: getHeaders()};
-    // }
 }));
 
 wsLink.client.on('connecting', () => {
@@ -109,10 +109,20 @@ wsLink.client.on('connecting', () => {
 
 wsLink.client.on('connected', () => {
     console.info('[Websocket] Is connected.');
+    // Mark current event user as online.
+    const coreStore = useCore();
+    if (coreStore.isActiveEventUserSession) {
+        coreStore.setEventUserOnlineState(true);
+    }
 });
 
 wsLink.client.on('closed', () => {
     console.info('[Websocket] Is disconnected');
+    // Mark current event user as offline.
+    const coreStore = useCore();
+    if (coreStore.isActiveEventUserSession) {
+        coreStore.setEventUserOnlineState(false);
+    }
 });
 
 // Create the Error link.
@@ -183,8 +193,17 @@ export async function resetClient() {
 
 export async function terminateClient() {
     try {
-        await wsLink.client.terminate();
+        await terminateWebsocketClient();
         await resetClient();
+    } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+    }
+}
+
+export async function terminateWebsocketClient() {
+    try {
+        await wsLink.client.terminate();
     } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);

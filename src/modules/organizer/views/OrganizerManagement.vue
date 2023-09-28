@@ -91,7 +91,7 @@ import {
 import {useMutation, useQuery} from "@vue/apollo-composable";
 import {ORGANIZERS} from "@/modules/organizer/graphql/queries/organizers";
 import {computed, ref} from "vue";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {createFormattedDateFromTimeStamp} from '@/core/util/time-stamp';
 import {UPDATE_ORGANIZER} from "@/modules/organizer/graphql/mutation/update-organizer";
 import {toast} from "vue3-toastify";
@@ -114,13 +114,13 @@ const routes = getRoutesByName([
 ]);
 
 const headers = [
-  {text: i18n.global.tc('view.organizers.user'), value: "username", sortable: true},
-  {text: i18n.global.tc('view.organizers.createDatetime'), value: "createDatetime", sortable: true},
-  {text: i18n.global.tc('view.organizers.organisation'), value: "publicOrganisation", sortable: true},
-  {text: i18n.global.tc('view.organizers.email'), value: "email", sortable: true},
-  {text: i18n.global.tc('view.organizers.confirmedEmail'), value: "confirmedEmail", sortable: true},
-  {text: i18n.global.tc('view.organizers.verified'), value: "verified", sortable: true},
-  {text: i18n.global.tc('view.organizers.actions'), value: "id"},
+  {text: t('view.organizers.user'), value: "username", sortable: true},
+  {text: t('view.organizers.createDatetime'), value: "createDatetime", sortable: true},
+  {text: t('view.organizers.organisation'), value: "publicOrganisation", sortable: true},
+  {text: t('view.organizers.email'), value: "email", sortable: true},
+  {text: t('view.organizers.confirmedEmail'), value: "confirmedEmail", sortable: true},
+  {text: t('view.organizers.verified'), value: "verified", sortable: true},
+  {text: t('view.organizers.actions'), value: "id"},
 ];
 
 const organizers = ref([]);
@@ -143,14 +143,14 @@ function onVerify({id}, verified) {
         return refetch();
       })
       .then(() => {
-        toast(i18n.global.tc('success.organizer.organizers.updatedSuccessfully'), {type: 'success'});
+        toast(t('success.organizer.organizers.updatedSuccessfully'), {type: 'success'});
       })
       .catch((error) => handleError(error));
 }
 
 function onDelete({id}) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.organizers.confirmDelete')
+    message: t('view.organizers.confirmDelete')
   });
   dialog.onConfirm(() => {
     // Delete organizer
@@ -164,7 +164,7 @@ function onDelete({id}) {
           return refetch();
         })
         .then(() => {
-          toast(i18n.global.tc('success.organizer.organizers.deletedSuccessfully'), {type: 'success'});
+          toast(t('success.organizer.organizers.deletedSuccessfully'), {type: 'success'});
         })
         .catch((error) => handleError(error));
   });

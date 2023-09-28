@@ -59,7 +59,7 @@ import {UPDATE_EVENT_USER_TO_GUEST} from "@/modules/organizer/graphql/mutation/u
 import {EVENT_USERS} from "@/modules/organizer/graphql/queries/event-users";
 import {createConfirmDialog} from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {UPDATE_EVENT_USER} from "@/modules/organizer/graphql/mutation/update-event-user";
 import {NEW_EVENT_USER} from "@/modules/organizer/graphql/subscription/new-event-user";
 import {
@@ -189,7 +189,7 @@ async function onUnverfifyEventUser(eventUserId) {
   }
 
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: i18n.global.tc('view.event.user.confirm.unverify')
+    message: t('view.event.user.confirm.unverify')
   });
   dialog.onConfirm(async () => {
     const {mutate: updateEventUser} = useMutation(UPDATE_EVENT_USER, {

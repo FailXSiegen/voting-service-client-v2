@@ -1,6 +1,6 @@
 import {gql} from "graphql-tag";
 
-export const QUERY_ORGANIZER = gql`
+export const ORGANIZER = gql`
     query organizer($organizerId:ID!) {
         organizer(organizerId:$organizerId) {
             id

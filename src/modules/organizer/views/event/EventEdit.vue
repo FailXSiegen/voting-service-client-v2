@@ -1,12 +1,19 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerEventsEdit')">
     <template #title>
-      <div class="events-new-title">
-        {{ $t('navigation.views.organizerEventsEdit') }}
-      </div>
+      {{ $t('navigation.views.organizerEventsEdit') }}
+      <router-link
+        :to="{name: RouteOrganizerEvents}"
+        class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
+      >
+        <i class="bi-arrow-left bi--1xl mr-1" />
+        <span class="align-middle">
+          {{ $t('navigation.backToEvents') }}
+        </span>
+      </router-link>
     </template>
     <template #header>
-      <EventNavigation :routes="routes" />
+      <PageNavigation :routes="routes" />
     </template>
     <template #content>
       <EventForm
@@ -20,13 +27,20 @@
 
 <script setup>
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import EventForm from '@/modules/organizer/components/events/EventForm.vue';
-import {RouteOrganizerEvents} from "@/router/routes";
+import {
+  getRoutesByName,
+  RouteOrganizerAllEvents,
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerManagement,
+  RouteOrganizerVideoConference
+} from "@/router/routes";
 import {reactive, ref} from "vue";
 import {handleError} from "@/core/error/error-handler";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
 import {useMutation, useQuery} from "@vue/apollo-composable";
@@ -41,6 +55,15 @@ const route = useRoute();
 const id = route.params.id;
 const loaded = ref(false);
 const event = ref(null);
+
+// Define navigation items.
+const routes = getRoutesByName([
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents
+]);
 
 const prefillData = reactive({
   title: '',
@@ -118,7 +141,7 @@ async function onSubmit(formData) {
   await router.push({name: RouteOrganizerEvents});
 
   // Show success message.
-  toast(i18n.global.tc('success.organizer.events.updatedSuccessfully'), {type: 'success'});
+  toast(t('success.organizer.events.updatedSuccessfully'), {type: 'success'});
 }
 </script>
 

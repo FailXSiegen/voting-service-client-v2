@@ -130,7 +130,7 @@ const pendingUsersCount = computed(() => eventUsers.value.filter((eventUser) => 
 
 const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
 newEventUserSubscription.onResult(({data}) => {
-  if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
+  if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(eventId, 10)) {
     // This event user does not belong to our event.
     return;
   }

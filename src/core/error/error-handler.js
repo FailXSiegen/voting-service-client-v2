@@ -1,6 +1,6 @@
 import {NetworkError} from "@/core/error/NetworkError";
 import {toast} from "vue3-toastify";
-import i18n from "@/l18n";
+import t from '@/core/util/l18n';
 import {InvalidFormError} from "@/core/error/InvalidFormError";
 import {UnauthorizedError} from "@/core/error/UnauthorizedError";
 import {ApiError} from "@/core/error/ApiError";
@@ -15,7 +15,7 @@ export function handleError(error, toastOptions = {}) {
     if (import.meta.env.DEV) {
         console.error(error);
     }
-    let errorMessage = i18n.global.tc('error.network.genericError');
+    let errorMessage = t('error.network.genericError');
     if (error instanceof NetworkError) {
         errorMessage = error.message;
     } else if (error instanceof ApiError) {
@@ -25,20 +25,20 @@ export function handleError(error, toastOptions = {}) {
         if (import.meta.env.DEV) {
             errorMessage = error.message;
         } else {
-            errorMessage = i18n.global.tc('error.network.genericError');
+            errorMessage = t('error.network.genericError');
         }
     } else if (error instanceof InvalidFormError) {
         errorMessage = error.message;
     } else if (error instanceof UnauthorizedError) {
-        errorMessage = i18n.global.tc('error.network.unauthorized');
+        errorMessage = t('error.network.unauthorized');
     } else if (error instanceof Error && import.meta.env.PROD) {
-        errorMessage = i18n.global.tc('error.network.genericError');
+        errorMessage = t('error.network.genericError');
     } else if (error instanceof Error && import.meta.env.DEV) {
         errorMessage = error.message;
     } else if (error instanceof String && import.meta.env.PROD) {
         errorMessage = error;
     } else if (error instanceof String && import.meta.env.DEV) {
-        errorMessage = i18n.global.tc('error.network.genericError');
+        errorMessage = t('error.network.genericError');
     }
 
     toast(errorMessage, {
