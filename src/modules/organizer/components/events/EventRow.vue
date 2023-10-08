@@ -31,7 +31,7 @@
       </button>
       <button
         v-if="eventsShowActivate && event.active"
-        class="btn btn-info mx-1 my-2"
+        class="btn btn-secondary mx-1 my-2"
         :title="$t('view.event.listing.actions.deactivate')"
         @click="onToggleActivate(event.id, false)"
       >
@@ -51,12 +51,19 @@
     </td>
     <td
       :class="{
-        'bg-danger': getDaysSinceScheduledDateTime > 180 && showOrganizer
+        'bg-danger': getDaysSinceScheduledDateTime > 180 && showOrganizer,
+        'text-white': getDaysSinceScheduledDateTime > 180 && showOrganizer,
       }"
       class="align-middle"
     >
       {{ getScheduledDatetime }}
-      <span v-if="showOrganizer">- {{ getDaysSinceScheduledDateTime }} Tage</span>
+      <small
+        v-if="showOrganizer"
+        :class="[
+          'd-block',
+          getDaysSinceScheduledDateTime > 180 && showOrganizer ? 'text-white' : 'text-muted'
+        ]"
+      >({{ getDaysSinceScheduledDateTime }} Tage)</small>
     </td>
     <td
       v-if="event.active"
@@ -89,11 +96,9 @@
       >
         <i class="bi-link-45deg bi--2xl" />
       </span>
-      <!-- @todo add missing link to member list! -->
-
       <router-link
         :to="{ name: RouteOrganizerMemberRoom, params: { id: event.id } }"
-        class="btn btn-info mx-1 my-2"
+        class="btn btn-secondary mx-1 my-2"
         :title="$t('view.event.listing.actions.newTab')"
       >
         <i class="bi-eye-fill bi--2xl" />
@@ -161,7 +166,7 @@ const getScheduledDatetime = computed(() => createFormattedDateFromTimeStamp(pro
 const getDaysSinceScheduledDateTime = computed(() => {
   const $todayUnixTimeDate = Math.floor(Date.now() / 1000);
   const $unixDifference = $todayUnixTimeDate - props.event.scheduledDatetime;
-  return parseInt($unixDifference / 86400);
+  return parseInt($unixDifference / 86400) * -1;
 });
 
 function onDelete(eventId, organizerId) {
@@ -221,13 +226,13 @@ function copyTextToClipboard(text) {
     return;
   }
   navigator.clipboard.writeText(text).then(
-      function () {
-        // @todo show copied text?
-        toast(t('view.event.listing.textCopiedToClipboard'), {type: 'success'});
-      },
-      function (error) {
-        handleError(error);
-      }
+    function () {
+      // @todo show copied text?
+      toast(t('view.event.listing.textCopiedToClipboard'), {type: 'success'});
+    },
+    function (error) {
+      handleError(error);
+    }
   );
 }
 

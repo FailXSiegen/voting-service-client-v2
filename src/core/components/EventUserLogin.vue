@@ -31,7 +31,7 @@
     <button
       id="event-user-login-submit"
       type="submit"
-      class="btn btn-info btn-block text-white"
+      class="btn btn-secondary btn-block text-white"
     >
       {{ $t('view.login.submitToEvent') }}
     </button>

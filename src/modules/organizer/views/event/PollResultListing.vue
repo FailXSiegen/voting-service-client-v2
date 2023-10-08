@@ -2,48 +2,20 @@
   <PageLayout :meta-title="$t('navigation.views.organizerPollResults')">
     <template #title>
       <div class="events-new-title">
-        {{ $t('navigation.views.organizerPollResults') }}
+        {{ $t('navigation.views.organizerPollResults') }} - <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>
       <EventNavigation />
     </template>
     <template #content>
-      <div class="row">
-        <div class="col-6 col-md-auto mb-3">
-          <button
-            class="btn btn-success mr-3"
-            @click="exportPollOverview()"
-          >
-            Export Übersicht
-          </button>
-        </div>
-        <div class="col-6 col-md-auto  mb-3">
-          <button
-            class="btn btn-success mr-3"
-            @click="exportPollResults"
-          >
-            Export Ergebnisse
-          </button>
-        </div>
-        <div class="col-6 col-md-auto mb-3">
-          <button
-            class="btn btn-success mr-3"
-            @click="exportPollResultsDetail"
-          >
-            Export Ergebnisse mit Details
-          </button>
-        </div>
-        <div class="col-6 col-md-auto">
-          <button
-            class="btn btn-success mr-3"
-            @click="exportPollEventUsersVoted"
-          >
-            Export Teilnehmer mit abgegebener Stimmenanzahl
-          </button>
-        </div>
-      </div>
+      <ButtonDropdown
+        :buttons="exportButtons"
+        label="Export"
+      />
+
       <hr>
+
       <ResultListing
         v-if="pollResults?.length > 0"
         :poll-results="pollResults"
@@ -52,7 +24,7 @@
 
       <button
         v-if="showMoreEnabled"
-        class="my-5 mx-auto btn btn-info py-2 d-flex align-items-center d-print-none"
+        class="my-5 mx-auto btn btn-secondary py-2 d-flex align-items-center d-print-none"
         @click="showMorePollResults"
       >
         <i class="mr-3 bi bi-plus-square-fill bi--2xl" />
@@ -85,6 +57,7 @@ import {POLLS_RESULTS} from "@/modules/organizer/graphql/queries/poll-results";
 import {toast} from "vue3-toastify";
 import l18n from "@/l18n";
 import {exportPollResultsCsv} from "@/modules/organizer/requests/export-results-csv";
+import ButtonDropdown from "@/modules/organizer/components/form/ButtonDropdown.vue";
 
 const coreStore = useCore();
 const router = useRouter();
@@ -97,7 +70,24 @@ const pollResults = ref([]);
 const page = ref(0);
 const pageSize = ref(10);
 const showMoreEnabled = ref(true);
-
+const exportButtons = [
+  {
+    label: 'Übersicht',
+    onClick: exportPollOverview
+  },
+  {
+    label: 'Ergebnisse',
+    onClick: exportPollResults
+  },
+  {
+    label: 'Ergebnisse mit Details',
+    onClick: exportPollResultsDetail
+  },
+  {
+    label: 'Teilnehmer mit abgegebener Stimmenanzahl',
+    onClick: exportPollEventUsersVoted
+  }
+];
 let pollResultsQuery;
 
 // Try to fetch event by id and organizer id.

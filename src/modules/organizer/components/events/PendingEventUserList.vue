@@ -62,7 +62,7 @@
             {{ $t('view.event.user.member') }}
           </button>
           <button
-            class="btn btn-info mr-2"
+            class="btn btn-secondary mr-2"
             @click="onUpdateToGuest(item.id)"
           >
             {{ $t('view.event.user.verifyAs') }}
@@ -102,7 +102,7 @@ const headers = [
   {text: t('eventUser.createDatetime'), value: "createDatetime", sortable: true},
   {text: t('eventUser.username'), value: "username", sortable: true},
   {text: t('eventUser.publicName'), value: "publicName", sortable: true},
-  {text: '', value: "id", sortable: true},
+  {text: '', value: "id", sortable: false},
 ];
 
 const eventUsersCopy = ref(null);
@@ -115,8 +115,8 @@ function formatTimestamp(timestamp) {
 
 function onFilter() {
   eventUsersCopy.value = props.eventUsers.filter(eventUser => (
-      !eventUser.verified &&
-      eventUser.username.includes(filter.username)
+    !eventUser.verified &&
+        eventUser.username.includes(filter.username)
   ));
 }
 

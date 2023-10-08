@@ -35,7 +35,7 @@
       </template>
       <button
         :disabled="noMorePastEventsFound"
-        class="my-5 mx-auto btn btn-info py-2 d-flex align-items-center d-print-none"
+        class="my-5 mx-auto btn btn-secondary py-2 d-flex align-items-center d-print-none"
         @click.prevent="onShowMorePastEvents"
       >
         <i class="mr-3 bi bi-plus-square-fill bi--2xl" />

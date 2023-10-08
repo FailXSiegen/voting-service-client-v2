@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerMemberRoom')">
     <template #title>
       <div class="events-new-title">
-        {{ $t('navigation.views.organizerMemberRoom') }}
+        {{ $t('navigation.views.organizerMemberRoom') }} - <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>
@@ -20,7 +20,7 @@
       </router-link>
       <router-link
         :to="{ name: RouteOrganizerEventUserMultipleNew }"
-        class="btn btn-info my-3"
+        class="btn btn-secondary my-3"
       >
         <i class="bi-list bi--2xl align-middle" />
         <span class="align-middle">

@@ -19,6 +19,7 @@
       >
       <label
         v-if="item.label"
+        class="form-check-label"
         :for="id+'-'+item.value"
       >
         {{ item.label }}
@@ -47,38 +48,38 @@ import {ref} from "vue";
 const emit = defineEmits(['change']);
 
 const props = defineProps({
-  // eslint-disable-next-line vue/require-default-prop
-  label: String,
-  // eslint-disable-next-line vue/require-default-prop
-  id: String,
-  // eslint-disable-next-line vue/require-default-prop
-  name: String,
-  // eslint-disable-next-line vue/require-default-prop
-  autocomplete: String,
-  classes: {
-    type: Array,
-    // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
-  },
-  hasErrors: Boolean,
-  errors: {
-    type: Array,
-    // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
-  },
-  // eslint-disable-next-line vue/require-default-prop
-  value: String,
-  // eslint-disable-next-line vue/require-default-prop
-  helpText: String,
-  items: {
-    type: Array,
-    default: () => []
-  },
+    // eslint-disable-next-line vue/require-default-prop
+    label: String,
+    // eslint-disable-next-line vue/require-default-prop
+    id: String,
+    // eslint-disable-next-line vue/require-default-prop
+    name: String,
+    // eslint-disable-next-line vue/require-default-prop
+    autocomplete: String,
+    classes: {
+        type: Array,
+        // eslint-disable-next-line vue/require-valid-default-prop
+        default: []
+    },
+    hasErrors: Boolean,
+    errors: {
+        type: Array,
+        // eslint-disable-next-line vue/require-valid-default-prop
+        default: []
+    },
+    // eslint-disable-next-line vue/require-default-prop
+    value: String,
+    // eslint-disable-next-line vue/require-default-prop
+    helpText: String,
+    items: {
+        type: Array,
+        default: () => []
+    },
 });
 
 const inputValue = ref(props.value);
 
 function onChange() {
-  emit('change', {value: inputValue.value});
+    emit('change', {value: inputValue.value});
 }
 </script>

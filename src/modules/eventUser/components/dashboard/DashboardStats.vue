@@ -5,7 +5,7 @@
       {{ $t('view.user.verified.welcome') }}
       {{ eventUser.publicName }}
     </h2>
-    <p id="userInformation">
+    <p :class="{'pulse': highlightStatusChange}">
       {{ eventUser.username }} -
       <span
         v-if="eventUser.allowToVote"
@@ -19,7 +19,7 @@
         $t('view.event.user.visitor')
       }}</span>
       <span v-if="eventUser.allowToVote">
-        | Anzahl Stimmen: {{ eventUser.voteAmount }}</span>
+        | Anzahl Stimmen: <span class="badge badge-info">{{ eventUser.voteAmount }}</span></span>
       <span> | Status: </span>
       <span
         v-if="eventUser.online"
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   event: {
     type: Object,
     required: true
@@ -50,10 +50,34 @@ const props = defineProps({
   eventUser: {
     type: Object,
     required: true
+  },
+  highlightStatusChange: {
+    type: Boolean,
+    required: true
   }
 });
 </script>
 
 <style scoped>
+.pulse {
+    background: rgba(23, 162, 184, 0.15);
+    box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.5);
+    transform: scale(1);
+    animation: pulse 1.5s infinite;
+}
 
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.4);
+    }
+    30% {
+        transform: scale(0.99);
+        box-shadow: 0 0 0 10px rgba(23, 162, 184, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(23, 162, 184, 0);
+    }
+}
 </style>

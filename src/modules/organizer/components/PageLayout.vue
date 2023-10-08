@@ -5,7 +5,7 @@
     </header>
     <main class="container-fluid">
       <div class="row">
-        <div class="col-12 py-3 mb-4">
+        <div class="col-12">
           <h1>
             <slot name="title" />
           </h1>

@@ -121,16 +121,17 @@ async function onSubmit() {
   const {mutate: createZoomMeeting} = useMutation(CREATE_ZOOM_MEETING, {
     variables: {
       input: {
-        id: coreStore.getOrganizer?.id,
+        organizerId: coreStore.getOrganizer?.id,
         title: formData.title,
         apiKey: formData.apiKey,
         apiSecret: formData.apiSecret,
       },
     },
   });
+
   await createZoomMeeting();
 
-  // Refetch organizer record.
+  // Re-fetch organizer record.
   coreStore.queryOrganizer();
 
   // Back to list.
