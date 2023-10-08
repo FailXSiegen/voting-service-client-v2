@@ -42,13 +42,13 @@ import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import EventListing from '@/modules/organizer/components/events/EventListing.vue';
 import {ref} from 'vue';
 import {
-    getRoutesByName,
-    RouteOrganizerAllEvents,
-    RouteOrganizerDashboard,
-    RouteOrganizerEvents,
-    RouteOrganizerManagement,
-    RouteOrganizerVideoConference,
-    RouteOrganizerEventsNew,
+  getRoutesByName,
+  RouteOrganizerAllEvents,
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerManagement,
+  RouteOrganizerVideoConference,
+  RouteOrganizerEventsNew,
 } from "@/router/routes";
 import {UPCOMING_EVENTS} from '@/modules/organizer/graphql/queries/upcoming-events';
 import {EXPIRED_EVENTS} from '@/modules/organizer/graphql/queries/expired-events';
@@ -62,11 +62,11 @@ const coreStore = useCore();
 
 // Define navigation items.
 const routes = getRoutesByName([
-    RouteOrganizerDashboard,
-    RouteOrganizerEvents,
-    RouteOrganizerVideoConference,
-    RouteOrganizerManagement,
-    RouteOrganizerAllEvents
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents
 ]);
 
 const upcomingEvents = ref([]);
@@ -75,33 +75,33 @@ const expiredEvents = ref([]);
 // Query upcoming event.
 const upcomingEventsQuery = useQuery(UPCOMING_EVENTS, {organizerId: coreStore?.user?.id ?? 0}, {fetchPolicy: "no-cache"});
 upcomingEventsQuery.onResult(({data}) => {
-    upcomingEvents.value = data?.upcomingEvents ?? [];
+  upcomingEvents.value = data?.upcomingEvents ?? [];
 });
 
 // Query upcoming event.
 const expiredEventsQuery = useQuery(EXPIRED_EVENTS, {organizerId: coreStore?.user?.id ?? 0}, {fetchPolicy: "no-cache"});
 expiredEventsQuery.onResult(({data}) => {
-    expiredEvents.value = data?.expiredEvents ?? [];
+  expiredEvents.value = data?.expiredEvents ?? [];
 });
 
 async function onDelete({eventId, organizerId}) {
-    // Update new zoom meeting.
-    const {mutate: removeEvent} = useMutation(REMOVE_EVENT, {
-        variables: {
-            organizerId,
-            id: eventId,
-        },
-    });
-    await removeEvent();
+  // Update new zoom meeting.
+  const {mutate: removeEvent} = useMutation(REMOVE_EVENT, {
+    variables: {
+      organizerId,
+      id: eventId,
+    },
+  });
+  await removeEvent();
 
-    // Refetch organizer record.
-    coreStore.queryOrganizer();
+  // Refetch organizer record.
+  coreStore.queryOrganizer();
 
-    // Refetch event record.
-    upcomingEventsQuery.refetch();
-    expiredEventsQuery.refetch();
+  // Refetch event record.
+  upcomingEventsQuery.refetch();
+  expiredEventsQuery.refetch();
 
-    // Show success message.
-    toast(t('success.organizer.events.deletedSuccessfully'), {type: 'success'});
+  // Show success message.
+  toast(t('success.organizer.events.deletedSuccessfully'), {type: 'success'});
 }
 </script>

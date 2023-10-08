@@ -38,30 +38,30 @@
 <script setup>
 defineEmits(['update:checked']);
 defineProps({
-    // eslint-disable-next-line vue/require-default-prop
-    label: String,
-    // eslint-disable-next-line vue/require-default-prop
-    id: String,
-    // eslint-disable-next-line vue/require-default-prop
-    name: String,
-    classes: {
-        type: Array,
-        // eslint-disable-next-line vue/require-valid-default-prop
-        default: []
-    },
-    hasErrors: Boolean,
-    errors: {
-        type: Array,
-        // eslint-disable-next-line vue/require-valid-default-prop
-        default: []
-    },
-    // eslint-disable-next-line vue/require-default-prop
-    helpText: String,
-    // eslint-disable-next-line vue/require-default-prop
-    checked: Boolean,
-    // eslint-disable-next-line vue/require-default-prop
-    disabled: Boolean,
-    // eslint-disable-next-line vue/require-default-prop
-    value: String,
+  // eslint-disable-next-line vue/require-default-prop
+  label: String,
+  // eslint-disable-next-line vue/require-default-prop
+  id: String,
+  // eslint-disable-next-line vue/require-default-prop
+  name: String,
+  classes: {
+    type: Array,
+    // eslint-disable-next-line vue/require-valid-default-prop
+    default: []
+  },
+  hasErrors: Boolean,
+  errors: {
+    type: Array,
+    // eslint-disable-next-line vue/require-valid-default-prop
+    default: []
+  },
+  // eslint-disable-next-line vue/require-default-prop
+  helpText: String,
+  // eslint-disable-next-line vue/require-default-prop
+  checked: Boolean,
+  // eslint-disable-next-line vue/require-default-prop
+  disabled: Boolean,
+  // eslint-disable-next-line vue/require-default-prop
+  value: String,
 });
 </script>

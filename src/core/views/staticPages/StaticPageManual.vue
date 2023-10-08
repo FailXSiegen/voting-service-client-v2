@@ -207,7 +207,8 @@
             erscheint.
           </p>
           <p>
-            <b>Hinweis für Teilnehmer mit mehreren Delegiertenstimmen:</b><br>Sie dürfen nach jeder Stimmenabgabe erneut
+            <b>Hinweis für Teilnehmer mit mehreren Delegiertenstimmen:</b><br>Sie dürfen nach jeder
+            Stimmenabgabe erneut
             eine Auswahl treffen
             und "Jetzt abstimmen" drücken. Sie geben nicht mit einer Abgabe alle
             Ihnen zur Verfügung stehenden Stimmen ab. Wenn Sie 3 Stimmen haben und
@@ -366,8 +367,10 @@
           </div>
           <div class="col d-flex align-items-center flex-column">
             <p class="mb-0">
-              <b>Tipp</b>: Um den Nutzern einen komfortablen Einstieg zu ermöglichen kann man den Link zum Versenden
-              individualisieren. Nutzen Sie hierzu die Serienmail-Funktion von Google oder Microsoft mit einer Tabelle
+              <b>Tipp</b>: Um den Nutzern einen komfortablen Einstieg zu ermöglichen kann man den Link zum
+              Versenden
+              individualisieren. Nutzen Sie hierzu die Serienmail-Funktion von Google oder Microsoft mit
+              einer Tabelle
               aller Empfänger.
             </p>
             <ul>
@@ -378,7 +381,8 @@
               digitalwahl.org/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
             </code>
             <p>
-              Wichtig ist, dass der Link Encodiert ist. Dafür gibt es Funktionen wie URLCODIEREN in Excel, die
+              Wichtig ist, dass der Link Encodiert ist. Dafür gibt es Funktionen wie URLCODIEREN in Excel,
+              die
               automatisch aus einem zusammengefügten Satz einen sauberen klickbaren Link generiert
             </p>
           </div>

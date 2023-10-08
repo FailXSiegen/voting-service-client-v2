@@ -68,47 +68,47 @@ import $ from 'jquery';
 
 const emit = defineEmits(['submit']);
 const props = defineProps({
-    poll: {
-        type: Object,
-        required: true
-    },
-    event: {
-        type: Object,
-        required: true
-    },
-    eventUser: {
-        type: Object,
-        required: true
-    },
-    voteCounter: {
-        type: Number,
-        required: true
-    },
+  poll: {
+    type: Object,
+    required: true
+  },
+  event: {
+    type: Object,
+    required: true
+  },
+  eventUser: {
+    type: Object,
+    required: true
+  },
+  voteCounter: {
+    type: Number,
+    required: true
+  },
 });
 // This key is only a small hack to force a rerender of this component.
 const pollFormKey = ref(1);
 
 // Events.
 function onSubmit(data) {
-    emit('submit', data);
-    pollFormKey.value += 1;
+  emit('submit', data);
+  pollFormKey.value += 1;
 }
 
 function showModal() {
-    // TODO Remove me with bootstrap 5.
-    $('#pollModal').modal('show');
+  // TODO Remove me with bootstrap 5.
+  $('#pollModal').modal('show');
 }
 
 function hideModal() {
-    $('#pollModal').modal('hide');
-    // TODO Remove me with bootstrap 5.
-    pollFormKey.value += 1;
+  $('#pollModal').modal('hide');
+  // TODO Remove me with bootstrap 5.
+  pollFormKey.value += 1;
 }
 
 // Make these methods available for the parent component.
 defineExpose({
-    showModal,
-    hideModal
+  showModal,
+  hideModal
 });
 </script>
 

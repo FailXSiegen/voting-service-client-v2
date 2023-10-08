@@ -243,38 +243,38 @@ async function onSubmitAndStart() {
 
 function updatePollAnswers() {
   switch (formData.pollAnswer) {
-    case 'custom':
-      convertListTextToPollAnswers();
-      return;
-    case 'yesNoAbstain':
-      formData.possibleAnswers = [
-        {
-          content: 'Ja'
-        },
-        {
-          content: 'Nein'
-        },
-        {
-          content: 'Enthaltung'
-        }
-      ];
-      formData.list = '';
-      formData.allowAbstain = false;
-      formData.maxVotes = 1;
-      formData.minVotes = 0;
-      break;
-    case 'yesNo':
-      formData.possibleAnswers = [
-        {
-          content: 'Ja'
-        },
-        {
-          content: 'Nein'
-        }
-      ];
-      break;
-    default:
-      throw new Error(`Invalid answer type '${formData.pollAnswer}' given. Allowed are: 'yesNoAbstain', 'yesNo', 'custom'`);
+  case 'custom':
+    convertListTextToPollAnswers();
+    return;
+  case 'yesNoAbstain':
+    formData.possibleAnswers = [
+      {
+        content: 'Ja'
+      },
+      {
+        content: 'Nein'
+      },
+      {
+        content: 'Enthaltung'
+      }
+    ];
+    formData.list = '';
+    formData.allowAbstain = false;
+    formData.maxVotes = 1;
+    formData.minVotes = 0;
+    break;
+  case 'yesNo':
+    formData.possibleAnswers = [
+      {
+        content: 'Ja'
+      },
+      {
+        content: 'Nein'
+      }
+    ];
+    break;
+  default:
+    throw new Error(`Invalid answer type '${formData.pollAnswer}' given. Allowed are: 'yesNoAbstain', 'yesNo', 'custom'`);
   }
   // Reset custom answer related properties.
   formData.list = '';

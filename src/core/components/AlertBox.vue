@@ -70,12 +70,12 @@ const config = computed(() => {
 
 <style scoped>
 .alert .icon {
-  display: table-cell;
+    display: table-cell;
 }
 
 .alert div,
 .alert span {
-  padding-left: 5px;
-  display: table-cell;
+    padding-left: 5px;
+    display: table-cell;
 }
 </style>

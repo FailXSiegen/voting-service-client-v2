@@ -115,6 +115,6 @@ function join(res) {
 
 <style>
 #zmmtg-root {
-  display: none;
+    display: none;
 }
 </style>

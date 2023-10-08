@@ -139,13 +139,13 @@ function onVerify({id}, verified) {
     },
   });
   updateOrganizer()
-      .then(() => {
-        return refetch();
-      })
-      .then(() => {
-        toast(t('success.organizer.organizers.updatedSuccessfully'), {type: 'success'});
-      })
-      .catch((error) => handleError(error));
+    .then(() => {
+      return refetch();
+    })
+    .then(() => {
+      toast(t('success.organizer.organizers.updatedSuccessfully'), {type: 'success'});
+    })
+    .catch((error) => handleError(error));
 }
 
 function onDelete({id}) {
@@ -160,13 +160,13 @@ function onDelete({id}) {
       },
     });
     deleteOrganizer()
-        .then(() => {
-          return refetch();
-        })
-        .then(() => {
-          toast(t('success.organizer.organizers.deletedSuccessfully'), {type: 'success'});
-        })
-        .catch((error) => handleError(error));
+      .then(() => {
+        return refetch();
+      })
+      .then(() => {
+        toast(t('success.organizer.organizers.deletedSuccessfully'), {type: 'success'});
+      })
+      .catch((error) => handleError(error));
   });
 
   // Show confirm dialog.
