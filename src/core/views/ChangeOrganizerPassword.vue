@@ -34,7 +34,7 @@
               </div>
               <button
                 type="submit"
-                class="btn btn-info btn-block"
+                class="btn btn-secondary btn-block"
               >
                 {{ $t('view.changePassword.form.changePasswordSubmit') }}
               </button>

@@ -86,7 +86,7 @@ import {
   RouteOrganizerVideoConferenceNew,
   RouteOrganizerVideoConferenceEdit,
 } from "@/router/routes";
-import {ref, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import {useCore} from "@/core/store/core";
 import {storeToRefs} from "pinia";
 import {useMutation} from "@vue/apollo-composable";
@@ -113,8 +113,7 @@ const routes = getRoutesByName([
   RouteOrganizerAllEvents
 ]);
 
-const {organizer} = storeToRefs(coreStore);
-const zoomvideoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
+const zoomvideoConferences = computed(() => coreStore.getOrganizer?.zoomMeetings ?? []);
 
 // Currently we only support zoom. So this is static
 const meetingTypes = [
@@ -123,10 +122,6 @@ const meetingTypes = [
     title: 'Zoom Meeting'
   }
 ];
-// Watch changes to organizer in the store.
-watch(organizer, ({zoomMeetings}) => {
-  zoomvideoConferences.value = zoomMeetings;
-});
 
 async function onDelete(id) {
   const dialog = createConfirmDialog(ConfirmModal, {

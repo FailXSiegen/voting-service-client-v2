@@ -42,13 +42,9 @@
 @import 'event/zoom/overwrite';
 @import 'organizer/organizers';
 
-// Date picker @todo
-//@import "~pc-bootstrap4-datetimepicker/build/css/bootstrap-datetimepicker.min.css";
-
 $bootstrap-icons-font-src: url("../assets/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
 url("../assets/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");
 @import '../node_modules/bootstrap-icons/font/bootstrap-icons';
-
 
 .modal-backdrop {
   z-index: 190;

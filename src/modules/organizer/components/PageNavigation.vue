@@ -84,8 +84,6 @@ import t from '@/core/util/l18n';
 import {useCore} from "@/core/store/core";
 import {useRoute, useRouter} from "vue-router";
 
-// @todo add possibility to add badges to nav links.
-
 const coreStore = useCore();
 const router = useRouter();
 const appVersion = inject('appVersion');
@@ -110,8 +108,8 @@ const params = useRoute().params;
 
 function onLogout() {
   logout()
-      .then(() => router.push({name: RouteMainLogin}))
-      .then(() => toast(t('success.logout.organizer'), {type: 'success'}));
+    .then(() => router.push({name: RouteMainLogin}))
+    .then(() => toast(t('success.logout.organizer'), {type: 'success'}));
 }
 
 function isRouteAccessible(route) {

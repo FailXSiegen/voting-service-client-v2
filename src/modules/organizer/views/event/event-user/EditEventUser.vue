@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerEventsEdit')">
     <template #title>
       <div class="events-new-title">
-        {{ $t('navigation.views.organizerEventsEdit') }}
+        {{ $t('navigation.views.organizerEventsEdit') }} - <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>

@@ -70,7 +70,7 @@
           </button>
           <button
             v-else-if="item.allowToVote"
-            class="btn btn-info"
+            class="btn btn-secondary"
             @click="onUpdateToGuest(item.id)"
           >
             {{ $t('view.event.user.setTo') }}
@@ -120,7 +120,7 @@ const headers = [
   {text: t('eventUser.createDatetime'), value: "createDatetime", sortable: true},
   {text: t('eventUser.username'), value: "username", sortable: true},
   {text: t('eventUser.publicName'), value: "publicName", sortable: true},
-  {text: '', value: "id", sortable: true},
+  {text: '', value: "id", sortable: false},
 ];
 
 const eventUsersCopy = ref(null);
@@ -133,7 +133,7 @@ function formatTimestamp(timestamp) {
 
 function onFilter() {
   eventUsersCopy.value = props.eventUsers.filter(eventUser => (
-      eventUser.username.includes(filter.username)
+    eventUser.username.includes(filter.username)
   ));
 }
 
@@ -152,7 +152,6 @@ function onUpdateToGuest(eventUserId) {
 
 function onUnverfifyEventUser(eventUserId) {
   emit('unverfifyEventUser', eventUserId);
-
 }
 </script>
 

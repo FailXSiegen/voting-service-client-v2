@@ -1,10 +1,10 @@
 <template>
-  <li class="list-group-item">
-    <div
-      v-if="pollResult.poll"
-      class="border p-3"
-    >
-      <h5 class="mb-1">
+  <div
+    v-if="pollResult.poll"
+    class="card mb-3"
+  >
+    <div class="card-header">
+      <h5 class="h4 mb-1">
         {{ pollResult.poll.title }} ({{
           $t('view.results.type.' + pollResult.type)
         }}) -
@@ -18,7 +18,9 @@
         {{ $t('view.results.voters') }}
         {{ pollResult.maxVotes }}
       </p>
-      <hr class="divider my-2">
+    </div>
+
+    <div class="card-body">
       <div class="row">
         <div class="col-12 col-md-6">
           <p>{{ $t('view.results.mainResult') }}</p>
@@ -67,7 +69,7 @@
         <div class="col-12 col-md-6">
           <p>{{ $t('general.member') }}</p>
           <button
-            class="btn btn-primary d-print-none"
+            class="btn btn-primary btn-result d-print-none"
             type="button"
             data-toggle="collapse"
             :data-target="'#poll-' + pollResult.id + '-ResultVoters'"
@@ -99,7 +101,7 @@
           </p>
           <button
             v-if="pollResult.type === 'PUBLIC'"
-            class="btn btn-primary d-print-none"
+            class="btn btn-primary btn-result d-print-none"
             type="button"
             data-toggle="collapse"
             :data-target="'#poll-' + pollResult.id + '-ResultDetails'"
@@ -146,7 +148,7 @@
         </div>
       </div>
     </div>
-  </li>
+  </div>
 </template>
 
 <script setup>
@@ -194,7 +196,7 @@ function groupBy(array, key) {
 
 function getPublicName(pollUserId) {
   const userFound = props.pollResult.pollUser.find(
-      user => user.id === pollUserId
+    user => user.id === pollUserId
   );
   if (!userFound) {
     return 'Unknown';
@@ -212,20 +214,25 @@ function getAnswerPercentage(answerLength, answerTotal, pollResult) {
 </script>
 
 <style scoped>
+.btn-result {
+    width: 100%;
+    text-align: left;
+}
+
 @media print {
-  .collapse {
-    display: block !important;
-    height: auto !important;
-  }
+    .collapse {
+        display: block !important;
+        height: auto !important;
+    }
 
-  .col-md-9 {
-    width: 100% !important;
-  }
+    .col-md-9 {
+        width: 100% !important;
+    }
 
-  .list-group-item {
-    position: relative;
-    page-break-inside: avoid;
-    page-break-after: always;
-  }
+    .list-group-item {
+        position: relative;
+        page-break-inside: avoid;
+        page-break-after: always;
+    }
 }
 </style>

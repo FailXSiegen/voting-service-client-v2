@@ -1,9 +1,9 @@
 <template>
   <div class="results-listing">
     <h2>{{ $t('view.results.pastResults') }}</h2>
-    <ul
+    <div
       v-if="pollResults?.length > 0"
-      class="created-polls list-group"
+      class="created-polls"
     >
       <ResultItem
         v-for="(pollResult, index) in pollResults"
@@ -11,7 +11,7 @@
         :event-record="eventRecord"
         :poll-result="pollResult"
       />
-    </ul>
+    </div>
   </div>
 </template>
 

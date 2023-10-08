@@ -244,13 +244,21 @@
           "buttonStart": "Abstimmung starten",
           "maxVote1": "Sie können eine Position auswählen",
           "maxVoteGreater1": "Achtung: Sie können mehrere Positionen auswählen: ",
-          "minVoteGreater0": "Achtung: Sie müssen eine Mindestanzahl auswählen: "
+          "minVoteGreater0": "Achtung: Sie müssen eine Mindestanzahl auswählen: ",
+          "canSubmitAnswerForEachVote": "Alle {voteAmount} Stimmen auf einmal abgeben",
+          "canSubmitAnswerForEachVoteHelptext": "Nur bei der ersten Stimme möglich.",
+          "close": "Schließen",
+          "result": "Ergebnis"
         },
         "active": {
           "title": "Aktuelle Abstimmung",
-          "close": "Abstimmung beenden erzwingen",
-          "closeDialog": "Abstimmung schließen?"
-        }
+          "close": "Beenden der Abstimmung erzwingen",
+          "closeDialog": "Abstimmung schließen?",
+          "details": "Abstimmungsdetails",
+          "alreadyVoted": "Bisherige Stimmenabgabe",
+          "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}"
+        },
+        "userUpdate": "Ihr Status wurde aktualisiert."
       },
       "results": {
         "pastResults": "Vergangene Abstimmungen",

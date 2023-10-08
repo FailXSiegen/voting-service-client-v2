@@ -112,10 +112,10 @@ async function onSubmit() {
   const {username, password, publicName} = formData;
 
   loginEventUser(username, password, publicName, props.event?.id ?? 0)
-      .then(({token}) => coreStore.loginUser(token))
-      .then(() => toast(t('success.login.eventUser', {userName: publicName}), {type: 'success'}))
-      .then(() => emit('exit'))
-      .catch(error => handleError(error, {autoClose: false}));
+    .then(({token}) => coreStore.loginUser(token))
+    .then(() => toast(t('success.login.eventUser', {userName: publicName}), {type: 'success'}))
+    .then(() => emit('exit'))
+    .catch(error => handleError(error, {autoClose: false}));
 }
 </script>
 

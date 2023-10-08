@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerPolls')">
     <template #title>
       <div class="events-new-title">
-        {{ $t('navigation.views.organizerPolls') }}
+        {{ $t('navigation.views.organizerPolls') }} - <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>
@@ -169,7 +169,7 @@ eventQuery.onResult(({data}) => {
   });
 
   // Fetch active poll.
-  activePollQuery = useQuery(ACTIVE_POLL, {eventId: event.value?.id}, {fetchPolicy: "cache-and-network"});
+  activePollQuery = useQuery(ACTIVE_POLL, {eventId: event.value?.id}, {fetchPolicy: "no-cache"});
   activePollQuery.onResult(({data}) => {
     if (data?.activePoll) {
       activePoll.value = data?.activePoll;
@@ -179,20 +179,8 @@ eventQuery.onResult(({data}) => {
   // Fetch active poll event user.
   activePollEventUserQuery = useQuery(ACTIVE_POLL_EVENT_USER, {eventId: event.value?.id}, {fetchPolicy: "cache-and-network"});
   activePollEventUserQuery.onResult(({data}) => {
-
     if (data?.activePollEventUser) {
       activePollEventUser.value = data?.activePollEventUser;
-    }
-
-    if (data?.activePollEventUser && data?.activePollEventUser?.pollUserVoted && data.activePollEventUser?.pollUser) {
-      // @todo what happens here?!
-      data.activePollEventUser.pollUserVoted.forEach((pollUserVoted) => {
-        data.activePollEventUser.pollUser.forEach((pollUser, index) => {
-          if (parseInt(pollUser.eventUserId, 10) === parseInt(pollUserVoted.eventUserId, 10)) {
-            data.activePollEventUser.pollUser[index].voted = true;
-          }
-        });
-      });
     }
   });
 
@@ -214,9 +202,7 @@ eventQuery.onResult(({data}) => {
   // Fetch polls with no results.
   pollsWithNoResultsQuery = useQuery(POLLS_WITH_NO_RESULTS, {eventId: event.value?.id}, {fetchPolicy: "cache-and-network"});
   pollsWithNoResultsQuery.onResult(({data}) => {
-    if (data?.pollsWithNoResults) {
-      pollsWithNoResults.value = data?.pollsWithNoResults;
-    }
+    pollsWithNoResults.value = data?.pollsWithNoResults ? data?.pollsWithNoResults : [];
   });
 });
 
@@ -326,12 +312,15 @@ eventUserLifeCycleSubscription.onResult(({data}) => {
 
 const pollAnswerLifeCycleSubscription = useSubscription(POLL_ANSWER_LIVE_CYCLE);
 pollAnswerLifeCycleSubscription.onResult(({data}) => {
-  if (parseInt(data?.pollAnswerLifeCycle.eventId) === parseInt(id)) {
-    activePollAnswerCount.value = data?.pollAnswerLifeCycle?.pollAnswersCount;
-    activePollMaxAnswer.value = data?.pollAnswerLifeCycle?.maxVotes;
-    pollUserCount.value = data?.pollAnswerLifeCycle?.pollUserCount;
-    pollUserVotedCount.value = data?.pollAnswerLifeCycle?.pollUserVotedCount;
+  if (parseInt(data?.pollAnswerLifeCycle.eventId) !== parseInt(id)) {
+    return;
   }
+  activePollAnswerCount.value = data?.pollAnswerLifeCycle?.pollAnswersCount;
+  activePollMaxAnswer.value = data?.pollAnswerLifeCycle?.maxVotes;
+  pollUserCount.value = data?.pollAnswerLifeCycle?.pollUserCount;
+  pollUserVotedCount.value = data?.pollAnswerLifeCycle?.pollUserVotedCount;
+  activePollEventUserQuery.refetch();
+
 });
 
 const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE);
