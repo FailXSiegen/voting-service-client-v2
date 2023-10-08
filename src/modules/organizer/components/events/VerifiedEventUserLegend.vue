@@ -62,31 +62,31 @@ const props = defineProps({
 });
 
 const verifiedUsersCount = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified).length
+  (eventUser) => eventUser.verified).length
 );
 const verifiedUsersCountOnline = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && eventUser.online).length
+  (eventUser) => eventUser.verified && eventUser.online).length
 );
 const verifiedUsersCountOffline = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && !eventUser.online).length
+  (eventUser) => eventUser.verified && !eventUser.online).length
 );
 const verifiedUsersCountAllowToVote = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && eventUser.allowToVote).length
+  (eventUser) => eventUser.verified && eventUser.allowToVote).length
 );
 const verifiedUsersCountAllowToVoteOnline = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && eventUser.online && eventUser.allowToVote).length
+  (eventUser) => eventUser.verified && eventUser.online && eventUser.allowToVote).length
 );
 const verifiedUsersCountAllowToVoteOffline = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && !eventUser.online && eventUser.allowToVote).length
+  (eventUser) => eventUser.verified && !eventUser.online && eventUser.allowToVote).length
 );
 const verifiedUsersCountNotAllowToVote = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && !eventUser.allowToVote).length
+  (eventUser) => eventUser.verified && !eventUser.allowToVote).length
 );
 const verifiedUsersCountNotAllowToVoteOnline = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && eventUser.online && !eventUser.allowToVote).length
+  (eventUser) => eventUser.verified && eventUser.online && !eventUser.allowToVote).length
 );
 const verifiedUsersCountNotAllowToVoteOffline = computed(() => props.eventUsers.filter(
-    (eventUser) => eventUser.verified && !eventUser.online && !eventUser.allowToVote).length
+  (eventUser) => eventUser.verified && !eventUser.online && !eventUser.allowToVote).length
 );
 const verifiedUsersVoteCount = computed(() => {
   let voteCount = 0;

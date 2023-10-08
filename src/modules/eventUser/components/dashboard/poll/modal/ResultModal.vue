@@ -63,29 +63,29 @@ import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vu
 import t from "@/core/util/l18n";
 
 defineProps({
-    pollResult: {
-        type: Object,
-        required: true
-    },
-    event: {
-        type: Object,
-        required: true
-    },
+  pollResult: {
+    type: Object,
+    required: true
+  },
+  event: {
+    type: Object,
+    required: true
+  },
 });
 
 function showModal() {
-    // TODO Remove me with bootstrap 5.
-    $('#resultModal').modal('show');
+  // TODO Remove me with bootstrap 5.
+  $('#resultModal').modal('show');
 }
 
 function hideModal() {
-    $('#resultModal').modal('hide');
-    // TODO Remove me with bootstrap 5.
+  $('#resultModal').modal('hide');
+  // TODO Remove me with bootstrap 5.
 }
 
 // Make these methods available for the parent component.
 defineExpose({
-    showModal,
-    hideModal
+  showModal,
+  hideModal
 });
 </script>

@@ -78,7 +78,7 @@ function onLoaded() {
 
 <style>
 .container-zoom {
-  width: 70%;
-  height: 100%;
+    width: 70%;
+    height: 100%;
 }
 </style>

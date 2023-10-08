@@ -178,11 +178,11 @@ const v$ = useVuelidate(rules, formData);
 
 function loadVideoConfigByType() {
   switch (formData.videoConference?.__typename) {
-    case 'ZoomMeeting':
-      videoConfigComponent.value = ZoomConfig;
-      break;
-    default:
-      videoConfigComponent.value = null;
+  case 'ZoomMeeting':
+    videoConfigComponent.value = ZoomConfig;
+    break;
+  default:
+    videoConfigComponent.value = null;
   }
 }
 

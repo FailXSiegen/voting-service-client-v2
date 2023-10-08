@@ -112,6 +112,6 @@ function onToggleActive(event) {
 <style scoped>
 .table td,
 .table th {
-  vertical-align: middle;
+    vertical-align: middle;
 }
 </style>

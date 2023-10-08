@@ -219,10 +219,10 @@ import CorePageLayout from '@/core/components/CorePageLayout.vue';
 
 <style>
 .card-header:hover {
-  background-color: rgba(0, 0, 0, 0.06);
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
 .card-header .btn:focus {
-  box-shadow: none !important;
+    box-shadow: none !important;
 }
 </style>

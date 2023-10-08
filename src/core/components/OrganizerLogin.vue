@@ -81,9 +81,9 @@ async function onLogin() {
     return;
   }
   loginOrganizer(formData.username, formData.password)
-      .then(({token}) => coreStore.loginUser(token))
-      .then(() => router.push({name: RouteOrganizerDashboard}))
-      .then(() => toast(t('success.login.organizer'), {type: 'success'}))
-      .catch(error => handleError(error, {autoClose: false}));
+    .then(({token}) => coreStore.loginUser(token))
+    .then(() => router.push({name: RouteOrganizerDashboard}))
+    .then(() => toast(t('success.login.organizer'), {type: 'success'}))
+    .catch(error => handleError(error, {autoClose: false}));
 }
 </script>

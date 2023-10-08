@@ -86,7 +86,7 @@ function onChangeText({value}) {
   } catch (index) {
     const numberOfRow = index + 1;
     handleError(new NetworkError(
-        'Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ' + numberOfRow
+      'Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ' + numberOfRow
     ));
   }
 }

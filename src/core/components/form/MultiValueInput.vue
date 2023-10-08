@@ -12,7 +12,7 @@
       'form-control',
       ...classes
     ]"
-  ></textarea>
+  />
   <small
     v-if="helpText"
     class="form-text text-muted"
