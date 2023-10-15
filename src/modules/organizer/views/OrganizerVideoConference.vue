@@ -1,35 +1,26 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerVideoConference')">
     <template #title>
-      {{ $t('navigation.views.organizerVideoConference') }}
+      {{ $t("navigation.views.organizerVideoConference") }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      <div
-        class="input-group new-meeting-button-group mb-5"
-        role="group"
-      >
-        <select
-          class="custom-select"
-        >
-          <option
-            v-for="type in meetingTypes"
-            :key="type.id"
-            :value="type.id"
-          >
+      <div class="input-group new-meeting-button-group mb-5" role="group">
+        <select class="custom-select">
+          <option v-for="type in meetingTypes" :key="type.id" :value="type.id">
             {{ type.title }}
           </option>
         </select>
         <div class="input-group-append">
           <router-link
-            :to="{name: RouteOrganizerVideoConferenceNew}"
+            :to="{ name: RouteOrganizerVideoConferenceNew }"
             class="btn btn-secondary"
           >
             <i class="bi-plus bi--1xl align-middle" />
             <span class="align-middle">
-              {{ $t('view.videoConference.addNew') }}
+              {{ $t("view.videoConference.addNew") }}
             </span>
           </router-link>
         </div>
@@ -43,12 +34,12 @@
         theme-color="#007bff"
       >
         <template #item-id="item">
-          <div
-            class="btn-group float-right"
-            role="group"
-          >
+          <div class="btn-group float-right" role="group">
             <router-link
-              :to="{name: RouteOrganizerVideoConferenceEdit, params: { id: item.id }}"
+              :to="{
+                name: RouteOrganizerVideoConferenceEdit,
+                params: { id: item.id },
+              }"
               class="btn btn-secondary"
             >
               <i class="bi-pencil bi--xl" />
@@ -63,19 +54,16 @@
           </div>
         </template>
       </EasyDataTable>
-      <AlertBox
-        v-else
-        type="info"
-      >
-        {{ $t('view.videoConference.noRecords') }}
+      <AlertBox v-else type="info">
+        {{ $t("view.videoConference.noRecords") }}
       </AlertBox>
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -87,20 +75,19 @@ import {
   RouteOrganizerVideoConferenceEdit,
 } from "@/router/routes";
 
-import {computed, ref, watch} from "vue";
-import {useCore} from "@/core/store/core";
-import {storeToRefs} from "pinia";
-import {useMutation} from "@vue/apollo-composable";
-import {DELETE_ZOOM_MEETING} from "@/modules/organizer/graphql/mutation/delete-zoom-meeting";
-import {toast} from "vue3-toastify";
-import t from '@/core/util/l18n';
-import ConfirmModal from '@/core/components/ConfirmModal.vue';
-import {createConfirmDialog} from 'vuejs-confirm-dialog';
+import { computed } from "vue";
+import { useCore } from "@/core/store/core";
+import { useMutation } from "@vue/apollo-composable";
+import { DELETE_ZOOM_MEETING } from "@/modules/organizer/graphql/mutation/delete-zoom-meeting";
+import { toast } from "vue3-toastify";
+import t from "@/core/util/l18n";
+import ConfirmModal from "@/core/components/ConfirmModal.vue";
+import { createConfirmDialog } from "vuejs-confirm-dialog";
 import AlertBox from "@/core/components/AlertBox.vue";
 
 const headers = [
-  {text: t('view.videoConference.title'), value: "title", sortable: true},
-  {text: "", value: "id"},
+  { text: t("view.videoConference.title"), value: "title", sortable: true },
+  { text: "", value: "id" },
 ];
 
 const coreStore = useCore();
@@ -111,26 +98,28 @@ const routes = getRoutesByName([
   RouteOrganizerEvents,
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
-  RouteOrganizerAllEvents
+  RouteOrganizerAllEvents,
 ]);
 
-const zoomvideoConferences = computed(() => coreStore.getOrganizer?.zoomMeetings ?? []);
+const zoomvideoConferences = computed(
+  () => coreStore.getOrganizer?.zoomMeetings ?? [],
+);
 
 // Currently we only support zoom. So this is static
 const meetingTypes = [
   {
     id: 1,
-    title: 'Zoom Meeting'
-  }
+    title: "Zoom Meeting",
+  },
 ];
 
 async function onDelete(id) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t('view.videoConference.confirmDelete')
+    message: t("view.videoConference.confirmDelete"),
   });
   dialog.onConfirm(async () => {
     // Update new zoom meeting.
-    const {mutate: updateZoomMeeting} = useMutation(DELETE_ZOOM_MEETING, {
+    const { mutate: updateZoomMeeting } = useMutation(DELETE_ZOOM_MEETING, {
       variables: {
         id,
       },
@@ -140,7 +129,9 @@ async function onDelete(id) {
     coreStore.queryOrganizer();
 
     // Show success message.
-    toast(t('success.organizer.videoConference.deletedSuccessfully'), {type: 'success'});
+    toast(t("success.organizer.videoConference.deletedSuccessfully"), {
+      type: "success",
+    });
   });
 
   // Show confirm dialog.
