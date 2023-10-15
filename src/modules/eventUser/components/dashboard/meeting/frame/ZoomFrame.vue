@@ -3,10 +3,10 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
-import {setCookie} from "@/core/util/cookie";
+import { onMounted, ref } from "vue";
+import { setCookie } from "@/core/util/cookie";
 
-const emit = defineEmits(['loaded']);
+const emit = defineEmits(["loaded"]);
 const meetConfig = ref({});
 const ZoomMeeting = ref(null);
 const signature = ref(null);
@@ -14,41 +14,41 @@ const signature = ref(null);
 const props = defineProps({
   apiKey: {
     type: String,
-    required: true
+    required: true,
   },
   apiSecret: {
     type: String,
-    required: true
+    required: true,
   },
   nickname: {
     type: String,
-    required: true
+    required: true,
   },
   meetingId: {
     type: Number,
-    required: true
+    required: true,
   },
   password: {
     type: String,
-    required: true
+    required: true,
   },
   returnUrl: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 onMounted(async () => {
-  const {ZoomMtg} = await import('@zoomus/websdk');
+  const { ZoomMtg } = await import("@zoomus/websdk");
   ZoomMeeting.value = ZoomMtg;
-  document.getElementById('zmmtg-root').style.display = 'block';
+  document.getElementById("zmmtg-root").style.display = "block";
   // @see vite.config.js
-  ZoomMeeting.value.setZoomJSLib('/lib/zoom/lib', '/av');
+  ZoomMeeting.value.setZoomJSLib("/lib/zoom/lib", "/av");
   ZoomMeeting.value?.preLoadWasm();
   ZoomMeeting.value?.prepareJssdk();
   // loads language files, also passes any error messages to the ui
-  ZoomMeeting.value?.i18n.load('de-DE');
-  ZoomMeeting.value?.i18n.reload('de-DE');
+  ZoomMeeting.value?.i18n.load("de-DE");
+  ZoomMeeting.value?.i18n.reload("de-DE");
 
   // Meeting config object
   meetConfig.value = {
@@ -59,15 +59,15 @@ onMounted(async () => {
     passWord: props.password,
     leaveUrl: props.returnUrl,
     role: 0,
-    lang: 'de-DE',
+    lang: "de-DE",
     china: false,
-    userEmail: ''
+    userEmail: "",
   };
-  setCookie('meeting_number', props.meetingId);
-  setCookie('meeting_pwd', props.password);
+  setCookie("meeting_number", props.meetingId);
+  setCookie("meeting_pwd", props.password);
 
   // Mark as loaded here because the overlay already exist at this point.
-  emit('loaded');
+  emit("loaded");
 
   // Generate Signature function
   signature.value = ZoomMeeting.value?.generateSignature({
@@ -77,9 +77,8 @@ onMounted(async () => {
     role: meetConfig.value?.role,
     success: function (res) {
       join(res);
-    }
+    },
   });
-
 });
 
 function join(res) {
@@ -103,18 +102,18 @@ function join(res) {
         },
         error: function (error) {
           console.log(error);
-        }
+        },
       });
     },
     error: function (error) {
       console.error(error);
-    }
+    },
   });
 }
 </script>
 
 <style>
 #zmmtg-root {
-    display: none;
+  display: none;
 }
 </style>

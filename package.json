@@ -9,7 +9,8 @@
     "test:unit": "vitest --environment jsdom --root src/",
     "test:e2e": "start-server-and-test preview :4173 'cypress run --e2e'",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' :4173 'cypress open --e2e'",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "format": "prettier src --write"
   },
   "dependencies": {
     "@apollo/client": "^3.7.7",
@@ -41,11 +42,13 @@
     "@vitejs/plugin-vue": "^4.0.0",
     "@vue/test-utils": "^2.2.6",
     "cypress": "^13.3.1",
-    "eslint": "^8.22.0",
+    "eslint": "^8.51.0",
+    "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-cypress": "^2.12.1",
-    "eslint-plugin-vue": "^9.3.0",
+    "eslint-plugin-vue": "^9.17.0",
     "happy-dom": "^8.2.6",
     "jsdom": "^20.0.3",
+    "prettier": "3.0.3",
     "sass": "^1.58.0",
     "start-server-and-test": "^1.15.2",
     "vite": "^4.0.0",

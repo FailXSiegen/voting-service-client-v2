@@ -9,7 +9,11 @@
               :errors="v$.title?.$errors"
               :has-errors="v$.title?.$errors?.length > 0"
               :value="formData.title"
-              @change="({value}) => {formData.title = value;}"
+              @change="
+                ({ value }) => {
+                  formData.title = value;
+                }
+              "
             />
           </div>
         </div>
@@ -22,7 +26,11 @@
               :value="formData.slug"
               :base-value="formData.title"
               :help-text="$t('view.event.create.labels.slugHelp')"
-              @change="({value}) => {formData.slug = value;}"
+              @change="
+                ({ value }) => {
+                  formData.slug = value;
+                }
+              "
             />
           </div>
         </div>
@@ -35,7 +43,11 @@
           :has-errors="v$.description?.$errors?.length > 0"
           :value="formData.description"
           :help-text="$t('view.event.create.labels.descriptionHelp')"
-          @change="({value}) => {formData.description = value;}"
+          @change="
+            ({ value }) => {
+              formData.description = value;
+            }
+          "
         />
       </div>
       <div class="form-group">
@@ -44,7 +56,11 @@
           :errors="v$.scheduledDatetime?.$errors"
           :has-errors="v$.scheduledDatetime?.$errors?.length > 0"
           :value="formData.scheduledDatetime"
-          @change="({value}) => {formData.scheduledDatetime = value;}"
+          @change="
+            ({ value }) => {
+              formData.scheduledDatetime = value;
+            }
+          "
         />
       </div>
       <div class="form-group">
@@ -53,7 +69,11 @@
           :label="$t('view.event.create.labels.lobbyOpen')"
           :errors="v$.lobbyOpen?.$errors"
           :has-errors="v$.lobbyOpen?.$errors?.length > 0"
-          @update="({value}) => {formData.lobbyOpen = value;}"
+          @update="
+            ({ value }) => {
+              formData.lobbyOpen = value;
+            }
+          "
         />
       </div>
       <div class="form-group">
@@ -62,7 +82,11 @@
           :label="$t('view.event.create.labels.active')"
           :errors="v$.active?.$errors"
           :has-errors="v$.lobbyOpen?.active?.length > 0"
-          @update="({value}) => {formData.active = value;}"
+          @update="
+            ({ value }) => {
+              formData.active = value;
+            }
+          "
         />
       </div>
       <div class="card">
@@ -85,20 +109,24 @@
           />
         </div>
       </div>
-      <hr>
-      <h3>{{ $t('view.event.create.labels.multivoteTypeTitle') }}</h3>
+      <hr />
+      <h3>{{ $t("view.event.create.labels.multivoteTypeTitle") }}</h3>
       <p class="text-muted">
-        {{ $t('view.event.create.labels.multivoteTypeInfo') }}
+        {{ $t("view.event.create.labels.multivoteTypeInfo") }}
       </p>
       <RadioInput
         :items="radioOptions"
         :value="formData.multivoteType.toString()"
-        @change="({value}) => {formData.multivoteType = parseInt(value, 10);}"
+        @change="
+          ({ value }) => {
+            formData.multivoteType = parseInt(value, 10);
+          }
+        "
       />
       <button class="btn btn-primary mt-5 mb-3">
         <i class="bi-play bi--2xl align-middle" />
         <span class="align-middle">
-          {{ $t('view.event.create.labels.submit') }}
+          {{ $t("view.event.create.labels.submit") }}
         </span>
       </button>
     </form>
@@ -106,14 +134,14 @@
 </template>
 
 <script setup>
-import {computed, reactive, shallowRef, watch} from "vue";
-import {required} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
+import { computed, reactive, shallowRef, watch } from "vue";
+import { required } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
 import BaseInput from "@/core/components/form/BaseInput.vue";
-import {handleError} from "@/core/error/error-handler";
-import {InvalidFormError} from "@/core/error/InvalidFormError";
-import t from '@/core/util/l18n';
-import {useCore} from "@/core/store/core";
+import { handleError } from "@/core/error/error-handler";
+import { InvalidFormError } from "@/core/error/InvalidFormError";
+import t from "@/core/util/l18n";
+import { useCore } from "@/core/store/core";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import SlugInput from "@/core/components/form/SlugInput.vue";
 import TextInput from "@/core/components/form/TextInput.vue";
@@ -122,13 +150,13 @@ import ZoomConfig from "@/modules/organizer/components/events/video-conference-c
 import VideoConferenceSelect from "@/modules/organizer/components/form/VideoConferenceSelect.vue";
 import RadioInput from "@/core/components/form/RadioInput.vue";
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(["submit"]);
 const props = defineProps({
   prefillData: {
     type: Object,
     required: false,
-    default: null
-  }
+    default: null,
+  },
 });
 
 const videoConfigComponent = shallowRef(null);
@@ -137,40 +165,41 @@ const coreStore = useCore();
 
 const radioOptions = [
   {
-    label: t('view.event.create.labels.multivoteRadio1Label'),
-    helpText: t('view.event.create.labels.multivoteRadio1Help'),
-    value: '1'
+    label: t("view.event.create.labels.multivoteRadio1Label"),
+    helpText: t("view.event.create.labels.multivoteRadio1Help"),
+    value: "1",
   },
   {
-    label: t('view.event.create.labels.multivoteRadio2Label'),
-    helpText: t('view.event.create.labels.multivoteRadio2Help'),
-    value: '2'
+    label: t("view.event.create.labels.multivoteRadio2Label"),
+    helpText: t("view.event.create.labels.multivoteRadio2Help"),
+    value: "2",
   },
 ];
 
 // Form and validation setup.
 const formData = reactive({
-  title: props.prefillData?.title ?? '',
-  slug: props.prefillData?.slug ?? '',
-  description: props.prefillData?.description ?? '',
-  scheduledDatetime: props.prefillData?.scheduledDatetime ?? Math.floor(Date.now() / 1000),
+  title: props.prefillData?.title ?? "",
+  slug: props.prefillData?.slug ?? "",
+  description: props.prefillData?.description ?? "",
+  scheduledDatetime:
+    props.prefillData?.scheduledDatetime ?? Math.floor(Date.now() / 1000),
   lobbyOpen: props.prefillData?.lobbyOpen ?? false,
   active: props.prefillData?.active ?? false,
   orgnaizerId: coreStore.user?.id ?? 0,
   multivoteType: props.prefillData?.multivoteType ?? 1,
-  videoConferenceConfig: props.prefillData?.videoConferenceConfig ?? '{}',
+  videoConferenceConfig: props.prefillData?.videoConferenceConfig ?? "{}",
   videoConference: props.prefillData?.videoConference ?? null,
 });
 const rules = computed(() => {
   return {
-    title: {required},
-    slug: {required},
-    description: {required},
-    scheduledDatetime: {required},
-    lobbyOpen: {required},
-    active: {required},
-    orgnaizerId: {required},
-    multivoteType: {required},
+    title: { required },
+    slug: { required },
+    description: { required },
+    scheduledDatetime: { required },
+    lobbyOpen: { required },
+    active: { required },
+    orgnaizerId: { required },
+    multivoteType: { required },
   };
 });
 
@@ -178,15 +207,15 @@ const v$ = useVuelidate(rules, formData);
 
 function loadVideoConfigByType() {
   switch (formData.videoConference?.__typename) {
-  case 'ZoomMeeting':
-    videoConfigComponent.value = ZoomConfig;
-    break;
-  default:
-    videoConfigComponent.value = null;
+    case "ZoomMeeting":
+      videoConfigComponent.value = ZoomConfig;
+      break;
+    default:
+      videoConfigComponent.value = null;
   }
 }
 
-function onChangeVideoConference({value}) {
+function onChangeVideoConference({ value }) {
   formData.videoConference = value;
 
   // Update video conference id in config string.
@@ -207,13 +236,13 @@ async function onSubmit() {
     handleError(new InvalidFormError());
     return;
   }
-  emit('submit', formData);
+  emit("submit", formData);
 }
 
 // Reset videoConferenceConfig if videoConference is unset.
 watch(formData, (value) => {
   if (!value.videoConference) {
-    formData.videoConferenceConfig = '{}';
+    formData.videoConferenceConfig = "{}";
   }
 });
 

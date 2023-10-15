@@ -1,64 +1,64 @@
-import {describe, it, expect} from 'vitest';
-import {mount} from '@vue/test-utils';
-import AlertBox from '../AlertBox.vue';
+import { describe, it, expect } from "vitest";
+import { mount } from "@vue/test-utils";
+import AlertBox from "../AlertBox.vue";
 
-describe('AlertBox', () => {
-    it('Renders properly with default values', () => {
-        const message = "this is a test";
-        const wrapper = mount(AlertBox, {
-            props: {message},
-            global: {
-                stubs: {
-                    'router-link': {template: '<div/>'},
-                },
-            },
-        });
-
-        expect(wrapper.html()).toContain('alert alert-success');
+describe("AlertBox", () => {
+  it("Renders properly with default values", () => {
+    const message = "this is a test";
+    const wrapper = mount(AlertBox, {
+      props: { message },
+      global: {
+        stubs: {
+          "router-link": { template: "<div/>" },
+        },
+      },
     });
 
-    it('Renders properly danger alerts', () => {
-        const message = "this is a test";
-        const type = 'danger';
-        const wrapper = mount(AlertBox, {
-            props: {message, type},
-            global: {
-                stubs: {
-                    'router-link': {template: '<div/>'},
-                },
-            },
-        });
+    expect(wrapper.html()).toContain("alert alert-success");
+  });
 
-        expect(wrapper.html()).toContain('alert alert-danger');
+  it("Renders properly danger alerts", () => {
+    const message = "this is a test";
+    const type = "danger";
+    const wrapper = mount(AlertBox, {
+      props: { message, type },
+      global: {
+        stubs: {
+          "router-link": { template: "<div/>" },
+        },
+      },
     });
 
-    it('Renders properly warning alerts', () => {
-        const message = "this is a test";
-        const type = 'warning';
-        const wrapper = mount(AlertBox, {
-            props: {message, type},
-            global: {
-                stubs: {
-                    'router-link': {template: '<div/>'},
-                },
-            },
-        });
+    expect(wrapper.html()).toContain("alert alert-danger");
+  });
 
-        expect(wrapper.html()).toContain('alert alert-warning');
+  it("Renders properly warning alerts", () => {
+    const message = "this is a test";
+    const type = "warning";
+    const wrapper = mount(AlertBox, {
+      props: { message, type },
+      global: {
+        stubs: {
+          "router-link": { template: "<div/>" },
+        },
+      },
     });
 
-    it('Renders properly info alerts', () => {
-        const message = "this is a test";
-        const type = 'info';
-        const wrapper = mount(AlertBox, {
-            props: {message, type},
-            global: {
-                stubs: {
-                    'router-link': {template: '<div/>'},
-                },
-            },
-        });
+    expect(wrapper.html()).toContain("alert alert-warning");
+  });
 
-        expect(wrapper.html()).toContain('alert alert-info');
+  it("Renders properly info alerts", () => {
+    const message = "this is a test";
+    const type = "info";
+    const wrapper = mount(AlertBox, {
+      props: { message, type },
+      global: {
+        stubs: {
+          "router-link": { template: "<div/>" },
+        },
+      },
     });
+
+    expect(wrapper.html()).toContain("alert alert-info");
+  });
 });

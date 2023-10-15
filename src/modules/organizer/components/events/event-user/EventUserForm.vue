@@ -7,7 +7,11 @@
           :label="$t('view.event.create.labels.eventUser.verified')"
           :errors="v$.verified?.$errors"
           :has-errors="v$.verified?.$errors?.length > 0"
-          @update="({value}) => {formData.verified = value;}"
+          @update="
+            ({ value }) => {
+              formData.verified = value;
+            }
+          "
         />
       </div>
       <div class="form-group">
@@ -16,7 +20,11 @@
           :label="$t('view.event.create.labels.eventUser.allowToVote')"
           :errors="v$.allowToVote?.$errors"
           :has-errors="v$.allowToVote?.$errors?.length > 0"
-          @update="({value}) => {formData.allowToVote = value;}"
+          @update="
+            ({ value }) => {
+              formData.allowToVote = value;
+            }
+          "
         />
       </div>
       <div class="form-group">
@@ -25,7 +33,11 @@
           :errors="v$.username?.$errors"
           :has-errors="v$.username?.$errors?.length > 0"
           :value="formData.username"
-          @change="({value}) => {formData.username = value;}"
+          @change="
+            ({ value }) => {
+              formData.username = value;
+            }
+          "
         />
       </div>
       <div class="form-group">
@@ -34,26 +46,31 @@
           :errors="v$.publicName?.$errors"
           :has-errors="v$.publicName?.$errors?.length > 0"
           :value="formData.publicName"
-          @change="({value}) => {formData.publicName = value;}"
+          @change="
+            ({ value }) => {
+              formData.publicName = value;
+            }
+          "
         />
       </div>
-      <div
-        v-if="formData.allowToVote"
-        class="form-group"
-      >
+      <div v-if="formData.allowToVote" class="form-group">
         <BaseInput
           :label="$t('view.event.create.labels.eventUser.voteAmount')"
           :errors="v$.voteAmount?.$errors"
           :has-errors="v$.voteAmount?.$errors?.length > 0"
           :value="formData.voteAmount?.toString()"
           type="number"
-          @change="({value}) => {formData.voteAmount = value;}"
+          @change="
+            ({ value }) => {
+              formData.voteAmount = value;
+            }
+          "
         />
       </div>
       <button class="btn btn-primary mt-5 mb-3">
         <i class="bi-play bi--2xl align-middle" />
         <span class="align-middle">
-          {{ $t('view.event.create.labels.eventUser.submit') }}
+          {{ $t("view.event.create.labels.eventUser.submit") }}
         </span>
       </button>
     </form>
@@ -61,38 +78,38 @@
 </template>
 
 <script setup>
-import {computed, reactive} from "vue";
-import {required, requiredIf} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
-import {handleError} from "@/core/error/error-handler";
-import {InvalidFormError} from "@/core/error/InvalidFormError";
+import { computed, reactive } from "vue";
+import { required, requiredIf } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
+import { handleError } from "@/core/error/error-handler";
+import { InvalidFormError } from "@/core/error/InvalidFormError";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(["submit"]);
 const props = defineProps({
   prefillData: {
     type: Object,
     required: false,
-    default: null
-  }
+    default: null,
+  },
 });
 
 // Form and validation setup.
 const formData = reactive({
   verified: props.prefillData?.verified ?? false,
   allowToVote: props.prefillData?.allowToVote ?? false,
-  username: props.prefillData?.username ?? '',
-  publicName: props.prefillData?.publicName ?? '',
+  username: props.prefillData?.username ?? "",
+  publicName: props.prefillData?.publicName ?? "",
   voteAmount: props.prefillData?.voteAmount ?? 1,
 });
 const rules = computed(() => {
   return {
-    username: {required},
-    publicName: {required},
+    username: { required },
+    publicName: { required },
     voteAmount: {
       requiredIf: requiredIf(formData.allowToVote),
-    }
+    },
   };
 });
 const v$ = useVuelidate(rules, formData);
@@ -109,7 +126,7 @@ async function onSubmit() {
     formData.voteAmount = 0;
   }
 
-  emit('submit', formData);
+  emit("submit", formData);
 }
 </script>
 

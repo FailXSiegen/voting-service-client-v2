@@ -1,8 +1,5 @@
 <template>
-  <label
-    v-if="label"
-    :for="id"
-  >
+  <label v-if="label" :for="id">
     {{ label }}
   </label>
   <VueDatePicker
@@ -15,10 +12,7 @@
     select-text="auswählen"
     @update:model-value="onChange"
   />
-  <small
-    v-if="helpText"
-    class="form-text text-muted"
-  >
+  <small v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
   </small>
   <span
@@ -31,10 +25,10 @@
 </template>
 
 <script setup>
-import {ref} from "vue";
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { ref } from "vue";
+import VueDatePicker from "@vuepic/vue-datepicker";
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(["change"]);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -50,24 +44,26 @@ const props = defineProps({
   classes: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   hasErrors: Boolean,
   errors: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   // eslint-disable-next-line vue/require-default-prop
   value: Number,
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String
+  helpText: String,
 });
 
-const inputValue = ref(props.value > 0 ? new Date(props.value * 1000) : new Date());
+const inputValue = ref(
+  props.value > 0 ? new Date(props.value * 1000) : new Date(),
+);
 
 function onChange() {
-  emit('change', {value: Math.floor(inputValue.value.getTime() / 1000)});
+  emit("change", { value: Math.floor(inputValue.value.getTime() / 1000) });
 }
 
 const format = (date) => {

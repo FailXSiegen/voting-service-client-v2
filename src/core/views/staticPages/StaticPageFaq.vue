@@ -2,15 +2,9 @@
   <CorePageLayout meta-title="Häufige Fragen">
     <div class="faq">
       <h1>Häufige Fragen</h1>
-      <div
-        id="accordionFaq"
-        class="accordion"
-      >
+      <div id="accordionFaq" class="accordion">
         <div class="card">
-          <div
-            id="faq1head"
-            class="card-header"
-          >
+          <div id="faq1head" class="card-header">
             <h2 class="mb-0">
               <button
                 class="btn btn-block text-left d-flex align-items-center"
@@ -32,16 +26,13 @@
             data-parent="#faq1"
           >
             <div class="card-body">
-              Die Server werden von PSV Digital GmbH betrieben und verwaltet. Der
+              Die Server werden von PSV NEO GmbH betrieben und verwaltet. Der
               Serverstandort liegt in Frankfurt am Main.
             </div>
           </div>
         </div>
         <div class="card">
-          <div
-            id="faq2head"
-            class="card-header"
-          >
+          <div id="faq2head" class="card-header">
             <h2 class="mb-0">
               <button
                 class="btn btn-block text-left d-flex align-items-center"
@@ -70,10 +61,7 @@
           </div>
         </div>
         <div class="card">
-          <div
-            id="faq3head"
-            class="card-header"
-          >
+          <div id="faq3head" class="card-header">
             <h2 class="mb-0">
               <button
                 class="btn btn-block text-left d-flex align-items-center"
@@ -95,18 +83,15 @@
             data-parent="#faq3"
           >
             <div class="card-body">
-              Nein. Es muss für jede Veranstaltung einzeln geprüft werden, ob die
-              Wahlen digital durchgeführt werden dürfen. Die Verwantwortung liegt
-              bei den Veranstaltern. digitalwahl.org bietet die technischen
-              Möglichkeiten und technische Sicherheit.
+              Nein. Es muss für jede Veranstaltung einzeln geprüft werden, ob
+              die Wahlen digital durchgeführt werden dürfen. Die Verwantwortung
+              liegt bei den Veranstaltern. digitalwahl.org bietet die
+              technischen Möglichkeiten und technische Sicherheit.
             </div>
           </div>
         </div>
         <div class="card">
-          <div
-            id="faq4head"
-            class="card-header"
-          >
+          <div id="faq4head" class="card-header">
             <h2 class="mb-0">
               <button
                 class="btn btn-block text-left d-flex align-items-center"
@@ -130,16 +115,13 @@
             <div class="card-body">
               Ja. Wie jede regulär durchgeführte Wahl besteht ein Anspruch der
               Anfechtbarkeit. Wir von digitalwahl.org unterstützen bestmöglichst
-              mit den gegebenen Informationen um jede Frage mit bestem Wissen und
-              Gewissen zu beantworten.
+              mit den gegebenen Informationen um jede Frage mit bestem Wissen
+              und Gewissen zu beantworten.
             </div>
           </div>
         </div>
         <div class="card">
-          <div
-            id="faq6head"
-            class="card-header"
-          >
+          <div id="faq6head" class="card-header">
             <h2 class="mb-0">
               <button
                 class="btn btn-block text-left d-flex align-items-center"
@@ -175,7 +157,7 @@
 </template>
 
 <script setup>
-import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import CorePageLayout from "@/core/components/CorePageLayout.vue";
 
 // @todo add icon switch via vue!
 // import AppFooter from '@/frame/components/Footer'
@@ -219,10 +201,10 @@ import CorePageLayout from '@/core/components/CorePageLayout.vue';
 
 <style>
 .card-header:hover {
-    background-color: rgba(0, 0, 0, 0.06);
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .card-header .btn:focus {
-    box-shadow: none !important;
+  box-shadow: none !important;
 }
 </style>

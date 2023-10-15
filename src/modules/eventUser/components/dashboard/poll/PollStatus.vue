@@ -22,21 +22,21 @@
     role="alert"
   >
     <p class="mb-0">
-      {{ $t('view.user.verified.noActivePoll') }}
+      {{ $t("view.user.verified.noActivePoll") }}
     </p>
   </div>
-  <hr class="d-print-none">
+  <hr class="d-print-none" />
 </template>
 
 <script setup>
 defineProps({
   pollState: {
     type: String,
-    required: true
+    required: true,
   },
   existActivePoll: {
     type: Boolean,
-    required: true
-  }
+    required: true,
+  },
 });
 </script>

@@ -1,9 +1,5 @@
 <template>
-  <form
-    id="poll-form"
-    class="needs-validation"
-    @submit.prevent="onSubmit"
-  >
+  <form id="poll-form" class="needs-validation" @submit.prevent="onSubmit">
     <!-- Can only select one. -->
     <fieldset v-if="voteType === VOTE_TYPE_SINGLE">
       <RadioInput
@@ -11,7 +7,11 @@
         :items="possibleAnswers"
         :value="null"
         :has-errors="v$.singleAnswer?.$errors?.length > 0"
-        @change="({value}) => {formData.singleAnswer = parseInt(value, 10);}"
+        @change="
+          ({ value }) => {
+            formData.singleAnswer = parseInt(value, 10);
+          }
+        "
       />
     </fieldset>
 
@@ -25,50 +25,57 @@
         :has-errors="v$.multipleAnswers?.$errors?.length > 0"
         :max-checked-items="poll.maxVotes || null"
         :min-checked-items="poll.minVotes || null"
-        @change="(value) => {formData.multipleAnswers = value}"
+        @change="
+          (value) => {
+            formData.multipleAnswers = value;
+          }
+        "
       />
     </fieldset>
 
     <!-- Abstain. -->
     <template v-if="poll.allowAbstain && voteType !== VOTE_TYPE_SINGLE">
-      <hr>
+      <hr />
       <fieldset>
         <CheckboxInput
           id="allow-abstain"
           :label="$t('view.polls.modal.abstain')"
-          :help-text="$t('view.polls.modal.abstainHelptext') "
+          :help-text="$t('view.polls.modal.abstainHelptext')"
           @update:checked="formData.abstain = !formData.abstain"
         />
       </fieldset>
     </template>
 
     <!-- Force answer/s for each vote -->
-    <hr v-if="canSubmitAnswerForEachVote">
+    <hr v-if="canSubmitAnswerForEachVote" />
     <fieldset v-if="canSubmitAnswerForEachVote">
       <CheckboxInput
         id="submit-answer-for-each-vote"
-        :label="$t('view.polls.modal.canSubmitAnswerForEachVote',{voteAmount: eventUser.voteAmount})"
+        :label="
+          $t('view.polls.modal.canSubmitAnswerForEachVote', {
+            voteAmount: eventUser.voteAmount,
+          })
+        "
         :help-text="$t('view.polls.modal.canSubmitAnswerForEachVoteHelptext')"
-        @update:checked="formData.useAllAvailableVotes = !formData.useAllAvailableVotes"
+        @update:checked="
+          formData.useAllAvailableVotes = !formData.useAllAvailableVotes
+        "
       />
     </fieldset>
 
-    <hr>
-    <button
-      type="submit"
-      class="btn btn-primary float-right"
-    >
-      {{ $t('view.polls.modal.submitPoll') }}
+    <hr />
+    <button type="submit" class="btn btn-primary float-right">
+      {{ $t("view.polls.modal.submitPoll") }}
     </button>
   </form>
 </template>
 
 <script setup>
-import {handleError} from "@/core/error/error-handler";
-import {InvalidFormError} from "@/core/error/InvalidFormError";
-import {computed, reactive} from "vue";
-import {and, or, required} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
+import { handleError } from "@/core/error/error-handler";
+import { InvalidFormError } from "@/core/error/InvalidFormError";
+import { computed, reactive } from "vue";
+import { and, or, required } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
 import RadioInput from "@/core/components/form/RadioInput.vue";
 import CheckboxInputGroup from "@/core/components/form/CheckboxInputGroup.vue";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
@@ -77,29 +84,29 @@ import {
   objectPropertyIsEqual,
   objectPropertyIsGreaterThan,
   maxLength,
-  objectPropertyIsNotEqual
+  objectPropertyIsNotEqual,
 } from "@/core/form/validation/same-as";
 
 const VOTE_TYPE_SINGLE = 1;
 const VOTE_TYPE_MULTIPLE_ALL = 2;
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits(["submit"]);
 const props = defineProps({
   poll: {
     type: Object,
-    required: true
+    required: true,
   },
   event: {
     type: Object,
-    required: true
+    required: true,
   },
   eventUser: {
     type: Object,
-    required: true
+    required: true,
   },
   voteCounter: {
     type: Number,
-    required: true
+    required: true,
   },
 });
 
@@ -112,7 +119,7 @@ const voteType = computed(() => {
   if (props.poll.maxVotes > 1 || props.poll.maxVotes === 0) {
     return VOTE_TYPE_MULTIPLE_ALL;
   }
-  throw Error('Invalid voting setup!');
+  throw Error("Invalid voting setup!");
 });
 
 const possibleAnswers = computed(() => {
@@ -120,15 +127,18 @@ const possibleAnswers = computed(() => {
   props.poll.possibleAnswers.forEach((answer) => {
     result.push({
       label: answer.content,
-      value: parseInt(answer.id, 10)
+      value: parseInt(answer.id, 10),
     });
   });
 
   return result;
 });
 
-const canSubmitAnswerForEachVote = computed(() =>
-  props.eventUser.voteAmount > 1 && props.voteCounter === 1 && props.event.multivoteType === 1
+const canSubmitAnswerForEachVote = computed(
+  () =>
+    props.eventUser.voteAmount > 1 &&
+    props.voteCounter === 1 &&
+    props.event.multivoteType === 1,
 );
 
 // Form and validation setup.
@@ -137,7 +147,7 @@ const formData = reactive({
   singleAnswer: null,
   multipleAnswers: [],
   abstain: false,
-  useAllAvailableVotes: false
+  useAllAvailableVotes: false,
 });
 
 const rules = computed(() => {
@@ -145,56 +155,56 @@ const rules = computed(() => {
     singleAnswer: {
       or: or(
         // Not the correct voting type, so skip validation for this property.
-        objectPropertyIsNotEqual('value', voteType, VOTE_TYPE_SINGLE),
+        objectPropertyIsNotEqual("value", voteType, VOTE_TYPE_SINGLE),
         // Min vote = 1 and max vote = 1 (Required to pick 1 answer).
         and(
-          objectPropertyIsEqual('minVotes', props.poll, 1),
-          objectPropertyIsEqual('maxVotes', props.poll, 1),
-          required
+          objectPropertyIsEqual("minVotes", props.poll, 1),
+          objectPropertyIsEqual("maxVotes", props.poll, 1),
+          required,
         ),
         // Min vote = 0 and max vote = 1 (Can pick 1 answer).
         and(
-          objectPropertyIsEqual('minVotes', props.poll, 0),
-          objectPropertyIsEqual('maxVotes', props.poll, 1),
+          objectPropertyIsEqual("minVotes", props.poll, 0),
+          objectPropertyIsEqual("maxVotes", props.poll, 1),
         ),
       ),
     },
     multipleAnswers: {
       or: or(
         // Not the correct voting type, so skip validation for this property.
-        objectPropertyIsNotEqual('value', voteType, VOTE_TYPE_MULTIPLE_ALL),
+        objectPropertyIsNotEqual("value", voteType, VOTE_TYPE_MULTIPLE_ALL),
         // Min vote = 0 and max vote = 0 (Do what you want)
         and(
-          objectPropertyIsEqual('minVotes', props.poll, 0),
-          objectPropertyIsEqual('maxVotes', props.poll, 0),
+          objectPropertyIsEqual("minVotes", props.poll, 0),
+          objectPropertyIsEqual("maxVotes", props.poll, 0),
         ),
         // Min vote = 0 and max vote > 0 (can not be greater than max vote)
         and(
-          objectPropertyIsEqual('minVotes', props.poll, 0),
-          objectPropertyIsGreaterThan('maxVotes', props.poll, 0),
+          objectPropertyIsEqual("minVotes", props.poll, 0),
+          objectPropertyIsGreaterThan("maxVotes", props.poll, 0),
           maxLength(props.poll.maxVotes),
         ),
         // Min vote > 0 and max vote = 0 (must be at least the length of min vote)
         and(
-          objectPropertyIsGreaterThan('minVotes', props.poll, 0),
-          objectPropertyIsEqual('maxVotes', props.poll, 0),
+          objectPropertyIsGreaterThan("minVotes", props.poll, 0),
+          objectPropertyIsEqual("maxVotes", props.poll, 0),
           minLength(props.poll.minVotes),
         ),
         // Min vote > 0 and max vote > 0
         // (must be at least the length of min vote but can not be greater than max vote)
         and(
-          objectPropertyIsGreaterThan('minVotes', props.poll, 0),
-          objectPropertyIsGreaterThan('maxVotes', props.poll, 0),
+          objectPropertyIsGreaterThan("minVotes", props.poll, 0),
+          objectPropertyIsGreaterThan("maxVotes", props.poll, 0),
           maxLength(props.poll.maxVotes),
           minLength(props.poll.minVotes),
         ),
         // Allow to abstain.
         and(
-          objectPropertyIsEqual('allowAbstain', props.poll, true),
-          objectPropertyIsEqual('abstain', formData, true)
+          objectPropertyIsEqual("allowAbstain", props.poll, true),
+          objectPropertyIsEqual("abstain", formData, true),
         ),
-      )
-    }
+      ),
+    },
   };
 });
 const v$ = useVuelidate(rules, formData);
@@ -208,6 +218,6 @@ async function onSubmit() {
     return;
   }
   formData.type = voteType.value;
-  emit('submit', formData);
+  emit("submit", formData);
 }
 </script>

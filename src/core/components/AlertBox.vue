@@ -1,8 +1,5 @@
 <template>
-  <div
-    :class="'alert text-left ' + config.wrapperClass"
-    role="alert"
-  >
+  <div :class="'alert text-left ' + config.wrapperClass" role="alert">
     <div class="icon">
       <i
         v-if="useIcon"
@@ -19,42 +16,42 @@
 </template>
 
 <script setup>
-import {computed} from "vue";
+import { computed } from "vue";
 
 const types = {
   success: {
-    wrapperClass: 'alert-success',
-    icon: 'bi-check-circle-fill'
+    wrapperClass: "alert-success",
+    icon: "bi-check-circle-fill",
   },
   warning: {
-    wrapperClass: 'alert-warning',
-    icon: 'bi-exclamation-triangle-fill'
+    wrapperClass: "alert-warning",
+    icon: "bi-exclamation-triangle-fill",
   },
   danger: {
-    wrapperClass: 'alert-danger',
-    icon: 'bi-exclamation-triangle-fill'
+    wrapperClass: "alert-danger",
+    icon: "bi-exclamation-triangle-fill",
   },
   info: {
-    wrapperClass: 'alert-info',
-    icon: 'bi-info-circle-fill'
-  }
+    wrapperClass: "alert-info",
+    icon: "bi-info-circle-fill",
+  },
 };
 
 const props = defineProps({
   message: {
     type: String,
     required: false,
-    default: ''
+    default: "",
   },
   type: {
     type: String,
     required: false,
-    default: 'success'
+    default: "success",
   },
   useIcon: {
     type: Boolean,
     required: false,
-    default: true
+    default: true,
   },
 });
 
@@ -64,18 +61,21 @@ const config = computed(() => {
       return value;
     }
   }
-  throw new Error("Invalid type used for AlertBox. Allowed types are: " + Object.keys(types).join(', '));
+  throw new Error(
+    "Invalid type used for AlertBox. Allowed types are: " +
+      Object.keys(types).join(", "),
+  );
 });
 </script>
 
 <style scoped>
 .alert .icon {
-    display: table-cell;
+  display: table-cell;
 }
 
 .alert div,
 .alert span {
-    padding-left: 5px;
-    display: table-cell;
+  padding-left: 5px;
+  display: table-cell;
 }
 </style>

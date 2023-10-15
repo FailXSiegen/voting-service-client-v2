@@ -10,11 +10,11 @@
           <div class="col d-flex align-items-center">
             <p class="mb-0">
               Holen Sie sich einen Rechtsbeistand um zu klären, ob Ihr
-              Verein/Verband Wahlen digital durchführen darf.<br><br>digitalwahl.org
-              ist eine unterstützende technische Plattform.<br>
+              Verein/Verband Wahlen digital durchführen darf.<br /><br />digitalwahl.org
+              ist eine unterstützende technische Plattform.<br />
               <b>
-                digitalwahl.org kann keine Rechtssicherheit für die Gültigkeit der
-                durchgeführten Wahlen gewährleisten!
+                digitalwahl.org kann keine Rechtssicherheit für die Gültigkeit
+                der durchgeführten Wahlen gewährleisten!
               </b>
             </p>
           </div>
@@ -38,12 +38,12 @@
       </div>
       <p>
         <b>Verantwortung:</b> Jeder Veranstalter einer Wahl auf digitalwahl.org
-        ist selbst für das erstellte Event verantwortlich. Alle Daten zu dem Event
-        obliegen der Datenhoheit des Veranstalters. digitalwahl.org nimmt keinen
-        Einfluss auf eingebene und verwendete Daten für ein selbst organisiertes
-        Event, außer es wird ein Missbrauch gemeldet. Wir behalten wir uns das
-        Recht vor, Informationen nach Meldung eines Missbrauchs zum Zweck des
-        Nachweises zu speichern und erst nach Aufforderung zu löschen.
+        ist selbst für das erstellte Event verantwortlich. Alle Daten zu dem
+        Event obliegen der Datenhoheit des Veranstalters. digitalwahl.org nimmt
+        keinen Einfluss auf eingebene und verwendete Daten für ein selbst
+        organisiertes Event, außer es wird ein Missbrauch gemeldet. Wir behalten
+        wir uns das Recht vor, Informationen nach Meldung eines Missbrauchs zum
+        Zweck des Nachweises zu speichern und erst nach Aufforderung zu löschen.
       </p>
       <p>
         <b>Haftung:</b> Veranstalter haften für missbräuchlich verwendete
@@ -54,8 +54,8 @@
         <b>Verfügbarkeit:</b> Aufgrund technischer Beschränkungen kann es zu
         Einschränkungen oder Ausfällen kommen. Dies ist der Fall, wenn parallel
         stattfindene Events mit einer größeren Anzahl an Teilnehmer den Server
-        überlasten. Wir versuchen durch Updates und technische Verbesserungen der
-        Serverstruktur und Software eine automatische Skalierung zu
+        überlasten. Wir versuchen durch Updates und technische Verbesserungen
+        der Serverstruktur und Software eine automatische Skalierung zu
         implementieren.
       </p>
       <div class="alert alert-info">
@@ -65,7 +65,8 @@
           </div>
           <div class="col d-flex align-items-center">
             <p class="mb-0">
-              Eine Veranstaltungen mit mehr als <b>100 Teilnehmern</b> sollte bei
+              Eine Veranstaltungen mit mehr als <b>100 Teilnehmern</b> sollte
+              bei
               <a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a>
               gemeldet werden.
             </p>
@@ -74,28 +75,30 @@
       </div>
       <p>
         <b>Vertraulichkeit:</b> Eingestellte Inhalte wie Abstimmungsergebnisse
-        werden vertraulich behandelt und nicht an unbefugte Dritte veröffentlicht.
-        Ein standardmäßiges Monitoring von Inhalten durch den Betreiber erfolgt
-        nicht. Jedoch können Entwickler im Rahmen von technischen Arbeiten
-        zufällig Kenntnis von Inhalten erlangen.
+        werden vertraulich behandelt und nicht an unbefugte Dritte
+        veröffentlicht. Ein standardmäßiges Monitoring von Inhalten durch den
+        Betreiber erfolgt nicht. Jedoch können Entwickler im Rahmen von
+        technischen Arbeiten zufällig Kenntnis von Inhalten erlangen.
       </p>
 
       <p>
-        <b>Löschfristen:</b> Registierte Organisator:innen ohne E-Mail Bestätigung
-        werden automatisch nach 24 Stunden gelöscht. Durchgeführte Events werden
-        180 Tage nach angegeben Start-Datum gelöscht. Es obliegt dem Veranstalter,
-        alle Ergebnisse und Informationen zur Nachweispflicht zu sichern.
+        <b>Löschfristen:</b> Registierte Organisator:innen ohne E-Mail
+        Bestätigung werden automatisch nach 24 Stunden gelöscht. Durchgeführte
+        Events werden 180 Tage nach angegeben Start-Datum gelöscht. Es obliegt
+        dem Veranstalter, alle Ergebnisse und Informationen zur Nachweispflicht
+        zu sichern.
       </p>
 
       <p>
         <b>Nutzung von Kontaktdaten:</b> digitalwahl.org nutzt ins System
-        eingetragene E-Mail- oder Kontaktdaten nur, um systemspezifische Prozesse
-        abzuwickeln (z.B. zur Passwortrücksetzung oder um von den Nutzer:innen
-        bestellte Zusammenfassungen zu versenden) oder um starke Veränderungen am
-        System zu kommunizieren (Ausfallzeiten o.ä.). Die Kontaktdaten werden
-        nicht an Dritte weitergegeben. Die Organisator:innen von Veranstaltungen
-        in digitalwahl.org sind dazu angehalten, die Daten der Teilnehmenden nicht
-        für andere als die vereinbarten Zwecke zu nutzen.
+        eingetragene E-Mail- oder Kontaktdaten nur, um systemspezifische
+        Prozesse abzuwickeln (z.B. zur Passwortrücksetzung oder um von den
+        Nutzer:innen bestellte Zusammenfassungen zu versenden) oder um starke
+        Veränderungen am System zu kommunizieren (Ausfallzeiten o.ä.). Die
+        Kontaktdaten werden nicht an Dritte weitergegeben. Die Organisator:innen
+        von Veranstaltungen in digitalwahl.org sind dazu angehalten, die Daten
+        der Teilnehmenden nicht für andere als die vereinbarten Zwecke zu
+        nutzen.
       </p>
       <p>
         <b>Aktualisierungen:</b> Diese Nutzungsbedingungen können jederzeit den
@@ -104,14 +107,12 @@
         Monetarisierung weitergegeben (verkauft) werden.
       </p>
 
-      <p>
-        (Version: 10. Januar 2021)
-      </p>
+      <p>(Version: 10. Januar 2021)</p>
       <p>&nbsp;</p>
     </div>
   </CorePageLayout>
 </template>
 
 <script setup>
-import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import CorePageLayout from "@/core/components/CorePageLayout.vue";
 </script>

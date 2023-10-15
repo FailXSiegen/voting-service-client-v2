@@ -1,24 +1,24 @@
-import {gql} from "graphql-tag";
+import { gql } from "graphql-tag";
 
 export const ORGANIZER = gql`
-    query organizer($organizerId:ID!) {
-        organizer(organizerId:$organizerId) {
-            id
-            username
-            email
-            password
-            publicName
-            publicOrganisation
-            confirmedEmail
-            verified
-            superAdmin
-            createDatetime
-            zoomMeetings {
-                id
-                title
-                apiKey
-                apiSecret
-            }
-        }
+  query organizer($organizerId: ID!) {
+    organizer(organizerId: $organizerId) {
+      id
+      username
+      email
+      password
+      publicName
+      publicOrganisation
+      confirmedEmail
+      verified
+      superAdmin
+      createDatetime
+      zoomMeetings {
+        id
+        title
+        apiKey
+        apiSecret
+      }
     }
+  }
 `;

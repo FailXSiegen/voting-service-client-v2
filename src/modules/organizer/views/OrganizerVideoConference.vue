@@ -86,6 +86,7 @@ import {
   RouteOrganizerVideoConferenceNew,
   RouteOrganizerVideoConferenceEdit,
 } from "@/router/routes";
+
 import {computed, ref, watch} from "vue";
 import {useCore} from "@/core/store/core";
 import {storeToRefs} from "pinia";

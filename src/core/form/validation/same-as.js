@@ -1,16 +1,18 @@
-import {helpers} from "@vuelidate/validators";
+import { helpers } from "@vuelidate/validators";
 
 /**
  * @param {String} field
  * @param  {Object} formData
  * @returns {ValidationRuleWithParams}
  */
-export const sameAs = (field, formData) => helpers.withParams({
-        type: 'sameAs',
-        value: field
+export const sameAs = (field, formData) =>
+  helpers.withParams(
+    {
+      type: "sameAs",
+      value: field,
     },
-    (value) => value === formData[field]
-);
+    (value) => value === formData[field],
+  );
 
 /**
  *
@@ -32,12 +34,14 @@ export const maxLength = (max) => (value) => value.length <= max;
  * @param  {String|Number|Boolean} targetValue
  * @returns {ValidationRuleWithParams}
  */
-export const objectPropertyIsEqual = (field, object, targetValue) => helpers.withParams({
-        type: 'objectPropertyIsEqual',
-        value: field
+export const objectPropertyIsEqual = (field, object, targetValue) =>
+  helpers.withParams(
+    {
+      type: "objectPropertyIsEqual",
+      value: field,
     },
-    () => object[field] === targetValue
-);
+    () => object[field] === targetValue,
+  );
 
 /**
  * @param {String} field
@@ -45,12 +49,14 @@ export const objectPropertyIsEqual = (field, object, targetValue) => helpers.wit
  * @param  {String|Number|Boolean} targetValue
  * @returns {ValidationRuleWithParams}
  */
-export const objectPropertyIsNotEqual = (field, object, targetValue) => helpers.withParams({
-        type: 'objectPropertyIsNotEqual',
-        value: field
+export const objectPropertyIsNotEqual = (field, object, targetValue) =>
+  helpers.withParams(
+    {
+      type: "objectPropertyIsNotEqual",
+      value: field,
     },
-    () => object[field] !== targetValue
-);
+    () => object[field] !== targetValue,
+  );
 
 /**
  * @param {String} field
@@ -58,9 +64,11 @@ export const objectPropertyIsNotEqual = (field, object, targetValue) => helpers.
  * @param  {Number} targetValue
  * @returns {ValidationRuleWithParams}
  */
-export const objectPropertyIsGreaterThan = (field, object, targetValue) => helpers.withParams({
-        type: 'objectPropertyIsGreaterThan',
-        value: field
+export const objectPropertyIsGreaterThan = (field, object, targetValue) =>
+  helpers.withParams(
+    {
+      type: "objectPropertyIsGreaterThan",
+      value: field,
     },
-    () => object[field] > targetValue
-);
+    () => object[field] > targetValue,
+  );

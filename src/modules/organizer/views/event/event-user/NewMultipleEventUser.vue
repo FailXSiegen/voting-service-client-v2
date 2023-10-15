@@ -1,10 +1,11 @@
 <template>
-  <PageLayout :meta-title="$t('navigation.views.organizerEventUserMultipleNew')">
+  <PageLayout
+    :meta-title="$t('navigation.views.organizerEventUserMultipleNew')"
+  >
     <template #title>
       <div class="events-new-title">
-        {{ $t('navigation.views.organizerEventUserMultipleNew') }} - <span v-if="event?.title">{{
-          event?.title
-        }}</span>
+        {{ $t("navigation.views.organizerEventUserMultipleNew") }} -
+        <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>
@@ -17,20 +18,23 @@
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
-import MultipleNewEventUserForm from '@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue';
-import {RouteOrganizerDashboard, RouteOrganizerMemberRoom} from "@/router/routes";
-import {useCore} from "@/core/store/core";
-import {useRoute, useRouter} from "vue-router";
-import {ref} from "vue";
-import {useMutation, useQuery} from "@vue/apollo-composable";
-import {EVENT} from "@/modules/organizer/graphql/queries/event";
-import {handleError} from "@/core/error/error-handler";
-import {NetworkError} from "@/core/error/NetworkError";
-import {CREATE_EVENT_USER} from "@/modules/organizer/graphql/mutation/create-event-user";
-import {toast} from "vue3-toastify";
-import t from '@/core/util/l18n';
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
+import MultipleNewEventUserForm from "@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue";
+import {
+  RouteOrganizerDashboard,
+  RouteOrganizerMemberRoom,
+} from "@/router/routes";
+import { useCore } from "@/core/store/core";
+import { useRoute, useRouter } from "vue-router";
+import { ref } from "vue";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { EVENT } from "@/modules/organizer/graphql/queries/event";
+import { handleError } from "@/core/error/error-handler";
+import { NetworkError } from "@/core/error/NetworkError";
+import { CREATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/create-event-user";
+import { toast } from "vue3-toastify";
+import t from "@/core/util/l18n";
 
 const coreStore = useCore();
 const router = useRouter();
@@ -40,22 +44,26 @@ const loaded = ref(false);
 const event = ref(null);
 
 // Try to fetch event by id and organizer id.
-const eventQuery = useQuery(EVENT, {id, organizerId: coreStore.user.id}, {fetchPolicy: "no-cache"});
-eventQuery.onResult(({data}) => {
+const eventQuery = useQuery(
+  EVENT,
+  { id, organizerId: coreStore.user.id },
+  { fetchPolicy: "no-cache" },
+);
+eventQuery.onResult(({ data }) => {
   // Check if the event could be fetched successfully. redirect to list if not.
   if (null === data?.event) {
     handleError(new NetworkError());
-    router.push({name: RouteOrganizerDashboard});
+    router.push({ name: RouteOrganizerDashboard });
     return;
   }
   event.value = data?.event;
   loaded.value = true;
 });
 
-async function onSubmit({usernames, allowToVote, voteAmount}) {
+async function onSubmit({ usernames, allowToVote, voteAmount }) {
   // Create new Event users.
   for (const username of usernames) {
-    const {mutate: createEventUser} = useMutation(CREATE_EVENT_USER, {
+    const { mutate: createEventUser } = useMutation(CREATE_EVENT_USER, {
       variables: {
         input: {
           eventId: id,
@@ -70,10 +78,11 @@ async function onSubmit({usernames, allowToVote, voteAmount}) {
   }
 
   // Back to member room.
-  await router.push({name: RouteOrganizerMemberRoom});
+  await router.push({ name: RouteOrganizerMemberRoom });
 
   // Show success message.
-  toast(t('success.organizer.eventUser.createdSuccessfully'), {type: 'success'});
+  toast(t("success.organizer.eventUser.createdSuccessfully"), {
+    type: "success",
+  });
 }
-
 </script>

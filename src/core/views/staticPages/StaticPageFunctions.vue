@@ -2,7 +2,7 @@
   <CorePageLayout meta-title="Funktionen">
     <div class="functions">
       <h1>Funktionen und Planung</h1>
-      <hr>
+      <hr />
       <h2>Aktuell verfügbare Funktionen</h2>
       <ul>
         <li>Synchrone Wahl</li>
@@ -11,10 +11,11 @@
         <li>Einfacher Export der Ergebnisse</li>
       </ul>
       <p>
-        Die Plattform digitalwahl.org ist aktuell als <b>Begleit-Anwendung</b> zur
-        digitalen oder hybriden Versammlung zu verwenden.
+        Die Plattform digitalwahl.org ist aktuell als
+        <b>Begleit-Anwendung</b> zur digitalen oder hybriden Versammlung zu
+        verwenden.
       </p>
-      <hr>
+      <hr />
       <h2>In Planung</h2>
       <ul>
         <li>Dokumentation und Installer</li>
@@ -35,5 +36,5 @@
 </template>
 
 <script setup>
-import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import CorePageLayout from "@/core/components/CorePageLayout.vue";
 </script>

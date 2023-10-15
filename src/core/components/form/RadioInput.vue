@@ -1,33 +1,27 @@
 <template>
-  <template
-    v-for="item in items"
-    :key="item.value"
-  >
+  <template v-for="item in items" :key="item.value">
     <div class="form-check">
       <input
-        :id="id+'-'+item.value"
+        :id="id + '-' + item.value"
         v-model="inputValue"
         :name="name"
         :class="[
           'form-check-input',
-          (hasErrors ? 'is-invalid': null),
-          ...classes
+          hasErrors ? 'is-invalid' : null,
+          ...classes,
         ]"
         type="radio"
         :value="item.value"
         @change="onChange"
-      >
+      />
       <label
         v-if="item.label"
         class="form-check-label"
-        :for="id+'-'+item.value"
+        :for="id + '-' + item.value"
       >
         {{ item.label }}
       </label>
-      <small
-        v-if="item.helpText"
-        class="form-text text-muted"
-      >
+      <small v-if="item.helpText" class="form-text text-muted">
         <span v-html="item.helpText" />
       </small>
     </div>
@@ -38,14 +32,14 @@
     :key="error.uid"
     class="form-field-error text-danger"
   >
-    {{ $t('error.formValidation.' + error.$validator) }}<br>
+    {{ $t("error.formValidation." + error.$validator) }}<br />
   </span>
 </template>
 
 <script setup>
-import {ref} from "vue";
+import { ref } from "vue";
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(["change"]);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -59,13 +53,13 @@ const props = defineProps({
   classes: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   hasErrors: Boolean,
   errors: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   // eslint-disable-next-line vue/require-default-prop
   value: String,
@@ -73,13 +67,13 @@ const props = defineProps({
   helpText: String,
   items: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
 });
 
 const inputValue = ref(props.value);
 
 function onChange() {
-  emit('change', {value: inputValue.value});
+  emit("change", { value: inputValue.value });
 }
 </script>

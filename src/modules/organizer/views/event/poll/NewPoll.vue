@@ -2,36 +2,34 @@
   <PageLayout :meta-title="$t('navigation.views.organizerPollsNew')">
     <template #title>
       <div class="events-new-title">
-        {{ $t('navigation.views.organizerPollsNew') }} - <span v-if="event?.title">{{ event?.title }}</span>
+        {{ $t("navigation.views.organizerPollsNew") }} -
+        <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>
       <EventNavigation />
     </template>
     <template #content>
-      <PollForm
-        @submit="onSubmit"
-        @submit-and-start="onSubmitAndStart"
-      />
+      <PollForm @submit="onSubmit" @submit-and-start="onSubmitAndStart" />
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
 import PollForm from "@/modules/organizer/components/events/poll/PollForm.vue";
-import {RouteOrganizerDashboard, RouteOrganizerPolls} from "@/router/routes";
-import {useCore} from "@/core/store/core";
-import {useRoute, useRouter} from "vue-router";
-import {useMutation, useQuery} from "@vue/apollo-composable";
-import {EVENT} from "@/modules/organizer/graphql/queries/event";
-import {handleError} from "@/core/error/error-handler";
-import {NetworkError} from "@/core/error/NetworkError";
-import {ref} from "vue";
-import {toast} from "vue3-toastify";
-import t from '@/core/util/l18n';
-import {CREATE_POLL} from "@/modules/organizer/graphql/mutation/create-poll";
+import { RouteOrganizerDashboard, RouteOrganizerPolls } from "@/router/routes";
+import { useCore } from "@/core/store/core";
+import { useRoute, useRouter } from "vue-router";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { EVENT } from "@/modules/organizer/graphql/queries/event";
+import { handleError } from "@/core/error/error-handler";
+import { NetworkError } from "@/core/error/NetworkError";
+import { ref } from "vue";
+import { toast } from "vue3-toastify";
+import t from "@/core/util/l18n";
+import { CREATE_POLL } from "@/modules/organizer/graphql/mutation/create-poll";
 
 const coreStore = useCore();
 const router = useRouter();
@@ -41,12 +39,16 @@ const loaded = ref(false);
 const event = ref(null);
 
 // Try to fetch event by id and organizer id.
-const eventQuery = useQuery(EVENT, {id, organizerId: coreStore.user.id}, {fetchPolicy: "no-cache"});
-eventQuery.onResult(({data}) => {
+const eventQuery = useQuery(
+  EVENT,
+  { id, organizerId: coreStore.user.id },
+  { fetchPolicy: "no-cache" },
+);
+eventQuery.onResult(({ data }) => {
   // check if the event could be fetched successfully. redirect to list if not.
   if (null === data?.event) {
     handleError(new NetworkError());
-    router.push({name: RouteOrganizerDashboard});
+    router.push({ name: RouteOrganizerDashboard });
     return;
   }
   event.value = data?.event;
@@ -57,18 +59,20 @@ async function onSubmit(formData) {
   // Create new poll.
   await createNewPoll(formData, false);
   // Back to polls view.
-  await router.push({name: RouteOrganizerPolls});
+  await router.push({ name: RouteOrganizerPolls });
   // Show success message.
-  toast(t('success.organizer.poll.createdSuccessfully'), {type: 'success'});
+  toast(t("success.organizer.poll.createdSuccessfully"), { type: "success" });
 }
 
 async function onSubmitAndStart(formData) {
   // Create new poll.
   await createNewPoll(formData, true);
   // Back to polls view.
-  await router.push({name: RouteOrganizerPolls});
+  await router.push({ name: RouteOrganizerPolls });
   // Show success message.
-  toast(t('success.organizer.poll.createdAndStartedSuccessfully'), {type: 'success'});
+  toast(t("success.organizer.poll.createdAndStartedSuccessfully"), {
+    type: "success",
+  });
 }
 
 /**
@@ -90,7 +94,7 @@ function createNewPoll(data, instantStart) {
         maxVotes: data.maxVotes,
         allowAbstain: data.allowAbstain,
       },
-      instantStart
+      instantStart,
     },
   });
   return createPollMutation.mutate();

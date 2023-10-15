@@ -2,7 +2,7 @@
   <CorePageLayout meta-title="Datenschutz">
     <div class="dataprotection">
       <h1>Datenschutzerklärung</h1>
-      <hr>
+      <hr />
       <p>
         digitalwahl.org erfüllt den Anspruch auf eine sichere, einfache und
         verlässliche digitale Wahl. Bei einer Wahl müssen je nach Wahlprozess
@@ -13,13 +13,13 @@
 
       <p>
         Unter
-        <a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a> könnnen Sie
-        gerne eine Anfrage stellen und ausführliche Informationen zu Art, Wege und
-        Speicherdauer der vzu verarbeitenden Daten erhalten.
+        <a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a> könnnen
+        Sie gerne eine Anfrage stellen und ausführliche Informationen zu Art,
+        Wege und Speicherdauer der vzu verarbeitenden Daten erhalten.
       </p>
 
       <p>&nbsp;</p>
-      <hr>
+      <hr />
       <h2>zu verarbeitende Daten</h2>
 
       <p>
@@ -35,7 +35,8 @@
             rel="nofollow noopener"
             title="Was ist eine IP-Adresse?"
           >
-            <i class="bi-question-circle bi-2xl" /> </a>: automatischer Server-Protokoll Eintrag
+            <i class="bi-question-circle bi-2xl" /> </a
+          >: automatischer Server-Protokoll Eintrag
         </li>
         <li>Zeitpunkt: Datum, Uhrzeit)</li>
         <li>Systeminformationen: Betriebssystem, Browser, Version</li>
@@ -56,11 +57,10 @@
       </p>
       <ul>
         <li>
-          Selbst angegebener Name, E-Mail-Adresse und das verschlüsselte Passwort
+          Selbst angegebener Name, E-Mail-Adresse und das verschlüsselte
+          Passwort
         </li>
-        <li>
-          Abstimmungsteilnahme
-        </li>
+        <li>Abstimmungsteilnahme</li>
       </ul>
       <p>
         Organisator*innen haben nach der Veranstaltung 180 Tage Zugriff auf die
@@ -74,28 +74,28 @@
         Jeder Teilnehmer einer Veranstaltung ist ein individueller Eintrag. Ein
         Teilnehmerdatensatz ist immer einmalig pro Veranstaltung. Es gibt keine
         Verknüpfung, wenn ein Nutzer mit den gleichen Zugangsdaten bei einem
-        anderen Event teilnimmt. Hier wird ein neuer Nutzerdatensatz generiert und
-        die 180 Tage Löschfrist gilt pro Veranstaltung.
+        anderen Event teilnimmt. Hier wird ein neuer Nutzerdatensatz generiert
+        und die 180 Tage Löschfrist gilt pro Veranstaltung.
       </p>
       <p>
         Bei einer Veranstaltung werden Abstimmungs-Datensätze erstellt. Wenn ein
-        Abstimmungsdatensatz als "offene Abstimmung" definiert wird, werden in der
-        Tabelle "Abstimmungergebnis" die Antwort und der Benutzer gespeichert.
-        Zusätzlich wird der Benutzer in einer Tabelle "Abstimmungsteilnehmer"
-        gespeichert zur Sicherstellung, dass der Nutzer nicht mehrfach abgestimmt
-        hat. Bei einer "geheimen Abstimmung" werden in der
-        "Abstimmungsergebnis"-Tabelle nur die Antworten ohne Benutzer gespeichert.
-        Der Benutzer wird in der "Abstimmungsteilnehmer" erfasst.
+        Abstimmungsdatensatz als "offene Abstimmung" definiert wird, werden in
+        der Tabelle "Abstimmungergebnis" die Antwort und der Benutzer
+        gespeichert. Zusätzlich wird der Benutzer in einer Tabelle
+        "Abstimmungsteilnehmer" gespeichert zur Sicherstellung, dass der Nutzer
+        nicht mehrfach abgestimmt hat. Bei einer "geheimen Abstimmung" werden in
+        der "Abstimmungsergebnis"-Tabelle nur die Antworten ohne Benutzer
+        gespeichert. Der Benutzer wird in der "Abstimmungsteilnehmer" erfasst.
       </p>
       <p>
         Als Anmeldeprozess zwischen Benutzer und Server werden Tokens verwendet.
-        Die Tokens dienen der verschlüsselten Kommunikation zwischen Endgerät und
-        Server.
+        Die Tokens dienen der verschlüsselten Kommunikation zwischen Endgerät
+        und Server.
       </p>
       <p>
         Die Hauptkommunikation zwischen Endgerät und Server findet mittels
-        Websockets statt. Die Kommunikation über Websocket wird nicht gespeichert.
-        Es wird keine Protokoll-Datei der Websockets erstellt.
+        Websockets statt. Die Kommunikation über Websocket wird nicht
+        gespeichert. Es wird keine Protokoll-Datei der Websockets erstellt.
       </p>
       <p>
         Zur potentiellen Fehleranalyse werden serverseitig ausgeführte
@@ -109,25 +109,21 @@
         DSGVO (Einwilligung der Betroffenen, rechtliche Verpflichtung).
       </p>
       <p>&nbsp;</p>
-      <hr>
+      <hr />
       <h2>Auftragsverarbeitung</h2>
+      <p>Das Hosting liegt bei</p>
       <p>
-        Das Hosting liegt bei
-      </p>
-      <p>
-        PSV Digital GmbH<br>
-        Martinshardt 5<br>
-        57074 Siegen<br><br>
-        Tel.: <a href="tel:+492717700160">+49 271 770016 - 0</a><br>
+        PSV Digital GmbH<br />
+        Martinshardt 5<br />
+        57074 Siegen<br /><br />
+        Tel.: <a href="tel:+492717700160">+49 271 770016 - 0</a><br />
         E-Mail: <a href="mailto:info@psv-neo.de">info@psv-neo.de</a>
       </p>
       <p>Der Serverstandort ist in Frankfurt am Main/Deutschland.</p>
       <p>&nbsp;</p>
-      <hr>
+      <hr />
       <h2>Weitergabe personenbezogener Daten an Dritte</h2>
-      <p>
-        digitalwahl.org bindet keine externen Dienste mit ein.
-      </p>
+      <p>digitalwahl.org bindet keine externen Dienste mit ein.</p>
       <p>
         Daten, die beim Zugriff auf digitalwahl.org protokolliert werden, werden
         nur an Dritte übermittelt, soweit wir gesetzlich oder durch
@@ -137,15 +133,13 @@
       </p>
 
       <p>&nbsp;</p>
-      <hr>
+      <hr />
       <h2>Verwendung von Cookies</h2>
 
+      <p>Systeme mit Login-Funktionalität erfordern den Einsatz von Cookies.</p>
       <p>
-        Systeme mit Login-Funktionalität erfordern den Einsatz von Cookies.
-      </p>
-      <p>
-        Cookies im Zusammenhang mit dieser Website werden ausschließlich durch den
-        Server erstellt und verarbeitet.
+        Cookies im Zusammenhang mit dieser Website werden ausschließlich durch
+        den Server erstellt und verarbeitet.
       </p>
       <p>
         Die meisten Browser sind so eingestellt, dass sie Cookies automatisch
@@ -158,5 +152,5 @@
 </template>
 
 <script setup>
-import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import CorePageLayout from "@/core/components/CorePageLayout.vue";
 </script>

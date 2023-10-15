@@ -3,26 +3,15 @@
     <input
       :id="id"
       :name="name"
-      :class="[
-        'form-check-input',
-        (hasErrors ? 'is-invalid': null),
-        ...classes
-      ]"
+      :class="['form-check-input', hasErrors ? 'is-invalid' : null, ...classes]"
       :value="value ?? 1"
       :checked="checked"
       :disabled="disabled"
       type="checkbox"
       @input="(event) => $emit('update:checked', event.target.checked)"
-    >
-    <label
-      class="form-check-label"
-      :for="id"
-      v-html="label"
     />
-    <small
-      v-if="helpText"
-      class="form-text text-muted"
-    >
+    <label class="form-check-label" :for="id" v-html="label" />
+    <small v-if="helpText" class="form-text text-muted">
       <span v-html="helpText" />
     </small>
     <span
@@ -30,13 +19,13 @@
       :key="error.uid"
       class="form-field-error text-danger"
     >
-      {{ $t('error.formValidation.' + error.$validator) }}<br>
+      {{ $t("error.formValidation." + error.$validator) }}<br />
     </span>
   </div>
 </template>
 
 <script setup>
-defineEmits(['update:checked']);
+defineEmits(["update:checked"]);
 defineProps({
   // eslint-disable-next-line vue/require-default-prop
   label: String,
@@ -47,13 +36,13 @@ defineProps({
   classes: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   hasErrors: Boolean,
   errors: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   // eslint-disable-next-line vue/require-default-prop
   helpText: String,

@@ -1,11 +1,8 @@
 <template>
-  <div
-    v-if="eventUsers?.length > 0"
-    class="pending-event-users"
-  >
+  <div v-if="eventUsers?.length > 0" class="pending-event-users">
     <div class="form-group">
       <label for="filterByUsername">
-        {{ $t('eventUser.filter.byUsername') }}
+        {{ $t("eventUser.filter.byUsername") }}
       </label>
       <div class="input-group">
         <input
@@ -14,20 +11,17 @@
           class="form-control"
           :placeholder="$t('eventUser.filter.byUsername')"
           @input="onFilter"
-        >
+        />
         <div class="input-group-append">
-          <button
-            class="btn btn-secondary"
-            @click.prevent="onResetFilter"
-          >
-            {{ $t('eventUser.filter.reset') }}
+          <button class="btn btn-secondary" @click.prevent="onResetFilter">
+            {{ $t("eventUser.filter.reset") }}
           </button>
         </div>
       </div>
     </div>
-    <hr>
+    <hr />
     <VerifiedEventUserLegend :event-users="eventUsers" />
-    <hr>
+    <hr />
     <small
       class="d-inline-block text-muted mb-3"
       v-html="$t('view.event.user.info')"
@@ -46,40 +40,34 @@
           v-if="item.online"
           class="badge badge-success badge-pill status-indicator"
         >
-          {{ $t('eventUser.onlineState.online') }}
+          {{ $t("eventUser.onlineState.online") }}
         </span>
-        <span
-          v-else
-          class="badge badge-danger badge-pill status-indicator"
-        >
-          {{ $t('eventUser.onlineState.offline') }}
+        <span v-else class="badge badge-danger badge-pill status-indicator">
+          {{ $t("eventUser.onlineState.offline") }}
         </span>
       </template>
       <template #item-id="item">
-        <div
-          class="btn-group float-right"
-          role="group"
-        >
+        <div class="btn-group float-right" role="group">
           <button
             v-if="!item.allowToVote"
             class="h-100 btn btn-success"
             @click="onUpdateToParticipant(item.id)"
           >
-            {{ $t('view.event.user.setTo') }}
-            {{ $t('view.event.user.member') }}
+            {{ $t("view.event.user.setTo") }}
+            {{ $t("view.event.user.member") }}
           </button>
           <button
             v-else-if="item.allowToVote"
             class="btn btn-secondary"
             @click="onUpdateToGuest(item.id)"
           >
-            {{ $t('view.event.user.setTo') }}
-            {{ $t('view.event.user.visitor') }}
+            {{ $t("view.event.user.setTo") }}
+            {{ $t("view.event.user.visitor") }}
           </button>
           <router-link
             :to="{
               name: RouteOrganizerEventUserEdit,
-              params: { eventUserId: item.id }
+              params: { eventUserId: item.id },
             }"
             :title="$t('view.event.user.edit')"
             class="btn btn-warning d-flex justify-content-center align-items-center"
@@ -100,58 +88,70 @@
 </template>
 
 <script setup>
-import {computed, reactive, ref} from "vue";
-import t from '@/core/util/l18n';
-import {createFormattedDateFromTimeStamp} from "@/core/util/time-stamp";
+import { computed, reactive, ref } from "vue";
+import t from "@/core/util/l18n";
+import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import VerifiedEventUserLegend from "@/modules/organizer/components/events/VerifiedEventUserLegend.vue";
-import {RouteOrganizerEventUserEdit} from "@/router/routes";
+import { RouteOrganizerEventUserEdit } from "@/router/routes";
 
-const emit = defineEmits(['updateToGuest', 'updateToParticipant', 'unverfifyEventUser']);
+const emit = defineEmits([
+  "updateToGuest",
+  "updateToParticipant",
+  "unverfifyEventUser",
+]);
 
 const props = defineProps({
   eventUsers: {
     type: Array,
-    required: true
-  }
+    required: true,
+  },
 });
 
 const headers = [
-  {text: t('eventUser.online'), value: "online", sortable: true},
-  {text: t('eventUser.createDatetime'), value: "createDatetime", sortable: true},
-  {text: t('eventUser.username'), value: "username", sortable: true},
-  {text: t('eventUser.publicName'), value: "publicName", sortable: true},
-  {text: '', value: "id", sortable: false},
+  { text: t("eventUser.online"), value: "online", sortable: true },
+  {
+    text: t("eventUser.createDatetime"),
+    value: "createDatetime",
+    sortable: true,
+  },
+  { text: t("eventUser.username"), value: "username", sortable: true },
+  { text: t("eventUser.publicName"), value: "publicName", sortable: true },
+  { text: "", value: "id", sortable: false },
 ];
 
 const eventUsersCopy = ref(null);
-const eventUserFiltered = computed(() => eventUsersCopy.value ? eventUsersCopy.value : JSON.parse(JSON.stringify(props.eventUsers)));
-const filter = reactive({username: ''});
+const eventUserFiltered = computed(() =>
+  eventUsersCopy.value
+    ? eventUsersCopy.value
+    : JSON.parse(JSON.stringify(props.eventUsers)),
+);
+const filter = reactive({ username: "" });
 
 function formatTimestamp(timestamp) {
   return createFormattedDateFromTimeStamp(timestamp);
 }
 
 function onFilter() {
-  eventUsersCopy.value = props.eventUsers.filter(eventUser => (
-    eventUser.username.includes(filter.username)
-  ));
+  eventUsersCopy.value = props.eventUsers.filter((eventUser) =>
+    eventUser.username.includes(filter.username),
+  );
 }
 
 function onResetFilter() {
-  filter.username = '';
+  filter.username = "";
   eventUsersCopy.value = JSON.parse(JSON.stringify(props.eventUsers));
 }
 
 function onUpdateToParticipant(eventUserId) {
-  emit('updateToParticipant', eventUserId);
+  emit("updateToParticipant", eventUserId);
 }
 
 function onUpdateToGuest(eventUserId) {
-  emit('updateToGuest', eventUserId);
+  emit("updateToGuest", eventUserId);
 }
 
 function onUnverfifyEventUser(eventUserId) {
-  emit('unverfifyEventUser', eventUserId);
+  emit("unverfifyEventUser", eventUserId);
 }
 </script>
 
