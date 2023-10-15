@@ -116,7 +116,7 @@ import {
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
-import { computed, ref, watch } from "vue";
+import { computed, watch } from "vue";
 import { useCore } from "@/core/store/core";
 import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";

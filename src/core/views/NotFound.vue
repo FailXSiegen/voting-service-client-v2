@@ -27,7 +27,6 @@
 
 <script setup>
 import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import LoginFooter from "@/core/components/LoginFooter.vue";
 </script>
 
 <style lang="scss" scoped>

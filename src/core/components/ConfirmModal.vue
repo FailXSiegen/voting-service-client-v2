@@ -15,7 +15,10 @@
 <script setup>
 const emit = defineEmits(["confirm", "cancel"]);
 defineProps({
-  message: String,
+  message: {
+    type: String,
+    required: true,
+  },
 });
 </script>
 
