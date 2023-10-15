@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerDashboard')">
     <template #title>
-      {{ $t('navigation.views.organizerDashboard') }}
+      {{ $t("navigation.views.organizerDashboard") }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -16,20 +16,20 @@
             <dl>
               <dt>Organisator-Ansicht aktualisiert</dt>
               <dd>
-                Responsive/mobile Navigation verbessert, Icons in die
-                Navigation integriert
+                Responsive/mobile Navigation verbessert, Icons in die Navigation
+                integriert
               </dd>
               <dt>Filtern nach Benutzernamen</dt>
               <dd>
-                In der Teilnehmerliste und im Wartenraum lässt sich jetzt
-                nach Benutzernamen filtern für einen schnelleren Zugriff
+                In der Teilnehmerliste und im Wartenraum lässt sich jetzt nach
+                Benutzernamen filtern für einen schnelleren Zugriff
               </dd>
               <dt>Sortieren von Teilnehmern</dt>
               <dd>
-                Im Warteraum und in der Teilnehmerliste lässt sich jetzt
-                nach Benutzernamen, Angezeigten Namen, Online oder
-                Erstellungsdatum (standard) sortieren. Mit einem 2. Klick
-                auf das gleiche Sortierkriterium invertiert die Reihenfolge
+                Im Warteraum und in der Teilnehmerliste lässt sich jetzt nach
+                Benutzernamen, Angezeigten Namen, Online oder Erstellungsdatum
+                (standard) sortieren. Mit einem 2. Klick auf das gleiche
+                Sortierkriterium invertiert die Reihenfolge
               </dd>
             </dl>
             <h2 class="h3">
@@ -38,9 +38,9 @@
             <dl>
               <dt>Kopieren & Löschen von Veranstaltungen</dt>
               <dd>
-                Aktives Löschen seitens Organisatoren und kopieren von
-                bereits erstellten Veranstaltungen mit allen erstellten
-                (gespeicherten) Abstimmungen
+                Aktives Löschen seitens Organisatoren und kopieren von bereits
+                erstellten Veranstaltungen mit allen erstellten (gespeicherten)
+                Abstimmungen
               </dd>
               <dt>Integration von Videokonferenzsystemem</dt>
               <dd>
@@ -51,10 +51,9 @@
               <dd>
                 Der Source-Code ist aktuell schon einsehbar und auf eigenen
                 System installierbar, jedoch nur was für Profis. Wir wollen
-                Anleitungen und Installationshelfer erstellen und
-                bereitstellen damit Vereine und Verbände ihre eigene
-                Digitalwahl-Plattform verwalten können für 100%ige
-                Datenhoheit.
+                Anleitungen und Installationshelfer erstellen und bereitstellen
+                damit Vereine und Verbände ihre eigene Digitalwahl-Plattform
+                verwalten können für 100%ige Datenhoheit.
               </dd>
             </dl>
           </div>
@@ -63,7 +62,7 @@
           <div class="row">
             <div class="col-6 col-lg-4 col-xl-auto mb-4">
               <router-link
-                :to="{name: RouteOrganizerProfile}"
+                :to="{ name: RouteOrganizerProfile }"
                 class="btn btn-primary tn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
               >
                 <span
@@ -71,31 +70,31 @@
                   :title="$t('navigation.views.' + RouteOrganizerProfile)"
                 />
                 <span class="nav-title mt-1 px-2">
-                  {{ $t('navigation.views.' + RouteOrganizerProfile) }}
+                  {{ $t("navigation.views." + RouteOrganizerProfile) }}
                 </span>
               </router-link>
             </div>
             <div class="col-6 col-lg-4 col-xl-auto mb-4">
               <router-link
-                :to="{name: RouteStaticManual}"
+                :to="{ name: RouteStaticManual }"
                 target="_blank"
                 class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100 px-xl-4"
               >
                 <span
-                  class="nav-icon bi--6xl bi-question-circle  mb-auto"
+                  class="nav-icon bi--6xl bi-question-circle mb-auto"
                   title="Anleitungen"
                 />
-                <span class="nav-title mt-1 px-2">
-                  Anleitungen
-                </span>
+                <span class="nav-title mt-1 px-2"> Anleitungen </span>
               </router-link>
             </div>
             <div class="col-12 col-lg-auto mb-4">
               <router-link
-                :to="{name: RouteOrganizerVideoConference}"
+                :to="{ name: RouteOrganizerVideoConference }"
                 class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
               >
-                <span class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100">
+                <span
+                  class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100"
+                >
                   <span
                     class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
                     title="Videokonferenzsystem einrichten"
@@ -114,8 +113,8 @@
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import {
   getRoutesByName,
   RouteOrganizerDashboard,
@@ -124,7 +123,7 @@ import {
   RouteStaticManual,
   RouteOrganizerAllEvents,
   RouteOrganizerManagement,
-  RouteOrganizerProfile
+  RouteOrganizerProfile,
 } from "@/router/routes";
 
 // Define navigation items.
@@ -133,6 +132,6 @@ const routes = getRoutesByName([
   RouteOrganizerEvents,
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
-  RouteOrganizerAllEvents
+  RouteOrganizerAllEvents,
 ]);
 </script>

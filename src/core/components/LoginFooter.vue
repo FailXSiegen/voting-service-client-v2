@@ -1,13 +1,10 @@
 <template>
-  <footer class="fixed-bottom page-footer font-small border-top  bg-white pb-2">
+  <footer class="fixed-bottom page-footer font-small border-top bg-white pb-2">
     <nav class="d-flex justify-content-center text-center">
       <ul class="nav navbar-nav flex-row">
         <li class="nav-item m-1">
-          <router-link
-            :to="{name: RouteMainLogin}"
-            class="nav-link  p-1"
-          >
-            {{ $t('navigation.views.startPage') }}
+          <router-link :to="{ name: RouteMainLogin }" class="nav-link p-1">
+            {{ $t("navigation.views.startPage") }}
           </router-link>
         </li>
         <li
@@ -15,11 +12,8 @@
           :key="routeName"
           class="nav-item m-1"
         >
-          <router-link
-            :to="{name: routeName}"
-            class="nav-link  p-1"
-          >
-            {{ $t('navigation.views.staticPages.' + routeName) }}
+          <router-link :to="{ name: routeName }" class="nav-link p-1">
+            {{ $t("navigation.views.staticPages." + routeName) }}
           </router-link>
         </li>
       </ul>
@@ -35,7 +29,7 @@ import {
   RouteStaticFunctions,
   RouteStaticImprint,
   RouteStaticManual,
-  RouteStaticUserAgreement
+  RouteStaticUserAgreement,
 } from "@/router/routes";
 
 const navigationItems = [
@@ -44,7 +38,7 @@ const navigationItems = [
   RouteStaticDataProtection,
   RouteStaticFunctions,
   RouteStaticFaq,
-  RouteStaticManual
+  RouteStaticManual,
 ];
 </script>
 

@@ -1,9 +1,6 @@
 <template>
   <div id="test" />
-  <div
-    v-if="show"
-    class="to-top position-fixed"
-  >
+  <div v-if="show" class="to-top position-fixed">
     <button
       data-cy="to-top-btn"
       class="btn btn-secondary shadow"
@@ -15,7 +12,7 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from "vue";
+import { onMounted, ref } from "vue";
 
 const minHeight = 250;
 const show = ref(false);
@@ -24,7 +21,7 @@ let lastKnownScrollPosition = 0;
 let ticking = false;
 
 function onClickToTopButton() {
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function onScroll() {
@@ -44,13 +41,12 @@ function onScroll() {
 onMounted(() => {
   document.addEventListener("scroll", onScroll);
 });
-
 </script>
 
 <style scoped>
 .to-top {
-    z-index: 1100;
-    right: 20px;
-    bottom: 20px;
+  z-index: 1100;
+  right: 20px;
+  bottom: 20px;
 }
 </style>

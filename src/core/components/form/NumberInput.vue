@@ -1,30 +1,20 @@
 <template>
-  <label
-    v-if="label"
-    :for="id"
-  >
+  <label v-if="label" :for="id">
     {{ label }}
   </label>
   <input
     :id="id"
     v-model="inputValue"
     :name="name"
-    :class="[
-      'form-control',
-      (hasErrors ? 'is-invalid': null),
-      ...classes
-    ]"
+    :class="['form-control', hasErrors ? 'is-invalid' : null, ...classes]"
     :placeholder="placeholder"
     :autocomplete="autocomplete"
     type="number"
     :min="min"
     :max="max"
     @keyup="onChange"
-  >
-  <small
-    v-if="helpText"
-    class="form-text text-muted"
-  >
+  />
+  <small v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
   </small>
   <span
@@ -32,25 +22,25 @@
     :key="error.uid"
     class="form-field-error text-danger"
   >
-    {{ $t('error.formValidation.' + error.$validator) }}<br>
+    {{ $t("error.formValidation." + error.$validator) }}<br />
   </span>
 </template>
 
 <script setup>
-import {ref} from "vue";
+import { ref } from "vue";
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(["change"]);
 
 const props = defineProps({
   min: {
     type: Number,
     required: false,
-    default: Number.MIN_SAFE_INTEGER
+    default: Number.MIN_SAFE_INTEGER,
   },
   max: {
     type: Number,
     required: false,
-    default: Number.MAX_SAFE_INTEGER
+    default: Number.MAX_SAFE_INTEGER,
   },
   // eslint-disable-next-line vue/require-default-prop
   label: String,
@@ -67,25 +57,25 @@ const props = defineProps({
   classes: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   hasErrors: Boolean,
   errors: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   value: {
     type: Number,
-    required: true
+    required: true,
   },
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String
+  helpText: String,
 });
 
 const inputValue = ref(props.value);
 
 function onChange() {
-  emit('change', {value: inputValue.value});
+  emit("change", { value: inputValue.value });
 }
 </script>

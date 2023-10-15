@@ -5,25 +5,25 @@
         class="actions-item btn btn-danger d-print-none"
         @click="onLogout"
       >
-        <i class="mr-2 bi bi-x-square" />{{ $t('navigation.logOut') }}
+        <i class="mr-2 bi bi-x-square" />{{ $t("navigation.logOut") }}
       </button>
       <button
         class="actions-item btn btn-secondary d-print-none"
         @click="onReloadPage"
       >
-        <i class="mr-2 bi bi-arrow-repeat" />{{ $t('navigation.reload') }}
+        <i class="mr-2 bi bi-arrow-repeat" />{{ $t("navigation.reload") }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-const emit = defineEmits(['logout']);
+const emit = defineEmits(["logout"]);
 
 // Events.
 
 function onLogout() {
-  emit('logout');
+  emit("logout");
 }
 
 function onReloadPage() {
@@ -39,7 +39,7 @@ function onReloadPage() {
   .actions {
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    gap: 0.5rem;
   }
 }
 </style>

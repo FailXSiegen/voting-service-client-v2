@@ -1,17 +1,14 @@
 <template>
-  <hr>
+  <hr />
   <div class="polls-container mb-3">
     <p v-if="currentOnlineUserCount === 0">
       <u>
-        {{ $t('view.polls.noActiveUser') }}
+        {{ $t("view.polls.noActiveUser") }}
       </u>
     </p>
-    <div
-      v-if="pollsWithNoResults"
-      class="polls-listing-container"
-    >
+    <div v-if="pollsWithNoResults" class="polls-listing-container">
       <h2 v-if="pollsWithNoResults.length > 0">
-        {{ $t('view.polls.headlines.listingTitle') }}
+        {{ $t("view.polls.headlines.listingTitle") }}
       </h2>
       <ul class="created-polls list-group">
         <li
@@ -61,30 +58,30 @@
 defineProps({
   pollsWithNoResults: {
     type: Array,
-    required: true
+    required: true,
   },
   currentOnlineUserCount: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
 });
-const emit = defineEmits(['copy', 'edit', 'remove', 'start']);
+const emit = defineEmits(["copy", "edit", "remove", "start"]);
 
 // Events.
 
 function onCopy(pollId) {
-  emit('copy', pollId);
+  emit("copy", pollId);
 }
 
 function onEdit(pollId) {
-  emit('edit', pollId);
+  emit("edit", pollId);
 }
 
 function onRemove(pollId) {
-  emit('remove', pollId);
+  emit("remove", pollId);
 }
 
 function onStart(pollId) {
-  emit('start', pollId);
+  emit("start", pollId);
 }
 </script>

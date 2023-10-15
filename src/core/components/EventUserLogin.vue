@@ -6,7 +6,7 @@
     @submit.prevent="onLogin"
   >
     <h2 class="mb-4">
-      {{ $t('view.login.headline.eventIdent') }}
+      {{ $t("view.login.headline.eventIdent") }}
     </h2>
     <div class="form-group">
       <BaseInput
@@ -14,7 +14,7 @@
         :label="$t('view.login.label.eventIdent')"
         :errors="v$.eventSlug.$errors"
         :has-errors="v$.eventSlug.$errors.length > 0"
-        @change="({value}) => formData.eventSlug = value"
+        @change="({ value }) => (formData.eventSlug = value)"
       />
 
       <!--      <label for="event-slug">-->
@@ -33,25 +33,25 @@
       type="submit"
       class="btn btn-secondary btn-block text-white"
     >
-      {{ $t('view.login.submitToEvent') }}
+      {{ $t("view.login.submitToEvent") }}
     </button>
   </form>
 </template>
 
 <script setup>
-import {reactive} from "vue";
-import BaseInput from '@/core/components/form/BaseInput.vue';
-import {required} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
-import {handleError} from "@/core/error/error-handler";
-import {InvalidFormError} from "@/core/error/InvalidFormError";
+import { reactive } from "vue";
+import BaseInput from "@/core/components/form/BaseInput.vue";
+import { required } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
+import { handleError } from "@/core/error/error-handler";
+import { InvalidFormError } from "@/core/error/InvalidFormError";
 
 // Form and validation setup.
 const formData = reactive({
-  eventSlug: '',
+  eventSlug: "",
 });
 const rules = {
-  eventSlug: {required},
+  eventSlug: { required },
 };
 const v$ = useVuelidate(rules, formData);
 
@@ -62,6 +62,6 @@ async function onLogin() {
     return;
   }
 
-  throw new Error('yet not implemented');
+  throw new Error("yet not implemented");
 }
 </script>

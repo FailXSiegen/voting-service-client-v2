@@ -7,15 +7,12 @@
     >
       <span class="sr-only">Loading...</span>
     </div>
-    <h1>{{ $t('view.user.pending.tankYou') }}</h1>
+    <h1>{{ $t("view.user.pending.tankYou") }}</h1>
     <h2>
-      {{ $t('view.user.pending.loggedInAs') }}
+      {{ $t("view.user.pending.loggedInAs") }}
       {{ eventUser.username }}
     </h2>
-    <AlertBox
-      type="info"
-      :message="$t('view.user.pending.bodyText')"
-    />
+    <AlertBox type="info" :message="$t('view.user.pending.bodyText')" />
   </div>
 </template>
 
@@ -25,7 +22,7 @@ import AlertBox from "@/core/components/AlertBox.vue";
 defineProps({
   eventUser: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 });
 </script>

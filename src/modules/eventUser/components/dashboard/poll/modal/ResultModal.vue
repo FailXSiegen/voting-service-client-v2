@@ -11,17 +11,11 @@
       data-backdrop="static"
       aria-hidden="true"
     >
-      <div
-        class="modal-dialog modal-dialog-centered"
-        role="document"
-      >
-        <div
-          v-if="pollResult"
-          class="modal-content"
-        >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div v-if="pollResult" class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ t('view.polls.modal.result') }}
+              {{ t("view.polls.modal.result") }}
             </h5>
             <button
               type="button"
@@ -33,10 +27,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <result-item
-              :poll-result="pollResult"
-              :event-record="event"
-            />
+            <result-item :poll-result="pollResult" :event-record="event" />
           </div>
           <div class="modal-footer">
             <button
@@ -46,7 +37,7 @@
               @click="hideModal()"
             >
               <span aria-hidden="true">
-                {{ t('view.polls.modal.close') }}
+                {{ t("view.polls.modal.close") }}
               </span>
             </button>
           </div>
@@ -58,34 +49,34 @@
 
 <script setup>
 // TODO Remove me with bootstrap 5.
-import $ from 'jquery';
+import $ from "jquery";
 import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
 import t from "@/core/util/l18n";
 
 defineProps({
   pollResult: {
     type: Object,
-    required: true
+    required: true,
   },
   event: {
     type: Object,
-    required: true
+    required: true,
   },
 });
 
 function showModal() {
   // TODO Remove me with bootstrap 5.
-  $('#resultModal').modal('show');
+  $("#resultModal").modal("show");
 }
 
 function hideModal() {
-  $('#resultModal').modal('hide');
+  $("#resultModal").modal("hide");
   // TODO Remove me with bootstrap 5.
 }
 
 // Make these methods available for the parent component.
 defineExpose({
   showModal,
-  hideModal
+  hideModal,
 });
 </script>

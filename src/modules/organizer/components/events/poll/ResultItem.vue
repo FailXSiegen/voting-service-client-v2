@@ -1,21 +1,17 @@
 <template>
-  <div
-    v-if="pollResult.poll"
-    class="card mb-3"
-  >
+  <div v-if="pollResult.poll" class="card mb-3">
     <div class="card-header">
       <h5 class="h4 mb-1">
         {{ pollResult.poll.title }} ({{
-          $t('view.results.type.' + pollResult.type)
+          $t("view.results.type." + pollResult.type)
         }}) -
         {{ getCreateDatetime }}
       </h5>
       <p class="small text-muted">
-        {{ $t('view.event.user.member') }}:
-        {{ pollResult.pollUser.length }} |
-        {{ $t('view.results.givenVotes') }}
+        {{ $t("view.event.user.member") }}: {{ pollResult.pollUser.length }} |
+        {{ $t("view.results.givenVotes") }}
         {{ pollResult.pollAnswer.length }} |
-        {{ $t('view.results.voters') }}
+        {{ $t("view.results.voters") }}
         {{ pollResult.maxVotes }}
       </p>
     </div>
@@ -23,7 +19,7 @@
     <div class="card-body">
       <div class="row">
         <div class="col-12 col-md-6">
-          <p>{{ $t('view.results.mainResult') }}</p>
+          <p>{{ $t("view.results.mainResult") }}</p>
           <div class="result-list">
             <ul class="list-group">
               <li
@@ -54,20 +50,22 @@
                   >
                     {{ answer.length }}
                   </span>
-                  <span class="ml-2 small">({{
-                    getAnswerPercentage(
-                      answer.length,
-                      pollResult.pollAnswer.length,
-                      pollResult
-                    )
-                  }})</span>
+                  <span class="ml-2 small"
+                    >({{
+                      getAnswerPercentage(
+                        answer.length,
+                        pollResult.pollAnswer.length,
+                        pollResult,
+                      )
+                    }})</span
+                  >
                 </span>
               </li>
             </ul>
           </div>
         </div>
         <div class="col-12 col-md-6">
-          <p>{{ $t('general.member') }}</p>
+          <p>{{ $t("general.member") }}</p>
           <button
             class="btn btn-primary btn-result d-print-none"
             type="button"
@@ -77,12 +75,9 @@
             :aria-controls="'poll-' + pollResult.id + '-ResultVoters'"
           >
             <i class="bi bi-caret-right-fill" />
-            {{ $t('view.results.showMemberList') }}
+            {{ $t("view.results.showMemberList") }}
           </button>
-          <div
-            :id="'poll-' + pollResult.id + '-ResultVoters'"
-            class="collapse"
-          >
+          <div :id="'poll-' + pollResult.id + '-ResultVoters'" class="collapse">
             <div class="card card-body">
               <ul class="list-group">
                 <li
@@ -95,9 +90,9 @@
               </ul>
             </div>
           </div>
-          <hr class="divider mx-2">
+          <hr class="divider mx-2" />
           <p v-if="pollResult.type === 'PUBLIC'">
-            {{ $t('view.results.detailResult') }}
+            {{ $t("view.results.detailResult") }}
           </p>
           <button
             v-if="pollResult.type === 'PUBLIC'"
@@ -109,7 +104,7 @@
             :aria-controls="'poll-' + pollResult.id + '-ResultDetails'"
           >
             <i class="bi bi-caret-right-fill" />
-            {{ $t('view.results.showDetailResult') }}
+            {{ $t("view.results.showDetailResult") }}
           </button>
           <div
             v-if="pollResult.type === 'PUBLIC'"
@@ -117,12 +112,11 @@
             class="collapse"
           >
             <div class="card card-body">
-              <ul
-                v-if="eventRecord.multivoteType == 1"
-                class="list-group"
-              >
+              <ul v-if="eventRecord.multivoteType == 1" class="list-group">
                 <li
-                  v-for="(participantWithAnswer, index) in pollResult.pollAnswer"
+                  v-for="(
+                    participantWithAnswer, index
+                  ) in pollResult.pollAnswer"
                   :key="index"
                   class="list-group-item d-flex justify-content-between align-items-center"
                 >
@@ -130,10 +124,7 @@
                   {{ participantWithAnswer.answerContent }}
                 </li>
               </ul>
-              <ul
-                v-if="eventRecord.multivoteType == 2"
-                class="list-group"
-              >
+              <ul v-if="eventRecord.multivoteType == 2" class="list-group">
                 <li
                   v-for="(user, index) in pollAnswerGroupByUser"
                   :key="index"
@@ -153,8 +144,8 @@
 
 <script setup>
 // @todo refactor this mess.
-import {computed} from "vue";
-import {createFormattedDateFromTimeStamp} from "@/core/util/time-stamp";
+import { computed } from "vue";
+import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 
 const props = defineProps({
   eventRecord: {
@@ -163,14 +154,14 @@ const props = defineProps({
   },
   pollResult: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 });
 
 // computed.
 
 const pollAnswerGroups = computed(() => {
-  return groupBy(props.pollResult.pollAnswer, 'answerContent');
+  return groupBy(props.pollResult.pollAnswer, "answerContent");
 });
 
 const getCreateDatetime = computed(() => {
@@ -178,14 +169,14 @@ const getCreateDatetime = computed(() => {
 });
 
 const pollAnswerGroupByUser = computed(() => {
-  return groupBy(props.pollResult.pollAnswer, 'pollUserId');
+  return groupBy(props.pollResult.pollAnswer, "pollUserId");
 });
 
 // Functions.
 
 function groupBy(array, key) {
   const result = {};
-  array.forEach(item => {
+  array.forEach((item) => {
     if (!result[item[key]]) {
       result[item[key]] = [];
     }
@@ -196,43 +187,48 @@ function groupBy(array, key) {
 
 function getPublicName(pollUserId) {
   const userFound = props.pollResult.pollUser.find(
-    user => user.id === pollUserId
+    (user) => user.id === pollUserId,
   );
   if (!userFound) {
-    return 'Unknown';
+    return "Unknown";
   }
   return userFound.publicName;
 }
 
 function getAnswerPercentage(answerLength, answerTotal, pollResult) {
-  if (pollResult.poll.pollAnswer !== 'custom') {
-    return ((answerLength / answerTotal) * 100).toFixed(2) + '%';
+  if (pollResult.poll.pollAnswer !== "custom") {
+    return ((answerLength / answerTotal) * 100).toFixed(2) + "%";
   } else {
-    return ((answerLength / pollResult.maxVoteCycles) * 100).toFixed(2) + '% // ' + ((answerLength / answerTotal) * 100).toFixed(2) + '%';
+    return (
+      ((answerLength / pollResult.maxVoteCycles) * 100).toFixed(2) +
+      "% // " +
+      ((answerLength / answerTotal) * 100).toFixed(2) +
+      "%"
+    );
   }
 }
 </script>
 
 <style scoped>
 .btn-result {
-    width: 100%;
-    text-align: left;
+  width: 100%;
+  text-align: left;
 }
 
 @media print {
-    .collapse {
-        display: block !important;
-        height: auto !important;
-    }
+  .collapse {
+    display: block !important;
+    height: auto !important;
+  }
 
-    .col-md-9 {
-        width: 100% !important;
-    }
+  .col-md-9 {
+    width: 100% !important;
+  }
 
-    .list-group-item {
-        position: relative;
-        page-break-inside: avoid;
-        page-break-after: always;
-    }
+  .list-group-item {
+    position: relative;
+    page-break-inside: avoid;
+    page-break-after: always;
+  }
 }
 </style>

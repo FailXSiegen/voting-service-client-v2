@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerManagement')">
     <template #title>
-      {{ $t('navigation.views.organizerManagement') }}
+      {{ $t("navigation.views.organizerManagement") }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -18,31 +18,19 @@
           {{ createFormattedDateFromTimeStamp(item.createDatetime) }}
         </template>
         <template #item-confirmedEmail="item">
-          <span
-            v-if="item.confirmedEmail"
-            class="text-success text-uppercase"
-          >
+          <span v-if="item.confirmedEmail" class="text-success text-uppercase">
             <i class="bi-envelope-open bi--xl" />
           </span>
-          <span
-            v-else
-            class="text-danger text-uppercase"
-          >
+          <span v-else class="text-danger text-uppercase">
             <i class="bi-envelope-fill bi--xl" />
           </span>
         </template>
         <template #item-verified="item">
-          <span
-            v-if="item.verified"
-            class="text-success text-uppercase"
-          >
-            {{ $t('view.organizers.verified') }}
+          <span v-if="item.verified" class="text-success text-uppercase">
+            {{ $t("view.organizers.verified") }}
           </span>
-          <span
-            v-else
-            class="text-danger text-uppercase"
-          >
-            <strong>{{ $t('view.organizers.denied') }}</strong>
+          <span v-else class="text-danger text-uppercase">
+            <strong>{{ $t("view.organizers.denied") }}</strong>
           </span>
         </template>
         <template #item-id="item">
@@ -80,26 +68,28 @@
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import {
-  getRoutesByName, RouteOrganizerAllEvents,
+  getRoutesByName,
+  RouteOrganizerAllEvents,
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
-  RouteOrganizerManagement, RouteOrganizerVideoConference
+  RouteOrganizerManagement,
+  RouteOrganizerVideoConference,
 } from "@/router/routes";
-import {useMutation, useQuery} from "@vue/apollo-composable";
-import {ORGANIZERS} from "@/modules/organizer/graphql/queries/organizers";
-import {computed, ref} from "vue";
-import t from '@/core/util/l18n';
-import {createFormattedDateFromTimeStamp} from '@/core/util/time-stamp';
-import {UPDATE_ORGANIZER} from "@/modules/organizer/graphql/mutation/update-organizer";
-import {toast} from "vue3-toastify";
-import {handleError} from "@/core/error/error-handler";
-import {createConfirmDialog} from "vuejs-confirm-dialog";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { ORGANIZERS } from "@/modules/organizer/graphql/queries/organizers";
+import { computed, ref } from "vue";
+import t from "@/core/util/l18n";
+import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
+import { UPDATE_ORGANIZER } from "@/modules/organizer/graphql/mutation/update-organizer";
+import { toast } from "vue3-toastify";
+import { handleError } from "@/core/error/error-handler";
+import { createConfirmDialog } from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import {DELETE_ORGANIZER} from "@/modules/organizer/graphql/mutation/delete-organizer";
-import {useCore} from "@/core/store/core";
+import { DELETE_ORGANIZER } from "@/modules/organizer/graphql/mutation/delete-organizer";
+import { useCore } from "@/core/store/core";
 
 const coreStore = useCore();
 const currentOrganizerSessionId = computed(() => coreStore?.user?.id);
@@ -110,31 +100,45 @@ const routes = getRoutesByName([
   RouteOrganizerEvents,
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
-  RouteOrganizerAllEvents
+  RouteOrganizerAllEvents,
 ]);
 
 const headers = [
-  {text: t('view.organizers.user'), value: "username", sortable: true},
-  {text: t('view.organizers.createDatetime'), value: "createDatetime", sortable: true},
-  {text: t('view.organizers.organisation'), value: "publicOrganisation", sortable: true},
-  {text: t('view.organizers.email'), value: "email", sortable: true},
-  {text: t('view.organizers.confirmedEmail'), value: "confirmedEmail", sortable: true},
-  {text: t('view.organizers.verified'), value: "verified", sortable: true},
-  {text: t('view.organizers.actions'), value: "id"},
+  { text: t("view.organizers.user"), value: "username", sortable: true },
+  {
+    text: t("view.organizers.createDatetime"),
+    value: "createDatetime",
+    sortable: true,
+  },
+  {
+    text: t("view.organizers.organisation"),
+    value: "publicOrganisation",
+    sortable: true,
+  },
+  { text: t("view.organizers.email"), value: "email", sortable: true },
+  {
+    text: t("view.organizers.confirmedEmail"),
+    value: "confirmedEmail",
+    sortable: true,
+  },
+  { text: t("view.organizers.verified"), value: "verified", sortable: true },
+  { text: t("view.organizers.actions"), value: "id" },
 ];
 
 const organizers = ref([]);
-const {onResult, refetch} = useQuery(ORGANIZERS, null, {fetchPolicy: "no-cache"});
-onResult(({data}) => {
+const { onResult, refetch } = useQuery(ORGANIZERS, null, {
+  fetchPolicy: "no-cache",
+});
+onResult(({ data }) => {
   organizers.value = data?.organizers ?? [];
 });
 
-function onVerify({id}, verified) {
-  const {mutate: updateOrganizer} = useMutation(UPDATE_ORGANIZER, {
+function onVerify({ id }, verified) {
+  const { mutate: updateOrganizer } = useMutation(UPDATE_ORGANIZER, {
     variables: {
       input: {
         id,
-        verified: verified
+        verified: verified,
       },
     },
   });
@@ -143,18 +147,20 @@ function onVerify({id}, verified) {
       return refetch();
     })
     .then(() => {
-      toast(t('success.organizer.organizers.updatedSuccessfully'), {type: 'success'});
+      toast(t("success.organizer.organizers.updatedSuccessfully"), {
+        type: "success",
+      });
     })
     .catch((error) => handleError(error));
 }
 
-function onDelete({id}) {
+function onDelete({ id }) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t('view.organizers.confirmDelete')
+    message: t("view.organizers.confirmDelete"),
   });
   dialog.onConfirm(() => {
     // Delete organizer
-    const {mutate: deleteOrganizer} = useMutation(DELETE_ORGANIZER, {
+    const { mutate: deleteOrganizer } = useMutation(DELETE_ORGANIZER, {
       variables: {
         id,
       },
@@ -164,7 +170,9 @@ function onDelete({id}) {
         return refetch();
       })
       .then(() => {
-        toast(t('success.organizer.organizers.deletedSuccessfully'), {type: 'success'});
+        toast(t("success.organizer.organizers.deletedSuccessfully"), {
+          type: "success",
+        });
       })
       .catch((error) => handleError(error));
   });

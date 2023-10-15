@@ -1,7 +1,7 @@
 .ReactModalPortal,
 #zmmtg-root {
   button {
-    &[aria-expanded='true'] + ul {
+    &[aria-expanded="true"] + ul {
       display: block !important;
       z-index: 1200 !important;
 
@@ -42,8 +42,9 @@
   }
 }
 
-@media(max-width: 768px) {
-  html, body {
+@media (max-width: 768px) {
+  html,
+  body {
     min-width: 1px !important;
   }
   body.zoom-hidden {

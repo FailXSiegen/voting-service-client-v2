@@ -4,22 +4,16 @@
       <div class="align-items-center justify-content-center">
         <div class="verify-registered-organizer-wrapper text-center m-auto">
           <h1 class="register-organizer-headline">
-            {{ $t('view.register.headline') }}
+            {{ $t("view.register.headline") }}
           </h1>
           <AlertBox v-if="requestFinished && !requestFailed">
-            {{ $t('view.register.verify.success') }}
+            {{ $t("view.register.verify.success") }}
           </AlertBox>
-          <AlertBox
-            v-else-if="requestFailed"
-            type="danger"
-          >
-            {{ $t('view.register.verify.failed') }}
+          <AlertBox v-else-if="requestFailed" type="danger">
+            {{ $t("view.register.verify.failed") }}
           </AlertBox>
-          <AlertBox
-            v-else
-            type="info"
-          >
-            {{ $t('view.register.verify.processing') }}
+          <AlertBox v-else type="info">
+            {{ $t("view.register.verify.processing") }}
           </AlertBox>
         </div>
       </div>
@@ -28,11 +22,11 @@
 </template>
 
 <script setup>
-import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import {validateHash} from "@/modules/organizer/requests/validate-hash";
-import {onMounted, ref} from "vue";
-import {handleError} from "@/core/error/error-handler";
-import {useRoute} from "vue-router";
+import CorePageLayout from "@/core/components/CorePageLayout.vue";
+import { validateHash } from "@/modules/organizer/requests/validate-hash";
+import { onMounted, ref } from "vue";
+import { handleError } from "@/core/error/error-handler";
+import { useRoute } from "vue-router";
 import AlertBox from "@/core/components/AlertBox.vue";
 
 // Access the hash of the url.
@@ -46,12 +40,14 @@ const requestFinished = ref(false);
 const requestFailed = ref(false);
 
 onMounted(() => {
-  validateHash(hash).then((response) => {
-    requestFinished.value = true;
-  }).catch((error) => {
-    requestFailed.value = true;
-    handleError(error);
-  });
+  validateHash(hash)
+    .then((response) => {
+      requestFinished.value = true;
+    })
+    .catch((error) => {
+      requestFailed.value = true;
+      handleError(error);
+    });
 });
 </script>
 

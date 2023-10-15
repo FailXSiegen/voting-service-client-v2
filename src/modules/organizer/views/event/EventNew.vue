@@ -1,14 +1,15 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerEventsNew')">
     <template #title>
-      {{ $t('navigation.views.organizerEventsNew') }} - <span v-if="event?.title">{{ event?.title }}</span>
+      {{ $t("navigation.views.organizerEventsNew") }} -
+      <span v-if="event?.title">{{ event?.title }}</span>
       <router-link
-        :to="{name: RouteOrganizerEvents}"
+        :to="{ name: RouteOrganizerEvents }"
         class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
       >
         <i class="bi-arrow-left bi--1xl mr-1" />
         <span class="align-middle">
-          {{ $t('navigation.backToEvents') }}
+          {{ $t("navigation.backToEvents") }}
         </span>
       </router-link>
     </template>
@@ -16,30 +17,29 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      <EventForm
-        :prefill-data="null"
-        @submit="onSubmit"
-      />
+      <EventForm :prefill-data="null" @submit="onSubmit" />
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue';
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
-import EventForm from '@/modules/organizer/components/events/EventForm.vue';
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import EventForm from "@/modules/organizer/components/events/EventForm.vue";
 import {
-  getRoutesByName, RouteOrganizerAllEvents,
+  getRoutesByName,
+  RouteOrganizerAllEvents,
   RouteOrganizerDashboard,
-  RouteOrganizerEvents, RouteOrganizerManagement,
-  RouteOrganizerVideoConference
+  RouteOrganizerEvents,
+  RouteOrganizerManagement,
+  RouteOrganizerVideoConference,
 } from "@/router/routes";
-import {toast} from "vue3-toastify";
-import t from '@/core/util/l18n';
-import {useCore} from "@/core/store/core";
-import {useRouter} from "vue-router";
-import {useMutation} from "@vue/apollo-composable";
-import {CREATE_EVENT} from "@/modules/organizer/graphql/mutation/create-event";
+import { toast } from "vue3-toastify";
+import t from "@/core/util/l18n";
+import { useCore } from "@/core/store/core";
+import { useRouter } from "vue-router";
+import { useMutation } from "@vue/apollo-composable";
+import { CREATE_EVENT } from "@/modules/organizer/graphql/mutation/create-event";
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -47,7 +47,7 @@ const routes = getRoutesByName([
   RouteOrganizerEvents,
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
-  RouteOrganizerAllEvents
+  RouteOrganizerAllEvents,
 ]);
 
 const coreStore = useCore();
@@ -55,7 +55,7 @@ const router = useRouter();
 
 async function onSubmit(formData) {
   // Create new Events.
-  const {mutate: createEvent} = useMutation(CREATE_EVENT, {
+  const { mutate: createEvent } = useMutation(CREATE_EVENT, {
     variables: {
       input: {
         organizerId: coreStore.getOrganizer?.id,
@@ -76,10 +76,10 @@ async function onSubmit(formData) {
   coreStore.queryOrganizer();
 
   // Back to list.
-  await router.push({name: RouteOrganizerEvents});
+  await router.push({ name: RouteOrganizerEvents });
 
   // Show success message.
-  toast(t('success.organizer.events.createdSuccessfully'), {type: 'success'});
+  toast(t("success.organizer.events.createdSuccessfully"), { type: "success" });
 }
 </script>
 

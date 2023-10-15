@@ -1,8 +1,5 @@
 <template>
-  <label
-    v-if="label"
-    :for="id"
-  >
+  <label v-if="label" :for="id">
     {{ label }}
   </label>
   <select
@@ -10,19 +7,10 @@
     :id="id"
     v-model="inputValue"
     :name="name"
-    :class="[
-      'custom-select',
-      (hasErrors ? 'is-invalid': null),
-      ...classes
-    ]"
+    :class="['custom-select', hasErrors ? 'is-invalid' : null, ...classes]"
     @change="onChange"
   >
-    <option
-      value="0"
-      selected="selected"
-    >
-      ---
-    </option>
+    <option value="0" selected="selected">---</option>
     <option
       v-for="videoConference in videoConferences"
       :key="videoConference.id"
@@ -31,10 +19,7 @@
       {{ videoConference.title }}
     </option>
   </select>
-  <small
-    v-if="helpText"
-    class="form-text text-muted"
-  >
+  <small v-if="helpText" class="form-text text-muted">
     {{ helpText }}
   </small>
   <span
@@ -42,16 +27,16 @@
     :key="error.uid"
     class="form-field-error text-danger"
   >
-    {{ $t('error.formValidation.' + error.$validator) }}<br>
+    {{ $t("error.formValidation." + error.$validator) }}<br />
   </span>
 </template>
 
 <script setup>
-import {ref, watch} from "vue";
-import {storeToRefs} from "pinia";
-import {useCore} from "@/core/store/core";
+import { ref, watch } from "vue";
+import { storeToRefs } from "pinia";
+import { useCore } from "@/core/store/core";
 
-const emit = defineEmits(['change']);
+const emit = defineEmits(["change"]);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -67,33 +52,34 @@ const props = defineProps({
   classes: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   hasErrors: Boolean,
   errors: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
-    default: []
+    default: [],
   },
   // eslint-disable-next-line vue/require-default-prop
   value: String,
   // eslint-disable-next-line vue/require-default-prop
-  helpText: String
+  helpText: String,
 });
 
 const inputValue = ref(props.value);
 
 function onChange() {
-  emit('change', {value: videoConferences.value.find(({id}) => inputValue.value === id)});
+  emit("change", {
+    value: videoConferences.value.find(({ id }) => inputValue.value === id),
+  });
 }
 
 const coreStore = useCore();
 
-const {organizer} = storeToRefs(coreStore);
+const { organizer } = storeToRefs(coreStore);
 const videoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
 // Watch changes to organizer in the store.
-watch(organizer, ({zoomMeetings}) => {
+watch(organizer, ({ zoomMeetings }) => {
   videoConferences.value = zoomMeetings;
 });
-
 </script>

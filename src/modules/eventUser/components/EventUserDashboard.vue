@@ -3,10 +3,7 @@
     <template #actions>
       <DashboardActions @logout="onLogout" />
     </template>
-    <template
-      v-if="eventUser"
-      #content
-    >
+    <template v-if="eventUser" #content>
       <ConnectionLostOverlay v-if="connectionLost" />
       <NotVerifiedWidget
         v-if="eventUser && !eventUser.verified"
@@ -44,7 +41,7 @@
           @click="onShowMorePollResults"
         >
           <i class="mr-3 bi bi-plus-square-fill bi--2xl" />
-          {{ $t('view.results.showMore') }}
+          {{ $t("view.results.showMore") }}
         </button>
         <AlertBox
           v-if="!showMoreEnabled"
@@ -85,27 +82,25 @@ import AlertBox from "@/core/components/AlertBox.vue";
 import PollModal from "@/modules/eventUser/components/dashboard/poll/modal/PollModal.vue";
 import ResultModal from "@/modules/eventUser/components/dashboard/poll/modal/ResultModal.vue";
 
-import {useCore} from "@/core/store/core";
-import {computed, ref} from "vue";
-import {useMutation, useQuery, useSubscription} from "@vue/apollo-composable";
-import {POLLS_RESULTS} from "@/modules/organizer/graphql/queries/poll-results";
-import {toast} from "vue3-toastify";
+import { useCore } from "@/core/store/core";
+import { computed, ref } from "vue";
+import { useMutation, useQuery, useSubscription } from "@vue/apollo-composable";
+import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results";
+import { toast } from "vue3-toastify";
 import l18n from "@/l18n";
-import {logout} from "@/core/auth/login";
+import { logout } from "@/core/auth/login";
 import t from "@/core/util/l18n";
-import {
-  UPDATE_EVENT_USER_ACCESS_RIGHTS
-} from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
-import {CREATE_POLL_SUBMIT_ANSWER} from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
-import {POLL_LIFE_CYCLE_SUBSCRIPTION} from "@/modules/eventUser/graphql/subscription/poll-life-cycle";
+import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
+import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
+import { POLL_LIFE_CYCLE_SUBSCRIPTION } from "@/modules/eventUser/graphql/subscription/poll-life-cycle";
 
 const coreStore = useCore();
-const emit = defineEmits(['exit']);
+const emit = defineEmits(["exit"]);
 defineProps({
   event: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 });
 
 // Data.
@@ -116,7 +111,7 @@ const page = ref(0);
 const pageSize = ref(1);
 const showMoreEnabled = ref(true);
 const voteCounter = ref(1);
-const pollState = ref('closed');
+const pollState = ref("closed");
 const poll = ref(null);
 const pollModal = ref(null);
 const resultModal = ref(null);
@@ -130,10 +125,10 @@ const highlightStatusChange = ref(false);
 // Fetch poll results.
 const pollResultsQuery = useQuery(
   POLLS_RESULTS,
-  {eventId: event.value?.id, page, pageSize},
-  {fetchPolicy: "cache-and-network"}
+  { eventId: event.value?.id, page, pageSize },
+  { fetchPolicy: "cache-and-network" },
 );
-pollResultsQuery.onResult(({data}) => {
+pollResultsQuery.onResult(({ data }) => {
   if (data?.pollResult && data?.pollResult?.length >= pageSize.value) {
     showMoreEnabled.value = true;
   }
@@ -146,26 +141,37 @@ pollResultsQuery.onResult(({data}) => {
 });
 
 // Computed.
-const existActivePoll = computed(() => poll.value !== null && pollState.value !== 'closed');
-const connectionLost = computed(() => !eventUser.value?.online || !eventUser.value?.id);
+const existActivePoll = computed(
+  () => poll.value !== null && pollState.value !== "closed",
+);
+const connectionLost = computed(
+  () => !eventUser.value?.online || !eventUser.value?.id,
+);
 
 // Subscriptions.
-const updateEventUserAccessRightsSubscription = useSubscription(UPDATE_EVENT_USER_ACCESS_RIGHTS, {eventUserId: eventUser.value.id});
-updateEventUserAccessRightsSubscription.onResult(({data}) => {
+const updateEventUserAccessRightsSubscription = useSubscription(
+  UPDATE_EVENT_USER_ACCESS_RIGHTS,
+  { eventUserId: eventUser.value.id },
+);
+updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
-    const {verified, voteAmount, allowToVote} = data.updateEventUserAccessRights;
+    const { verified, voteAmount, allowToVote } =
+      data.updateEventUserAccessRights;
     coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote);
-    toast(l18n.global.tc('view.polls.userUpdate'), {
-      type: 'info',
+    toast(l18n.global.tc("view.polls.userUpdate"), {
+      type: "info",
       autoClose: false,
-      onOpen: () => highlightStatusChange.value = true,
-      onClose: () => highlightStatusChange.value = false
+      onOpen: () => (highlightStatusChange.value = true),
+      onClose: () => (highlightStatusChange.value = false),
     });
   }
 });
 
-const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE_SUBSCRIPTION, {eventId: event.value.id});
-pollLifeCycleSubscription.onResult(({data}) => {
+const pollLifeCycleSubscription = useSubscription(
+  POLL_LIFE_CYCLE_SUBSCRIPTION,
+  { eventId: event.value.id },
+);
+pollLifeCycleSubscription.onResult(({ data }) => {
   if (!data?.pollLifeCycle) {
     return;
   }
@@ -178,16 +184,14 @@ pollLifeCycleSubscription.onResult(({data}) => {
   pollState.value = data.pollLifeCycle.state;
 
   // Handle poll state.
-  if (pollState.value === 'new') {
-
+  if (pollState.value === "new") {
     // Reset voteCounter.
     voteCounter.value = 1;
     // Close the result modal.
     resultModal.value.hideModal();
     // Open the poll modal.
     pollModal.value.showModal();
-  } else if (pollState.value === 'closed') {
-
+  } else if (pollState.value === "closed") {
     // Close the poll modal.
     pollModal.value.hideModal();
     // Open the result modal.
@@ -203,8 +207,8 @@ pollLifeCycleSubscription.onResult(({data}) => {
 
 function onLogout() {
   logout()
-    .then(() => toast(t('success.logout.eventUser'), {type: 'success'}))
-    .then(() => emit('exit'));
+    .then(() => toast(t("success.logout.eventUser"), { type: "success" }))
+    .then(() => emit("exit"));
 }
 
 function onJoinMeeting() {
@@ -216,18 +220,15 @@ function onShowMorePollResults() {
   pollResultsQuery.fetchMore({
     variables: {
       page: page.value,
-      pageSize: pageSize.value
+      pageSize: pageSize.value,
     },
-    updateQuery: (previousResult, {fetchMoreResult}) => {
+    updateQuery: (previousResult, { fetchMoreResult }) => {
       if (!fetchMoreResult?.pollResult) {
         showMoreEnabled.value = false;
-        toast(l18n.global.tc('view.results.noMoreResults'), {type: 'info'});
+        toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
         return;
       }
-      pollResults.value = [
-        ...pollResults.value,
-        ...fetchMoreResult.pollResult,
-      ];
+      pollResults.value = [...pollResults.value, ...fetchMoreResult.pollResult];
     },
   });
 }
@@ -244,15 +245,16 @@ async function onSubmitPoll(pollFormData) {
   };
   if (pollFormData.abstain) {
     // Abstain.
-    input.answerContent = l18n.global.tc('view.polls.modal.abstain');
+    input.answerContent = l18n.global.tc("view.polls.modal.abstain");
     input.possibleAnswerId = null;
     await mutateAnswer(input);
   } else if (pollFormData.multipleAnswers?.length > 0) {
     // Multiple answers to persist.
     let answerCounter = 1;
     for await (const answerId of pollFormData.multipleAnswers) {
-
-      const answer = poll.value.possibleAnswers.find((x) => parseInt(x.id) === parseInt(answerId));
+      const answer = poll.value.possibleAnswers.find(
+        (x) => parseInt(x.id) === parseInt(answerId),
+      );
       input.answerContent = answer.content;
       input.possibleAnswerId = answer.id;
       input.answerItemLength = pollFormData.multipleAnswers.length;
@@ -262,18 +264,23 @@ async function onSubmitPoll(pollFormData) {
     }
   } else if (pollFormData.singleAnswer) {
     // Single answers to persist.
-    const answer = poll.value.possibleAnswers.find((x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer));
+    const answer = poll.value.possibleAnswers.find(
+      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer),
+    );
     input.answerContent = answer.content;
     input.possibleAnswerId = answer.id;
 
     await mutateAnswer(input);
   } else {
     // Invalid form data. Just ignore that submit.
-    console.warn('invalid form data. Submit gets ignored!');
+    console.warn("invalid form data. Submit gets ignored!");
     return;
   }
 
-  if (voteCounter.value >= (eventUser.value?.voteAmount || 1) || pollFormData.useAllAvailableVotes) {
+  if (
+    voteCounter.value >= (eventUser.value?.voteAmount || 1) ||
+    pollFormData.useAllAvailableVotes
+  ) {
     // Finish
     voteCounter.value = 1;
     // Close the poll modal.
@@ -285,9 +292,12 @@ async function onSubmitPoll(pollFormData) {
 }
 
 async function mutateAnswer(input) {
-  const createPollSubmitAnswerMutation = useMutation(CREATE_POLL_SUBMIT_ANSWER, {
-    variables: {input,},
-  });
+  const createPollSubmitAnswerMutation = useMutation(
+    CREATE_POLL_SUBMIT_ANSWER,
+    {
+      variables: { input },
+    },
+  );
   await createPollSubmitAnswerMutation.mutate();
 }
 </script>

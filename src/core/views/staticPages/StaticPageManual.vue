@@ -19,10 +19,7 @@
       </div>
       <ul class="list-unstyled">
         <li class="mb-3">
-          <a
-            href="#teilnehmer"
-            class="h3"
-          >Für Teilnehmer</a>
+          <a href="#teilnehmer" class="h3">Für Teilnehmer</a>
           <ol class="mt-3">
             <li><a href="#loginmaske">An einer Veranstaltung teilnehmen</a></li>
             <li><a href="#warteraum">Warteraum</a></li>
@@ -32,10 +29,7 @@
           </ol>
         </li>
         <li>
-          <a
-            href="#organisator"
-            class="h3"
-          >Für Organisatoren</a>
+          <a href="#organisator" class="h3">Für Organisatoren</a>
           <ol class="mt-3">
             <li><a href="#dashboard">Dashboard</a></li>
             <li><a href="#uebersicht">Meine Veranstaltungen</a></li>
@@ -55,17 +49,9 @@
           </ol>
         </li>
       </ul>
-      <hr>
-      <h2
-        id="teilnehmer"
-        class="mb-3"
-      >
-        Für Teilnehmer
-      </h2>
-      <div
-        id="loginmaske"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <h2 id="teilnehmer" class="mb-3">Für Teilnehmer</h2>
+      <div id="loginmaske" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/teilnehmer/loginmaske.png"
@@ -73,7 +59,7 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>An einer Veranstaltung teilnehmen</h3>
@@ -84,19 +70,19 @@
           <p>Für eine Anmeldung sind folgende Informationen erforderlich:</p>
           <ol>
             <li>
-              <b>E-Mail Adresse oder Mitgliedsnummer:</b><br>Je nach Verfahren
+              <b>E-Mail Adresse oder Mitgliedsnummer:</b><br />Je nach Verfahren
               wird der Organisator eine vorherige Anmeldung durchgeführt haben.
               Verwenden Sie hier die vom Organisator vorgegebene Möglichkeit.
             </li>
             <li>
-              <b>Passwort:</b><br>Geben Sie ein eigenes Kennwort ein, um sich
-              nach der Veranstaltung erneut anmelden zu können. Das Passwort dient
-              auch zur Wiederanmeldung, falls Sie während der Veranstaltung das
-              Endgerät wechseln oder sonstige technische Schwierigkeiten haben und
-              sich neu anmelden müssen.
+              <b>Passwort:</b><br />Geben Sie ein eigenes Kennwort ein, um sich
+              nach der Veranstaltung erneut anmelden zu können. Das Passwort
+              dient auch zur Wiederanmeldung, falls Sie während der
+              Veranstaltung das Endgerät wechseln oder sonstige technische
+              Schwierigkeiten haben und sich neu anmelden müssen.
             </li>
             <li>
-              <b>Anzeige-Name:</b><br>
+              <b>Anzeige-Name:</b><br />
               Der Name wird bei der Auswertung der Wahlen angezeigt. Hier sollte
               eine Eindeutigkeit geschaffen werden, also nicht nur Ihr Name,
               sondern am besten auch die Information, für welchen Verein/Verband
@@ -105,11 +91,8 @@
           </ol>
         </div>
       </div>
-      <hr>
-      <div
-        id="warteraum"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="warteraum" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/teilnehmer/warteraum.png"
@@ -117,15 +100,16 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Warteraum</h3>
           <p>
             Falls der Organisator keine Teilnehmer im Vorfeld der Veranstaltung
-            hinterlegt hat, Sie andere Anmelde-Information verwenden oder einfach
-            einen Rechtschreibfehler in Ihren Anmeldeinformationen haben sind Sie
-            dem System nicht bekannt und müssen auf eine Freigabe warten.
+            hinterlegt hat, Sie andere Anmelde-Information verwenden oder
+            einfach einen Rechtschreibfehler in Ihren Anmeldeinformationen haben
+            sind Sie dem System nicht bekannt und müssen auf eine Freigabe
+            warten.
           </p>
           <p>
             Der Organisator wird Sie entweder als Teilnehmer oder Gast
@@ -133,11 +117,8 @@
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="gast"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="gast" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/teilnehmer/gast.png"
@@ -145,22 +126,19 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Gast</h3>
           <p>
-            Als Gast sehen Sie, ob eine Abstimmung in dem Moment stattfindet. Sie
-            bekommen die Ergebnisse angezeigt und können auch die vergangenen
-            Ergebnisse von vorherigen Wahlen einsehen.
+            Als Gast sehen Sie, ob eine Abstimmung in dem Moment stattfindet.
+            Sie bekommen die Ergebnisse angezeigt und können auch die
+            vergangenen Ergebnisse von vorherigen Wahlen einsehen.
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="stimmrecht"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="stimmrecht" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/teilnehmer/stimmrecht.png"
@@ -168,7 +146,7 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Teilnehmer</h3>
@@ -182,11 +160,8 @@
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="demoabstimmung"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="demoabstimmung" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/teilnehmer/demoabstimmung.png"
@@ -194,7 +169,7 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Abstimmung</h3>
@@ -207,27 +182,18 @@
             erscheint.
           </p>
           <p>
-            <b>Hinweis für Teilnehmer mit mehreren Delegiertenstimmen:</b><br>Sie dürfen nach jeder
-            Stimmenabgabe erneut
-            eine Auswahl treffen
-            und "Jetzt abstimmen" drücken. Sie geben nicht mit einer Abgabe alle
-            Ihnen zur Verfügung stehenden Stimmen ab. Wenn Sie 3 Stimmen haben und
-            3x"Ja" wählen möchten müssen Sie jedes Mal die Auswahl durchführen und
-            auf "Jetzt abstimmen" drücken/klicken.
+            <b>Hinweis für Teilnehmer mit mehreren Delegiertenstimmen:</b
+            ><br />Sie dürfen nach jeder Stimmenabgabe erneut eine Auswahl
+            treffen und "Jetzt abstimmen" drücken. Sie geben nicht mit einer
+            Abgabe alle Ihnen zur Verfügung stehenden Stimmen ab. Wenn Sie 3
+            Stimmen haben und 3x"Ja" wählen möchten müssen Sie jedes Mal die
+            Auswahl durchführen und auf "Jetzt abstimmen" drücken/klicken.
           </p>
         </div>
       </div>
-      <hr>
-      <h2
-        id="organisator"
-        class="mb-3"
-      >
-        Für Organisatoren
-      </h2>
-      <div
-        id="dashboard"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <h2 id="organisator" class="mb-3">Für Organisatoren</h2>
+      <div id="dashboard" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/dashboard.png"
@@ -235,18 +201,15 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Dashboard</h3>
           <p>Übersicht aller bevorstehenden Veranstaltungen</p>
         </div>
       </div>
-      <hr>
-      <div
-        id="uebersicht"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="uebersicht" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/uebersicht.png"
@@ -254,14 +217,14 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Veranstaltungsübersicht</h3>
           <p>
             Hier sehen Sie die bevorstehende und vergangenen Veranstaltungen.
-            Zusätzlich können Sie Veranstaltungen erstellen mit den Button "Neues
-            Veranstaltung erstellen".
+            Zusätzlich können Sie Veranstaltungen erstellen mit den Button
+            "Neues Veranstaltung erstellen".
           </p>
           <p>
             In der Aktionsspalte der erstellten Veranstaltungen können Sie die
@@ -271,11 +234,8 @@
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="eventerstellen"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="eventerstellen" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/eventerstellen.png"
@@ -283,54 +243,52 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Veranstaltungen erstellen und bearbeiten</h3>
           <p>Folgende Felder werden benötigt:</p>
           <ol>
             <li>
-              <b>Titel:</b><br>Beispiel: Jahreshauptversammlung 2025 des
+              <b>Titel:</b><br />Beispiel: Jahreshauptversammlung 2025 des
               Musterchors aus Musterstadt
             </li>
             <li>
-              <b>Slug:</b><br>Das Slug ist das Pfadsegment für die URL. Das Slug
-              muss im System einmalig sein. Falls eine Veranstaltungen nicht
-              erstellt werden kann liegt es zu 99% an einem Slug, der schon
-              verwendet wird. Hier ist also darauf zu achten, einen kurze, aber
-              prägnante Bezeichnung zu verwenden.<br><br>Beispiel:
-              musterchor-musterstadt-jhv-2025<br><br>Die Eingabe wird
+              <b>Slug:</b><br />Das Slug ist das Pfadsegment für die URL. Das
+              Slug muss im System einmalig sein. Falls eine Veranstaltungen
+              nicht erstellt werden kann liegt es zu 99% an einem Slug, der
+              schon verwendet wird. Hier ist also darauf zu achten, einen kurze,
+              aber prägnante Bezeichnung zu verwenden.<br /><br />Beispiel:
+              musterchor-musterstadt-jhv-2025<br /><br />Die Eingabe wird
               automatisch umformatiert in Kleinbuchstaben. Sonderzeichen werden
               entfernt und Leerezeilen mit "-" ersetzt.
             </li>
             <li>
-              <b>Beschreibung:</b><br>Kurzer Beschreibungstext Ihrer
+              <b>Beschreibung:</b><br />Kurzer Beschreibungstext Ihrer
               Veranstaltung.
             </li>
             <li>
-              <b>Start-Datum:</b><br>Zeitpunkt der Durchführung Ihrer
+              <b>Start-Datum:</b><br />Zeitpunkt der Durchführung Ihrer
               Veranstaltung.
             </li>
             <li>
-              <b>Lobby:</b><br>Falls der Warteraum deaktiviert ist können sich
+              <b>Lobby:</b><br />Falls der Warteraum deaktiviert ist können sich
               die Teilnehmer noch nicht aktivieren. Aktuell muss die Lobby per
-              Hand aktiviert oder deaktiviert werden. Es existiert also noch kein
-              Automatismus in Bezug zum Start-Zeitpunkt
+              Hand aktiviert oder deaktiviert werden. Es existiert also noch
+              kein Automatismus in Bezug zum Start-Zeitpunkt
             </li>
             <li>
-              <b>Aktiv:</b><br>Aktiviert die gesamte Veranstaltung. Wenn eine
-              Veranstaltung nicht mehr aktiv ist können sich keine Teilnehmer oder
-              Gäste unter der Veranstaltungens-URL einloggen. Aktuell wird ein
-              einfacher Hinweis gegeben, dass die Veranstaltung nicht aktiv ist.
+              <b>Aktiv:</b><br />Aktiviert die gesamte Veranstaltung. Wenn eine
+              Veranstaltung nicht mehr aktiv ist können sich keine Teilnehmer
+              oder Gäste unter der Veranstaltungens-URL einloggen. Aktuell wird
+              ein einfacher Hinweis gegeben, dass die Veranstaltung nicht aktiv
+              ist.
             </li>
           </ol>
         </div>
       </div>
-      <hr>
-      <div
-        id="event-teilnehmer"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="event-teilnehmer" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/event-teilnehmer.png"
@@ -338,25 +296,27 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
-          <h3>Veranstaltungs-Details<br>Nutzer anlegen</h3>
+          <h3>Veranstaltungs-Details<br />Nutzer anlegen</h3>
           <p>
             Nach Klick auf die Veranstaltungens-Details erscheint die Übersicht
             der Nutzer
           </p>
-          <p>Im oberen Bereich sehen Sie zusammengefasst Nutzerinformationen.</p>
           <p>
-            Es besteht die Möglichkeit, Nutzer zu bearbeiten. Sie können die Rolle
-            (Teilnehmer/Gast) eines Nutzer mit einem Klick auf den Button "Setzen
-            auf" ändern. Wenn man einen Teilnehmer auf Gast umschaltet wird
-            automatisch das Stimmrecht entzogen. Bei der nächsten Wahl kann der
-            geänderte Nutzer nicht teilnehmern, sieht jedoch wie jeder andere Gast
-            auch die Ergebnisse. Man kann auch einen Gast zu einem Teilnehmer
-            umwandeln. Der geänderte Teilnehmer erhält Stimmrecht mit einer
-            Stimme. Falls der Teilnehmer mehrere Stimmen vertritt muss der Nutzer
-            im Detail geändert werden.
+            Im oberen Bereich sehen Sie zusammengefasst Nutzerinformationen.
+          </p>
+          <p>
+            Es besteht die Möglichkeit, Nutzer zu bearbeiten. Sie können die
+            Rolle (Teilnehmer/Gast) eines Nutzer mit einem Klick auf den Button
+            "Setzen auf" ändern. Wenn man einen Teilnehmer auf Gast umschaltet
+            wird automatisch das Stimmrecht entzogen. Bei der nächsten Wahl kann
+            der geänderte Nutzer nicht teilnehmern, sieht jedoch wie jeder
+            andere Gast auch die Ergebnisse. Man kann auch einen Gast zu einem
+            Teilnehmer umwandeln. Der geänderte Teilnehmer erhält Stimmrecht mit
+            einer Stimme. Falls der Teilnehmer mehrere Stimmen vertritt muss der
+            Nutzer im Detail geändert werden.
           </p>
         </div>
       </div>
@@ -367,11 +327,10 @@
           </div>
           <div class="col d-flex align-items-center flex-column">
             <p class="mb-0">
-              <b>Tipp</b>: Um den Nutzern einen komfortablen Einstieg zu ermöglichen kann man den Link zum
-              Versenden
-              individualisieren. Nutzen Sie hierzu die Serienmail-Funktion von Google oder Microsoft mit
-              einer Tabelle
-              aller Empfänger.
+              <b>Tipp</b>: Um den Nutzern einen komfortablen Einstieg zu
+              ermöglichen kann man den Link zum Versenden individualisieren.
+              Nutzen Sie hierzu die Serienmail-Funktion von Google oder
+              Microsoft mit einer Tabelle aller Empfänger.
             </p>
             <ul>
               <li>Parameter username - Füllt das Feld "Benutzername" aus</li>
@@ -381,18 +340,15 @@
               digitalwahl.org/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
             </code>
             <p>
-              Wichtig ist, dass der Link Encodiert ist. Dafür gibt es Funktionen wie URLCODIEREN in Excel,
-              die
-              automatisch aus einem zusammengefügten Satz einen sauberen klickbaren Link generiert
+              Wichtig ist, dass der Link Encodiert ist. Dafür gibt es Funktionen
+              wie URLCODIEREN in Excel, die automatisch aus einem
+              zusammengefügten Satz einen sauberen klickbaren Link generiert
             </p>
           </div>
         </div>
       </div>
-      <hr>
-      <div
-        id="teilnehmer-editieren"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="teilnehmer-editieren" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/teilnehmer-editieren.png"
@@ -400,7 +356,7 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Nutzer editieren</h3>
@@ -414,11 +370,8 @@
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="event-warteraum"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="event-warteraum" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/event-warteraum.png"
@@ -426,7 +379,7 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Warteraum</h3>
@@ -441,11 +394,8 @@
           <p><b>Aktuell ist der "Blockieren"-Button noch ohne Funktion.</b></p>
         </div>
       </div>
-      <hr>
-      <div
-        id="event-abstimmung"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="event-abstimmung" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/abstimmung-erstellen.png"
@@ -453,7 +403,7 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Abstimmung erstellen und starten</h3>
@@ -478,8 +428,8 @@
           <p>
             Falls Sie Personen wählen möchten sonstige individuelle
             Antwortoptionen vorgeben möchten können Sie "individuelle
-            Antwortoption" auswählen. Es erscheint ein Freitextfeld, wo jede Zeile
-            eine Antwortoption darstellt. Im unteren Bereich können Sie
+            Antwortoption" auswählen. Es erscheint ein Freitextfeld, wo jede
+            Zeile eine Antwortoption darstellt. Im unteren Bereich können Sie
             definieren, ob Teilnehmer mehr als eine Antwortoption auswählen
             dürfen.
           </p>
@@ -497,11 +447,8 @@
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="event-abstimmung-beenden"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="event-abstimmung-beenden" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/abstimmung-beenden.png"
@@ -509,27 +456,24 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Abstimmung beenden</h3>
           <p>
-            Nach dem Starten einer Abstimmung sehen Sie die Anzahl der abgegebenen
-            Stimmen und die Anzahl der Personen, die gewählt haben und wie viel
-            Stimmen/Personen insgesamt möglich sind.
+            Nach dem Starten einer Abstimmung sehen Sie die Anzahl der
+            abgegebenen Stimmen und die Anzahl der Personen, die gewählt haben
+            und wie viel Stimmen/Personen insgesamt möglich sind.
           </p>
           <p>
             Falls ein Teilnehmer verhindert ist, die Stimme abzugeben bzw. Sie
-            nach einer längeren Wartezeit keine Veränderung wahrnehmen können Sie
-            die aktuell stattfindende Abstimmung auch manuell beenden.
+            nach einer längeren Wartezeit keine Veränderung wahrnehmen können
+            Sie die aktuell stattfindende Abstimmung auch manuell beenden.
           </p>
         </div>
       </div>
-      <hr>
-      <div
-        id="event-ergebnisse"
-        class="media flex-column flex-lg-row"
-      >
+      <hr />
+      <div id="event-ergebnisse" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/ergebnisliste.png"
@@ -537,14 +481,14 @@
             class="mr-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
-          >
+          />
         </span>
         <div class="media-body">
           <h3>Ergebnisliste</h3>
           <p>
-            Hier sehen Sie alle vergangenen Abstimmungen und deren Ergebnisse. Mit
-            der Browserseitigen Druckfunktion können Sie die Ergebnisse auch auf
-            Ihrem PC abspeichern.
+            Hier sehen Sie alle vergangenen Abstimmungen und deren Ergebnisse.
+            Mit der Browserseitigen Druckfunktion können Sie die Ergebnisse auch
+            auf Ihrem PC abspeichern.
           </p>
         </div>
       </div>
@@ -562,19 +506,11 @@
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <button
-                type="button"
-                class="close"
-                data-dismiss="modal"
-              >
-                <span aria-hidden="true">&times;</span><span class="sr-only">Schließen</span>
+              <button type="button" class="close" data-dismiss="modal">
+                <span aria-hidden="true">&times;</span
+                ><span class="sr-only">Schließen</span>
               </button>
-              <h4
-                id="popLoginLabel"
-                class="modal-title"
-              >
-                Vergrößerung
-              </h4>
+              <h4 id="popLoginLabel" class="modal-title">Vergrößerung</h4>
             </div>
             <div class="modal-body text-center">
               <img
@@ -582,14 +518,10 @@
                 :src="modalImageSrc"
                 alt=""
                 class="img img-fluid"
-              >
+              />
             </div>
             <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-danger"
-                data-dismiss="modal"
-              >
+              <button type="button" class="btn btn-danger" data-dismiss="modal">
                 Schließen
               </button>
             </div>
@@ -601,19 +533,19 @@
 </template>
 
 <script setup>
-import CorePageLayout from '@/core/components/CorePageLayout.vue';
-import * as bootstrap from 'bootstrap';
-import {onMounted, ref} from "vue";
+import CorePageLayout from "@/core/components/CorePageLayout.vue";
+import * as bootstrap from "bootstrap";
+import { onMounted, ref } from "vue";
 
 let modal;
-const modalImageSrc = ref('');
+const modalImageSrc = ref("");
 
-function onClickImage({target}) {
+function onClickImage({ target }) {
   modalImageSrc.value = target?.src;
   modal?.show();
 }
 
 onMounted(() => {
-  modal = new bootstrap.Modal(document.getElementById('imagemodal'), {});
+  modal = new bootstrap.Modal(document.getElementById("imagemodal"), {});
 });
 </script>

@@ -37,26 +37,32 @@
 @import "../node_modules/bootstrap/scss/tooltip";
 @import "../node_modules/bootstrap/scss/transitions";
 @import "../node_modules/bootstrap/scss/type";
-@import 'components/toast';
-@import 'frame/frame';
-@import 'event/zoom/overwrite';
-@import 'organizer/organizers';
+@import "components/toast";
+@import "frame/frame";
+@import "event/zoom/overwrite";
+@import "organizer/organizers";
 
-$bootstrap-icons-font-src: url("../assets/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
-url("../assets/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");
-@import '../node_modules/bootstrap-icons/font/bootstrap-icons';
+$bootstrap-icons-font-src:
+  url("../assets/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d")
+    format("woff2"),
+  url("../assets/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d")
+    format("woff");
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons";
 
 .modal-backdrop {
   z-index: 190;
 }
 
-button:disabled, .btn-disabled, .disabled {
+button:disabled,
+.btn-disabled,
+.disabled {
   cursor: not-allowed;
   pointer-events: all !important;
 }
 
 // Allow styling for bigger icons.
-span, i {
+span,
+i {
   &[class*="bi"] {
     font-size: 14px;
 
@@ -82,6 +88,7 @@ span, i {
   }
 }
 
-.was-validated .form-check-input:valid ~ .form-check-label, .form-check-input.is-valid ~ .form-check-label {
+.was-validated .form-check-input:valid ~ .form-check-label,
+.form-check-input.is-valid ~ .form-check-label {
   color: inherit;
 }
