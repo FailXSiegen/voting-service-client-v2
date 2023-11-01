@@ -81,7 +81,6 @@ import ResultListing from "@/modules/organizer/components/events/poll/ResultList
 import AlertBox from "@/core/components/AlertBox.vue";
 import PollModal from "@/modules/eventUser/components/dashboard/poll/modal/PollModal.vue";
 import ResultModal from "@/modules/eventUser/components/dashboard/poll/modal/ResultModal.vue";
-
 import { useCore } from "@/core/store/core";
 import { computed, ref } from "vue";
 import { useMutation, useQuery, useSubscription } from "@vue/apollo-composable";
@@ -126,14 +125,24 @@ const highlightStatusChange = ref(false);
 const pollResultsQuery = useQuery(
   POLLS_RESULTS,
   { eventId: event.value?.id, page, pageSize },
-  { fetchPolicy: "cache-and-network" },
+  { fetchPolicy: "cache-and-network" }
 );
 pollResultsQuery.onResult(({ data }) => {
   if (data?.pollResult && data?.pollResult?.length >= pageSize.value) {
     showMoreEnabled.value = true;
   }
-  if (data?.pollResult && pollResults.value.length === 0) {
-    pollResults.value = data.pollResult;
+
+  if (data?.pollResult?.length > 0) {
+    // Make sure to only add new poll results.
+    for (let pollResult of data.pollResult) {
+      if (!pollResults.value.find((x) => x.id === pollResult.id)) {
+        pollResults.value.push(pollResult);
+      }
+    }
+    // Sort the result.
+    pollResults.value = pollResults.value.sort(
+      (a, b) => b.createDatetime - a.createDatetime
+    );
   }
   if (data?.pollResult) {
     lastPollResult.value = data.pollResult[0];
@@ -142,16 +151,16 @@ pollResultsQuery.onResult(({ data }) => {
 
 // Computed.
 const existActivePoll = computed(
-  () => poll.value !== null && pollState.value !== "closed",
+  () => poll.value !== null && pollState.value !== "closed"
 );
 const connectionLost = computed(
-  () => !eventUser.value?.online || !eventUser.value?.id,
+  () => !eventUser.value?.online || !eventUser.value?.id
 );
 
 // Subscriptions.
 const updateEventUserAccessRightsSubscription = useSubscription(
   UPDATE_EVENT_USER_ACCESS_RIGHTS,
-  { eventUserId: eventUser.value.id },
+  { eventUserId: eventUser.value.id }
 );
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
@@ -169,7 +178,7 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 
 const pollLifeCycleSubscription = useSubscription(
   POLL_LIFE_CYCLE_SUBSCRIPTION,
-  { eventId: event.value.id },
+  { eventId: event.value.id }
 );
 pollLifeCycleSubscription.onResult(({ data }) => {
   if (!data?.pollLifeCycle) {
@@ -199,7 +208,8 @@ pollLifeCycleSubscription.onResult(({ data }) => {
     // Refresh poll results.
     showMoreEnabled.value = true;
     page.value = 0;
-    pollResultsQuery.restart();
+    pollResults.value = [];
+    pollResultsQuery.refetch();
   }
 });
 
@@ -228,7 +238,15 @@ function onShowMorePollResults() {
         toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
         return;
       }
-      pollResults.value = [...pollResults.value, ...fetchMoreResult.pollResult];
+
+      const pollResult = previousResult?.pollResult
+        ? [...previousResult.pollResult, ...fetchMoreResult.pollResult]
+        : [...fetchMoreResult.pollResult];
+
+      return {
+        ...previousResult,
+        pollResult,
+      };
     },
   });
 }
@@ -253,7 +271,7 @@ async function onSubmitPoll(pollFormData) {
     let answerCounter = 1;
     for await (const answerId of pollFormData.multipleAnswers) {
       const answer = poll.value.possibleAnswers.find(
-        (x) => parseInt(x.id) === parseInt(answerId),
+        (x) => parseInt(x.id) === parseInt(answerId)
       );
       input.answerContent = answer.content;
       input.possibleAnswerId = answer.id;
@@ -265,7 +283,7 @@ async function onSubmitPoll(pollFormData) {
   } else if (pollFormData.singleAnswer) {
     // Single answers to persist.
     const answer = poll.value.possibleAnswers.find(
-      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer),
+      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer)
     );
     input.answerContent = answer.content;
     input.possibleAnswerId = answer.id;
@@ -296,7 +314,7 @@ async function mutateAnswer(input) {
     CREATE_POLL_SUBMIT_ANSWER,
     {
       variables: { input },
-    },
+    }
   );
   await createPollSubmitAnswerMutation.mutate();
 }
