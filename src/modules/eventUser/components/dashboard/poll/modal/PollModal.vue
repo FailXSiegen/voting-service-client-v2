@@ -9,7 +9,10 @@
       data-backdrop="static"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-dialog-centered" role="document">
+      <div
+        class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
+        role="document"
+      >
         <div v-if="poll" class="modal-content">
           <div class="modal-header">
             <h5 :id="identifier + 'Title'" class="modal-title">
