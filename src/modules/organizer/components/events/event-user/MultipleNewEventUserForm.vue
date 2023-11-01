@@ -38,7 +38,7 @@
           :has-errors="v$.usernames?.$errors?.length > 0"
           :rows="20"
           :cols="5"
-          @change="onChangeText"
+          @change="onChangeUsernamesText"
         />
       </div>
       <button class="btn btn-primary mt-5 mb-3">
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { computed, reactive } from "vue";
+import { computed, reactive, ref } from "vue";
 import { required, requiredIf } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import { handleError } from "@/core/error/error-handler";
@@ -63,7 +63,7 @@ import TextInput from "@/core/components/form/TextInput.vue";
 import { NetworkError } from "@/core/error/NetworkError";
 
 const emit = defineEmits(["submit"]);
-
+const usernamesText = ref("");
 // Form and validation setup.
 const formData = reactive({
   allowToVote: false,
@@ -80,8 +80,8 @@ const rules = computed(() => {
 });
 const v$ = useVuelidate(rules, formData);
 
-function onChangeText({ value }) {
-  const usernames = value?.split("\n") ?? [];
+function parseUsernamesText() {
+  const usernames = usernamesText.value?.split("\n") ?? [];
   try {
     usernames.forEach((username, index) => {
       if (username === "" || username.trim().indexOf(" ") >= 0) {
@@ -100,7 +100,12 @@ function onChangeText({ value }) {
   }
 }
 
+function onChangeUsernamesText({ value }) {
+  usernamesText.value = value;
+}
+
 async function onSubmit() {
+  parseUsernamesText();
   const result = await v$.value.$validate();
   if (!result) {
     handleError(new InvalidFormError());

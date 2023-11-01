@@ -13,28 +13,6 @@
       <slot name="content" />
     </div>
   </main>
-
-  <!--  <div class="container-fluid">-->
-  <!--    <div class="align-items-center justify-content-around">-->
-  <!--      <main class="container-fluid min-vh-100 ">-->
-  <!--        <div class="align-items-center justify-content-around h-100">-->
-  <!--          <div class="row">-->
-  <!--            <div class="col-12 py-3 mb-4">-->
-  <!--              <h1 class="text-center">-->
-  <!--                <slot name="title" />-->
-  <!--              </h1>-->
-  <!--              <h2 class="h4 text-center">-->
-  <!--                <slot name="subtitle" />-->
-  <!--              </h2>-->
-  <!--            </div>-->
-  <!--            <div class="col-12">-->
-  <!--              <slot name="content" />-->
-  <!--            </div>-->
-  <!--          </div>-->
-  <!--        </div>-->
-  <!--      </main>-->
-  <!--    </div>-->
-  <!--  </div>-->
 </template>
 
 <script setup>
