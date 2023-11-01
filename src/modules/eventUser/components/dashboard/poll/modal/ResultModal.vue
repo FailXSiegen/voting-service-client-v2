@@ -1,6 +1,4 @@
 <template>
-  <!-- TODO ResultModal -->
-
   <div class="container-modal d-print-none">
     <div
       id="resultModal"

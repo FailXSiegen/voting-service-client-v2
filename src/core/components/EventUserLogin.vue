@@ -16,17 +16,6 @@
         :has-errors="v$.eventSlug.$errors.length > 0"
         @change="({ value }) => (formData.eventSlug = value)"
       />
-
-      <!--      <label for="event-slug">-->
-      <!--        {{ $t('view.login.label.eventIdent') }}-->
-      <!--      </label>-->
-      <!--      <input-->
-      <!--        id="event-user-login-event-slug"-->
-      <!--        v-model="eventSlug"-->
-      <!--        class="form-control"-->
-      <!--        type="text"-->
-      <!--        required="required"-->
-      <!--      >-->
     </div>
     <button
       id="event-user-login-submit"

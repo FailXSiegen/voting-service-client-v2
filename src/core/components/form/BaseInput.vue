@@ -11,6 +11,8 @@
     :autocomplete="autocomplete"
     :type="type"
     @keyup="onChange"
+    @blur="onChange"
+    @change="onChange"
   />
   <small v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
