@@ -29,8 +29,19 @@ export function usePollStatePersistence() {
     persistence.setItem(generateIdentifier(pollId), votes);
   }
 
+  /**
+   * @param {number} pollId
+   * @return {number}
+   */
+  function restoreVoteCounter(pollId) {
+    const votes = persistence.getItem(generateIdentifier(pollId)) || 0;
+
+    return parseInt(votes, 10);
+  }
+
   return {
     canVote,
     upsertPollState,
+    restoreVoteCounter,
   };
 }
