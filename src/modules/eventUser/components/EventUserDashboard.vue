@@ -85,6 +85,7 @@ import { useCore } from "@/core/store/core";
 import { computed, ref } from "vue";
 import { useMutation, useQuery, useSubscription } from "@vue/apollo-composable";
 import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results";
+import { ACTIVE_POLL_EVENT_USER } from "@/modules/organizer/graphql/queries/active-poll-event-user.js";
 import { toast } from "vue3-toastify";
 import l18n from "@/l18n";
 import { logout } from "@/core/auth/login";
@@ -92,6 +93,7 @@ import t from "@/core/util/l18n";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
 import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
 import { POLL_LIFE_CYCLE_SUBSCRIPTION } from "@/modules/eventUser/graphql/subscription/poll-life-cycle";
+import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 
 const coreStore = useCore();
 const emit = defineEmits(["exit"]);
@@ -115,17 +117,36 @@ const poll = ref(null);
 const pollModal = ref(null);
 const resultModal = ref(null);
 const pollResults = ref([]);
-const pollResultId = ref(null);
 const lastPollResult = ref(null);
 const highlightStatusChange = ref(false);
+const pollStatePersistence = usePollStatePersistence();
 
 // Api.
 
+// Try to fetch the active poll. activePoll
+const activePollEventUserQuery = useQuery(
+  ACTIVE_POLL_EVENT_USER,
+  { eventId: event.value?.id },
+  { fetchPolicy: "cache-and-network" }
+);
+activePollEventUserQuery.onResult(({ data }) => {
+  if (!data?.activePollEventUser) {
+    return;
+  }
+  poll.value = data.activePollEventUser.poll;
+  pollState.value = data.activePollEventUser.state;
+  // check if user already voted
+  if (
+    pollStatePersistence.canVote(poll.value.id, eventUser.value, event.value)
+  ) {
+    pollModal.value.showModal();
+  }
+});
 // Fetch poll results.
 const pollResultsQuery = useQuery(
   POLLS_RESULTS,
   { eventId: event.value?.id, page, pageSize },
-  { fetchPolicy: "cache-and-network" },
+  { fetchPolicy: "cache-and-network" }
 );
 pollResultsQuery.onResult(({ data }) => {
   if (data?.pollResult && data?.pollResult?.length >= pageSize.value) {
@@ -141,7 +162,7 @@ pollResultsQuery.onResult(({ data }) => {
     }
     // Sort the result.
     pollResults.value = pollResults.value.sort(
-      (a, b) => b.createDatetime - a.createDatetime,
+      (a, b) => b.createDatetime - a.createDatetime
     );
   }
   if (data?.pollResult) {
@@ -151,16 +172,16 @@ pollResultsQuery.onResult(({ data }) => {
 
 // Computed.
 const existActivePoll = computed(
-  () => poll.value !== null && pollState.value !== "closed",
+  () => poll.value !== null && pollState.value !== "closed"
 );
 const connectionLost = computed(
-  () => !eventUser.value?.online || !eventUser.value?.id,
+  () => !eventUser.value?.online || !eventUser.value?.id
 );
 
 // Subscriptions.
 const updateEventUserAccessRightsSubscription = useSubscription(
   UPDATE_EVENT_USER_ACCESS_RIGHTS,
-  { eventUserId: eventUser.value.id },
+  { eventUserId: eventUser.value.id }
 );
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
@@ -178,15 +199,13 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 
 const pollLifeCycleSubscription = useSubscription(
   POLL_LIFE_CYCLE_SUBSCRIPTION,
-  { eventId: event.value.id },
+  { eventId: event.value.id }
 );
 pollLifeCycleSubscription.onResult(({ data }) => {
+  console.log("pollLifeCycleSubscription", data);
   if (!data?.pollLifeCycle) {
     return;
   }
-
-  // Store the pollResultId.
-  pollResultId.value = data.pollLifeCycle.pollResultId ?? pollResultId.value;
   // Set the current poll;
   poll.value = data.pollLifeCycle.poll;
   // Set the actual poll state
@@ -254,7 +273,7 @@ function onShowMorePollResults() {
 async function onSubmitPoll(pollFormData) {
   const input = {
     eventUserId: eventUser.value.id,
-    pollResultId: pollResultId.value ?? 0,
+    pollId: poll.value?.id ?? 0,
     type: poll.value.type,
     voteCycle: voteCounter.value,
     answerItemLength: 1,
@@ -271,7 +290,7 @@ async function onSubmitPoll(pollFormData) {
     let answerCounter = 1;
     for await (const answerId of pollFormData.multipleAnswers) {
       const answer = poll.value.possibleAnswers.find(
-        (x) => parseInt(x.id) === parseInt(answerId),
+        (x) => parseInt(x.id) === parseInt(answerId)
       );
       input.answerContent = answer.content;
       input.possibleAnswerId = answer.id;
@@ -283,7 +302,7 @@ async function onSubmitPoll(pollFormData) {
   } else if (pollFormData.singleAnswer) {
     // Single answers to persist.
     const answer = poll.value.possibleAnswers.find(
-      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer),
+      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer)
     );
     input.answerContent = answer.content;
     input.possibleAnswerId = answer.id;
@@ -297,8 +316,12 @@ async function onSubmitPoll(pollFormData) {
 
   if (
     voteCounter.value >= (eventUser.value?.voteAmount || 1) ||
-    pollFormData.useAllAvailableVotes
+    pollFormData.useAllAvailableVotes ||
+    event.value?.multivoteType === 2
   ) {
+    if (poll.value?.id) {
+      pollStatePersistence.upsertPollState(poll.value.id, 99999);
+    }
     // Finish
     voteCounter.value = 1;
     // Close the poll modal.
@@ -307,6 +330,8 @@ async function onSubmitPoll(pollFormData) {
   }
 
   voteCounter.value++;
+  // todo handle - pollFormData.useAllAvailableVotes
+  pollStatePersistence.upsertPollState(poll.value.id, voteCounter.value);
 }
 
 async function mutateAnswer(input) {
@@ -314,7 +339,7 @@ async function mutateAnswer(input) {
     CREATE_POLL_SUBMIT_ANSWER,
     {
       variables: { input },
-    },
+    }
   );
   await createPollSubmitAnswerMutation.mutate();
 }
