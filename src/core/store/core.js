@@ -136,7 +136,7 @@ export const useCore = defineStore("core", {
       const organizerQuery = useQuery(
         ORGANIZER,
         { organizerId: this.user?.id },
-        { fetchPolicy: "no-cache" },
+        { fetchPolicy: "no-cache" }
       );
       organizerQuery.onResult((result) => {
         this.organizer.value = result?.data?.organizer;
@@ -151,7 +151,7 @@ export const useCore = defineStore("core", {
       const eventUserQuery = useQuery(
         EVENT_USER,
         { id: this.user?.id },
-        { fetchPolicy: "no-cache" },
+        { fetchPolicy: "no-cache" }
       );
       eventUserQuery.onResult((result) => {
         this.eventUser.value = result?.data?.eventUser;
