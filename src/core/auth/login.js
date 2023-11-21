@@ -131,6 +131,44 @@ export function refreshLogin() {
 }
 
 /**
+ * @returns {Promise<any>}
+ */
+export function loginByEventUserAuthToken() {
+  const endpoint = URLS.EVENT_USER_AUTH_TOKEN_LOGIN_ENDPOINT;
+  const requestOptions = {
+    method: "POST",
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
+    cache: "no-cache",
+    credentials: "include",
+    mode: "cors",
+  };
+
+  return fetch(endpoint, requestOptions)
+    .then((response) => {
+      if (response?.status >= 500) {
+        throw new NetworkError(t("error.network.internalServerError"));
+      }
+      if (response?.status >= 400) {
+        throw new NetworkError(t("error.network.consumerError"));
+      }
+      if (
+        response?.status >= 200 &&
+        response?.status < 300 &&
+        response?.status !== 201
+      ) {
+        throw new ExpiredSessionError(t("view.login.invalidRefreshToken"));
+      }
+      if (response?.status === 201) {
+        return response;
+      }
+      throw new NetworkError(t("error.network.undefinedError"));
+    })
+    .then((response) => response.json())
+    .then((data) => data);
+}
+
+/**
  * @returns {Promise<void>}
  */
 export function logout() {

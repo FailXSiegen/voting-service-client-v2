@@ -35,6 +35,7 @@ import { NetworkError } from "@/core/error/NetworkError";
 import { CREATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/create-event-user";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
+import { CREATE_EVENT_USER_AUTH_TOKEN } from "@/modules/organizer/graphql/mutation/create-event-user-auth-token";
 
 const coreStore = useCore();
 const router = useRouter();
@@ -60,19 +61,26 @@ eventQuery.onResult(({ data }) => {
   loaded.value = true;
 });
 
-async function onSubmit({ usernames, allowToVote, voteAmount }) {
+async function onSubmit({
+  usernames,
+  allowToVote,
+  voteAmount,
+  tokenBasedLogin,
+}) {
+  const mutation = tokenBasedLogin
+    ? CREATE_EVENT_USER_AUTH_TOKEN
+    : CREATE_EVENT_USER;
   // Create new Event users.
   for (const username of usernames) {
-    const { mutate: createEventUser } = useMutation(CREATE_EVENT_USER, {
-      variables: {
-        input: {
-          eventId: id,
-          username,
-          verified: true,
-          allowToVote,
-          voteAmount,
-        },
-      },
+    const input = {
+      eventId: id,
+      verified: true,
+      allowToVote,
+      voteAmount: voteAmount || 0,
+    };
+    input[tokenBasedLogin ? "email" : "username"] = username;
+    const { mutate: createEventUser } = useMutation(mutation, {
+      variables: { input },
     });
     await createEventUser();
   }

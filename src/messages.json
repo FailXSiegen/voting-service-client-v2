@@ -64,6 +64,12 @@
         "submit": "Registrierung abschicken",
         "success": "Sie haben sich Erfolgreich registriert! Bitte bestätigen Sie Ihre E-Mail Adresse. Nach Ihrer Bestätigung wird der Account von einem Administrator geprüft und freigeschaltet. Sie erhalten eine Bestätigung nach Freischaltung!"
       },
+      "activateAuthToken": {
+        "title": "digitalwahl.org",
+        "subTitle": "Ihre Einladung zur Veranstaltung<br />\"{eventTitle}\"",
+        "description": "Mit klick auf den folgenden Button registieren Sie sich mit <b>diesem</b> Gerät. Sie werden <b>nur mit diesem Gerät</b> an der Veranstaltung teilnehmen können. Möchten Sie ein anderes Gerät verwenden, dann öffnen Sie bitte diesen Link auf dem anderen Gerät.",
+        "activateButtonText": "Dieses Gerät aktivieren"
+      },
       "profile": {
         "headline": "",
         "label": {
@@ -142,14 +148,19 @@
               "verified": "Freigeschaltet",
               "publicName": "Angezeigter Name",
               "username": "Benutzername",
-              "voteAmount": "Anzahl der Stimmen"
+              "emails": "Liste von E-Mails",
+              "voteAmount": "Anzahl der Stimmen",
+              "tokenBasedLogin": "Tokenbasierter-Login",
+              "tokenBasedLoginHelp": "Nutzer melden sich mit einem im Browser hinterlegtem Schlüssel an (Kein Passwort)."
             },
             "eventMultipleUser": {
               "submit": "Benutzerliste speichern",
               "createNew": "Mehrere Benutzer erstellen",
               "allowToVote": "Teilnehmer mit Stimmrecht",
-              "usernames": "Benutzernamen",
+              "usernames": "Benutzerliste (Benutzernamen)",
+              "emails": "Benutzerliste (E-Mail-Adressen)",
               "usernamesHint": "Immer ein Benutzer pro Zeile. Keine Leerzeichen im Benutzernamen. Keine leeren Zeilen",
+              "emailsHint": "Immer eine E-Mail-Adresse pro Zeile. Keine Leerzeichen in der E-Mail-Adresse. Keine leeren Zeilen",
               "voteAmount": "Anzahl der Stimmen"
             },
             "videoConferenceConfig": {
@@ -382,13 +393,15 @@
         "404Headline": "Die angeforderte Seite konnte leider nicht gefunden werden."
       },
       "api": {
-        "InvalidPasswordError": "Bitte prüfen Sie das eingegebene Passwort."
+        "InvalidPasswordError": "Bitte prüfen Sie das eingegebene Passwort.",
+        "RecordNotFoundError": "Die übermittelten Daten sind fehlerhaft."
       }
     },
     "success": {
       "login": {
         "organizer": "Willkommen im Adminbereich.",
-        "eventUser": "Willkommen {userName}!"
+        "eventUser": "Willkommen {userName}!",
+        "activateEventUserAuthToken": "Ihr Gerät wurde erfolgreich für die Veranstaltung aktiviert."
       },
       "logout": {
         "organizer": "Sie haben sich erfolgreich abgemeldet.",

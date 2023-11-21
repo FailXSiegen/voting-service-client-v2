@@ -3,6 +3,7 @@
     <form @submit.prevent="onSubmit">
       <div class="form-group">
         <CheckboxInput
+          id="allowToVote"
           v-model:checked="formData.allowToVote"
           :label="$t('view.event.create.labels.eventUser.allowToVote')"
           :errors="v$.allowToVote?.$errors"
@@ -16,6 +17,7 @@
       </div>
       <div v-if="formData.allowToVote" class="form-group">
         <BaseInput
+          id="voteAmount"
           :label="$t('view.event.create.labels.eventUser.voteAmount')"
           :errors="v$.voteAmount?.$errors"
           :has-errors="v$.voteAmount?.$errors?.length > 0"
@@ -29,10 +31,38 @@
         />
       </div>
       <div class="form-group">
-        <TextInput
-          :label="$t('view.event.create.labels.eventMultipleUser.usernames')"
+        <CheckboxInput
+          id="tokenBasedLogin"
+          v-model:checked="formData.tokenBasedLogin"
+          :label="$t('view.event.create.labels.eventUser.tokenBasedLogin')"
           :help-text="
-            $t('view.event.create.labels.eventMultipleUser.usernamesHint')
+            $t('view.event.create.labels.eventUser.tokenBasedLoginHelp')
+          "
+          :errors="v$.tokenBasedLogin?.$errors"
+          :has-errors="v$.tokenBasedLogin?.$errors?.length > 0"
+          @update="
+            ({ value }) => {
+              formData.tokenBasedLogin = value;
+            }
+          "
+        />
+      </div>
+      <div class="form-group">
+        <TextInput
+          id="eventMultipleUser"
+          :label="
+            $t(
+              formData.tokenBasedLogin
+                ? 'view.event.create.labels.eventMultipleUser.emails'
+                : 'view.event.create.labels.eventMultipleUser.usernames',
+            )
+          "
+          :help-text="
+            $t(
+              formData.tokenBasedLogin
+                ? 'view.event.create.labels.eventMultipleUser.emailsHint'
+                : 'view.event.create.labels.eventMultipleUser.usernamesHint',
+            )
           "
           :errors="v$.usernames?.$errors"
           :has-errors="v$.usernames?.$errors?.length > 0"
@@ -61,12 +91,13 @@ import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import TextInput from "@/core/components/form/TextInput.vue";
 import { NetworkError } from "@/core/error/NetworkError";
-
+import { isValidEmail } from "@/core/util/email-validator";
 const emit = defineEmits(["submit"]);
 const usernamesText = ref("");
 // Form and validation setup.
 const formData = reactive({
   allowToVote: false,
+  tokenBasedLogin: false,
   voteAmount: 1,
   usernames: [],
 });
@@ -88,7 +119,16 @@ function parseUsernamesText() {
         throw index;
       }
     });
+    // Validate each line for email format, if tokenBasedLogin = true
+    if (formData.tokenBasedLogin) {
+      usernames.forEach((email, index) => {
+        if (!isValidEmail(email)) {
+          throw index;
+        }
+      });
+    }
     formData.usernames = usernames;
+    return true;
   } catch (index) {
     const numberOfRow = index + 1;
     handleError(
@@ -97,6 +137,7 @@ function parseUsernamesText() {
           numberOfRow,
       ),
     );
+    return false;
   }
 }
 
@@ -105,9 +146,9 @@ function onChangeUsernamesText({ value }) {
 }
 
 async function onSubmit() {
-  parseUsernamesText();
+  const parsedSuccessfully = parseUsernamesText();
   const result = await v$.value.$validate();
-  if (!result) {
+  if (!result || !parsedSuccessfully) {
     handleError(new InvalidFormError());
     return;
   }

@@ -2,15 +2,21 @@ import { defineStore } from "pinia";
 import {
   apolloClient,
   AUTH_TOKEN,
+  EVENT_USER_AUTH_TOKEN,
   resetClient,
   terminateClient,
 } from "@/apollo-client";
 import { decodeJsonWebToken } from "@/core/auth/jwt-util";
-import { USER_TYPE_EVENT_USER, USER_TYPE_ORGANIZER } from "@/core/auth/login";
+import {
+  loginByEventUserAuthToken,
+  USER_TYPE_EVENT_USER,
+  USER_TYPE_ORGANIZER,
+} from "@/core/auth/login";
 import { provideApolloClient, useQuery } from "@vue/apollo-composable";
 import { ORGANIZER } from "@/modules/organizer/graphql/queries/organizer";
 import { EVENT_USER } from "@/modules/eventUser/graphql/queries/event-user";
 import { reactive, ref } from "vue";
+import { getCookie } from "../util/cookie";
 
 // WATCH OUT: You can not use the router here. This will result in errors.
 
@@ -26,6 +32,7 @@ export const useCore = defineStore("core", {
     event: reactive({}),
     organizer: ref({}),
     eventUser: ref({}),
+    eventUserAuthorizedViaToken: false,
   }),
   getters: {
     isActiveOrganizerSession: (state) =>
@@ -40,28 +47,43 @@ export const useCore = defineStore("core", {
     isSuperOrganizer: (state) =>
       state.user?.type === USER_TYPE_ORGANIZER &&
       state.organizer.value?.superAdmin === true,
+    isEventUserAuthorizedViaToken: (state) =>
+      state.eventUserAuthorizedViaToken === true,
   },
   actions: {
-    init() {
-      return new Promise((resolve) => {
-        // Check if window.localStorage is available.
-        if (typeof window.localStorage === "undefined") {
-          throw new Error("Missing LocalStorage object, but it is required.");
-        }
+    async init() {
+      // Check if window.localStorage is available.
+      if (typeof window.localStorage === "undefined") {
+        throw new Error("Missing LocalStorage object, but it is required.");
+      }
 
-        if (this.user?.id) {
-          // Do not need to initialize, because we already have an active session.
-          resolve();
-        }
+      // Check if the user have an auth token cookie.
+      if (getCookie(EVENT_USER_AUTH_TOKEN)) {
+        this.eventUserAuthorizedViaToken = true;
+      }
 
-        // Check if we have a token, but no active user session.
-        const token = localStorage.getItem(AUTH_TOKEN);
-        if (token && !this.user?.id) {
-          // Create a user session
-          resolve(this.loginUser(token));
+      if (this.user?.id) {
+        // Do not need to initialize, because we already have an active session.
+        return;
+      }
+
+      // Check if we have a token, but no active user session.
+      const token = localStorage.getItem(AUTH_TOKEN);
+      if (token && !this.user?.id) {
+        // Create a user session
+        await this.loginUser(token);
+        return;
+      }
+
+      // Try to login the user by "event user auth token", if the related cookie is present.
+      if (getCookie(EVENT_USER_AUTH_TOKEN)) {
+        // The token is invalid, so we request a new one.
+        const { token } = await loginByEventUserAuthToken();
+        if (token) {
+          // Login the user width the new token.
+          await this.loginUser(token);
         }
-        resolve();
-      });
+      }
     },
 
     /**
@@ -136,7 +158,7 @@ export const useCore = defineStore("core", {
       const organizerQuery = useQuery(
         ORGANIZER,
         { organizerId: this.user?.id },
-        { fetchPolicy: "no-cache" }
+        { fetchPolicy: "no-cache" },
       );
       organizerQuery.onResult((result) => {
         this.organizer.value = result?.data?.organizer;
@@ -151,7 +173,7 @@ export const useCore = defineStore("core", {
       const eventUserQuery = useQuery(
         EVENT_USER,
         { id: this.user?.id },
-        { fetchPolicy: "no-cache" }
+        { fetchPolicy: "no-cache" },
       );
       eventUserQuery.onResult((result) => {
         this.eventUser.value = result?.data?.eventUser;
