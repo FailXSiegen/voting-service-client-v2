@@ -23,6 +23,7 @@ import { ExpiredSessionError } from "@/core/error/ExpiredSessionError";
 import { URLS } from "@/urls";
 
 export const AUTH_TOKEN = "apollo-token";
+export const EVENT_USER_AUTH_TOKEN = "eventUserAuthToken";
 export const REFRESH_TOKEN = "refreshToken";
 
 function getAccessToken() {

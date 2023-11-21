@@ -16,7 +16,7 @@ export function standaloneRequest(endpoint, requestOptions) {
       if (response?.status >= 400) {
         throw new NetworkError(t("error.network.consumerError"));
       }
-      if (response?.status === 200) {
+      if (response?.status === 200 || response?.status === 201) {
         return response;
       }
       throw new NetworkError(t("error.network.undefinedError"));

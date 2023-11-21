@@ -36,6 +36,7 @@ import {
   RouteOrganizerPollsEdit,
   RouteOrganizerPollsCopy,
   RouteEventUserFrame,
+  RouteActivateAuthToken,
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 import { USER_ROLE_ORGANIZER } from "@/core/auth/login";
@@ -69,6 +70,7 @@ import NewMultipleEventUser from "@/modules/organizer/views/event/event-user/New
 import EditEventUser from "@/modules/organizer/views/event/event-user/EditEventUser.vue";
 
 import EventUserFrame from "@/modules/eventUser/views/EventUserFrame.vue";
+import ActivateAuthToken from "@/modules/eventUser/views/ActivateAuthToken.vue";
 
 import StaticPageImprint from "@/core/views/staticPages/StaticPageImprint.vue";
 import StaticPageDataProtection from "@/core/views/staticPages/StaticPageDataProtection.vue";
@@ -324,6 +326,12 @@ const routes = [
         };
       }
     },
+  ),
+
+  new Route(
+    "/activate-user/:eventId/:token",
+    RouteActivateAuthToken,
+    ActivateAuthToken,
   ),
 ];
 

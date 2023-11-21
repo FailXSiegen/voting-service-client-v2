@@ -155,7 +155,7 @@ let pollsWithNoResultsQuery;
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" }
+  { fetchPolicy: "no-cache" },
 );
 eventQuery.onResult(({ data }) => {
   // check if the event could be fetched successfully. redirect to list if not.
@@ -171,7 +171,7 @@ eventQuery.onResult(({ data }) => {
   eventUsersQuery = useQuery(
     EVENT_USERS,
     { eventId: event.value?.id },
-    { fetchPolicy: "cache-and-network" }
+    { fetchPolicy: "cache-and-network" },
   );
   eventUsersQuery.onResult(({ data }) => {
     if (data?.eventUsers) {
@@ -183,7 +183,7 @@ eventQuery.onResult(({ data }) => {
   activePollQuery = useQuery(
     ACTIVE_POLL,
     { eventId: event.value?.id },
-    { fetchPolicy: "no-cache" }
+    { fetchPolicy: "no-cache" },
   );
   activePollQuery.onResult(({ data }) => {
     if (data?.activePoll) {
@@ -195,7 +195,7 @@ eventQuery.onResult(({ data }) => {
   activePollEventUserQuery = useQuery(
     ACTIVE_POLL_EVENT_USER,
     { eventId: event.value?.id },
-    { fetchPolicy: "cache-and-network" }
+    { fetchPolicy: "cache-and-network" },
   );
   activePollEventUserQuery.onResult(({ data }) => {
     if (data?.activePollEventUser) {
@@ -211,7 +211,7 @@ eventQuery.onResult(({ data }) => {
       page,
       pageSize,
     },
-    { fetchPolicy: "cache-and-network" }
+    { fetchPolicy: "cache-and-network" },
   );
   pollResultsQuery.onResult(({ data }) => {
     if (data?.pollResult && data?.pollResult?.length === 10) {
@@ -226,7 +226,7 @@ eventQuery.onResult(({ data }) => {
   pollsWithNoResultsQuery = useQuery(
     POLLS_WITH_NO_RESULTS,
     { eventId: event.value?.id },
-    { fetchPolicy: "cache-and-network" }
+    { fetchPolicy: "cache-and-network" },
   );
   pollsWithNoResultsQuery.onResult(({ data }) => {
     pollsWithNoResults.value = data?.pollsWithNoResults

@@ -127,7 +127,7 @@ const pollStatePersistence = usePollStatePersistence();
 const activePollEventUserQuery = useQuery(
   ACTIVE_POLL_EVENT_USER,
   { eventId: event.value?.id },
-  { fetchPolicy: "cache-and-network" }
+  { fetchPolicy: "cache-and-network" },
 );
 activePollEventUserQuery.onResult(({ data }) => {
   if (!data?.activePollEventUser) {
@@ -147,7 +147,7 @@ activePollEventUserQuery.onResult(({ data }) => {
 const pollResultsQuery = useQuery(
   POLLS_RESULTS,
   { eventId: event.value?.id, page, pageSize },
-  { fetchPolicy: "cache-and-network" }
+  { fetchPolicy: "cache-and-network" },
 );
 pollResultsQuery.onResult(({ data }) => {
   if (data?.pollResult && data?.pollResult?.length >= pageSize.value) {
@@ -163,7 +163,7 @@ pollResultsQuery.onResult(({ data }) => {
     }
     // Sort the result.
     pollResults.value = pollResults.value.sort(
-      (a, b) => b.createDatetime - a.createDatetime
+      (a, b) => b.createDatetime - a.createDatetime,
     );
   }
   if (data?.pollResult) {
@@ -173,16 +173,16 @@ pollResultsQuery.onResult(({ data }) => {
 
 // Computed.
 const existActivePoll = computed(
-  () => poll.value !== null && pollState.value !== "closed"
+  () => poll.value !== null && pollState.value !== "closed",
 );
 const connectionLost = computed(
-  () => !eventUser.value?.online || !eventUser.value?.id
+  () => !eventUser.value?.online || !eventUser.value?.id,
 );
 
 // Subscriptions.
 const updateEventUserAccessRightsSubscription = useSubscription(
   UPDATE_EVENT_USER_ACCESS_RIGHTS,
-  { eventUserId: eventUser.value.id }
+  { eventUserId: eventUser.value.id },
 );
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
@@ -200,7 +200,7 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 
 const pollLifeCycleSubscription = useSubscription(
   POLL_LIFE_CYCLE_SUBSCRIPTION,
-  { eventId: event.value.id }
+  { eventId: event.value.id },
 );
 pollLifeCycleSubscription.onResult(({ data }) => {
   console.log("pollLifeCycleSubscription", data);
@@ -291,7 +291,7 @@ async function onSubmitPoll(pollFormData) {
     let answerCounter = 1;
     for await (const answerId of pollFormData.multipleAnswers) {
       const answer = poll.value.possibleAnswers.find(
-        (x) => parseInt(x.id) === parseInt(answerId)
+        (x) => parseInt(x.id) === parseInt(answerId),
       );
       input.answerContent = answer.content;
       input.possibleAnswerId = answer.id;
@@ -303,7 +303,7 @@ async function onSubmitPoll(pollFormData) {
   } else if (pollFormData.singleAnswer) {
     // Single answers to persist.
     const answer = poll.value.possibleAnswers.find(
-      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer)
+      (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer),
     );
     input.answerContent = answer.content;
     input.possibleAnswerId = answer.id;
@@ -340,7 +340,7 @@ async function mutateAnswer(input) {
     CREATE_POLL_SUBMIT_ANSWER,
     {
       variables: { input },
-    }
+    },
   );
   await createPollSubmitAnswerMutation.mutate();
 }

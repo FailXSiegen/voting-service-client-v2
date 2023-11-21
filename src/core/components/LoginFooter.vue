@@ -46,4 +46,10 @@ const navigationItems = [
 .router-link-exact-active {
   background-color: inherit;
 }
+
+@media (max-width: 576px) {
+  footer {
+    position: relative !important;
+  }
+}
 </style>

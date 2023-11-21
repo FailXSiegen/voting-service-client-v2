@@ -9,3 +9,16 @@ export function setCookie(name, value, expireAfterDaysCount = 1) {
   const expires = "expires=" + date.toUTCString();
   document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
+
+/**
+ * @param {String} name
+ * @return {String}
+ */
+export function getCookie(name) {
+  const regex = new RegExp(`(^| )${name}=([^;]+)`);
+  const match = document.cookie.match(regex);
+  if (match) {
+    return match[2];
+  }
+  return undefined;
+}

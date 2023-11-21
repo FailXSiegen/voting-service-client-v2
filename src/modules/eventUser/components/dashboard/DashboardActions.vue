@@ -2,6 +2,7 @@
   <div class="actions-container">
     <div class="actions">
       <button
+        v-if="!isEventUserAuthorizedViaToken"
         class="actions-item btn btn-danger d-print-none"
         @click="onLogout"
       >
@@ -18,8 +19,11 @@
 </template>
 
 <script setup>
-const emit = defineEmits(["logout"]);
+import { useCore } from "@/core/store/core";
 
+const emit = defineEmits(["logout"]);
+const store = useCore();
+const isEventUserAuthorizedViaToken = store.isEventUserAuthorizedViaToken;
 // Events.
 
 function onLogout() {
