@@ -137,7 +137,7 @@ const possibleAnswers = computed(() => {
 const canSubmitAnswerForEachVote = computed(
   () =>
     props.eventUser.voteAmount > 1 &&
-    props.voteCounter === 1 &&
+    props.voteCounter <= 1 &&
     props.event.multivoteType === 1,
 );
 

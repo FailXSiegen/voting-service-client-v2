@@ -15,7 +15,7 @@
       >
         <div v-if="poll" class="modal-content">
           <div class="modal-header">
-            <h5 :id="identifier + 'Title'" class="modal-title">
+            <h5 class="modal-title">
               {{ poll.title }}<br />
               <small v-if="props.event.multivoteType !== 2" id="pollCounter">
                 <b>(Stimme {{ voteCounter }} von {{ eventUser.voteAmount }})</b>
@@ -61,7 +61,8 @@ const emit = defineEmits(["submit"]);
 const props = defineProps({
   poll: {
     type: Object,
-    required: true,
+    required: false,
+    default: null,
   },
   event: {
     type: Object,

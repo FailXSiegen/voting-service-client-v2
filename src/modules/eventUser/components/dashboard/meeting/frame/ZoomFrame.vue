@@ -101,7 +101,7 @@ function join(res) {
           ZoomMeeting.value?.getCurrentUser();
         },
         error: function (error) {
-          console.log(error);
+          console.error(error);
         },
       });
     },

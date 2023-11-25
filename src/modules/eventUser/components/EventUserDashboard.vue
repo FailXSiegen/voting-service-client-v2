@@ -68,7 +68,6 @@
 
 <script setup>
 // TODO what about the user lost connection after the frist vote. What about the left votes?
-// TODO What if the user disconnected while the poll is active and reconnects?
 import PageLayout from "@/modules/eventUser/components/PageLayout.vue";
 import DashboardActions from "@/modules/eventUser/components/dashboard/DashboardActions.vue";
 import NotVerifiedWidget from "@/modules/eventUser/components/dashboard/NotVerifiedWidget.vue";
@@ -203,7 +202,6 @@ const pollLifeCycleSubscription = useSubscription(
   { eventId: event.value.id },
 );
 pollLifeCycleSubscription.onResult(({ data }) => {
-  console.log("pollLifeCycleSubscription", data);
   if (!data?.pollLifeCycle) {
     return;
   }
@@ -271,6 +269,7 @@ function onShowMorePollResults() {
   });
 }
 
+// todo show better validation info.
 async function onSubmitPoll(pollFormData) {
   const input = {
     eventUserId: eventUser.value.id,
