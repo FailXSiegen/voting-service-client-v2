@@ -57,7 +57,8 @@ import t from "@/core/util/l18n";
 defineProps({
   pollResult: {
     type: Object,
-    required: true,
+    required: false,
+    default: null,
   },
   event: {
     type: Object,

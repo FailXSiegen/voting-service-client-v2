@@ -332,7 +332,6 @@ newEventUserSubscription.onResult(({ data }) => {
 
 const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE);
 eventUserLifeCycleSubscription.onResult(({ data }) => {
-  console.log("eventUserLifeCycleSubscription", data);
   // We have to make a copy to add a new entry to the event users array.
   const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
   const eventUser = copyOfEventUsers.find((user) => {

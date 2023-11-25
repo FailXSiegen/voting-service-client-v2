@@ -34,7 +34,7 @@ export function usePollStatePersistence() {
    * @return {number}
    */
   function restoreVoteCounter(pollId) {
-    const votes = persistence.getItem(generateIdentifier(pollId)) || 0;
+    const votes = persistence.getItem(generateIdentifier(pollId)) || 1;
 
     return parseInt(votes, 10);
   }
