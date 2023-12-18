@@ -63,6 +63,17 @@
           "
         />
       </div>
+      <template v-if="formData.async">
+        <div class="form-group">
+          <DateInput
+            :label="$t('view.event.create.labels.endDatetime')"
+            :errors="v$.endDatetime?.$errors"
+            :has-errors="v$.endDatetime?.$errors?.length > 0"
+            :value="formData.endDatetime"
+            @change="({ value }) => (formData.endDatetime = value)"
+          />
+        </div>
+      </template>
       <div class="form-group">
         <CheckboxInput
           v-model:checked="formData.lobbyOpen"
@@ -85,6 +96,19 @@
           @update="
             ({ value }) => {
               formData.active = value;
+            }
+          "
+        />
+      </div>
+      <div class="form-group">
+        <CheckboxInput
+          v-model:checked="formData.async"
+          :label="$t('view.event.create.labels.async')"
+          :errors="v$.async?.$errors"
+          :has-errors="v$.async?.$errors?.length > 0"
+          @update="
+            ({ value }) => {
+              formData.async = value;
             }
           "
         />
@@ -135,7 +159,7 @@
 
 <script setup>
 import { computed, reactive, shallowRef, watch } from "vue";
-import { required } from "@vuelidate/validators";
+import { required, requiredIf } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import { handleError } from "@/core/error/error-handler";
@@ -189,15 +213,22 @@ const formData = reactive({
   multivoteType: props.prefillData?.multivoteType ?? 1,
   videoConferenceConfig: props.prefillData?.videoConferenceConfig ?? "{}",
   videoConference: props.prefillData?.videoConference ?? null,
+  async: props.prefillData?.async ?? false,
+  endDatetime: props.prefillData?.endDatetime ?? Math.floor(Date.now() / 1000),
 });
+
 const rules = computed(() => {
   return {
     title: { required },
     slug: { required },
     description: { required },
     scheduledDatetime: { required },
+    endDatetime: {
+      requiredIf: requiredIf(formData.async),
+    },
     lobbyOpen: { required },
     active: { required },
+    async: { required },
     orgnaizerId: { required },
     multivoteType: { required },
   };
@@ -236,6 +267,12 @@ async function onSubmit() {
     handleError(new InvalidFormError());
     return;
   }
+
+  // Remove endDatetime if event is not async.
+  if (!formData.async && formData.endDatetime) {
+    delete formData.endDatetime;
+  }
+
   emit("submit", formData);
 }
 

@@ -129,7 +129,7 @@
             "slugHelp": "Pfadsegment für URL: \"digitalwahl.org/meine-veranstaltung\" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.",
             "description": "Veranstaltungsbeschreibung",
             "descriptionHelp": "Veranstaltungsbeschreibung",
-            "scheduledDatetime": "Start-Datum",
+            "scheduledDatetime": "Startdatum",
             "lobbyOpen": "Lobby aktivieren / vorzeitiger Login und Anzeige der Veranstaltung auf der Startseite",
             "active": "Veranstaltung direkt aktiv schalten?",
             "submit": "Diese Veranstaltungen speichern",
@@ -140,6 +140,8 @@
             "multivoteRadio1Help": "Bsp.: Stimme 1 von 2: Ja, Stimme 2 von 2: nein<br>Bsp. 2: Checkbox ausgewählt vom Teilnehmer: Alle Stimmen auf einmal abgeben: Ja 2x",
             "multivoteRadio2Label": "Benutzer geben IMMER alle Stimmen auf einmal ab",
             "multivoteRadio2Help": "Bsp.: Teilnehmer hat 5 Stimmen. Bei Abstimmung wählt der Teilnehmer nur einmal, es wird 5 fach gewertet.",
+            "async": "Die Abstimmungen der Veranstaltung finden asynchron statt (Briefwahl).",
+            "endDatetime": "Enddatum (Nur für Briefwahl)",
             "eventUser": {
               "submit": "Benutzer speichern",
               "createNew": "Neuen Benutzer erstellen",
@@ -246,7 +248,10 @@
           "startConfirm": "Möchtest du die Abstimmung starten?",
           "delete": "Abstimmung löschen",
           "deleteConfirm": "Möchtest du die Abstimmung wirklich löschen?",
-          "stopConfirm": "Möchtest du die Abstimmung wirklich stoppen?"
+          "stopConfirm": "Möchtest du die Abstimmung wirklich stoppen?",
+          "async": {
+            "eventActiveCantCreatePoll": "Da die Veranstaltung bereits im Gange ist, kann keine neue Abstimmung angelegt oder bestehende Abstimmungen manipuliert werden."
+          }
         },
         "modal": {
           "submitPoll": "Jetzt abstimmen",
@@ -269,7 +274,9 @@
           "alreadyVoted": "Bisherige Stimmenabgabe",
           "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}"
         },
-        "userUpdate": "Ihr Status wurde aktualisiert."
+        "userUpdate": "Ihr Status wurde aktualisiert.",
+        "eventIsNotRunning": "Die Veranstaltung startet am {date} um {time} Uhr.",
+        "eventIsFinish": "Die Veranstaltung wurde beendet."
       },
       "results": {
         "pastResults": "Vergangene Abstimmungen",

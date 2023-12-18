@@ -13,6 +13,7 @@
       <PollForm
         v-if="loaded"
         :prefill-data="prefillData"
+        :show-submit-and-start-button="showSubmitAndStartButton"
         @submit="onSubmit"
         @submit-and-start="onSubmitAndStart"
       />
@@ -31,7 +32,7 @@ import { useMutation, useQuery } from "@vue/apollo-composable";
 import { EVENT } from "@/modules/organizer/graphql/queries/event";
 import { handleError } from "@/core/error/error-handler";
 import { NetworkError } from "@/core/error/NetworkError";
-import { reactive, ref } from "vue";
+import { reactive, ref, computed } from "vue";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 import { POLL } from "@/modules/organizer/graphql/queries/poll";
@@ -56,6 +57,8 @@ const prefillData = reactive({
   allowAbstain: false,
   possibleAnswers: [],
 });
+const showSubmitAndStartButton = computed(() => !event.value?.async === true);
+
 let pollQuery;
 
 // Try to fetch event by id and organizer id.

@@ -99,6 +99,8 @@ eventQuery.onResult(({ data }) => {
   prefillData.lobbyOpen = event.value?.lobbyOpen ?? false;
   prefillData.active = event.value?.active ?? false;
   prefillData.multivoteType = event.value?.multivoteType ?? 1;
+  prefillData.async = event.value?.async ?? false;
+  prefillData.endDatetime = event.value?.endDatetime ?? 0;
 
   const resolvedVideoConferenceConfig = JSON.parse(
     event.value?.videoConferenceConfig,
@@ -137,6 +139,8 @@ async function onSubmit(formData) {
         active: formData.active,
         multivoteType: formData.multivoteType,
         videoConferenceConfig: formData.videoConferenceConfig,
+        async: formData.async,
+        endDatetime: formData.endDatetime,
       },
     },
   });

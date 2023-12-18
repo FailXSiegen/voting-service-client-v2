@@ -6,22 +6,19 @@
         {{ $t("view.polls.noActiveUser") }}
       </u>
     </p>
-    <div v-if="pollsWithNoResults" class="polls-listing-container">
-      <h2 v-if="pollsWithNoResults.length > 0">
+    <div v-if="polls" class="polls-listing-container">
+      <h2 v-if="polls.length > 0">
         {{ $t("view.polls.headlines.listingTitle") }}
       </h2>
       <ul class="created-polls list-group">
-        <li
-          v-for="poll in pollsWithNoResults"
-          :key="poll.id"
-          class="list-group-item"
-        >
+        <li v-for="poll in polls" :key="poll.id" class="list-group-item">
           <h5 class="mb-1">
             {{ poll.title }}
           </h5>
           <button
+            v-if="showStartButton"
             class="btn btn-success my-2 mr-2"
-            :disabled="currentOnlineUserCount === 0"
+            :disabled="disabled || currentOnlineUserCount === 0"
             :title="$t('view.polls.listing.start')"
             @click="onStart(poll.id)"
           >
@@ -30,6 +27,7 @@
           <button
             class="btn btn-secondary my-2 mr-2"
             :title="$t('view.polls.listing.edit')"
+            :disabled="disabled"
             @click="onEdit(poll.id)"
           >
             <i class="bi bi-pencil-square bi--2xl" />
@@ -37,6 +35,7 @@
           <button
             class="btn btn-secondary my-2 mr-2"
             :title="$t('view.polls.listing.copy')"
+            :disabled="disabled"
             @click="onCopy(poll.id)"
           >
             <i class="bi bi-files bi--2xl" />
@@ -44,6 +43,7 @@
           <button
             class="btn btn-danger my-2 mr-2"
             :title="$t('view.polls.listing.delete')"
+            :disabled="disabled"
             @click="onRemove(poll.id)"
           >
             <i class="bi bi-trash bi--2xl" />
@@ -56,13 +56,21 @@
 
 <script setup>
 defineProps({
-  pollsWithNoResults: {
+  polls: {
     type: Array,
     required: true,
   },
   currentOnlineUserCount: {
     type: Number,
     required: true,
+  },
+  showStartButton: {
+    type: Boolean,
+    default: true,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 });
 const emit = defineEmits(["copy", "edit", "remove", "start"]);

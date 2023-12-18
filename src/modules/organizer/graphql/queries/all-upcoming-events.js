@@ -18,6 +18,9 @@ export const ALL_UPCOMING_EVENTS = gql`
       scheduledDatetime
       lobbyOpen
       active
+      async
+      finished
+      endDatetime
     }
   }
 `;

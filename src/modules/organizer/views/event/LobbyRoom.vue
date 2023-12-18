@@ -49,7 +49,7 @@ const loaded = ref(false);
 const event = ref(null);
 const eventUsers = ref([]);
 const pendingEventUsers = computed(() =>
-  eventUsers.value.filter((eventUser) => !eventUser.verified)
+  eventUsers.value.filter((eventUser) => !eventUser.verified),
 );
 let eventUsersQuery;
 
@@ -57,7 +57,7 @@ let eventUsersQuery;
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" }
+  { fetchPolicy: "no-cache" },
 );
 eventQuery.onResult(({ data }) => {
   // Check if the event could be fetched successfully. redirect to list if not.
@@ -73,7 +73,7 @@ eventQuery.onResult(({ data }) => {
   eventUsersQuery = useQuery(
     EVENT_USERS,
     { eventId: event.value?.id },
-    { fetchPolicy: "cache-and-network" }
+    { fetchPolicy: "cache-and-network" },
   );
   eventUsersQuery.onResult(({ data }) => {
     if (data?.eventUsers) {
@@ -99,7 +99,7 @@ newEventUserSubscription.onResult(({ data }) => {
 
 // Handle update of event user access rights.
 const updateEventUserAccessRightsSubscription = useSubscription(
-  UPDATE_EVENT_USER_ACCESS_RIGHTS
+  UPDATE_EVENT_USER_ACCESS_RIGHTS,
 );
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   const { eventUserId, eventId, verified, allowToVote, voteAmount } =
@@ -153,7 +153,7 @@ async function onUpdateToParticipant(eventUserId) {
       variables: {
         eventUserId,
       },
-    }
+    },
   );
   await updateEventUserToParticipant();
   await eventUsersQuery.refetch();
@@ -166,7 +166,7 @@ async function onUpdateToGuest(eventUserId) {
       variables: {
         eventUserId,
       },
-    }
+    },
   );
   await updateEventUserToGuest();
   await eventUsersQuery.refetch();

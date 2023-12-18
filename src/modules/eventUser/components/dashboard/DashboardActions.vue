@@ -24,6 +24,7 @@ import { useCore } from "@/core/store/core";
 const emit = defineEmits(["logout"]);
 const store = useCore();
 const isEventUserAuthorizedViaToken = store.isEventUserAuthorizedViaToken;
+
 // Events.
 
 function onLogout() {

@@ -13,6 +13,8 @@ export const CREATE_EVENT = gql`
       active
       multivoteType
       videoConferenceConfig
+      async
+      endDatetime
     }
   }
 `;
