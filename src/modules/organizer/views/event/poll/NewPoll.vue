@@ -10,7 +10,11 @@
       <EventNavigation />
     </template>
     <template #content>
-      <PollForm @submit="onSubmit" @submit-and-start="onSubmitAndStart" />
+      <PollForm
+        :show-submit-and-start-button="showSubmitAndStartButton"
+        @submit="onSubmit"
+        @submit-and-start="onSubmitAndStart"
+      />
     </template>
   </PageLayout>
 </template>
@@ -26,7 +30,7 @@ import { useMutation, useQuery } from "@vue/apollo-composable";
 import { EVENT } from "@/modules/organizer/graphql/queries/event";
 import { handleError } from "@/core/error/error-handler";
 import { NetworkError } from "@/core/error/NetworkError";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 import { CREATE_POLL } from "@/modules/organizer/graphql/mutation/create-poll";
@@ -37,6 +41,7 @@ const route = useRoute();
 const id = route.params.id;
 const loaded = ref(false);
 const event = ref(null);
+const showSubmitAndStartButton = computed(() => !event.value?.async === true);
 
 // Try to fetch event by id and organizer id.
 const eventQuery = useQuery(

@@ -12,6 +12,8 @@ export const UPDATE_EVENT = gql`
       active
       multivoteType
       videoConferenceConfig
+      async
+      endDatetime
     }
   }
 `;

@@ -67,6 +67,8 @@ async function onSubmit(formData) {
         active: formData.active,
         multivoteType: formData.multivoteType,
         videoConferenceConfig: formData.videoConferenceConfig,
+        async: formData.async,
+        endDatetime: formData.endDatetime,
       },
     },
   });

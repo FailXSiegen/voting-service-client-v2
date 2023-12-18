@@ -103,7 +103,7 @@ export const useCore = defineStore("core", {
       const { payload } = decodeJsonWebToken(token);
 
       // Update user data.
-      // @todo Add a validation of the response, so we can be sure to fetch real and good user data.
+      // todo: Add a validation of the response, so we can be sure to fetch real and good user data.
       this.user = {
         type: payload?.user?.type,
         id: payload?.user?.id,

@@ -58,12 +58,14 @@ const props = defineProps({
   helpText: String,
 });
 
-const inputValue = ref(
-  props.value > 0 ? new Date(props.value * 1000) : new Date(),
-);
+const inputValue = ref(props.value > 0 ? new Date(props.value * 1000) : null);
 
 function onChange() {
-  emit("change", { value: Math.floor(inputValue.value.getTime() / 1000) });
+  emit("change", {
+    value: inputValue.value
+      ? Math.floor(inputValue.value.getTime() / 1000)
+      : null,
+  });
 }
 
 const format = (date) => {

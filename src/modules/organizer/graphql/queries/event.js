@@ -14,6 +14,9 @@ export const EVENT = gql`
       active
       multivoteType
       videoConferenceConfig
+      async
+      finished
+      endDatetime
     }
   }
 `;

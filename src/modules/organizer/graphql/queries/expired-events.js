@@ -12,6 +12,9 @@ export const EXPIRED_EVENTS = gql`
       scheduledDatetime
       lobbyOpen
       active
+      async
+      finished
+      endDatetime
     }
   }
 `;

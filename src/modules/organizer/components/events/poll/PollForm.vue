@@ -101,6 +101,7 @@
       </div>
       <div class="col-12 col-md-6 mb-3">
         <button
+          v-if="showSubmitAndStartButton"
           class="btn btn-secondary d-block w-100"
           type="submit"
           :disabled="currentOnlineUserCount === 0"
@@ -138,6 +139,10 @@ const props = defineProps({
     type: Object,
     required: false,
     default: null,
+  },
+  showSubmitAndStartButton: {
+    type: Boolean,
+    default: true,
   },
 });
 
@@ -249,6 +254,9 @@ async function onSubmit() {
 }
 
 async function onSubmitAndStart() {
+  if (!props.showSubmitAndStartButton) {
+    return;
+  }
   const result = await v$.value.$validate();
   if (!result) {
     handleError(new InvalidFormError());
