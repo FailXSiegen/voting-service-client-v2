@@ -118,7 +118,8 @@
           "allVoteAmount": "Gesamtstimmen",
           "info": "Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren -> Haken bei \"Freigeschaltet\" entfernen. Benutzer erscheint wieder im Warteraum",
           "confirm": {
-            "unverify": "Freischaltung deaktivieren? Nutzer wird in den Warteraum verschoben."
+            "unverify": "Freischaltung deaktivieren? Nutzer wird in den Warteraum verschoben.",
+            "terminateTokenSession": "Mit der Abmeldung kann dieses Gerät nicht mehr an der Veranstaltung teilnehmen. Dieser Vorgang ist unwiderruflich. Möchten Sie sich wirklich abmelden?"
           }
         },
         "create": {
@@ -343,6 +344,7 @@
     },
     "navigation": {
       "logOut": "Ausloggen",
+      "terminateTokenSession": "Abmelden",
       "reload": "Aktualisieren",
       "backToDashboard": "Zurück zum Dashboard",
       "backToPolls": "Zurück zu Abstimmungen",
@@ -446,6 +448,11 @@
           "startedSuccessfully": "Die Abstimmung wurde erfolgreich gestartet.",
           "stoppedSuccessfully": "Die Abstimmung wurde erfolgreich gestoppt."
         }
+      }
+    },
+    "notice": {
+      "logout": {
+        "wrongEvent": "Sie waren noch in einer anderen Veranslatung angemeldet. Bitte melden Sie sich für die diese Veranslatung erneut an."
       }
     },
     "eventUser": {
