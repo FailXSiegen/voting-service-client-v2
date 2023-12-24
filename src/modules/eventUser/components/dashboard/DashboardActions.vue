@@ -9,6 +9,15 @@
         <i class="mr-2 bi bi-x-square" />{{ $t("navigation.logOut") }}
       </button>
       <button
+        v-else
+        class="actions-item btn btn-danger d-print-none"
+        @click="onTerminateTokenSession"
+      >
+        <i class="mr-2 bi bi-x-square" />{{
+          $t("navigation.terminateTokenSession")
+        }}
+      </button>
+      <button
         class="actions-item btn btn-secondary d-print-none"
         @click="onReloadPage"
       >
@@ -21,7 +30,7 @@
 <script setup>
 import { useCore } from "@/core/store/core";
 
-const emit = defineEmits(["logout"]);
+const emit = defineEmits(["logout", "terminateTokenSession"]);
 const store = useCore();
 const isEventUserAuthorizedViaToken = store.isEventUserAuthorizedViaToken;
 
@@ -29,6 +38,10 @@ const isEventUserAuthorizedViaToken = store.isEventUserAuthorizedViaToken;
 
 function onLogout() {
   emit("logout");
+}
+
+function onTerminateTokenSession() {
+  emit("terminateTokenSession");
 }
 
 function onReloadPage() {

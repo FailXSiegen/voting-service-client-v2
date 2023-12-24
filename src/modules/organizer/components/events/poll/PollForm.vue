@@ -61,6 +61,7 @@
           "
         />
         <CheckboxInput
+          v-if="!hideAbstainInput"
           id="allowAbstain"
           v-model:checked="formData.allowAbstain"
           :label="$t('view.polls.create.labels.abstention')"
@@ -155,8 +156,6 @@ const route = useRoute();
 const id = route.params.id;
 const loaded = ref(false);
 const eventUsers = ref([]);
-
-// computed.
 const currentOnlineUserCount = computed(() => {
   if (eventUsers.value?.length === 0) {
     return 0;
@@ -165,6 +164,7 @@ const currentOnlineUserCount = computed(() => {
     return eventUser?.verified && eventUser?.online && eventUser?.allowToVote;
   }).length;
 });
+const hideAbstainInput = computed(() => formData.maxVotes > 1);
 
 // Fetch event users.
 const eventUsersQuery = useQuery(
@@ -182,7 +182,7 @@ eventUsersQuery.onResult(({ data }) => {
 // Form and validation setup.
 const formData = reactive({
   title: props.prefillData?.title ?? "",
-  type: props.prefillData?.type ?? "PUBLIC",
+  type: props.prefillData?.type ?? "SECRET",
   pollAnswer: props.prefillData?.pollAnswer ?? "yesNoAbstain",
   list: props.prefillData?.list ?? "",
   minVotes: props.prefillData?.minVotes ?? 0,
@@ -201,7 +201,7 @@ const rules = computed(() => {
     },
     minVotes: { required },
     maxVotes: { required },
-    allowAbstain: { required },
+    allowAbstain: requiredIf(formData.maxVotes <= 1),
     possibleAnswers: { required },
   };
 });
@@ -250,6 +250,12 @@ async function onSubmit() {
     handleError(new InvalidFormError());
     return;
   }
+
+  // Reset abstain if max votes is bigger 1.
+  if (formData.maxVotes > 1) {
+    formData.allowAbstain = false;
+  }
+
   emit("submit", formData);
 }
 
