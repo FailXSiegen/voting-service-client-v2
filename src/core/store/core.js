@@ -17,6 +17,7 @@ import { ORGANIZER } from "@/modules/organizer/graphql/queries/organizer";
 import { EVENT_USER } from "@/modules/eventUser/graphql/queries/event-user";
 import { reactive, ref } from "vue";
 import { getCookie } from "../util/cookie";
+import { handleError } from "../error/error-handler";
 
 // WATCH OUT: You can not use the router here. This will result in errors.
 
@@ -67,22 +68,27 @@ export const useCore = defineStore("core", {
         return;
       }
 
-      // Check if we have a token, but no active user session.
-      const token = localStorage.getItem(AUTH_TOKEN);
-      if (token && !this.user?.id) {
-        // Create a user session
-        await this.loginUser(token);
-        return;
-      }
-
-      // Try to login the user by "event user auth token", if the related cookie is present.
-      if (getCookie(EVENT_USER_AUTH_TOKEN)) {
-        // The token is invalid, so we request a new one.
-        const { token } = await loginByEventUserAuthToken();
-        if (token) {
-          // Login the user width the new token.
+      try {
+        // Check if we have a token, but no active user session.
+        const token = localStorage.getItem(AUTH_TOKEN);
+        if (token && !this.user?.id) {
+          // Create a user session
           await this.loginUser(token);
+          return;
         }
+
+        // Try to login the user by "event user auth token", if the related cookie is present.
+        if (getCookie(EVENT_USER_AUTH_TOKEN)) {
+          // The token is invalid, so we request a new one.
+          const { token } = await loginByEventUserAuthToken();
+          if (token) {
+            // Login the user width the new token.
+            await this.loginUser(token);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+        handleError(error);
       }
     },
 
@@ -130,8 +136,9 @@ export const useCore = defineStore("core", {
      * @returns {Promise<void>}
      */
     async logoutUser() {
-      // Store token in local storage.
-      localStorage.removeItem(AUTH_TOKEN);
+      // Clear localstorage to ensure a clean application state.
+      // The server will remove the cookies.
+      localStorage.clear();
 
       // Unset user data.
       this.user = {
