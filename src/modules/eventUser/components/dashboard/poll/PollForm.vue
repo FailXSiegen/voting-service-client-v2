@@ -34,7 +34,7 @@
     </fieldset>
 
     <!-- Abstain. -->
-    <template v-if="poll.allowAbstain && voteType !== VOTE_TYPE_SINGLE">
+    <template v-if="showAbstain">
       <hr />
       <fieldset>
         <CheckboxInput
@@ -121,7 +121,12 @@ const voteType = computed(() => {
   }
   throw Error("Invalid voting setup!");
 });
-
+const showAbstain = computed(
+  () =>
+    props.poll.allowAbstain &&
+    props.poll.pollAnswer === "custom" &&
+    props.poll.maxVotes <= 1,
+);
 const possibleAnswers = computed(() => {
   const result = [];
   props.poll.possibleAnswers.forEach((answer) => {
@@ -133,7 +138,6 @@ const possibleAnswers = computed(() => {
 
   return result;
 });
-
 const canSubmitAnswerForEachVote = computed(
   () =>
     props.eventUser.voteAmount > 1 &&

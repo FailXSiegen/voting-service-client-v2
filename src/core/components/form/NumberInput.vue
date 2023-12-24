@@ -13,6 +13,7 @@
     :min="min"
     :max="max"
     @keyup="onChange"
+    @change="onChange"
   />
   <small v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />

@@ -1,7 +1,10 @@
 <template>
   <PageLayout>
     <template #actions>
-      <DashboardActions v-if="!eventIsAsync" @logout="onLogout" />
+      <DashboardActions
+        @logout="onLogout"
+        @terminate-token-session="onTerminateTokenSession"
+      />
     </template>
     <template #content>
       <AsyncEventDashboard v-if="eventIsAsync" :event="event" />
@@ -19,7 +22,8 @@ import { logout } from "@/core/auth/login";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 import { computed } from "vue";
-
+import { createConfirmDialog } from "vuejs-confirm-dialog";
+import ConfirmModal from "@/core/components/ConfirmModal.vue";
 const props = defineProps({
   event: {
     type: Object,
@@ -36,5 +40,17 @@ function onLogout() {
   logout()
     .then(() => toast(t("success.logout.eventUser"), { type: "success" }))
     .then(() => emit("exit"));
+}
+
+function onTerminateTokenSession() {
+  const dialog = createConfirmDialog(ConfirmModal, {
+    message: t("view.event.user.confirm.terminateTokenSession"),
+  });
+  dialog.onConfirm(() => {
+    onLogout();
+  });
+
+  // Show confirm dialog.
+  dialog.reveal();
 }
 </script>

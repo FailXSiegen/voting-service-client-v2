@@ -32,6 +32,7 @@ if (
   parseInt(event.id, 10) !== parseInt(eventUser?.eventId, 10)
 ) {
   logout()
+    .then(() => coreStore.init())
     .then(() => determineActiveComponent())
     .then(() => toast(t("notice.logout.wrongEvent"), { type: "info" }));
 }

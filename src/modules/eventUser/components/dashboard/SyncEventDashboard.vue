@@ -189,7 +189,7 @@ const pollLifeCycleSubscription = useSubscription(
   POLL_LIFE_CYCLE_SUBSCRIPTION,
   { eventId: props.event.id },
 );
-pollLifeCycleSubscription.onResult(({ data }) => {
+pollLifeCycleSubscription.onResult(async ({ data }) => {
   if (!data?.pollLifeCycle) {
     return;
   }
@@ -204,6 +204,12 @@ pollLifeCycleSubscription.onResult(({ data }) => {
     voteCounter.value = 1;
     // Close the result modal.
     resultModal.value.hideModal();
+
+    if (!poll.value) {
+      console.warn("missing current poll.");
+      await activePollEventUserQuery.refetch();
+    }
+
     // Open the poll modal.
     pollModal.value.showModal();
   } else if (pollState.value === "closed") {
