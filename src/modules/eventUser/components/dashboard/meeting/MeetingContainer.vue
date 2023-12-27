@@ -7,7 +7,7 @@
         :api-key="event.meeting.apiKey"
         :api-secret="event.meeting.apiSecret"
         :nickname="eventUser.publicName"
-        :meeting-id="parseInt(event.meeting.id, 10)"
+        :meeting-number="event.meeting.credentials.meetingId"
         :password="event.meeting.credentials.password"
         :return-url="event.slug"
         @loaded="onLoaded"

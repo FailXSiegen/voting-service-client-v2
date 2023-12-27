@@ -24,8 +24,8 @@ const props = defineProps({
     type: String,
     required: true,
   },
-  meetingId: {
-    type: Number,
+  meetingNumber: {
+    type: String,
     required: true,
   },
   password: {
@@ -63,17 +63,17 @@ onMounted(async () => {
     china: false,
     userEmail: "",
   };
-  setCookie("meeting_number", props.meetingId);
+  setCookie("meeting_number", props.meetingNumber);
   setCookie("meeting_pwd", props.password);
 
   // Mark as loaded here because the overlay already exist at this point.
   emit("loaded");
 
   // Generate Signature function
-  signature.value = ZoomMeeting.value?.generateSignature({
+  signature.value = ZoomMeeting.value?.generateSDKSignature({
     meetingNumber: meetConfig.value?.meetingNumber,
-    apiKey: meetConfig.value?.apiKey,
-    apiSecret: meetConfig.value?.apiSecret,
+    sdkKey: meetConfig.value?.apiKey,
+    sdkSecret: meetConfig.value?.apiSecret,
     role: meetConfig.value?.role,
     success: function (res) {
       join(res);
@@ -89,13 +89,22 @@ function join(res) {
     success: () => {
       ZoomMeeting.value?.i18n.load(meetConfig.value?.lang);
       ZoomMeeting.value?.i18n.reload(meetConfig.value?.lang);
+
+      // client.join({
+      //    sdkKey: sdkKey,
+      //    signature: signature,
+      //    meetingNumber: meetingNumber,
+      //    password: password,
+      //    userName: userName
+      // })
+
       ZoomMeeting.value?.join({
-        meetingNumber: meetConfig.value?.meetingNumber,
-        userName: meetConfig.value?.userName,
+        sdkKey: meetConfig.value?.apiKey,
         signature: meetConfig.value?.signature,
-        apiKey: meetConfig.value?.apiKey,
-        userEmail: meetConfig.value?.userEmail,
+        meetingNumber: meetConfig.value?.meetingNumber,
         passWord: meetConfig.value?.passWord,
+        userName: meetConfig.value?.userName,
+        userEmail: meetConfig.value?.userEmail,
         success: function () {
           ZoomMeeting.value?.getAttendeeslist({});
           ZoomMeeting.value?.getCurrentUser();
