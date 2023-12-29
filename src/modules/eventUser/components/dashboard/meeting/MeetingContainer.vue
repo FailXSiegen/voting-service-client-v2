@@ -4,8 +4,8 @@
       <div id="zoom-hook" />
       <ZoomFrame
         v-if="event.meeting.credentials"
-        :api-key="event.meeting.apiKey"
-        :api-secret="event.meeting.apiSecret"
+        :sdk-key="event.meeting.sdkKey"
+        :sdk-secret="event.meeting.sdkSecret"
         :nickname="eventUser.publicName"
         :meeting-number="event.meeting.credentials.meetingId"
         :password="event.meeting.credentials.password"

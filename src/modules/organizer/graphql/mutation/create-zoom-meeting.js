@@ -5,8 +5,8 @@ export const CREATE_ZOOM_MEETING = gql`
     createZoomMeeting(input: $input) {
       id
       title
-      apiKey
-      apiSecret
+      sdkKey
+      sdkSecret
     }
   }
 `;

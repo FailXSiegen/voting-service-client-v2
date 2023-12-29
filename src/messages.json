@@ -90,8 +90,8 @@
         "backToListView": "Zur Listenansicht",
         "formData": {
           "title": "Titel",
-          "apiKey": "API Key",
-          "apiSecret": "API Secret",
+          "sdkKey": "SDK Key",
+          "sdkSecret": "SDK Secret",
           "submitNew": "Datensatz anlegen",
           "submitEdit": "Speichern"
         }
