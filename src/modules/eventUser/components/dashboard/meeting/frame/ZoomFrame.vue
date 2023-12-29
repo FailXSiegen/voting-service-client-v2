@@ -5,11 +5,11 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import { setCookie } from "@/core/util/cookie";
+import { fetchSignature } from "@/modules/eventUser/requests/fetch-zoom-signature";
 
 const emit = defineEmits(["loaded"]);
 const meetConfig = ref({});
 const ZoomMeeting = ref(null);
-const signature = ref(null);
 
 const props = defineProps({
   sdkKey: {
@@ -69,35 +69,20 @@ onMounted(async () => {
   // Mark as loaded here because the overlay already exist at this point.
   emit("loaded");
 
-  // Generate Signature function
-  signature.value = ZoomMeeting.value?.generateSDKSignature({
-    meetingNumber: meetConfig.value?.meetingNumber,
-    sdkKey: meetConfig.value?.sdkKey,
-    sdkSecret: meetConfig.value?.sdkSecret,
-    role: meetConfig.value?.role,
-    success: function (res) {
-      join(res);
-    },
-  });
+  // Generate Signature.
+  const { signature } = await fetchSignature(meetConfig.value?.meetingNumber);
+  meetConfig.value.signature = signature;
+
+  join();
 });
 
-function join(res) {
-  meetConfig.value.signature = res.result;
+function join() {
   ZoomMeeting.value?.init({
     leaveUrl: meetConfig.value?.leaveUrl,
     webEndpoint: meetConfig.value?.webEndpoint,
     success: () => {
       ZoomMeeting.value?.i18n.load(meetConfig.value?.lang);
       ZoomMeeting.value?.i18n.reload(meetConfig.value?.lang);
-
-      // client.join({
-      //    sdkKey: sdkKey,
-      //    signature: signature,
-      //    meetingNumber: meetingNumber,
-      //    password: password,
-      //    userName: userName
-      // })
-
       ZoomMeeting.value?.join({
         sdkKey: meetConfig.value?.sdkKey,
         signature: meetConfig.value?.signature,

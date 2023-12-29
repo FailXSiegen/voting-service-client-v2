@@ -50,6 +50,7 @@ export const useCore = defineStore("core", {
       state.organizer.value?.superAdmin === true,
     isEventUserAuthorizedViaToken: (state) =>
       state.eventUserAuthorizedViaToken === true,
+    getAuthToken: () => localStorage.getItem(AUTH_TOKEN),
   },
   actions: {
     async init() {
