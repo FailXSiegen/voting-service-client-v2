@@ -5,8 +5,8 @@ export const UPDATE_ZOOM_MEETING = gql`
     updateZoomMeeting(input: $input) {
       id
       title
-      apiKey
-      apiSecret
+      sdkKey
+      sdkSecret
     }
   }
 `;

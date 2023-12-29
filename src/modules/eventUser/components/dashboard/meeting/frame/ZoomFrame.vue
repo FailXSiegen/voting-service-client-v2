@@ -12,11 +12,11 @@ const ZoomMeeting = ref(null);
 const signature = ref(null);
 
 const props = defineProps({
-  apiKey: {
+  sdkKey: {
     type: String,
     required: true,
   },
-  apiSecret: {
+  sdkSecret: {
     type: String,
     required: true,
   },
@@ -52,9 +52,9 @@ onMounted(async () => {
 
   // Meeting config object
   meetConfig.value = {
-    apiKey: props.apiKey,
-    apiSecret: props.apiSecret,
-    meetingNumber: props.meetingId,
+    sdkKey: props.sdkKey,
+    sdkSecret: props.sdkSecret,
+    meetingNumber: props.meetingNumber,
     userName: props.nickname,
     passWord: props.password,
     leaveUrl: props.returnUrl,
@@ -72,8 +72,8 @@ onMounted(async () => {
   // Generate Signature function
   signature.value = ZoomMeeting.value?.generateSDKSignature({
     meetingNumber: meetConfig.value?.meetingNumber,
-    sdkKey: meetConfig.value?.apiKey,
-    sdkSecret: meetConfig.value?.apiSecret,
+    sdkKey: meetConfig.value?.sdkKey,
+    sdkSecret: meetConfig.value?.sdkSecret,
     role: meetConfig.value?.role,
     success: function (res) {
       join(res);
@@ -99,7 +99,7 @@ function join(res) {
       // })
 
       ZoomMeeting.value?.join({
-        sdkKey: meetConfig.value?.apiKey,
+        sdkKey: meetConfig.value?.sdkKey,
         signature: meetConfig.value?.signature,
         meetingNumber: meetConfig.value?.meetingNumber,
         passWord: meetConfig.value?.passWord,

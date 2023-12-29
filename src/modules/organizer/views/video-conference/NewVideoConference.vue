@@ -32,26 +32,26 @@
         </div>
         <div class="form-group">
           <BaseInput
-            :label="$t('view.videoConference.formData.apiKey')"
-            :errors="v$.apiKey?.$errors"
-            :has-errors="v$.apiKey?.$errors.length > 0"
-            :value="formData.apiKey"
+            :label="$t('view.videoConference.formData.sdkKey')"
+            :errors="v$.sdkKey?.$errors"
+            :has-errors="v$.sdkKey?.$errors.length > 0"
+            :value="formData.sdkKey"
             @change="
               ({ value }) => {
-                formData.apiKey = value;
+                formData.sdkKey = value;
               }
             "
           />
         </div>
         <div class="form-group">
           <BaseInput
-            :label="$t('view.videoConference.formData.apiSecret')"
-            :errors="v$.apiSecret?.$errors"
-            :has-errors="v$.apiSecret?.$errors.length > 0"
-            :value="formData.apiSecret"
+            :label="$t('view.videoConference.formData.sdkSecret')"
+            :errors="v$.sdkSecret?.$errors"
+            :has-errors="v$.sdkSecret?.$errors.length > 0"
+            :value="formData.sdkSecret"
             @change="
               ({ value }) => {
-                formData.apiSecret = value;
+                formData.sdkSecret = value;
               }
             "
           />
@@ -103,14 +103,14 @@ const routes = getRoutesByName([
 // Form and validation setup.
 const formData = reactive({
   title: "",
-  apiKey: "",
-  apiSecret: "",
+  sdkKey: "",
+  sdkSecret: "",
 });
 const rules = computed(() => {
   return {
     title: { required },
-    apiKey: { required },
-    apiSecret: { required },
+    sdkKey: { required },
+    sdkSecret: { required },
   };
 });
 
@@ -129,8 +129,8 @@ async function onSubmit() {
       input: {
         organizerId: coreStore.getOrganizer?.id,
         title: formData.title,
-        apiKey: formData.apiKey,
-        apiSecret: formData.apiSecret,
+        sdkKey: formData.sdkKey,
+        sdkSecret: formData.sdkSecret,
       },
     },
   });

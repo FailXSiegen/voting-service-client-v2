@@ -5,8 +5,8 @@ export const QUERY_ZOOM_MEETING = gql`
     zoomMeeting(id: $id) {
       id
       title
-      apiKey
-      apiSecret
+      sdkKey
+      sdkSecret
     }
   }
 `;

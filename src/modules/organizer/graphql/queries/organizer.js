@@ -16,8 +16,8 @@ export const ORGANIZER = gql`
       zoomMeetings {
         id
         title
-        apiKey
-        apiSecret
+        sdkKey
+        sdkSecret
       }
     }
   }
