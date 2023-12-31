@@ -121,3 +121,10 @@
     margin-right: 0 !important;
   }
 }
+// Dropdown fix for zoom.
+.custom-dropdown-menu.dropdown-menu > li a {
+  display: block;
+}
+.open.dropup .dropdown-menu {
+  display: block;
+}
