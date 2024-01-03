@@ -314,8 +314,17 @@ const routes = [
     async (to) => {
       const slug = to.params?.eventSlug ?? "";
       try {
-        const event = await fetchEventBySlug(slug);
         const coreStore = useCore();
+
+        // Redirect to organizer dashboard, if current user session is a organizer session.
+        if (coreStore.isActiveOrganizerSession) {
+          toast(t("router.redirect.activeOrganizerSession"), { type: "info" });
+          return {
+            name: RouteOrganizerDashboard,
+          };
+        }
+
+        const event = await fetchEventBySlug(slug);
         coreStore.setEvent(event);
       } catch (error) {
         toast(t("router.redirect.invalidEventSlug", { slug }), {

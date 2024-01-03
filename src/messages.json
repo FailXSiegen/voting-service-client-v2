@@ -125,7 +125,7 @@
         "create": {
           "createNew": "Neue Veranstaltung erstellen",
           "labels": {
-            "title": "Veranstaltungtitel",
+            "title": "Veranstaltungstitel",
             "slug": "Slug",
             "slugHelp": "Pfadsegment für URL: \"digitalwahl.org/meine-veranstaltung\" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.",
             "description": "Veranstaltungsbeschreibung",

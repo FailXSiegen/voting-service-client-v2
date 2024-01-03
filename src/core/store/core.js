@@ -9,6 +9,7 @@ import {
 import { decodeJsonWebToken } from "@/core/auth/jwt-util";
 import {
   loginByEventUserAuthToken,
+  logout,
   USER_TYPE_EVENT_USER,
   USER_TYPE_ORGANIZER,
 } from "@/core/auth/login";
@@ -107,30 +108,34 @@ export const useCore = defineStore("core", {
       localStorage.setItem(AUTH_TOKEN, token);
 
       // Decode jwt.
-      const { payload } = decodeJsonWebToken(token);
+      try {
+        const { payload } = decodeJsonWebToken(token);
+        // Update user data.
+        // todo: Add a validation of the response, so we can be sure to fetch real and good user data.
+        this.user = {
+          type: payload?.user?.type,
+          id: payload?.user?.id,
+          verified: payload?.user?.verified,
+          role: payload?.role,
+          expiresAt: payload?.exp,
+        };
 
-      // Update user data.
-      // todo: Add a validation of the response, so we can be sure to fetch real and good user data.
-      this.user = {
-        type: payload?.user?.type,
-        id: payload?.user?.id,
-        verified: payload?.user?.verified,
-        role: payload?.role,
-        expiresAt: payload?.exp,
-      };
+        // Query organizer record, if this is an organizer session.
+        if (this.user?.type === USER_TYPE_ORGANIZER) {
+          this.queryOrganizer();
+        }
 
-      // Query organizer record, if this is an organizer session.
-      if (this.user?.type === USER_TYPE_ORGANIZER) {
-        this.queryOrganizer();
+        // Query event user record, if this is an event user session.
+        if (this.user?.type === USER_TYPE_EVENT_USER) {
+          this.queryEventUser();
+        }
+
+        // Reset apollo client.
+        return resetClient();
+      } catch (error) {
+        // Somethign went wrong, so terminate the user session.
+        await logout();
       }
-
-      // Query event user record, if this is an event user session.
-      if (this.user?.type === USER_TYPE_EVENT_USER) {
-        this.queryEventUser();
-      }
-
-      // Reset apollo client.
-      return resetClient();
     },
 
     /**
