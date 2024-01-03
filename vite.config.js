@@ -23,6 +23,18 @@ export default defineConfig({
           src: __dirname + "/node_modules/@zoomus/websdk/dist/lib",
           dest: __dirname + "/dist/lib/zoom/",
         },
+        {
+          src: __dirname + "/node_modules/@zoomus/websdk/dist/lib",
+          dest: __dirname + "/public/lib/zoom/",
+        },
+        {
+          src: __dirname + "/src/assets/pdf",
+          dest: __dirname + "/dist/download",
+        },
+        {
+          src: __dirname + "/src/assets/pdf",
+          dest: __dirname + "/public/download",
+        },
       ],
     }),
   ],
