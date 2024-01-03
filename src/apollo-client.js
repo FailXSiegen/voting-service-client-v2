@@ -21,7 +21,7 @@ import { UnauthorizedError } from "@/core/error/UnauthorizedError";
 import { GraphQLError } from "@/core/error/GraphQLError";
 import { ExpiredSessionError } from "@/core/error/ExpiredSessionError";
 import { URLS } from "@/urls";
-
+import { logout } from "@/core/auth/login";
 export const AUTH_TOKEN = "apollo-token";
 export const EVENT_USER_AUTH_TOKEN = "eventUserAuthToken";
 export const REFRESH_TOKEN = "refreshToken";
@@ -141,8 +141,8 @@ const errorLink = onError(async (error) => {
       // Session is invalid, so return to main login.
       handleError(new NetworkError(error.networkError.message));
       // @todo move routing to different place to avoid errors.
-      // await logout();
-      // await router.push({name: RouteMainLogin});
+      await logout();
+      // await router.push({ name: RouteMainLogin });
       return;
     }
 
@@ -185,7 +185,8 @@ export async function resetClient() {
 export async function terminateClient() {
   try {
     await terminateWebsocketClient();
-    await resetClient();
+    await apolloClient.clearStore();
+    apolloClient.stop();
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
