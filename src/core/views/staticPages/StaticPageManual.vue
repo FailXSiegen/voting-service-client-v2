@@ -2,21 +2,7 @@
   <CorePageLayout meta-title="Anleitung">
     <div class="manual">
       <h1>Anleitungen</h1>
-      <div class="alert alert-info">
-        <div class="row">
-          <div class="col-2 text-center">
-            <i class="bi bi-exclamation-circle bi--6xl" />
-          </div>
-          <div class="col d-flex align-items-center">
-            <p>
-              <b>Achtung</b>: Screenshots und Informationen können sich vom
-              aktuell verfügbaren Entwicklungsstand unterscheiden. Bei
-              Veröffentlichung von neuene Features wird die Anleitung
-              schnellstmöglich aktualisiert.
-            </p>
-          </div>
-        </div>
-      </div>
+
       <ul class="list-unstyled">
         <li class="mb-3">
           <a href="#teilnehmer" class="h3">Für Teilnehmer</a>
@@ -50,7 +36,9 @@
         </li>
       </ul>
       <hr />
-      <h2 id="teilnehmer" class="mb-3">Für Teilnehmer</h2>
+      <div class="bg-secondary text-white p-3 mb-3 rounded">
+        <h2 id="teilnehmer">Für Teilnehmer</h2>
+      </div>
       <div id="loginmaske" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
@@ -70,7 +58,7 @@
           <p>Für eine Anmeldung sind folgende Informationen erforderlich:</p>
           <ol>
             <li>
-              <b>E-Mail Adresse oder Mitgliedsnummer:</b><br />Je nach Verfahren
+              <b>Benutzername, E-Mail Adresse oder Mitgliedsnummer:</b><br />Je nach Verfahren
               wird der Organisator eine vorherige Anmeldung durchgeführt haben.
               Verwenden Sie hier die vom Organisator vorgegebene Möglichkeit.
             </li>
@@ -89,6 +77,18 @@
               Sie teilnehmen und Ihre Stimme abgeben.
             </li>
           </ol>
+          <div class="alert alert-info">
+            <div class="row">
+              <div class="col-2 text-center">
+                <i class="bi bi-exclamation-circle bi--6xl" />
+              </div>
+              <div class="col d-flex align-items-center">
+                <p class="mb-0">
+                  Der Organisator hat die Möglichkeit, <b>personalisierte</b> Links zu versenden. Falls also Felder nach Aufrufen der Seite schon vorausgefüllt sind tagen Sie nur noch fehlende Informationen ein.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <hr />
@@ -183,16 +183,15 @@
           </p>
           <p>
             <b>Hinweis für Teilnehmer mit mehreren Delegiertenstimmen:</b
-            ><br />Sie dürfen nach jeder Stimmenabgabe erneut eine Auswahl
-            treffen und "Jetzt abstimmen" drücken. Sie geben nicht mit einer
-            Abgabe alle Ihnen zur Verfügung stehenden Stimmen ab. Wenn Sie 3
-            Stimmen haben und 3x"Ja" wählen möchten müssen Sie jedes Mal die
-            Auswahl durchführen und auf "Jetzt abstimmen" drücken/klicken.
+            ><br />Sie dürfen bei der ersten Stimmenabgabe auswählen, ob Sie alle Ihre Stimmen auf einmal mit der ausgewählten Antwort abgeben.<br /><br />
+            Die Organisatoren haben die Möglichkeit, die Mehrfachstimmenabgabe zu erzwingen, wenn es die Satzung/Ordnung der Mitgliederversammlung vorsieht.
           </p>
         </div>
       </div>
       <hr />
-      <h2 id="organisator" class="mb-3">Für Organisatoren</h2>
+      <div class="bg-secondary text-white p-3 mb-3 rounded">
+        <h2 id="organisator">Für Organisatoren</h2>
+      </div>
       <div id="dashboard" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
@@ -205,7 +204,7 @@
         </span>
         <div class="media-body">
           <h3>Dashboard</h3>
-          <p>Übersicht aller bevorstehenden Veranstaltungen</p>
+          <p>Übersicht der aktuellsten Entwicklungen sowie geplanter Funktionen.</p>
         </div>
       </div>
       <hr />
@@ -230,8 +229,20 @@
             In der Aktionsspalte der erstellten Veranstaltungen können Sie die
             vorhandene Veranstaltung editieren, den Einladungslink kopieren, in
             die Detailansicht der Veranstaltung gehen und die Veranstaltung
-            deaktivieren.
+            löschen. Das Löschen ist nur möglich, wenn die Veranstaltung vorher auf "Inaktiv" geschaltet wurde in der Bearbeitungsansicht.
           </p>
+          <div class="alert alert-danger">
+            <div class="row">
+              <div class="col-2 text-center">
+                <i class="bi bi-exclamation-circle bi--6xl" />
+              </div>
+              <div class="col d-flex align-items-center">
+                <p class="mb-0">
+                  <b>Die Veranstaltung und alle damit verbundenen Informationen werden automatisch nach 180 Tagen des geplanten Datums gelöscht.<br /><br />Als Organisator erhalten Sie 3 Tage vor dem Löschen eine Hinweis-E-Mail der bevorstehenden Löschung.</b>
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <hr />
@@ -268,21 +279,33 @@
               Veranstaltung.
             </li>
             <li>
-              <b>Start-Datum:</b><br />Zeitpunkt der Durchführung Ihrer
+              <b>Startdatum:</b><br />Zeitpunkt der Durchführung Ihrer
               Veranstaltung.
             </li>
             <li>
-              <b>Lobby:</b><br />Falls der Warteraum deaktiviert ist können sich
-              die Teilnehmer noch nicht aktivieren. Aktuell muss die Lobby per
-              Hand aktiviert oder deaktiviert werden. Es existiert also noch
-              kein Automatismus in Bezug zum Start-Zeitpunkt
+              <b>Lobby aktivieren:</b><br />Personen können, falls dem System schon bekannt, sich im Vorfeld einloggen.<br />Alle unbekannten Personen werden als Nutzer erstellt und in eine Warteraum-Position gespeichert. Der Organisator muss den Nutzer als Teilnehmer oder Gast freischalten (siehe <a href="#event-warteraum">Warteraum</a>).<br />
+              Der Warteraum lässt sich auch als vorzeitige Authentifizierungslogik nutzen: Senden Sie als Organisator den Link zur Veranstaltung frühzeitig zu mit der Bitte, sich als Nutzer einzutragen. Als Organisator können Sie alle Teilnehmer an einem Tag vorher entsprechend der Delegationsart freischalten.
             </li>
             <li>
-              <b>Aktiv:</b><br />Aktiviert die gesamte Veranstaltung. Wenn eine
-              Veranstaltung nicht mehr aktiv ist können sich keine Teilnehmer
-              oder Gäste unter der Veranstaltungens-URL einloggen. Aktuell wird
-              ein einfacher Hinweis gegeben, dass die Veranstaltung nicht aktiv
-              ist.
+              <b>Veranstaltung aktiv schalten?:</b><br />Solange die Veranstaltung als Aktiv markiert ist, können Teilnehmer und Gäste sich nach der Veranstaltung mit ihren Zugangsdaten erneut anmelden.<br />
+
+              Erst, wenn Sie den Haken entfernen und damit die Veranstaltung als Inaktiv schalten, dürfen Sie die Veranstaltung manuell löschen.
+            </li>
+            <li>
+              <b>Asynchrone Wahl:</b><br />
+              Als Organisator müssen Sie neben dem Start- auch ein Enddatum angeben. Alle freigeschalteten Teilnehmer mit Stimmrecht dürfen ab dem Startdatum alle im Vorfeld hinterlegten Abstimmungen bearbeiten. Sobald das Enddatum überschritten ist, werden automatisch nur die Ergebnisse ausgegeben und es kann nicht weiter abgestimmt werden.<br /><br />
+              <div class="alert alert-danger">
+                Als Organisator dürfen Sie auch <u>keine</u> neuen Abstimmungen ab dem Startdatum <br />erstellen oder die vorhandenen Abstimmungen editieren.
+              </div>
+            </li>
+            <li>
+              <b>Videokonferenz-System:</b><br />
+              Hier können Sie auswählen, welche Video-Konferenzsoftware eingebettet verwendet werden soll. Aktuell wird nur Zoom unterstützt.<br />
+              Siehe <a href="#zoom-integration">Zoom-Integration</a>
+            </li>
+            <li>
+              <b>Mehrfachstimmenabgabe:</b><br />
+              Als Organisator bestimmen Sie, ob Delegierte mit mehreren Stimmen alternierend abstimmen dürfen oder alle Stimmen auf einmal abgeben müssen.
             </li>
           </ol>
         </div>
@@ -325,9 +348,9 @@
           <div class="col-1 text-center d-flex align-items-center">
             <i class="bi bi-exclamation-circle bi--6xl" />
           </div>
-          <div class="col d-flex align-items-center flex-column">
-            <p class="mb-0">
-              <b>Tipp</b>: Um den Nutzern einen komfortablen Einstieg zu
+          <div class="col d-flex flex-column">
+            <p>
+              <b>Tipp</b>:<br />Um den Nutzern einen komfortablen Einstieg zu
               ermöglichen kann man den Link zum Versenden individualisieren.
               Nutzen Sie hierzu die Serienmail-Funktion von Google oder
               Microsoft mit einer Tabelle aller Empfänger.
@@ -336,13 +359,11 @@
               <li>Parameter username - Füllt das Feld "Benutzername" aus</li>
               <li>Parameter publicname - Füllt das Feld "Anzeige-Name" aus</li>
             </ul>
-            <code class="py-3">
+            <code class="py-3 align-self-center">
               digitalwahl.org/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
             </code>
             <p>
-              Wichtig ist, dass der Link Encodiert ist. Dafür gibt es Funktionen
-              wie URLCODIEREN in Excel, die automatisch aus einem
-              zusammengefügten Satz einen sauberen klickbaren Link generiert
+              Die Links können in eine, Tabellenverarbeitungsprogramm wie Microsoft Excel oder Google Sheets automatisiert mit den Informationen erweitert werden. Diese Automatisierung lässt sicht auch auf verkürzte Links (tinyUrl) anwenden und auch auf die Generierung von QR Codes in einem Serienbrief zur Personalisierung einer Tagungsmappe.
             </p>
           </div>
         </div>
@@ -365,8 +386,7 @@
             Benutzerinformationen bearbeiten.
           </p>
           <p>
-            Man darf jedoch nicht das Passwort eines Nutzers zurücksetzt. Das
-            obliegt einzig dem Benutzer selbst.
+            Man darf jedoch nicht das Passwort eines Nutzers zurücksetzt. Sollte ein Nutzer sein Passwort vergessen haben, muss er dies dem Organisator mitteilen und sich entweder einen neuen Zugangsnamen geben lassen oder falls der Warteraum aktiv ist, mit einem alternativen neuen Zugang anmelden und vom Organisator freigeschaltet werden.
           </p>
         </div>
       </div>
@@ -388,10 +408,9 @@
             Lobby aktiviert ist).
           </p>
           <p>
-            Die Benutzer können als Teilnehmer oder als Gast freigeschaltet
+            Die Benutzer können als Teilnehmer (Standard mit einer Stimme) oder als Gast freigeschaltet
             werden.
           </p>
-          <p><b>Aktuell ist der "Blockieren"-Button noch ohne Funktion.</b></p>
         </div>
       </div>
       <hr />
@@ -414,7 +433,8 @@
               </div>
               <div class="col d-flex align-items-center">
                 <p class="mb-0">
-                  <b>Achtung</b>: Nur Teilnehmer, die zum Zeitpunkt des Startens
+                  <b>Achtung</b>:<br />
+                  Nur Teilnehmer, die zum Zeitpunkt des Startens
                   im System eingeloggt sind und als "Online" im System markiert
                   sind dürfen abstimmen
                 </p>
@@ -487,14 +507,33 @@
           <h3>Ergebnisliste</h3>
           <p>
             Hier sehen Sie alle vergangenen Abstimmungen und deren Ergebnisse.
-            Mit der Browserseitigen Druckfunktion können Sie die Ergebnisse auch
-            auf Ihrem PC abspeichern.
+            Die Seite verfügt über eine optimierte Druckansicht.<br />
           </p>
+          <p><b>Export:</b><br />Es können folgende CSV Dateien heruntergeladen werden:</p>
+          <ul>
+            <li>Übersicht</li>
+            <li>Ergebnisse</li>
+            <li>Ergebnisse mit Details</li>
+            <li>Teilnehmer mit abgegebener Stimmenanzahl</li>
+          </ul>
         </div>
       </div>
-      <span class="alert alert-info text-center h4 w-100 mt-3 d-inline-block">
-        Diese Seite befindet sich noch im Aufbau und wird laufend aktualisiert
-      </span>
+      <hr />
+      <div id="zoom-integration" class="media flex-column flex-lg-row">
+        <span class="btn pop">
+          <img
+            src="../../../assets/images/organisator/zoom-anleitung.png"
+            alt="Zoom Anleitung"
+            class="mr-3 click-enlarge img-thumbnail"
+            width="300"
+            @click="onClickImage"
+          />
+        </span>
+        <div class="media-body">
+          <h3>Zoom Anleitung</h3>
+          <p><a href="/download/pdf/anleitung-zoom-integration-v2.pdf" class="btn btn-primary" target="_blank">Anleitung als PDF herunterladen</a></p>
+        </div>
+      </div>
       <div
         id="imagemodal"
         class="modal fade"
@@ -510,7 +549,7 @@
                 <span aria-hidden="true">&times;</span
                 ><span class="sr-only">Schließen</span>
               </button>
-              <h4 id="popLoginLabel" class="modal-title">Vergrößerung</h4>
+              <h4 id="popLoginLabel" class="modal-title d-none d-print-block">Vergrößerung</h4>
             </div>
             <div class="modal-body text-center">
               <img
@@ -544,6 +583,7 @@ function onClickImage({ target }) {
   modalImageSrc.value = target?.src;
   modal?.show();
 }
+
 
 onMounted(() => {
   modal = new bootstrap.Modal(document.getElementById("imagemodal"), {});

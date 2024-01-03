@@ -1,8 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerEventsNew')">
     <template #title>
-      {{ $t("navigation.views.organizerEventsNew") }} -
-      <span v-if="event?.title">{{ event?.title }}</span>
+      {{ $t("navigation.views.organizerEventsNew") }}
       <router-link
         :to="{ name: RouteOrganizerEvents }"
         class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
