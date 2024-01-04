@@ -32,6 +32,7 @@
               <a href="#event-abstimmung-beenden">Abstimmung manuell beenden</a>
             </li>
             <li><a href="#event-ergebnisse">Ergebnisse</a></li>
+            <li><a href="#zoom-integration">Zoom Integration</a></li>
           </ol>
         </li>
       </ul>
@@ -531,6 +532,7 @@
         </span>
         <div class="media-body">
           <h3>Zoom Anleitung</h3>
+          <p>Die Voraussetzung ist ein Zoom Pro Account oder höher. Zoom Lizenz auf der <a href="https://zoom.us/de/pricing" target="_blank">Zoom-Website</a> vergleichen und kaufen</p>
           <p><a href="/download/pdf/anleitung-zoom-integration-v2.pdf" class="btn btn-primary" target="_blank">Anleitung als PDF herunterladen</a></p>
         </div>
       </div>
@@ -583,7 +585,6 @@ function onClickImage({ target }) {
   modalImageSrc.value = target?.src;
   modal?.show();
 }
-
 
 onMounted(() => {
   modal = new bootstrap.Modal(document.getElementById("imagemodal"), {});
