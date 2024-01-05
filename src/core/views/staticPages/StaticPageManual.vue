@@ -22,6 +22,9 @@
             <li><a href="#eventerstellen">Neue Veranstaltung erstellen</a></li>
             <li><a href="#event-teilnehmer">Veranstaltungs-Details</a></li>
             <li>
+              <a href="#teilnehmer-erstellen">Teilnehmer erstellen</a>
+            </li>
+            <li>
               <a href="#teilnehmer-editieren">Einzelnen Teilnehmer editieren</a>
             </li>
             <li><a href="#event-warteraum">Teilnehmer freischalten</a></li>
@@ -45,7 +48,7 @@
           <img
             src="../../../assets/images/teilnehmer/loginmaske.png"
             alt="loginmaske"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -98,7 +101,7 @@
           <img
             src="../../../assets/images/teilnehmer/warteraum.png"
             alt="Warteraum"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -124,7 +127,7 @@
           <img
             src="../../../assets/images/teilnehmer/gast.png"
             alt="Gast"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -144,7 +147,7 @@
           <img
             src="../../../assets/images/teilnehmer/stimmrecht.png"
             alt="Stimmrecht"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -167,7 +170,7 @@
           <img
             src="../../../assets/images/teilnehmer/demoabstimmung.png"
             alt="Demo-Abstimmung"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -198,7 +201,7 @@
           <img
             src="../../../assets/images/organisator/dashboard.png"
             alt="Dashboard"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -214,7 +217,7 @@
           <img
             src="../../../assets/images/organisator/uebersicht.png"
             alt="Event-Übersicht"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -252,7 +255,7 @@
           <img
             src="../../../assets/images/organisator/eventerstellen.png"
             alt="Event erstellen"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -317,7 +320,7 @@
           <img
             src="../../../assets/images/organisator/event-teilnehmer.png"
             alt="Event Teilnehmer"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -370,12 +373,58 @@
         </div>
       </div>
       <hr />
+      <div id="teilnehmer-erstellen" class="media flex-column flex-lg-row">
+        <span class="btn pop flex-column">
+          <img
+            src="../../../assets/images/organisator/teilnehmer-erstellen-buttons.png"
+            alt="Event Teilnehmer erstellen Buttons"
+            class="mr-3 me-3 click-enlarge img-thumbnail mb-3"
+            width="300"
+            @click="onClickImage"
+          />
+          <br />
+          <img
+            src="../../../assets/images/organisator/teilnehmer-erstellen-default.png"
+            alt="Event Teilnehmer"
+            class="mr-3 me-3 click-enlarge img-thumbnail mb-3"
+            width="300"
+            @click="onClickImage"
+          /><br />
+          <img
+            src="../../../assets/images/organisator/teilnehmer-erstellen-token.png"
+            alt="Event Teilnehmer"
+            class="mr-3 me-3 click-enlarge img-thumbnail mb-3"
+            width="300"
+            @click="onClickImage"
+          />
+        </span>
+        <div class="media-body">
+          <h3>Teilnehmer anlegen</h3>
+          <h4>Einfache Anlage</h4>
+          <p>
+            Die Anlegen einzelner Nutzer ist für kleine Veranstaltungen oder nachzügler geeignet. Sie geben als Organisator den Benutzernamen und den Anzeige-Namen sowie die mögliche Stimmenanzahl an.
+          </p>
+          <h4>Mehrere Teilnehmer anlegen</h4>
+          <p>
+            Das Anlegen mehrerer Nutzer ist für große Veranstaltungen geeignet, wenn Sie die Teilnehmer lokal in einer Tabelle vorliegen haben. Kopieren Sie hierzu einfach die Spalte mit dem Benutzernamen, den die Teilnehmer als Login verwenden sollen. Achten Sie darauf, dass die Spalte keine Überschrift enthält und dass es möglichst keine doppelten Eintragungen oder Leerzeilen gibt.<br /><br />
+            Sie tragen immer alle Teilnehmer gleichzeitig mit einer definierten Stimmenanzahl ein. Falls Sie Teilnehmer mit unterschiedlichen Stimmenanzahlen haben, müssen Sie diese nacheinander anlegen in Gruppen. Hierzu können Sie die Daten mit Ihrem lokalen Tabellenverarbeitungsprogramm filtern.
+          </p>
+          <h4>Token-basierter Login</h4>
+          <p>
+            Nutzer erhalten per E-Mail einen Anmelde-Link zur Veranstaltung. Beim Aufrufen des Links wird der Nutzer aufgefordert, Zugangsdaten einzutragen. Diese Zugangsdaten werden nicht mit der E-Mail Adresse in Verbindung gespeichert. Beim verwendeten Endgerät des Nutzers wird ein Schlüssel (token) gespeichert. Mit diesem Token wird der Nutzer automatisch beim Aufrufen des Veranstaltungslinks angemeldet.<br /><br />
+            <b>Der Authentifizierungslink kann nur einmalig auf einem einzelnen Endgerät genutzt werden.</b><br /><br />
+            Der Veranstaltungslink wird nicht mit der E-Mail versendet. Nach dem erfolgreichen Authentifizieren des Endgerätes wird der Nutzer automatisch angemeldet und zur Veranstaltungsseite weitergeleitet.<br />
+            Sobald der Teilnehmer sich abmeldet über den Abmelden Button, wird der Token gelöscht und der Nutzer muss sich erneut authentifizieren. Dies kann nicht mit der gleichen E-Mail durchgeführt werden.
+          </p>
+        </div>
+      </div>
+      <hr />
       <div id="teilnehmer-editieren" class="media flex-column flex-lg-row">
         <span class="btn pop">
           <img
             src="../../../assets/images/organisator/teilnehmer-editieren.png"
             alt="Teilnehmer editieren"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -397,7 +446,7 @@
           <img
             src="../../../assets/images/organisator/event-warteraum.png"
             alt="Teilnehmer warteraum"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -420,7 +469,7 @@
           <img
             src="../../../assets/images/organisator/abstimmung-erstellen.png"
             alt="Abstimmung erstellen"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -474,7 +523,7 @@
           <img
             src="../../../assets/images/organisator/abstimmung-beenden.png"
             alt="Abstimmung beenden"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -499,7 +548,7 @@
           <img
             src="../../../assets/images/organisator/ergebnisliste.png"
             alt="Ergebnisliste"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -525,7 +574,7 @@
           <img
             src="../../../assets/images/organisator/zoom-anleitung.png"
             alt="Zoom Anleitung"
-            class="mr-3 click-enlarge img-thumbnail"
+            class="mr-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
