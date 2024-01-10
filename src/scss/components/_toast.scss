@@ -6,18 +6,22 @@
   bottom: 10%;
   z-index: 200;
 }
+
 .toast {
   position: relative;
   right: 0;
   top: 0;
   width: 100%;
+
   .close {
-    color: white!important;
+    color: white !important;
   }
 }
+
 .toast-header {
-  color: white!important;
+  color: white !important;
 }
+
 @media all and (min-width: 991px) {
   .toast-container {
     top: 10%;

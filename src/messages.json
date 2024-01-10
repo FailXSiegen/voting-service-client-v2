@@ -4,20 +4,23 @@
       "yes": "Ja",
       "no": "Nein",
       "abstention": "Enthaltung",
-      "member": "Teilnehmer"
+      "member": "Teilnehmer",
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen"
     },
     "view": {
       "login": {
         "label": {
-          "username": "Benutzername, E-Mail oder Mitgliedsnummer*",
+          "username": "Benutzername, E-Mail oder Mitgliedsnummer *",
           "usernameHelp": "Als Benutzername dient Ihre Mitgliedsnummer, Ihre E-Mail Adresse oder eine individuelle Kennung. Die Informationen dienen zur Akkreditierung.<br /><b>Bitte beachten Sie die Vorgaben Ihres Veranstalters</b>",
-          "email": "E-Mail*",
-          "password": "Passwort*",
+          "email": "E-Mail *",
+          "password": "Passwort *",
           "passwordHelp": "Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zur Veranstaltung benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.",
           "lostPassword": "Passwort vergessen? Hier Link anfordern",
-          "publicName": "Anzeige-Name*",
+          "publicName": "Anzeige-Name *",
           "publicNameHelp": "Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die oberen 2 Felder.",
-          "eventIdent": "Veranstaltungs-ID eingeben*"
+          "eventIdent": "Veranstaltungs-ID eingeben *",
+          "onlyUsername": "Benutzername *"
         },
         "headline": {
           "title": "digitalwahl.org",
@@ -34,7 +37,8 @@
         "submitToEvent": "In Veranstaltung einloggen",
         "registerAsOrganizer": "Als Organisator registrieren",
         "registerAsOrganizerInfo": "ACHTUNG: Betastatus!",
-        "invalidCredentials": "Invalid credentials",
+        "invalidCredentials": "Die Anmeldung ist wegen ungültiger Anmeldedaten fehlgeschlagen.",
+        "invalidRefreshToken": "Ihre Nutzersession ist abgelaufen. Bitte melden Sie sich erneut an.",
         "asOrganizerLoggedIn": "Sie sind als Organisator eingeloggt. Bitte verwenden Sie zur Teilnahme an Abstimmungen einen anderen Browser oder ein anderes Endgerät."
       },
       "register": {
@@ -52,7 +56,19 @@
           "dataProtection": "* Ich bestätige, dass ich die <a href=\"/datenschutz\" target=\"_blank\">Datenschutzerklärung</a> gelesen habe, zur Kenntnis nehme und mit den <a href=\"/nutzervereinbarung\" target=\"_blank\">Nutzungsbedigungen</a> einverstanden bin.",
           "beta": "* Ich nehme zur Kenntnis, dass die Plattform sich im Entwicklungszustand befindet und es dadurch zu Einschränkungen kommen kann."
         },
-        "submit": "Registrierung abschicken"
+        "verify": {
+          "processing": "Der Validierungsprozess ist noch im Gange.",
+          "failed": "Der Validierungsprozess war leider nicht erfolgreich.",
+          "success": "Sie haben sich Erfolgreich verifiziert. Der Administrator wurde informiert."
+        },
+        "submit": "Registrierung abschicken",
+        "success": "Sie haben sich Erfolgreich registriert! Bitte bestätigen Sie Ihre E-Mail Adresse. Nach Ihrer Bestätigung wird der Account von einem Administrator geprüft und freigeschaltet. Sie erhalten eine Bestätigung nach Freischaltung!"
+      },
+      "activateAuthToken": {
+        "title": "digitalwahl.org",
+        "subTitle": "Ihre Einladung zur Veranstaltung<br />\"{eventTitle}\"",
+        "description": "Mit klick auf den folgenden Button registieren Sie sich mit <b>diesem</b> Gerät. Sie werden <b>nur mit diesem Gerät</b> an der Veranstaltung teilnehmen können. Möchten Sie ein anderes Gerät verwenden, dann öffnen Sie bitte diesen Link auf dem anderen Gerät.",
+        "activateButtonText": "Dieses Gerät aktivieren"
       },
       "profile": {
         "headline": "",
@@ -65,6 +81,21 @@
           "submit": "Speichern"
         }
       },
+      "videoConference": {
+        "addNew": "Neu anlegen",
+        "type": "Software",
+        "title": "Titel",
+        "noRecords": "Es existieren noch keine Datensätze.",
+        "confirmDelete": "Möchten Sie den Datensatz wirklich löschen?.",
+        "backToListView": "Zur Listenansicht",
+        "formData": {
+          "title": "Titel",
+          "sdkKey": "SDK Key",
+          "sdkSecret": "SDK Secret",
+          "submitNew": "Datensatz anlegen",
+          "submitEdit": "Speichern"
+        }
+      },
       "event": {
         "navigation": {
           "members": "Teilnehmer",
@@ -75,6 +106,8 @@
         },
         "user": {
           "verifyAs": "Verifizieren als:",
+          "edit": "Bearbeiten",
+          "unverfify": "In den Warteraum",
           "setTo": "Setzen auf:",
           "block": "Benutzer löschen",
           "member": "Teilnehmer",
@@ -82,19 +115,34 @@
           "online": "Online",
           "offline": "Offline",
           "all": "Gesamt",
-          "allVoteAmount": "Gesamtstimmen"
+          "allVoteAmount": "Gesamtstimmen",
+          "info": "Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren -> Haken bei \"Freigeschaltet\" entfernen. Benutzer erscheint wieder im Warteraum",
+          "confirm": {
+            "unverify": "Freischaltung deaktivieren? Nutzer wird in den Warteraum verschoben.",
+            "terminateTokenSession": "Mit der Abmeldung kann dieses Gerät nicht mehr an der Veranstaltung teilnehmen. Dieser Vorgang ist unwiderruflich. Möchten Sie sich wirklich abmelden?"
+          }
         },
         "create": {
           "createNew": "Neue Veranstaltung erstellen",
           "labels": {
-            "title": "Veranstaltungtitel",
+            "title": "Veranstaltungstitel",
             "slug": "Slug",
             "slugHelp": "Pfadsegment für URL: \"digitalwahl.org/meine-veranstaltung\" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.",
             "description": "Veranstaltungsbeschreibung",
             "descriptionHelp": "Veranstaltungsbeschreibung",
-            "scheduledDatetime": "Start-Datum",
+            "scheduledDatetime": "Startdatum",
             "lobbyOpen": "Lobby aktivieren / vorzeitiger Login und Anzeige der Veranstaltung auf der Startseite",
+            "active": "Veranstaltung direkt aktiv schalten?",
             "submit": "Diese Veranstaltungen speichern",
+            "videoConferenceSelect": "Videokonferenz-System-Auswahl",
+            "multivoteTypeTitle": "Mehrfachstimmenabgabe",
+            "multivoteTypeInfo": "Wahlmöglichkeit zur Vorgabe der stimmberechtigten Teilnehmer die mehr als eine Stimme haben",
+            "multivoteRadio1Label": "Benutzer können unterschiedliche Stimmenabgabe durchführen",
+            "multivoteRadio1Help": "Bsp.: Stimme 1 von 2: Ja, Stimme 2 von 2: nein<br>Bsp. 2: Checkbox ausgewählt vom Teilnehmer: Alle Stimmen auf einmal abgeben: Ja 2x",
+            "multivoteRadio2Label": "Benutzer geben IMMER alle Stimmen auf einmal ab",
+            "multivoteRadio2Help": "Bsp.: Teilnehmer hat 5 Stimmen. Bei Abstimmung wählt der Teilnehmer nur einmal, es wird 5 fach gewertet.",
+            "async": "Die Abstimmungen der Veranstaltung finden asynchron statt (Briefwahl).",
+            "endDatetime": "Enddatum (Nur für Briefwahl)",
             "eventUser": {
               "submit": "Benutzer speichern",
               "createNew": "Neuen Benutzer erstellen",
@@ -103,15 +151,26 @@
               "verified": "Freigeschaltet",
               "publicName": "Angezeigter Name",
               "username": "Benutzername",
-              "voteAmount": "Anzahl der Stimmen"
+              "emails": "Liste von E-Mails",
+              "voteAmount": "Anzahl der Stimmen",
+              "tokenBasedLogin": "Tokenbasierter-Login",
+              "tokenBasedLoginHelp": "Nutzer melden sich mit einem im Browser hinterlegtem Schlüssel an (Kein Passwort)."
             },
             "eventMultipleUser": {
               "submit": "Benutzerliste speichern",
               "createNew": "Mehrere Benutzer erstellen",
               "allowToVote": "Teilnehmer mit Stimmrecht",
-              "usernames": "Benutzernamen",
+              "usernames": "Benutzerliste (Benutzernamen)",
+              "emails": "Benutzerliste (E-Mail-Adressen)",
               "usernamesHint": "Immer ein Benutzer pro Zeile. Keine Leerzeichen im Benutzernamen. Keine leeren Zeilen",
+              "emailsHint": "Immer eine E-Mail-Adresse pro Zeile. Keine Leerzeichen in der E-Mail-Adresse. Keine leeren Zeilen",
               "voteAmount": "Anzahl der Stimmen"
+            },
+            "videoConferenceConfig": {
+              "zoom": {
+                "meetingId": "Meeting ID",
+                "password": "Passwort"
+              }
             }
           }
         },
@@ -124,19 +183,37 @@
           "stateActive": "Aktiv",
           "stateLocked": "Inaktiv",
           "voteAmount": "Stimmen",
+          "deleteInfo": "Nur inaktive Veranstaltungen können gelöscht werden",
+          "organizer": "Veranstalter",
+          "textCopiedToClipboard": "Der Veranstaltungslink wurde in die Zwischenablage kopiert.",
           "actions": {
             "label": "Aktionen",
             "edit": "Bearbeiten",
             "inviteLink": "Einladungs-Link kopieren",
             "newTab": "Veranstaltungs-Organisation in neuem Tab öffnen",
             "close": "Veranstaltung beenden",
-            "delete": "Veranstaltung löschen"
+            "delete": "Veranstaltung löschen",
+            "activate": "Veranstaltung aktivieren",
+            "deactivate": "Veranstaltung deaktivieren"
+          },
+          "confirm": {
+            "deleteQuestion": "Veranstaltung wird komplett mit allen Informationen unwiederherstellbar gelöscht. Sind Sie sich sicher?",
+            "updateActiveStateQuestion": "Veranstaltung wird bearbeitet. Sind Sie sich sicher?"
           }
         },
         "upcoming": "Bevorstehende Veranstaltungen",
-        "latest": "Letzte Veranstaltungen"
+        "latest": "Letzte Veranstaltungen",
+        "backToMemeberRoom": "Zurück zur Teilnehmeransicht",
+        "meeting": {
+          "join": "An Videokonferenz teilnehmen",
+          "backToMeeting": "Zurück zur Videokonferenz",
+          "backToDashboard": "Zurück zum Dashboard",
+          "switchView": "Ansicht wechseln"
+        }
       },
       "polls": {
+        "userCountText": "Aktuelle Anzahl wahlberechtigter Teilnehmer",
+        "createNewDisabledInfo": "Da gerade eine Abstimmung durchgeführt wird kann keine neue Abstimmung angelegt werden.",
         "noActiveUser": "Keine aktiven Teilnehmer. Abstimmungen können nicht gestartet werden.",
         "headlines": {
           "createTitle": "Neue Abstimmung erstellen",
@@ -158,8 +235,8 @@
             "abstention": "Enthaltungsfeld anzeigen",
             "openPoll": "Offene Abstimmung",
             "secretPoll": "Geheime Abstimmung",
-            "saveOnly": "Neue Abstimmung speichern",
-            "saveAndStart": "Neue Abstimmung speichern & sofort starten",
+            "saveOnly": "Abstimmung speichern",
+            "saveAndStart": "Abstimmung speichern & sofort starten",
             "replaceOnly": "Abstimmung ersetzen",
             "replaceAndStart": "Abstimmung ersetzen & sofort starten",
             "reset": "Abbrechen"
@@ -167,9 +244,15 @@
         },
         "listing": {
           "start": "Abstimmung starten",
+          "edit": "Abstimmung bearbeiten",
+          "copy": "Abstimmung kopieren",
           "startConfirm": "Möchtest du die Abstimmung starten?",
           "delete": "Abstimmung löschen",
-          "deleteConfirm": "Möchtest du die Abstimmung wirklich löschen?"
+          "deleteConfirm": "Möchtest du die Abstimmung wirklich löschen?",
+          "stopConfirm": "Möchtest du die Abstimmung wirklich stoppen?",
+          "async": {
+            "eventActiveCantCreatePoll": "Da die Veranstaltung bereits im Gange ist, kann keine neue Abstimmung angelegt oder bestehende Abstimmungen manipuliert werden."
+          }
         },
         "modal": {
           "submitPoll": "Jetzt abstimmen",
@@ -178,14 +261,26 @@
           "buttonStart": "Abstimmung starten",
           "maxVote1": "Sie können eine Position auswählen",
           "maxVoteGreater1": "Achtung: Sie können mehrere Positionen auswählen: ",
-          "minVoteGreater0": "Achtung: Sie müssen eine Mindestanzahl auswählen: "
+          "minVoteGreater0": "Achtung: Sie müssen eine Mindestanzahl auswählen: ",
+          "canSubmitAnswerForEachVote": "Alle {voteAmount} Stimmen auf einmal abgeben",
+          "canSubmitAnswerForEachVoteHelptext": "Nur bei der ersten Stimme möglich.",
+          "close": "Schließen",
+          "result": "Ergebnis"
         },
         "active": {
           "title": "Aktuelle Abstimmung",
-          "close": "Abstimmung beenden erzwingen"
-        }
+          "close": "Beenden der Abstimmung erzwingen",
+          "closeDialog": "Abstimmung schließen?",
+          "details": "Abstimmungsdetails",
+          "alreadyVoted": "Bisherige Stimmenabgabe",
+          "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}"
+        },
+        "userUpdate": "Ihr Status wurde aktualisiert.",
+        "eventIsNotRunning": "Die Veranstaltung startet am {date} um {time} Uhr.",
+        "eventIsFinish": "Die Veranstaltung wurde beendet."
       },
       "results": {
+        "pastResults": "Vergangene Abstimmungen",
         "givenVotes": "Anzahl abgegebener Stimmen:",
         "voters": "Maximale Stimmenanzahl:",
         "mainResult": "Gesamtergebnis",
@@ -219,8 +314,8 @@
         "createDatetime": "Erstellungsdatum",
         "organisation": "Organisation",
         "state": "Status",
-        "mail": "E-Mail",
-        "confirmedMail": "E-Mail bestätigt",
+        "email": "E-Mail",
+        "confirmedEmail": "E-Mail bestätigt",
         "actions": "Aktionen",
         "username": "Benutzername",
         "verified": "aktiv",
@@ -228,7 +323,19 @@
         "denied": "inaktiv",
         "deny": "deaktivieren",
         "edit": "bearbeiten",
-        "delete": "löschen"
+        "delete": "löschen",
+        "confirmDelete": "Möchten Sie den Organisator wirklich löschen?"
+      },
+      "changeOrganizerPassword": {
+        "title": "Passwort vergessen",
+        "backToStartpage": "Zum Login",
+        "emailHasBeenSent": "E-Mail wurde erfolgreich versendet. Bitte folgen Sie den Anweisungen der E-Mail um fortzufahren.",
+        "form": {
+          "username": "Benutzernamen eingeben *",
+          "requestChangePasswordSubmit": "Passwort vergessen-Link anfordern",
+          "changePasswordSubmit": "Neues passwort speichern",
+          "passwordChangedSuccessfully": "Passwort erfolgreich geändert"
+        }
       }
     },
     "pagination": {
@@ -236,17 +343,140 @@
       "previous": "<"
     },
     "navigation": {
-      "myProfile": "Mein Profil",
       "logOut": "Ausloggen",
+      "terminateTokenSession": "Abmelden",
       "reload": "Aktualisieren",
+      "backToDashboard": "Zurück zum Dashboard",
+      "backToPolls": "Zurück zu Abstimmungen",
+      "backToEvents": "Zurück zur Übersicht",
       "views": {
+        "organizerProfile": "Mein Profil",
+        "startPage": "Startseite",
         "mainLogin": "Login",
-        "organizerDashboard": "Dashboard"
+        "organizerDashboard": "Dashboard",
+        "organizerEvents": "Veranstaltungen",
+        "organizerEventsNew": "Neue Veranstaltung",
+        "organizerEventsEdit": "Veranstaltung Bearbeiten",
+        "organizerVideoConference": "Videokonferenzsysteme",
+        "organizerVideoConferenceNew": "Neue Videokonferenzsysteme",
+        "organizerVideoConferenceEdit": "Videokonferenzsysteme Bearbeiten",
+        "organizerManagement": "Organisatoren",
+        "organizerAllEvents": "Alle Veranstaltungen",
+        "organizerMemberRoom": "Teilnehmer",
+        "organizerLobbyRoom": "Warteraum",
+        "organizerPolls": "Abstimmungen",
+        "organizerPollResults": "Ergebnisse",
+        "organizerEventUserNew": "Neuen Nutzer anlegen",
+        "organizerEventUserEdit": "Nutzer Bearbeiten",
+        "organizerEventUserMultipleNew": "Neue Nutzer anlegen",
+        "organizerPollsNew": "Neue Abstimmung anlegen",
+        "organizerPollsEdit": "Abstimmung bearbeiten",
+        "organizerPollsCopy": "Abstimmung kopieren",
+        "staticPages": {
+          "dataProtection": "Datenschutz",
+          "faq": "Häufige Fragen",
+          "functions": "Funktionen und Planung",
+          "imprint": "Impressum",
+          "manual": "Anleitung",
+          "userAgreement": "Nutzervereinbarung"
+        }
       }
     },
     "error": {
       "network": {
-        "internalServerError": "Internal server error"
+        "connectionLost": "Serververbindung unterbrochen",
+        "internalServerError": "Interner Serverfehler.",
+        "consumerError": "Ihre Anfrage ist fehlerhaft.",
+        "undefinedError": "Ihre Anfrage ist fehlgeschlagen.",
+        "genericError": "Es tut uns leid, etwas ist schief gelaufen.",
+        "unauthorized": "Leider ist ein Fehler aufgetreten. Möglicherweise ist Ihre Nutzersession ist abgelaufen. Bitte melden Sie sich erneut an.",
+        "organizerUserNameNotFound": "Leider ist ein Fehler aufgetreten. Der Benutzername konnte nicht im  System gefunden werden."
+      },
+      "formValidation": {
+        "invalidForm": "Bitte überprüfen Sie ihre Eingaben.",
+        "sameAs": "Die Werte müssen identisch sein.",
+        "required": "Dieses Feld muss ausgefüllt werden.",
+        "requiredIf": "Dieses Feld muss ausgefüllt werden.",
+        "valueAlreadyExist": "Der Wert existiert bereits."
+      },
+      "routing": {
+        "404Headline": "Die angeforderte Seite konnte leider nicht gefunden werden."
+      },
+      "api": {
+        "InvalidPasswordError": "Bitte prüfen Sie das eingegebene Passwort.",
+        "RecordNotFoundError": "Die übermittelten Daten sind fehlerhaft."
+      }
+    },
+    "success": {
+      "login": {
+        "organizer": "Willkommen im Adminbereich.",
+        "eventUser": "Willkommen {userName}!",
+        "activateEventUserAuthToken": "Ihr Gerät wurde erfolgreich für die Veranstaltung aktiviert."
+      },
+      "logout": {
+        "organizer": "Sie haben sich erfolgreich abgemeldet.",
+        "eventUser": "Sie haben sich erfolgreich abgemeldet."
+      },
+      "organizer": {
+        "profile": {
+          "savedSuccessfully": "Ihre Daten wurde erfolgreich gespeichert."
+        },
+        "videoConference": {
+          "createdSuccessfully": "Der Datensatz wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
+        },
+        "organizers": {
+          "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
+        },
+        "events": {
+          "createdSuccessfully": "Die Veranstaltung wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Die Veranstaltung wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Die Veranstaltung wurde erfolgreich entfernt."
+        },
+        "eventUser": {
+          "createdSuccessfully": "Der Nutzer wurde erfolgreich erstellt.",
+          "updatedSuccessfully": "Der Nutzer wurde erfolgreich aktualisiert.",
+          "deletedSuccessfully": "Der Nutzer wurde erfolgreich entfernt."
+        },
+        "poll": {
+          "createdSuccessfully": "Die Abstimmung wurde erfolgreich erstellt.",
+          "createdAndStartedSuccessfully": "Die Abstimmung wurde erfolgreich erstellt und gestartet.",
+          "updatedSuccessfully": "Die Abstimmung wurde erfolgreich aktualisiert.",
+          "updatedAndStartedSuccessfully": "Die Abstimmung wurde erfolgreich aktualisiert und gestartet.",
+          "deletedSuccessfully": "Die Abstimmung wurde erfolgreich entfernt.",
+          "startedSuccessfully": "Die Abstimmung wurde erfolgreich gestartet.",
+          "stoppedSuccessfully": "Die Abstimmung wurde erfolgreich gestoppt."
+        }
+      }
+    },
+    "notice": {
+      "logout": {
+        "wrongEvent": "Sie waren noch in einer anderen Veranslatung angemeldet. Bitte melden Sie sich für die diese Veranslatung erneut an."
+      }
+    },
+    "eventUser": {
+      "publicName": "Öffentlicher Name",
+      "verified": "Freigeschaltet",
+      "allowToVote": "Abstimmrecht",
+      "online": "Online",
+      "username": "Nutzername",
+      "voteAmount": "Anzahl der Stimmen",
+      "createDatetime": "Erstellungsdatum",
+      "onlineState": {
+        "online": "Online",
+        "offline": "Offline"
+      },
+      "filter": {
+        "byUsername": "Filter für Benutzernamen",
+        "reset": "Filter zurücksetzen"
+      }
+    },
+    "router": {
+      "redirect": {
+        "activeOrganizerSession": "Sie wurden automatisch weitergeleitet, da Sie noch als Organisator angemeldet sind.",
+        "invalidEventSlug": "Das event mit der URL \"{slug}\" existiert nicht."
       }
     }
   },
