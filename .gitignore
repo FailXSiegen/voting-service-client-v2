@@ -30,3 +30,6 @@ coverage
 # Environment variables files.
 .env*
 !.env.dist
+
+# public
+public/lib

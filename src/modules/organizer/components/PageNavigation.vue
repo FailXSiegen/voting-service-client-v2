@@ -1,9 +1,8 @@
 <template>
-  <nav
-    id="mainNavigation"
-    class="navbar navbar-dark fixed-top bg-dark"
-  >
-    <span class="h5 my-3 d-block text-white">Digitalwahl - Client Version {{ appVersion }}</span>
+  <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
+    <span class="h5 my-3 d-block text-white"
+      >Digitalwahl - Client Version {{ appVersion }}</span
+    >
     <button
       class="navbar-toggler"
       type="button"
@@ -15,38 +14,61 @@
     >
       <span class="navbar-toggler-icon" />
     </button>
-    <div
-      id="navbarCollapse"
-      class="collapse navbar-collapse bg-dark"
-    >
-      <div class="mb-5">
+    <div id="navbarCollapse" class="collapse navbar-collapse bg-dark">
+      <div v-if="showProfileLink" class="mb-5">
         <router-link
-          to="/admin/profile"
-          class="btn btn-primary btn-block py-3 px-0"
+          :to="{ name: RouteOrganizerProfile }"
+          class="btn btn-secondary btn-block py-3 px-0"
         >
-          <span class="nav-title">{{ $t('navigation.myProfile') }}</span>
+          <span class="nav-title">{{
+            $t("navigation.views." + RouteOrganizerProfile)
+          }}</span>
           <span
             class="nav-icon bi--2xl bi-person"
-            :title="$t('navigation.myProfile')"
+            :title="$t('navigation.views.' + RouteOrganizerProfile)"
           />
         </router-link>
       </div>
       <ul class="list-group">
         <li
-          v-for="(route, index) in props.routes"
+          v-for="(navigationItemRoute, index) in props.routes"
           :key="index"
           class="navigation-item list-group-item"
         >
-          <!-- @todo respect super admin routes! -->
           <router-link
-            :to="route.path"
+            v-if="isRouteAccessible(navigationItemRoute) && passParams"
+            :to="{ name: navigationItemRoute.name, params }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{ $t('navigation.views.' + route.name) }}</span>
+            <span class="nav-title">{{
+              $t("navigation.views." + navigationItemRoute.name)
+            }}</span>
             <span
-              class="nav-icon bi--2xl"
-              :class="route.meta.bootstrapIcon"
-              :title="$t('navigation.views.' + route.name) "
+              :class="[
+                'nav-icon',
+                'bi',
+                'bi--2xl',
+                navigationItemRoute.meta.bootstrapIcon,
+              ]"
+              :title="$t('navigation.views.' + navigationItemRoute.name)"
+            />
+          </router-link>
+          <router-link
+            v-else-if="isRouteAccessible(navigationItemRoute)"
+            :to="{ name: navigationItemRoute.name }"
+            class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
+          >
+            <span class="nav-title">{{
+              $t("navigation.views." + navigationItemRoute.name)
+            }}</span>
+            <span
+              :class="[
+                'nav-icon',
+                'bi',
+                'bi--2xl',
+                navigationItemRoute.meta.bootstrapIcon,
+              ]"
+              :title="$t('navigation.views.' + navigationItemRoute.name)"
             />
           </router-link>
         </li>
@@ -57,37 +79,68 @@
       @click="onLogout"
     >
       <i class="mr-md-3 bi bi-x-square bi--2xl" />
-      <span class="d-none d-md-block">{{ $t('navigation.logOut') }}</span>
+      <span class="d-none d-md-block">{{ $t("navigation.logOut") }}</span>
     </button>
   </nav>
 </template>
 
 <script setup>
-import {inject} from 'vue'
+import { RouteOrganizerProfile, RouteMainLogin } from "@/router/routes";
+import { inject } from "vue";
+import { logout } from "@/core/auth/login";
+import { toast } from "vue3-toastify";
+import t from "@/core/util/l18n";
+import { useCore } from "@/core/store/core";
+import { useRoute, useRouter } from "vue-router";
 
-const appVersion = inject('appVersion')
+const coreStore = useCore();
+const router = useRouter();
+const appVersion = inject("appVersion");
 const props = defineProps({
   routes: {
     type: Array,
-    required: true
-  }
-})
+    required: true,
+  },
+  passParams: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  showProfileLink: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
+});
+
+const params = useRoute().params;
 
 function onLogout() {
-  throw new Error("Yet not implemented!");
+  logout()
+    .then(() => router.push({ name: RouteMainLogin }))
+    .then(() => toast(t("success.logout.organizer"), { type: "success" }));
+}
+
+function isRouteAccessible(route) {
+  if (route.meta.requireSuperOrganizerRole) {
+    return coreStore.isSuperOrganizer;
+  }
+  return true;
 }
 </script>
 
 <style lang="scss" scoped>
 .navigation-item {
   .router-link-active {
-    .nav-icon {
+    .nav-icon,
+    .nav-title {
       color: white;
     }
   }
 
   :hover {
-    .nav-icon {
+    .nav-icon,
+    .nav-title {
       color: black;
     }
   }

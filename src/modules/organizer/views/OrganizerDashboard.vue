@@ -1,7 +1,7 @@
 <template>
-  <PageLayout>
+  <PageLayout :meta-title="$t('navigation.views.organizerDashboard')">
     <template #title>
-      Dashboard
+      {{ $t("navigation.views.organizerDashboard") }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -13,84 +13,85 @@
             <h2 class="h3">
               <u>Neuigkeiten</u>
             </h2>
-            <dl>
-              <dt>Organisator-Ansicht aktualisiert</dt>
+            <dl class="mb-1">
+              <dt>Asynchrone Abstimmungen</dt>
               <dd>
-                Responsive/mobile Navigation verbessert, Icons in die
-                Navigation integriert
+                Definieren Sie einen Start- und Endzeitpunkt für Ihre Veranstaltung. Alle Teilnehmer können dann innerhalb dieses Zeitraums abstimmen. Die Ergebnisse werden erst nach Ablauf des Endzeitpunkts angezeigt.
               </dd>
-              <dt>Filtern nach Benutzernamen</dt>
+              <dt>Neue Pseudonymisierte Zugriffsart für Teilnehmer: Token-basierter Zugang</dt>
               <dd>
-                In der Teilnehmerliste und im Wartenraum lässt sich jetzt
-                nach Benutzernamen filtern für einen schnelleren Zugriff
+                Als Organisator tragen Sie bei den Teilnehmern E-Mail Adressen ein. Die Teilnehmer erhalten dann einen Link per E-Mail, mit dem sie sich anmelden können. Bei der Anmeldung wird ein Schlüssel (Token) auf dem verwendeten Endgerät gespeichert. Es wird kein Zusammenhang zwischen E-Mail Adresse und Token vom System gespeichert. Der Token wird als Zugangsschlüssel zur Veranstaltung verwendet.<br />
+                <u>Wichtig:</u><br />
+                Teilnehmer müssen das gleiche Endgerät verwenden, mit dem sie sich angemeldet haben. Ansonsten ist der Zugang nicht möglich.
               </dd>
-              <dt>Sortieren von Teilnehmern</dt>
+              <dt>Technisches Update</dt>
               <dd>
-                Im Warteraum und in der Teilnehmerliste lässt sich jetzt
-                nach Benutzernamen, Angezeigten Namen, Online oder
-                Erstellungsdatum (standard) sortieren. Mit einem 2. Klick
-                auf das gleiche Sortierkriterium invertiert die Reihenfolge
+                Dank einem technischen Update ist die Anwendung nun noch schneller und stabiler. Einige Funktionen wurden verbessert und Fehler behoben.
               </dd>
             </dl>
-            <h2 class="h3">
-              <u>Nächste Features</u>
-            </h2>
-            <dl>
-              <dt>Kopieren & Löschen von Veranstaltungen</dt>
-              <dd>
-                Aktives Löschen seitens Organisatoren und kopieren von
-                bereits erstellten Veranstaltungen mit allen erstellten
-                (gespeicherten) Abstimmungen
-              </dd>
-              <dt>Integration von Videokonferenzsystemem</dt>
-              <dd>
-                Einbettung von Zoom, Jitsi, BBB und weiteren System ist
-                langfristig geplant. Den Anfang macht Zoom!
-              </dd>
-              <dt>OpenSource Veröffentlichung</dt>
-              <dd>
-                Der Source-Code ist aktuell schon einsehbar und auf eigenen
-                System installierbar, jedoch nur was für Profis. Wir wollen
-                Anleitungen und Installationshelfer erstellen und
-                bereitstellen damit Vereine und Verbände ihre eigene
-                Digitalwahl-Plattform verwalten können für 100%ige
-                Datenhoheit.
-              </dd>
-            </dl>
+            <hr />
+            <p>
+              Sie benötigen ein neue Funktion? Schreiben Sie Ihren Vorschlag an <a href="mailto:info@digitalwahl.de">info@digitalwahl.de</a>
+            </p>
+            <p>Der komplette Quellcode ist öffentlich verfügbar unter: <br />
+              <a href="https://github.com/FailXSiegen/voting-service-client-v2" target="_blank">
+                https://github.com/FailXSiegen/voting-service-client-v2
+              </a>
+              <br />
+              <a href="https://github.com/FailXSiegen/voting-service-api" target="_blank">
+                https://github.com/FailXSiegen/voting-service-api
+              </a>
+            </p>
+            <p>Der Quellcode und die Funktion wurden von der Firma amexus Informationstechnik GmbH & Co. KG geprüft. Stand 23.12.2021. Auf Anfrage können Sie das Ergebnis per E-Mail als PDF erhalten.</p>
           </div>
         </div>
         <div class="col-12 col-sm-6 order-1 order-sm-2">
           <div class="row">
             <div class="col-6 col-lg-4 col-xl-auto mb-4">
               <router-link
-                to="/admin/profile"
-                class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
+                :to="{ name: RouteOrganizerProfile }"
+                class="btn btn-primary tn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
               >
                 <span
                   class="nav-icon bi--6xl bi-person mb-auto"
-                  :title="$t('navigation.myProfile')"
+                  :title="$t('navigation.views.' + RouteOrganizerProfile)"
                 />
                 <span class="nav-title mt-1 px-2">
-                  {{ $t('navigation.myProfile') }}
+                  {{ $t("navigation.views." + RouteOrganizerProfile) }}
                 </span>
               </router-link>
             </div>
             <div class="col-6 col-lg-4 col-xl-auto mb-4">
               <router-link
-                to="/anleitung"
+                :to="{ name: RouteStaticManual }"
                 target="_blank"
                 class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100 px-xl-4"
               >
                 <span
-                  class="nav-icon bi--6xl bi-question-circle  mb-auto"
+                  class="nav-icon bi--6xl bi-question-circle mb-auto"
                   title="Anleitungen"
                 />
-                <span class="nav-title mt-1 px-2">
-                  Anleitungen
+                <span class="nav-title mt-1 px-2"> Anleitungen </span>
+              </router-link>
+            </div>
+            <div class="col-12 col-lg-auto mb-4">
+              <router-link
+                :to="{ name: RouteOrganizerVideoConference }"
+                class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
+              >
+                <span
+                  class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100"
+                >
+                  <span
+                    class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
+                    title="Videokonferenzsystem einrichten"
+                  />
+                  <span class="nav-title mt-1 px-2">
+                    Videokonferenzsysteme einrichten
+                  </span>
                 </span>
               </router-link>
             </div>
-            <div class="col-12 col-lg-auto mb-4" />
           </div>
         </div>
       </div>
@@ -99,12 +100,25 @@
 </template>
 
 <script setup>
-import PageLayout from '@/modules/organizer/components/PageLayout.vue'
-import PageNavigation from '@/modules/organizer/components/PageNavigation.vue'
-import {getRoutesByName, RouteMainLogin, RouteOrganizerDashboard} from "@/router/routes";
+import PageLayout from "@/modules/organizer/components/PageLayout.vue";
+import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import {
+  getRoutesByName,
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteStaticManual,
+  RouteOrganizerAllEvents,
+  RouteOrganizerManagement,
+  RouteOrganizerProfile,
+} from "@/router/routes";
 
 // Define navigation items.
-const routes = getRoutesByName([RouteMainLogin, RouteOrganizerDashboard])
-console.log(import.meta.env)
+const routes = getRoutesByName([
+  RouteOrganizerDashboard,
+  RouteOrganizerEvents,
+  RouteOrganizerVideoConference,
+  RouteOrganizerManagement,
+  RouteOrganizerAllEvents,
+]);
 </script>
-

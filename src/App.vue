@@ -1,21 +1,21 @@
 <template>
-  <router-view />
-  <ToTop />
+  <template v-if="loaded">
+    <router-view />
+    <ToTop />
+    <DialogsWrapper />
+  </template>
 </template>
 
 <script setup>
-import ToTop from '@/core/components/ToTop.vue'
-import {useHead} from '@vueuse/head'
+import ToTop from "@/core/components/ToTop.vue";
+import { useCore } from "@/core/store/core";
+import { ref } from "vue";
 
-useHead({
-  title: 'Einfach die Wahl haben',
-  titleTemplate: '%s - digitalwahl.org',
-  htmlAttrs: {
-    lang: 'de'
-  },
-  meta: [
-    {name: 'description', content: 'Einfach die Wahl haben.'},
-    {name: 'viewport', content: 'width=device-width, initial-scale=1'}
-  ]
-})
+const loaded = ref(false);
+
+// Initialise the core store.
+(async () => {
+  await useCore().init();
+  loaded.value = true;
+})();
 </script>
