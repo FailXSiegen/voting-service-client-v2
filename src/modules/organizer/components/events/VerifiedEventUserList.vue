@@ -116,6 +116,7 @@ const headers = [
   },
   { text: t("eventUser.username"), value: "username", sortable: true },
   { text: t("eventUser.publicName"), value: "publicName", sortable: true },
+  { text: t("eventUser.voteAmount"), value: "voteAmount", sortable: true },
   { text: "", value: "id", sortable: false },
 ];
 
