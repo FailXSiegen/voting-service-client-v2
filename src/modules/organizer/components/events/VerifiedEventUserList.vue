@@ -27,6 +27,7 @@
       v-html="$t('view.event.user.info')"
     />
     <EasyDataTable
+      buttons-pagination
       :headers="headers"
       :items="eventUserFiltered"
       table-class-name="data-table"

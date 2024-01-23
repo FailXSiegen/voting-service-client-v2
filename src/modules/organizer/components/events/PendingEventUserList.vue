@@ -21,6 +21,7 @@
     </div>
     <hr />
     <EasyDataTable
+      buttons-pagination
       :headers="headers"
       :items="eventUserFiltered"
       table-class-name="data-table"
