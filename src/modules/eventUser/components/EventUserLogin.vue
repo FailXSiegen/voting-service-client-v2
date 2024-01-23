@@ -26,6 +26,7 @@
               :has-errors="v$.username?.$errors?.length > 0"
               :value="formData.username"
               :help-text="$t('view.login.label.usernameHelp')"
+              :autocomplete="off"
               @change="
                 ({ value }) => {
                   formData.username = value;
@@ -56,6 +57,7 @@
               :has-errors="v$.publicName?.$errors?.length > 0"
               :value="formData.publicName"
               :help-text="$t('view.login.label.publicNameHelp')"
+              :autocomplete="off"
               @change="
                 ({ value }) => {
                   formData.publicName = value;
