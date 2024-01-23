@@ -1,5 +1,23 @@
 <template>
   <form id="poll-form" class="needs-validation" @submit.prevent="onSubmit">
+  
+    <!-- Force answer/s for each vote -->
+    <fieldset class="alert alert-info" v-if="canSubmitAnswerForEachVote">
+      <CheckboxInput
+        id="submit-answer-for-each-vote"
+        :label="
+          $t('view.polls.modal.canSubmitAnswerForEachVote', {
+            voteAmount: eventUser.voteAmount,
+          })
+        "
+        :help-text="$t('view.polls.modal.canSubmitAnswerForEachVoteHelptext')"
+        @update:checked="
+          formData.useAllAvailableVotes = !formData.useAllAvailableVotes
+        "
+      />
+    </fieldset>
+    <hr v-if="canSubmitAnswerForEachVote" />
+
     <!-- Can only select one. -->
     <fieldset v-if="voteType === VOTE_TYPE_SINGLE">
       <RadioInput
@@ -46,22 +64,7 @@
       </fieldset>
     </template>
 
-    <!-- Force answer/s for each vote -->
-    <hr v-if="canSubmitAnswerForEachVote" />
-    <fieldset v-if="canSubmitAnswerForEachVote">
-      <CheckboxInput
-        id="submit-answer-for-each-vote"
-        :label="
-          $t('view.polls.modal.canSubmitAnswerForEachVote', {
-            voteAmount: eventUser.voteAmount,
-          })
-        "
-        :help-text="$t('view.polls.modal.canSubmitAnswerForEachVoteHelptext')"
-        @update:checked="
-          formData.useAllAvailableVotes = !formData.useAllAvailableVotes
-        "
-      />
-    </fieldset>
+    
 
     <hr />
     <button type="submit" class="btn btn-primary float-right">
