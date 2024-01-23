@@ -7,7 +7,7 @@
       <div class="input-group">
         <input
           id="event-user-filter-username"
-          v-model="filter.username"
+          v-model="filter.search"
           class="form-control"
           :placeholder="$t('eventUser.filter.byUsername')"
           @input="onFilter"
@@ -133,7 +133,8 @@ function formatTimestamp(timestamp) {
 
 function onFilter() {
   eventUsersCopy.value = props.eventUsers.filter((eventUser) =>
-    eventUser.username.includes(filter.username),
+    eventUser.username.includes(filter.search) || 
+    eventUser.publicName.includes(filter.search)
   );
 }
 
