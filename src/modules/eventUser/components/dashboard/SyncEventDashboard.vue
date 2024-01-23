@@ -106,6 +106,9 @@ const pollStatePersistence = usePollStatePersistence();
 const votingProcess = useVotingProcess(eventUser, props.event);
 const voteCounter = votingProcess.voteCounter;
 votingProcess.setVotingCompletedCallback(() => {
+  if (pollState.value !== "closed") {
+    pollState.value = "voted";
+  }
   pollModal.value.hideModal();
 });
 const existActivePoll = computed(
