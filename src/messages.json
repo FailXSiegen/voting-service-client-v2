@@ -469,7 +469,7 @@
         "offline": "Offline"
       },
       "filter": {
-        "byUsername": "Filter für Benutzernamen",
+        "byUsername": "Filter für Nutzername oder Öffentlicher Name",
         "reset": "Filter zurücksetzen"
       }
     },
