@@ -3,7 +3,7 @@
     <header>
       <slot name="header" />
     </header>
-    <main class="container-fluid">
+    <main class="container-fluid mb-5 pt-5">
       <div class="row">
         <div class="col-12">
           <h1>
