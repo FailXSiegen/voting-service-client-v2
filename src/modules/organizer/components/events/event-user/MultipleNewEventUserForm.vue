@@ -98,7 +98,7 @@ const usernamesText = ref("");
 const formData = reactive({
   allowToVote: false,
   tokenBasedLogin: false,
-  voteAmount: 1,
+  voteAmount: 0,
   usernames: [],
 });
 const rules = computed(() => {
