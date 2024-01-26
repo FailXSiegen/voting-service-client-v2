@@ -125,6 +125,7 @@ const pollUserVotedCount = ref(0);
 const page = ref(0);
 const pageSize = ref(1);
 const showMoreEnabled = ref(false);
+const canStartPoll = ref(true);
 
 let eventUsersQuery;
 let activePollQuery;
@@ -259,6 +260,7 @@ function onRemovePoll(pollId) {
 }
 
 function onStartPoll(pollId) {
+  canStartPoll.value = false;
   const dialog = createConfirmDialog(ConfirmModal, {
     message: t("view.polls.listing.startConfirm"),
   });
@@ -273,6 +275,10 @@ function onStartPoll(pollId) {
     await pollsWithNoResultsQuery.refetch();
     // Show success message.
     toast(t("success.organizer.poll.startedSuccessfully"), { type: "success" });
+    canStartPoll.value = true;
+  });
+  dialog.onCancel(() => {
+    canStartPoll.value = true;
   });
 
   // Show confirm dialog.
