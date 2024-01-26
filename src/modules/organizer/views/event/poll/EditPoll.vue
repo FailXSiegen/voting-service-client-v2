@@ -37,12 +37,15 @@ import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 import { POLL } from "@/modules/organizer/graphql/queries/poll";
 import { UPDATE_POLL } from "@/modules/organizer/graphql/mutation/update-poll";
+import { createConfirmDialog } from "vuejs-confirm-dialog";
+import ConfirmModal from "@/core/components/ConfirmModal.vue";
 
 const coreStore = useCore();
 const router = useRouter();
 const route = useRoute();
 const eventId = route.params.id;
 const pollId = route.params.pollId;
+const canSubmit = ref(true);
 
 const loaded = ref(false);
 const event = ref(null);
@@ -104,23 +107,39 @@ eventQuery.onResult(({ data }) => {
 // Events.
 
 async function onSubmit(formData) {
+  canSubmit.value = false;
   // Update poll.
   await updatePoll(formData, false);
   // Back to polls view.
   await router.push({ name: RouteOrganizerPolls });
   // Show success message.
   toast(t("success.organizer.poll.updatedSuccessfully"), { type: "success" });
+  canSubmit.value = true;
 }
 
 async function onSubmitAndStart(formData) {
-  // Update poll.
-  await updatePoll(formData, true);
-  // Back to polls view.
-  await router.push({ name: RouteOrganizerPolls });
-  // Show success message.
-  toast(t("success.organizer.poll.updatedAndStartedSuccessfully"), {
-    type: "success",
+  canSubmit.value = false;
+  const dialog = createConfirmDialog(ConfirmModal, {
+    message: t("view.polls.listing.startConfirm"),
   });
+
+  dialog.onConfirm(async () => {
+    // Update poll.
+    await updatePoll(formData, true);
+    // Back to polls view.
+    await router.push({ name: RouteOrganizerPolls });
+    // Show success message.
+    toast(t("success.organizer.poll.updatedAndStartedSuccessfully"), {
+      type: "success",
+    });
+    canSubmit.value = true;
+  });
+  dialog.onCancel(() => {
+    canSubmit.value = true;
+  });
+
+  // Show confirm dialog.
+  dialog.reveal();
 }
 
 /**
