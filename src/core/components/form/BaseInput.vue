@@ -9,6 +9,7 @@
     :class="['form-control', hasErrors ? 'is-invalid' : null, ...classes]"
     :placeholder="placeholder"
     :autocomplete="autocomplete"
+    :readonly="readonly"
     :type="type"
     @keyup="onChange"
     @blur="onChange"
@@ -44,6 +45,8 @@ const props = defineProps({
   name: String,
   // eslint-disable-next-line vue/require-default-prop
   autocomplete: String,
+  // eslint-disable-next-line vue/require-default-prop
+  readonly: String,
   classes: {
     type: Array,
     // eslint-disable-next-line vue/require-valid-default-prop
