@@ -5,6 +5,8 @@ import { InvalidFormError } from "@/core/error/InvalidFormError";
 import { UnauthorizedError } from "@/core/error/UnauthorizedError";
 import { ApiError } from "@/core/error/ApiError";
 import { GraphQLError } from "@/core/error/GraphQLError";
+import { InvalidAnonymousLoginError } from "@/core/error/event/InvalidAnonymousLoginError";
+import { InactiveEventLoginError } from "@/core/error/event/InactiveEventLoginError";
 
 /**
  * @param {Error|string} error
@@ -29,6 +31,10 @@ export function handleError(error, toastOptions = {}) {
     }
   } else if (error instanceof InvalidFormError) {
     errorMessage = error.message;
+  } else if (error instanceof InvalidAnonymousLoginError) {
+    errorMessage = t("error.network.invalidAnonymousLoginError");
+  } else if (error instanceof InactiveEventLoginError) {
+    errorMessage = t("error.network.inactiveEventLoginError");
   } else if (error instanceof UnauthorizedError) {
     errorMessage = t("error.network.unauthorized");
   } else if (error instanceof Error && import.meta.env.PROD) {

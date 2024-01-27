@@ -140,9 +140,7 @@ const errorLink = onError(async (error) => {
     if (error.networkError?.type === ExpiredSessionError.type) {
       // Session is invalid, so return to main login.
       handleError(new NetworkError(error.networkError.message));
-      // @todo move routing to different place to avoid errors.
       await logout();
-      // await router.push({ name: RouteMainLogin });
       return;
     }
 

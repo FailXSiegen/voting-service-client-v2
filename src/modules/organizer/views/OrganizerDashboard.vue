@@ -16,33 +16,60 @@
             <dl class="mb-1">
               <dt>Asynchrone Abstimmungen</dt>
               <dd>
-                Definieren Sie einen Start- und Endzeitpunkt für Ihre Veranstaltung. Alle Teilnehmer können dann innerhalb dieses Zeitraums abstimmen. Die Ergebnisse werden erst nach Ablauf des Endzeitpunkts angezeigt.
+                Definieren Sie einen Start- und Endzeitpunkt für Ihre
+                Veranstaltung. Alle Teilnehmer können dann innerhalb dieses
+                Zeitraums abstimmen. Die Ergebnisse werden erst nach Ablauf des
+                Endzeitpunkts angezeigt.
               </dd>
-              <dt>Neue Pseudonymisierte Zugriffsart für Teilnehmer: Token-basierter Zugang</dt>
+              <dt>
+                Neue Pseudonymisierte Zugriffsart für Teilnehmer:
+                Token-basierter Zugang
+              </dt>
               <dd>
-                Als Organisator tragen Sie bei den Teilnehmern E-Mail Adressen ein. Die Teilnehmer erhalten dann einen Link per E-Mail, mit dem sie sich anmelden können. Bei der Anmeldung wird ein Schlüssel (Token) auf dem verwendeten Endgerät gespeichert. Es wird kein Zusammenhang zwischen E-Mail Adresse und Token vom System gespeichert. Der Token wird als Zugangsschlüssel zur Veranstaltung verwendet.<br />
+                Als Organisator tragen Sie bei den Teilnehmern E-Mail Adressen
+                ein. Die Teilnehmer erhalten dann einen Link per E-Mail, mit dem
+                sie sich anmelden können. Bei der Anmeldung wird ein Schlüssel
+                (Token) auf dem verwendeten Endgerät gespeichert. Es wird kein
+                Zusammenhang zwischen E-Mail Adresse und Token vom System
+                gespeichert. Der Token wird als Zugangsschlüssel zur
+                Veranstaltung verwendet.<br />
                 <u>Wichtig:</u><br />
-                Teilnehmer müssen das gleiche Endgerät verwenden, mit dem sie sich angemeldet haben. Ansonsten ist der Zugang nicht möglich.
+                Teilnehmer müssen das gleiche Endgerät verwenden, mit dem sie
+                sich angemeldet haben. Ansonsten ist der Zugang nicht möglich.
               </dd>
               <dt>Technisches Update</dt>
               <dd>
-                Dank einem technischen Update ist die Anwendung nun noch schneller und stabiler. Einige Funktionen wurden verbessert und Fehler behoben.
+                Dank einem technischen Update ist die Anwendung nun noch
+                schneller und stabiler. Einige Funktionen wurden verbessert und
+                Fehler behoben.
               </dd>
             </dl>
             <hr />
             <p>
-              Sie benötigen ein neue Funktion? Schreiben Sie Ihren Vorschlag an <a href="mailto:info@digitalwahl.de">info@digitalwahl.de</a>
+              Sie benötigen ein neue Funktion? Schreiben Sie Ihren Vorschlag an
+              <a href="mailto:info@digitalwahl.de">info@digitalwahl.de</a>
             </p>
-            <p>Der komplette Quellcode ist öffentlich verfügbar unter: <br />
-              <a href="https://github.com/FailXSiegen/voting-service-client-v2" target="_blank">
+            <p>
+              Der komplette Quellcode ist öffentlich verfügbar unter: <br />
+              <a
+                href="https://github.com/FailXSiegen/voting-service-client-v2"
+                target="_blank"
+              >
                 https://github.com/FailXSiegen/voting-service-client-v2
               </a>
               <br />
-              <a href="https://github.com/FailXSiegen/voting-service-api" target="_blank">
+              <a
+                href="https://github.com/FailXSiegen/voting-service-api"
+                target="_blank"
+              >
                 https://github.com/FailXSiegen/voting-service-api
               </a>
             </p>
-            <p>Der Quellcode und die Funktion wurden von der Firma amexus Informationstechnik GmbH & Co. KG geprüft. Stand 23.12.2021. Auf Anfrage können Sie das Ergebnis per E-Mail als PDF erhalten.</p>
+            <p>
+              Der Quellcode und die Funktion wurden von der Firma amexus
+              Informationstechnik GmbH & Co. KG geprüft. Stand 23.12.2021. Auf
+              Anfrage können Sie das Ergebnis per E-Mail als PDF erhalten.
+            </p>
           </div>
         </div>
         <div class="col-12 col-sm-6 order-1 order-sm-2">

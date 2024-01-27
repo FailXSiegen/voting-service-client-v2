@@ -171,7 +171,10 @@ const pollAnswerGroups = computed(() => {
   groupsArray.sort((a, b) => b[1].length - a[1].length);
 
   // Zurück in ein Objekt umwandeln, falls nötig
-  return groupsArray.reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
+  return groupsArray.reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: value }),
+    {},
+  );
 });
 
 const getCreateDatetime = computed(() => {
@@ -209,10 +212,7 @@ function getAnswerPercentage(answerLength, answerTotal, pollResult) {
   if (pollResult.poll.pollAnswer !== "custom") {
     return ((answerLength / answerTotal) * 100).toFixed(2) + "%";
   } else {
-    return (
-      ((answerLength / answerTotal) * 100).toFixed(2) +
-      "%"
-    );
+    return ((answerLength / answerTotal) * 100).toFixed(2) + "%";
   }
 }
 </script>

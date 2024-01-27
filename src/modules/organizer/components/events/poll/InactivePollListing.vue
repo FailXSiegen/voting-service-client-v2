@@ -1,7 +1,7 @@
 <template>
   <hr />
   <div class="polls-container mb-3">
-    <p v-if="currentOnlineUserCount === 0">
+    <p v-if="currentOnlineUserCount && currentOnlineUserCount === 0">
       <u>
         {{ $t("view.polls.noActiveUser") }}
       </u>
@@ -62,7 +62,7 @@ defineProps({
   },
   currentOnlineUserCount: {
     type: Number,
-    required: true,
+    default: null,
   },
   showStartButton: {
     type: Boolean,
