@@ -175,8 +175,8 @@ const eventUsersQuery = useQuery(
 eventUsersQuery.onResult(({ data }) => {
   if (data?.eventUsers) {
     eventUsers.value = data?.eventUsers;
-    loaded.value = true;
   }
+  loaded.value = true;
 });
 
 // Form and validation setup.

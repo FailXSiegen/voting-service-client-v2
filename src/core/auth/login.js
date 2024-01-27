@@ -4,6 +4,7 @@ import { useCore } from "@/core/store/core";
 import { handleError } from "@/core/error/error-handler";
 import { ExpiredSessionError } from "@/core/error/ExpiredSessionError";
 import { URLS } from "@/urls";
+import { mapApiErrorToClientError } from "@/core/error/api-error-mapper";
 
 export const LOGIN_TYPE_ORGANIZER = "organizer";
 export const LOGIN_TYPE_EVENT_USER = "event-user";
@@ -76,19 +77,21 @@ function login(
       if (response?.status >= 400) {
         throw new NetworkError(t("error.network.consumerError"));
       }
-      if (
-        response?.status >= 200 &&
-        response?.status < 300 &&
-        response?.status !== 201
-      ) {
-        throw new NetworkError(t("view.login.invalidCredentials"));
-      }
-      if (response?.status === 201) {
+      if (response?.status >= 200 && response?.status < 300) {
         return response;
       }
       throw new NetworkError(t("error.network.undefinedError"));
     })
     .then((response) => response.json())
+    .then((response) => {
+      if (response.token) {
+        return response;
+      }
+      if (response.error) {
+        throw mapApiErrorToClientError(response.error?.name || "");
+      }
+      throw new NetworkError(t("error.network.undefinedError"));
+    })
     .then((data) => data);
 }
 

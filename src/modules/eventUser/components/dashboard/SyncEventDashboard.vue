@@ -136,7 +136,7 @@ activePollEventUserQuery.onResult(({ data }) => {
   if (
     pollStatePersistence.canVote(poll.value.id, eventUser.value, props.event)
   ) {
-    voteCounter.value = pollStatePersistence.restoreVoteCounter();
+    voteCounter.value = pollStatePersistence.restoreVoteCounter(poll.value.id);
     pollModal.value.showModal();
   }
 });

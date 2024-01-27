@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+import {defineStore} from "pinia";
 import {
   apolloClient,
   AUTH_TOKEN,
@@ -6,19 +6,20 @@ import {
   resetClient,
   terminateClient,
 } from "@/apollo-client";
-import { decodeJsonWebToken } from "@/core/auth/jwt-util";
+import {decodeJsonWebToken} from "@/core/auth/jwt-util";
 import {
   loginByEventUserAuthToken,
   logout,
   USER_TYPE_EVENT_USER,
   USER_TYPE_ORGANIZER,
 } from "@/core/auth/login";
-import { provideApolloClient, useQuery } from "@vue/apollo-composable";
-import { ORGANIZER } from "@/modules/organizer/graphql/queries/organizer";
-import { EVENT_USER } from "@/modules/eventUser/graphql/queries/event-user";
-import { reactive, ref } from "vue";
-import { getCookie } from "../util/cookie";
-import { handleError } from "../error/error-handler";
+import {provideApolloClient, useQuery} from "@vue/apollo-composable";
+import {ORGANIZER} from "@/modules/organizer/graphql/queries/organizer";
+import {EVENT_USER} from "@/modules/eventUser/graphql/queries/event-user";
+import {reactive, ref} from "vue";
+import {getCookie} from "../util/cookie";
+import {handleError} from "../error/error-handler";
+import {EventUserNotFoundError} from "@/core/error/EventUserNotFoundError";
 
 // WATCH OUT: You can not use the router here. This will result in errors.
 
@@ -82,7 +83,7 @@ export const useCore = defineStore("core", {
         // Try to login the user by "event user auth token", if the related cookie is present.
         if (getCookie(EVENT_USER_AUTH_TOKEN)) {
           // The token is invalid, so we request a new one.
-          const { token } = await loginByEventUserAuthToken();
+          const {token} = await loginByEventUserAuthToken();
           if (token) {
             // Login the user width the new token.
             await this.loginUser(token);
@@ -109,7 +110,7 @@ export const useCore = defineStore("core", {
 
       // Decode jwt.
       try {
-        const { payload } = decodeJsonWebToken(token);
+        const {payload} = decodeJsonWebToken(token);
         // Update user data.
         // todo: Add a validation of the response, so we can be sure to fetch real and good user data.
         this.user = {
@@ -122,18 +123,19 @@ export const useCore = defineStore("core", {
 
         // Query organizer record, if this is an organizer session.
         if (this.user?.type === USER_TYPE_ORGANIZER) {
-          this.queryOrganizer();
+          await this.queryOrganizer();
         }
 
         // Query event user record, if this is an event user session.
         if (this.user?.type === USER_TYPE_EVENT_USER) {
-          this.queryEventUser();
+          await this.queryEventUser();
         }
 
         // Reset apollo client.
         return resetClient();
       } catch (error) {
-        // Somethign went wrong, so terminate the user session.
+        console.error(error);
+        // Something went wrong, so terminate the user session.
         await logout();
       }
     },
@@ -164,32 +166,56 @@ export const useCore = defineStore("core", {
     },
 
     /**
-     * @returns void
+     * @returns {Promise<Object>}
      */
     queryOrganizer() {
-      provideApolloClient(apolloClient);
-      const organizerQuery = useQuery(
-        ORGANIZER,
-        { organizerId: this.user?.id },
-        { fetchPolicy: "no-cache" },
-      );
-      organizerQuery.onResult((result) => {
-        this.organizer.value = result?.data?.organizer;
+      return new Promise((resolve, reject) => {
+        provideApolloClient(apolloClient);
+        const organizerQuery = useQuery(
+          ORGANIZER,
+          {organizerId: this.user?.id},
+          {fetchPolicy: "no-cache"},
+        );
+        organizerQuery.onResult((result) => {
+          const organizer = result?.data?.organizer || null;
+          if (organizer) {
+            this.organizer.value = organizer;
+            resolve(organizer);
+            return;
+          }
+          reject(
+            new EventUserNotFoundError(
+              `Organizer with id "${this.user?.id}" not found`,
+            ),
+          );
+        });
       });
     },
 
     /**
-     * @returns void
+     * @returns {Promise<Object>}
      */
     queryEventUser() {
-      provideApolloClient(apolloClient);
-      const eventUserQuery = useQuery(
-        EVENT_USER,
-        { id: this.user?.id },
-        { fetchPolicy: "no-cache" },
-      );
-      eventUserQuery.onResult((result) => {
-        this.eventUser.value = result?.data?.eventUser;
+      return new Promise((resolve, reject) => {
+        provideApolloClient(apolloClient);
+        const eventUserQuery = useQuery(
+          EVENT_USER,
+          {id: this.user?.id},
+          {fetchPolicy: "no-cache"},
+        );
+        eventUserQuery.onResult((result) => {
+          const eventUser = result?.data?.eventUser || null;
+          if (eventUser) {
+            this.eventUser.value = eventUser;
+            resolve(eventUser);
+            return;
+          }
+          reject(
+            new EventUserNotFoundError(
+              `Event user with id "${this.user?.id}" not found`,
+            ),
+          );
+        });
       });
     },
 

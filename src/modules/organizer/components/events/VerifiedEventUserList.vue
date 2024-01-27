@@ -134,9 +134,10 @@ function formatTimestamp(timestamp) {
 }
 
 function onFilter() {
-  eventUsersCopy.value = props.eventUsers.filter((eventUser) =>
-    eventUser.username.includes(filter.search) || 
-    eventUser.publicName.includes(filter.search)
+  eventUsersCopy.value = props.eventUsers.filter(
+    (eventUser) =>
+      eventUser.username.includes(filter.search) ||
+      eventUser.publicName.includes(filter.search),
   );
 }
 

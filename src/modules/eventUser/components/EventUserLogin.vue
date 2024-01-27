@@ -139,7 +139,9 @@ async function onSubmit() {
       }),
     )
     .then(() => emit("exit"))
-    .catch((error) => handleError(error, { autoClose: false }));
+    .catch((error) => {
+      handleError(error, { autoClose: false });
+    });
 }
 </script>
 

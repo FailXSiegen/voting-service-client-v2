@@ -1,6 +1,5 @@
 <template>
   <form id="poll-form" class="needs-validation" @submit.prevent="onSubmit">
-  
     <!-- Force answer/s for each vote -->
     <fieldset class="alert alert-info" v-if="canSubmitAnswerForEachVote">
       <CheckboxInput
@@ -63,8 +62,6 @@
         />
       </fieldset>
     </template>
-
-    
 
     <hr />
     <button type="submit" class="btn btn-primary float-right">

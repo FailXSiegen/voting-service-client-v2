@@ -18,13 +18,11 @@
   <InactivePollListing
     v-if="polls?.length > 0"
     :polls="polls"
-    :current-online-user-count="verifiedUsersCountAllowToVoteOnline"
     :show-start-button="false"
     :disabled="eventIsRunning"
     @copy="onCopyPoll"
     @edit="onEditPoll"
     @remove="onRemovePoll"
-    @start="onStartPoll"
   />
 </template>
 
@@ -56,13 +54,13 @@ const props = defineProps({
 const route = useRoute();
 const id = route.params.id;
 const router = useRouter();
+const polls = ref([]);
 const eventIsRunning = computed(
   () =>
     (props.event?.active === true || props.event?.active === 1) &&
     props.event?.scheduledDatetime > 0 &&
     props.event?.scheduledDatetime <= getCurrentUnixTimeStamp(),
 );
-const polls = ref([]);
 
 // Fetch polls with no results.
 const pollsQuery = useQuery(

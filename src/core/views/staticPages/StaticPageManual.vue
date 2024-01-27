@@ -62,9 +62,10 @@
           <p>Für eine Anmeldung sind folgende Informationen erforderlich:</p>
           <ol>
             <li>
-              <b>Benutzername, E-Mail Adresse oder Mitgliedsnummer:</b><br />Je nach Verfahren
-              wird der Organisator eine vorherige Anmeldung durchgeführt haben.
-              Verwenden Sie hier die vom Organisator vorgegebene Möglichkeit.
+              <b>Benutzername, E-Mail Adresse oder Mitgliedsnummer:</b><br />Je
+              nach Verfahren wird der Organisator eine vorherige Anmeldung
+              durchgeführt haben. Verwenden Sie hier die vom Organisator
+              vorgegebene Möglichkeit.
             </li>
             <li>
               <b>Passwort:</b><br />Geben Sie ein eigenes Kennwort ein, um sich
@@ -88,7 +89,10 @@
               </div>
               <div class="col d-flex align-items-center">
                 <p class="mb-0">
-                  Der Organisator hat die Möglichkeit, <b>personalisierte</b> Links zu versenden. Falls also Felder nach Aufrufen der Seite schon vorausgefüllt sind tagen Sie nur noch fehlende Informationen ein.
+                  Der Organisator hat die Möglichkeit,
+                  <b>personalisierte</b> Links zu versenden. Falls also Felder
+                  nach Aufrufen der Seite schon vorausgefüllt sind tagen Sie nur
+                  noch fehlende Informationen ein.
                 </p>
               </div>
             </div>
@@ -187,8 +191,12 @@
           </p>
           <p>
             <b>Hinweis für Teilnehmer mit mehreren Delegiertenstimmen:</b
-            ><br />Sie dürfen bei der ersten Stimmenabgabe auswählen, ob Sie alle Ihre Stimmen auf einmal mit der ausgewählten Antwort abgeben.<br /><br />
-            Die Organisatoren haben die Möglichkeit, die Mehrfachstimmenabgabe zu erzwingen, wenn es die Satzung/Ordnung der Mitgliederversammlung vorsieht.
+            ><br />Sie dürfen bei der ersten Stimmenabgabe auswählen, ob Sie
+            alle Ihre Stimmen auf einmal mit der ausgewählten Antwort
+            abgeben.<br /><br />
+            Die Organisatoren haben die Möglichkeit, die Mehrfachstimmenabgabe
+            zu erzwingen, wenn es die Satzung/Ordnung der Mitgliederversammlung
+            vorsieht.
           </p>
         </div>
       </div>
@@ -208,7 +216,9 @@
         </span>
         <div class="media-body">
           <h3>Dashboard</h3>
-          <p>Übersicht der aktuellsten Entwicklungen sowie geplanter Funktionen.</p>
+          <p>
+            Übersicht der aktuellsten Entwicklungen sowie geplanter Funktionen.
+          </p>
         </div>
       </div>
       <hr />
@@ -233,7 +243,8 @@
             In der Aktionsspalte der erstellten Veranstaltungen können Sie die
             vorhandene Veranstaltung editieren, den Einladungslink kopieren, in
             die Detailansicht der Veranstaltung gehen und die Veranstaltung
-            löschen. Das Löschen ist nur möglich, wenn die Veranstaltung vorher auf "Inaktiv" geschaltet wurde in der Bearbeitungsansicht.
+            löschen. Das Löschen ist nur möglich, wenn die Veranstaltung vorher
+            auf "Inaktiv" geschaltet wurde in der Bearbeitungsansicht.
           </p>
           <div class="alert alert-danger">
             <div class="row">
@@ -242,7 +253,13 @@
               </div>
               <div class="col d-flex align-items-center">
                 <p class="mb-0">
-                  <b>Die Veranstaltung und alle damit verbundenen Informationen werden automatisch nach 180 Tagen des geplanten Datums gelöscht.<br /><br />Als Organisator erhalten Sie 3 Tage vor dem Löschen eine Hinweis-E-Mail der bevorstehenden Löschung.</b>
+                  <b
+                    >Die Veranstaltung und alle damit verbundenen Informationen
+                    werden automatisch nach 180 Tagen des geplanten Datums
+                    gelöscht.<br /><br />Als Organisator erhalten Sie 3 Tage vor
+                    dem Löschen eine Hinweis-E-Mail der bevorstehenden
+                    Löschung.</b
+                  >
                 </p>
               </div>
             </div>
@@ -287,29 +304,53 @@
               Veranstaltung.
             </li>
             <li>
-              <b>Lobby aktivieren:</b><br />Personen können, falls dem System schon bekannt, sich im Vorfeld einloggen.<br />Alle unbekannten Personen werden als Nutzer erstellt und in eine Warteraum-Position gespeichert. Der Organisator muss den Nutzer als Teilnehmer oder Gast freischalten (siehe <a href="#event-warteraum">Warteraum</a>).<br />
-              Der Warteraum lässt sich auch als vorzeitige Authentifizierungslogik nutzen: Senden Sie als Organisator den Link zur Veranstaltung frühzeitig zu mit der Bitte, sich als Nutzer einzutragen. Als Organisator können Sie alle Teilnehmer an einem Tag vorher entsprechend der Delegationsart freischalten.
+              <b>Lobby aktivieren:</b><br />Personen können, falls dem System
+              schon bekannt, sich im Vorfeld einloggen.<br />Alle unbekannten
+              Personen werden als Nutzer erstellt und in eine Warteraum-Position
+              gespeichert. Der Organisator muss den Nutzer als Teilnehmer oder
+              Gast freischalten (siehe
+              <a href="#event-warteraum">Warteraum</a>).<br />
+              Der Warteraum lässt sich auch als vorzeitige
+              Authentifizierungslogik nutzen: Senden Sie als Organisator den
+              Link zur Veranstaltung frühzeitig zu mit der Bitte, sich als
+              Nutzer einzutragen. Als Organisator können Sie alle Teilnehmer an
+              einem Tag vorher entsprechend der Delegationsart freischalten.
             </li>
             <li>
-              <b>Veranstaltung aktiv schalten?:</b><br />Solange die Veranstaltung als Aktiv markiert ist, können Teilnehmer und Gäste sich nach der Veranstaltung mit ihren Zugangsdaten erneut anmelden.<br />
+              <b>Veranstaltung aktiv schalten?:</b><br />Solange die
+              Veranstaltung als Aktiv markiert ist, können Teilnehmer und Gäste
+              sich nach der Veranstaltung mit ihren Zugangsdaten erneut
+              anmelden.<br />
 
-              Erst, wenn Sie den Haken entfernen und damit die Veranstaltung als Inaktiv schalten, dürfen Sie die Veranstaltung manuell löschen.
+              Erst, wenn Sie den Haken entfernen und damit die Veranstaltung als
+              Inaktiv schalten, dürfen Sie die Veranstaltung manuell löschen.
             </li>
             <li>
               <b>Asynchrone Wahl:</b><br />
-              Als Organisator müssen Sie neben dem Start- auch ein Enddatum angeben. Alle freigeschalteten Teilnehmer mit Stimmrecht dürfen ab dem Startdatum alle im Vorfeld hinterlegten Abstimmungen bearbeiten. Sobald das Enddatum überschritten ist, werden automatisch nur die Ergebnisse ausgegeben und es kann nicht weiter abgestimmt werden.<br /><br />
+              Als Organisator müssen Sie neben dem Start- auch ein Enddatum
+              angeben. Alle freigeschalteten Teilnehmer mit Stimmrecht dürfen ab
+              dem Startdatum alle im Vorfeld hinterlegten Abstimmungen
+              bearbeiten. Sobald das Enddatum überschritten ist, werden
+              automatisch nur die Ergebnisse ausgegeben und es kann nicht weiter
+              abgestimmt werden.<br /><br />
               <div class="alert alert-danger">
-                Als Organisator dürfen Sie auch <u>keine</u> neuen Abstimmungen ab dem Startdatum <br />erstellen oder die vorhandenen Abstimmungen editieren.
+                Als Organisator dürfen Sie auch <u>keine</u> neuen Abstimmungen
+                ab dem Startdatum <br />erstellen oder die vorhandenen
+                Abstimmungen editieren.
               </div>
             </li>
             <li>
               <b>Videokonferenz-System:</b><br />
-              Hier können Sie auswählen, welche Video-Konferenzsoftware eingebettet verwendet werden soll. Aktuell wird nur Zoom unterstützt.<br />
+              Hier können Sie auswählen, welche Video-Konferenzsoftware
+              eingebettet verwendet werden soll. Aktuell wird nur Zoom
+              unterstützt.<br />
               Siehe <a href="#zoom-integration">Zoom-Integration</a>
             </li>
             <li>
               <b>Mehrfachstimmenabgabe:</b><br />
-              Als Organisator bestimmen Sie, ob Delegierte mit mehreren Stimmen alternierend abstimmen dürfen oder alle Stimmen auf einmal abgeben müssen.
+              Als Organisator bestimmen Sie, ob Delegierte mit mehreren Stimmen
+              alternierend abstimmen dürfen oder alle Stimmen auf einmal abgeben
+              müssen.
             </li>
           </ol>
         </div>
@@ -367,7 +408,12 @@
               digitalwahl.org/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
             </code>
             <p>
-              Die Links können in eine, Tabellenverarbeitungsprogramm wie Microsoft Excel oder Google Sheets automatisiert mit den Informationen erweitert werden. Diese Automatisierung lässt sicht auch auf verkürzte Links (tinyUrl) anwenden und auch auf die Generierung von QR Codes in einem Serienbrief zur Personalisierung einer Tagungsmappe.
+              Die Links können in eine, Tabellenverarbeitungsprogramm wie
+              Microsoft Excel oder Google Sheets automatisiert mit den
+              Informationen erweitert werden. Diese Automatisierung lässt sicht
+              auch auf verkürzte Links (tinyUrl) anwenden und auch auf die
+              Generierung von QR Codes in einem Serienbrief zur Personalisierung
+              einer Tagungsmappe.
             </p>
           </div>
         </div>
@@ -402,19 +448,44 @@
           <h3>Teilnehmer anlegen</h3>
           <h4>Einfache Anlage</h4>
           <p>
-            Die Anlegen einzelner Nutzer ist für kleine Veranstaltungen oder nachzügler geeignet. Sie geben als Organisator den Benutzernamen und den Anzeige-Namen sowie die mögliche Stimmenanzahl an.
+            Die Anlegen einzelner Nutzer ist für kleine Veranstaltungen oder
+            nachzügler geeignet. Sie geben als Organisator den Benutzernamen und
+            den Anzeige-Namen sowie die mögliche Stimmenanzahl an.
           </p>
           <h4>Mehrere Teilnehmer anlegen</h4>
           <p>
-            Das Anlegen mehrerer Nutzer ist für große Veranstaltungen geeignet, wenn Sie die Teilnehmer lokal in einer Tabelle vorliegen haben. Kopieren Sie hierzu einfach die Spalte mit dem Benutzernamen, den die Teilnehmer als Login verwenden sollen. Achten Sie darauf, dass die Spalte keine Überschrift enthält und dass es möglichst keine doppelten Eintragungen oder Leerzeilen gibt.<br /><br />
-            Sie tragen immer alle Teilnehmer gleichzeitig mit einer definierten Stimmenanzahl ein. Falls Sie Teilnehmer mit unterschiedlichen Stimmenanzahlen haben, müssen Sie diese nacheinander anlegen in Gruppen. Hierzu können Sie die Daten mit Ihrem lokalen Tabellenverarbeitungsprogramm filtern.
+            Das Anlegen mehrerer Nutzer ist für große Veranstaltungen geeignet,
+            wenn Sie die Teilnehmer lokal in einer Tabelle vorliegen haben.
+            Kopieren Sie hierzu einfach die Spalte mit dem Benutzernamen, den
+            die Teilnehmer als Login verwenden sollen. Achten Sie darauf, dass
+            die Spalte keine Überschrift enthält und dass es möglichst keine
+            doppelten Eintragungen oder Leerzeilen gibt.<br /><br />
+            Sie tragen immer alle Teilnehmer gleichzeitig mit einer definierten
+            Stimmenanzahl ein. Falls Sie Teilnehmer mit unterschiedlichen
+            Stimmenanzahlen haben, müssen Sie diese nacheinander anlegen in
+            Gruppen. Hierzu können Sie die Daten mit Ihrem lokalen
+            Tabellenverarbeitungsprogramm filtern.
           </p>
           <h4>Token-basierter Login</h4>
           <p>
-            Nutzer erhalten per E-Mail einen Anmelde-Link zur Veranstaltung. Beim Aufrufen des Links wird der Nutzer aufgefordert, Zugangsdaten einzutragen. Diese Zugangsdaten werden nicht mit der E-Mail Adresse in Verbindung gespeichert. Beim verwendeten Endgerät des Nutzers wird ein Schlüssel (token) gespeichert. Mit diesem Token wird der Nutzer automatisch beim Aufrufen des Veranstaltungslinks angemeldet.<br /><br />
-            <b>Der Authentifizierungslink kann nur einmalig auf einem einzelnen Endgerät genutzt werden.</b><br /><br />
-            Der Veranstaltungslink wird nicht mit der E-Mail versendet. Nach dem erfolgreichen Authentifizieren des Endgerätes wird der Nutzer automatisch angemeldet und zur Veranstaltungsseite weitergeleitet.<br />
-            Sobald der Teilnehmer sich abmeldet über den Abmelden Button, wird der Token gelöscht und der Nutzer muss sich erneut authentifizieren. Dies kann nicht mit der gleichen E-Mail durchgeführt werden.
+            Nutzer erhalten per E-Mail einen Anmelde-Link zur Veranstaltung.
+            Beim Aufrufen des Links wird der Nutzer aufgefordert, Zugangsdaten
+            einzutragen. Diese Zugangsdaten werden nicht mit der E-Mail Adresse
+            in Verbindung gespeichert. Beim verwendeten Endgerät des Nutzers
+            wird ein Schlüssel (token) gespeichert. Mit diesem Token wird der
+            Nutzer automatisch beim Aufrufen des Veranstaltungslinks
+            angemeldet.<br /><br />
+            <b
+              >Der Authentifizierungslink kann nur einmalig auf einem einzelnen
+              Endgerät genutzt werden.</b
+            ><br /><br />
+            Der Veranstaltungslink wird nicht mit der E-Mail versendet. Nach dem
+            erfolgreichen Authentifizieren des Endgerätes wird der Nutzer
+            automatisch angemeldet und zur Veranstaltungsseite
+            weitergeleitet.<br />
+            Sobald der Teilnehmer sich abmeldet über den Abmelden Button, wird
+            der Token gelöscht und der Nutzer muss sich erneut authentifizieren.
+            Dies kann nicht mit der gleichen E-Mail durchgeführt werden.
           </p>
         </div>
       </div>
@@ -436,7 +507,12 @@
             Benutzerinformationen bearbeiten.
           </p>
           <p>
-            Man darf jedoch nicht das Passwort eines Nutzers zurücksetzt. Sollte ein Nutzer sein Passwort vergessen haben, muss er dies dem Organisator mitteilen und sich entweder einen neuen Zugangsnamen geben lassen oder falls der Warteraum aktiv ist, mit einem alternativen neuen Zugang anmelden und vom Organisator freigeschaltet werden.
+            Man darf jedoch nicht das Passwort eines Nutzers zurücksetzt. Sollte
+            ein Nutzer sein Passwort vergessen haben, muss er dies dem
+            Organisator mitteilen und sich entweder einen neuen Zugangsnamen
+            geben lassen oder falls der Warteraum aktiv ist, mit einem
+            alternativen neuen Zugang anmelden und vom Organisator
+            freigeschaltet werden.
           </p>
         </div>
       </div>
@@ -458,8 +534,8 @@
             Lobby aktiviert ist).
           </p>
           <p>
-            Die Benutzer können als Teilnehmer (Standard mit einer Stimme) oder als Gast freigeschaltet
-            werden.
+            Die Benutzer können als Teilnehmer (Standard mit einer Stimme) oder
+            als Gast freigeschaltet werden.
           </p>
         </div>
       </div>
@@ -484,9 +560,9 @@
               <div class="col d-flex align-items-center">
                 <p class="mb-0">
                   <b>Achtung</b>:<br />
-                  Nur Teilnehmer, die zum Zeitpunkt des Startens
-                  im System eingeloggt sind und als "Online" im System markiert
-                  sind dürfen abstimmen
+                  Nur Teilnehmer, die zum Zeitpunkt des Startens im System
+                  eingeloggt sind und als "Online" im System markiert sind
+                  dürfen abstimmen
                 </p>
               </div>
             </div>
@@ -559,7 +635,10 @@
             Hier sehen Sie alle vergangenen Abstimmungen und deren Ergebnisse.
             Die Seite verfügt über eine optimierte Druckansicht.<br />
           </p>
-          <p><b>Export:</b><br />Es können folgende CSV Dateien heruntergeladen werden:</p>
+          <p>
+            <b>Export:</b><br />Es können folgende CSV Dateien heruntergeladen
+            werden:
+          </p>
           <ul>
             <li>Übersicht</li>
             <li>Ergebnisse</li>
@@ -581,8 +660,22 @@
         </span>
         <div class="media-body">
           <h3>Zoom Anleitung</h3>
-          <p>Die Voraussetzung ist ein Zoom Pro Account oder höher. Zoom Lizenz auf der <a href="https://zoom.us/de/pricing" target="_blank">Zoom-Website</a> vergleichen und kaufen</p>
-          <p><a href="/download/pdf/anleitung-zoom-integration-v2.pdf" class="btn btn-primary" target="_blank">Anleitung als PDF herunterladen</a></p>
+          <p>
+            Die Voraussetzung ist ein Zoom Pro Account oder höher. Zoom Lizenz
+            auf der
+            <a href="https://zoom.us/de/pricing" target="_blank"
+              >Zoom-Website</a
+            >
+            vergleichen und kaufen
+          </p>
+          <p>
+            <a
+              href="/download/pdf/anleitung-zoom-integration-v2.pdf"
+              class="btn btn-primary"
+              target="_blank"
+              >Anleitung als PDF herunterladen</a
+            >
+          </p>
         </div>
       </div>
       <div
@@ -600,7 +693,9 @@
                 <span aria-hidden="true">&times;</span
                 ><span class="sr-only">Schließen</span>
               </button>
-              <h4 id="popLoginLabel" class="modal-title d-none d-print-block">Vergrößerung</h4>
+              <h4 id="popLoginLabel" class="modal-title d-none d-print-block">
+                Vergrößerung
+              </h4>
             </div>
             <div class="modal-body text-center">
               <img
