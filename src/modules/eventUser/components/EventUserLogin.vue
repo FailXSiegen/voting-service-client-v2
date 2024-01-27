@@ -27,6 +27,7 @@
               :value="formData.username"
               :help-text="$t('view.login.label.usernameHelp')"
               :autocomplete="off"
+              :readonly="readOnlyUsername"
               @change="
                 ({ value }) => {
                   formData.username = value;
@@ -120,6 +121,9 @@ const rules = computed(() => {
   };
 });
 const v$ = useVuelidate(rules, formData);
+
+// Set username readonly, if it is set in the url.
+const readOnlyUsername = urlParams.get("username") !== null ?? false;
 
 // Events.
 
