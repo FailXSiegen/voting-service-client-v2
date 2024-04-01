@@ -130,7 +130,9 @@ const { onResult, refetch } = useQuery(ORGANIZERS, null, {
   fetchPolicy: "no-cache",
 });
 onResult(({ data }) => {
-  organizers.value = data?.organizers ?? [];
+  organizers.value = (data?.organizers ?? []).sort((a, b) => {
+    return new Date(b.createDatetime) - new Date(a.createDatetime);
+  });
 });
 
 function onVerify({ id }, verified) {
