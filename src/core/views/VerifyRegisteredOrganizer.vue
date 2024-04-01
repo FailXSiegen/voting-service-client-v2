@@ -7,13 +7,15 @@
             {{ $t("view.register.headline") }}
           </h1>
           <AlertBox v-if="requestFinished && !requestFailed">
-            {{ $t("view.register.verify.success") }}
+            <b>{{ $t("view.register.verify.success") }}</b><br />
+            {{ $t("view.register.verify.successDescription") }}
           </AlertBox>
           <AlertBox v-else-if="requestFailed" type="danger">
-            {{ $t("view.register.verify.failed") }}
+            <b>{{ $t("view.register.verify.failed") }}</b>
           </AlertBox>
           <AlertBox v-else type="info">
-            {{ $t("view.register.verify.processing") }}
+            <b>{{ $t("view.register.verify.processing") }}</b><br />
+            {{ $t("view.register.verify.processingDescription") }}
           </AlertBox>
         </div>
       </div>
@@ -41,10 +43,17 @@ const requestFailed = ref(false);
 
 onMounted(() => {
   validateHash(hash)
-    .then(() => {
-      requestFinished.value = true;
+    .then((response) => {
+      console.log(response);
+      if (response.alreadyConfirmed) {
+        requestFinished.value = false;
+        requestFailed.value = false;
+      } else {
+        requestFinished.value = true;
+      }
     })
     .catch((error) => {
+      console.log(error);
       requestFailed.value = true;
       handleError(error);
     });
