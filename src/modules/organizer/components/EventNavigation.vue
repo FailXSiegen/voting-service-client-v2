@@ -1,7 +1,7 @@
 <template>
   <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
     <span class="h5 my-3 d-block text-white"
-      >Digitalwahl - Client Version {{ appVersion }}</span
+      >Digitalwahl</span
     >
     <button
       class="navbar-toggler"
