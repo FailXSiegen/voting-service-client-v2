@@ -131,7 +131,9 @@
             </div>
 
             <!-- reCAPTCHA -->
-            <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified" @expired="onCaptchaExpired" sitekey="6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD" />
+            <div class="g-recaptcha" :data-sitekey="recaptchaSiteKey" @recaptcha-success="onCaptchaVerified"></div>
+            <!-- 
+              <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified" @expired="onCaptchaExpired" sitekey="6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD" /> -->
             <button class="btn btn-primary btn-block float-right mt-3" :disabled="!recaptchaVerified">
               {{ $t("view.register.submit") }}
             </button>
@@ -144,7 +146,7 @@
 
 <script setup>
 import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { required, sameAs as equal } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import { handleError } from "@/core/error/error-handler";
@@ -155,11 +157,11 @@ import BaseInput from "@/core/components/form/BaseInput.vue";
 import EmailInput from "@/core/components/form/EmailInput.vue";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import AlertBox from "@/core/components/AlertBox.vue";
-import VueRecaptcha from 'vue-recaptcha';
 
 const submitSuccess = ref(false);
 const recaptchaResponse = ref(null);
 const recaptchaVerified = ref(false);
+const recaptchaSiteKey = "6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD";
 
 // Form and validation setup.
 const formData = reactive({
@@ -194,10 +196,13 @@ function onCaptchaVerified(response) {
   recaptchaVerified.value = true;
 }
 
-function onCaptchaExpired() {
-  recaptchaResponse.value = null;
-  recaptchaVerified.value = false;
-}
+onMounted(() => {
+  const script = document.createElement('script');
+  script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`;
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
+});
 
 async function onSubmit() {
   const result = await v$.value.$validate();
