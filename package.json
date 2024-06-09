@@ -32,7 +32,6 @@
     "pinia": "^2.0.30",
     "vue": "^3.2.45",
     "vue-i18n": "^9.2.2",
-    "vue-recaptcha": "^3.0.0-alpha.6",
     "vue-router": "^4.1.6",
     "vue3-easy-data-table": "^1.5.34",
     "vue3-toastify": "^0.0.6",
