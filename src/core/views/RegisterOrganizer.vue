@@ -131,7 +131,7 @@
             </div>
 
             <!-- reCAPTCHA -->
-            <div class="g-recaptcha" :data-sitekey="recaptchaSiteKey" @recaptcha-success="onCaptchaVerified"></div>
+            <div id="recaptcha-container" class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
             <button class="btn btn-primary btn-block float-right mt-3" :disabled="!recaptchaVerified">
               {{ $t("view.register.submit") }}
             </button>
@@ -160,6 +160,7 @@ const submitSuccess = ref(false);
 const recaptchaResponse = ref(null);
 const recaptchaVerified = ref(false);
 const recaptchaSiteKey = "6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD";
+let recaptchaWidgetId = null;
 
 // Form and validation setup.
 const formData = reactive({
@@ -190,14 +191,21 @@ const rules = {
 const v$ = useVuelidate(rules, formData);
 
 function onCaptchaVerified(response) {
-  console.log(response);
+  console.log('Captcha verified:', response); // Debugging output
   recaptchaResponse.value = response;
   recaptchaVerified.value = true;
 }
 
+function onCaptchaExpired() {
+  console.log('Captcha expired'); // Debugging output
+  recaptchaResponse.value = null;
+  recaptchaVerified.value = false;
+}
+
+
 onMounted(() => {
   const script = document.createElement('script');
-  script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`;
+  script.src = `https://www.google.com/recaptcha/api.js`;
   script.async = true;
   script.defer = true;
   document.head.appendChild(script);
@@ -206,11 +214,13 @@ onMounted(() => {
     console.log('reCAPTCHA script loaded');
     if (window.grecaptcha) {
       window.grecaptcha.ready(() => {
-        window.grecaptcha.render('recaptcha', {
-          sitekey: recaptchaSiteKey,
-          callback: onCaptchaVerified,
-          'expired-callback': onCaptchaExpired
-        });
+        if (recaptchaWidgetId === null) {
+          recaptchaWidgetId = window.grecaptcha.render('recaptcha-container', {
+            sitekey: recaptchaSiteKey,
+            callback: onCaptchaVerified,
+            'expired-callback': onCaptchaExpired,
+          });
+        }
       });
     } else {
       console.error('reCAPTCHA script not loaded correctly');
@@ -221,6 +231,7 @@ onMounted(() => {
     console.error('Failed to load reCAPTCHA script');
   };
 });
+
 
 async function onSubmit() {
   const result = await v$.value.$validate();
@@ -234,8 +245,7 @@ async function onSubmit() {
       email: formData.email,
       password: formData.password,
       publicName: formData.publicName,
-      publicOrganisation: formData.publicOrganisation,
-      recaptcha: recaptchaResponse.value,
+      publicOrganisation: formData.publicOrganisation
     });
     submitSuccess.value = true;
   } catch (error) {
