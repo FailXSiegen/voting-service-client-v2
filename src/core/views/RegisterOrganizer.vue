@@ -132,8 +132,6 @@
 
             <!-- reCAPTCHA -->
             <div class="g-recaptcha" :data-sitekey="recaptchaSiteKey" @recaptcha-success="onCaptchaVerified"></div>
-            <!-- 
-              <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified" @expired="onCaptchaExpired" sitekey="6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD" /> -->
             <button class="btn btn-primary btn-block float-right mt-3" :disabled="!recaptchaVerified">
               {{ $t("view.register.submit") }}
             </button>
@@ -192,6 +190,7 @@ const rules = {
 const v$ = useVuelidate(rules, formData);
 
 function onCaptchaVerified(response) {
+  console.log(response);
   recaptchaResponse.value = response;
   recaptchaVerified.value = true;
 }
@@ -202,6 +201,25 @@ onMounted(() => {
   script.async = true;
   script.defer = true;
   document.head.appendChild(script);
+
+  script.onload = () => {
+    console.log('reCAPTCHA script loaded');
+    if (window.grecaptcha) {
+      window.grecaptcha.ready(() => {
+        window.grecaptcha.render('recaptcha', {
+          sitekey: recaptchaSiteKey,
+          callback: onCaptchaVerified,
+          'expired-callback': onCaptchaExpired
+        });
+      });
+    } else {
+      console.error('reCAPTCHA script not loaded correctly');
+    }
+  };
+
+  script.onerror = () => {
+    console.error('Failed to load reCAPTCHA script');
+  };
 });
 
 async function onSubmit() {
