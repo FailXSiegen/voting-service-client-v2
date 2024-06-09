@@ -25,6 +25,7 @@
             class="register__form border p-3 text-left"
             @submit.prevent="onSubmit"
           >
+            <!-- Form Fields -->
             <div class="form-group">
               <BaseInput
                 :label="$t('view.register.label.username')"
@@ -75,7 +76,6 @@
                 "
               />
             </div>
-
             <div class="form-group">
               <BaseInput
                 :label="$t('view.register.label.publicName')"
@@ -88,7 +88,6 @@
                 "
               />
             </div>
-
             <div class="form-group">
               <BaseInput
                 :label="$t('view.register.label.publicOrganisation')"
@@ -104,7 +103,6 @@
                 {{ $t("view.register.label.publicOrganisationHint") }}
               </small>
             </div>
-
             <div class="form-group">
               <CheckboxInput
                 v-model:checked="formData.dataProtectionAccepted"
@@ -118,7 +116,6 @@
                 "
               />
             </div>
-
             <div class="form-group">
               <CheckboxInput
                 v-model:checked="formData.isBetaAccepted"
@@ -133,7 +130,9 @@
               />
             </div>
 
-            <button class="btn btn-primary btn-block float-right mt-3">
+            <!-- reCAPTCHA -->
+            <vue-recaptcha ref="recaptcha" @verify="onCaptchaVerified" @expired="onCaptchaExpired" sitekey="6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD" />
+            <button class="btn btn-primary btn-block float-right mt-3" :disabled="!recaptchaVerified">
               {{ $t("view.register.submit") }}
             </button>
           </form>
@@ -156,8 +155,11 @@ import BaseInput from "@/core/components/form/BaseInput.vue";
 import EmailInput from "@/core/components/form/EmailInput.vue";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import AlertBox from "@/core/components/AlertBox.vue";
+import VueRecaptcha from 'vue-recaptcha';
 
 const submitSuccess = ref(false);
+const recaptchaResponse = ref(null);
+const recaptchaVerified = ref(false);
 
 // Form and validation setup.
 const formData = reactive({
@@ -187,9 +189,19 @@ const rules = {
 
 const v$ = useVuelidate(rules, formData);
 
+function onCaptchaVerified(response) {
+  recaptchaResponse.value = response;
+  recaptchaVerified.value = true;
+}
+
+function onCaptchaExpired() {
+  recaptchaResponse.value = null;
+  recaptchaVerified.value = false;
+}
+
 async function onSubmit() {
   const result = await v$.value.$validate();
-  if (!result) {
+  if (!result || !recaptchaVerified.value) {
     handleError(new InvalidFormError());
     return;
   }
@@ -200,6 +212,7 @@ async function onSubmit() {
       password: formData.password,
       publicName: formData.publicName,
       publicOrganisation: formData.publicOrganisation,
+      recaptcha: recaptchaResponse.value,
     });
     submitSuccess.value = true;
   } catch (error) {
