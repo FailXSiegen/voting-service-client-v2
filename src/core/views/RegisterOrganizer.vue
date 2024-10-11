@@ -202,32 +202,42 @@ function onCaptchaExpired() {
   recaptchaVerified.value = false;
 }
 
-
 onMounted(() => {
-    const script = document.createElement('script');
-    script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
+  const script = document.createElement('script');
+  script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+  script.async = true;
+  script.defer = true;
+  document.head.appendChild(script);
 
-    script.onload = () => {
-      console.log('reCAPTCHA script loaded');
-      if (window.grecaptcha && window.grecaptcha.render) {
-        window.grecaptcha.ready(() => {
+  function tryRenderRecaptcha() {
+    if (window.grecaptcha && window.grecaptcha.render) {
+      console.log('reCAPTCHA is ready, rendering now');
+      window.grecaptcha.ready(() => {
+        try {
           recaptchaWidgetId = window.grecaptcha.render('recaptcha-container', {
             sitekey: recaptchaSiteKey,
             callback: onCaptchaVerified,
             'expired-callback': onCaptchaExpired,
           });
-        });
-      } else {
-        console.error('reCAPTCHA script not loaded correctly');
-      }
-    };
+          console.log('reCAPTCHA rendered successfully');
+        } catch (error) {
+          console.error('Error rendering reCAPTCHA:', error);
+        }
+      });
+    } else {
+      console.log('reCAPTCHA not ready, retrying in 100ms');
+      setTimeout(tryRenderRecaptcha, 100);
+    }
+  }
 
-    script.onerror = () => {
-      console.error('Failed to load reCAPTCHA script');
-    };
+  script.onload = () => {
+    console.log('reCAPTCHA script loaded, attempting to render');
+    tryRenderRecaptcha();
+  };
+
+  script.onerror = (error) => {
+    console.error('Failed to load reCAPTCHA script:', error);
+  };
 });
 
 async function onSubmit() {
