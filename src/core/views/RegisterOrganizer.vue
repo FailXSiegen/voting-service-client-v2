@@ -204,34 +204,31 @@ function onCaptchaExpired() {
 
 
 onMounted(() => {
-  const script = document.createElement('script');
-  script.src = `https://www.google.com/recaptcha/api.js`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=explicit`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
 
-  script.onload = () => {
-    console.log('reCAPTCHA script loaded');
-    if (window.grecaptcha) {
-      window.grecaptcha.ready(() => {
-        if (recaptchaWidgetId === null) {
+    script.onload = () => {
+      console.log('reCAPTCHA script loaded');
+      if (window.grecaptcha && window.grecaptcha.render) {
+        window.grecaptcha.ready(() => {
           recaptchaWidgetId = window.grecaptcha.render('recaptcha-container', {
             sitekey: recaptchaSiteKey,
             callback: onCaptchaVerified,
             'expired-callback': onCaptchaExpired,
           });
-        }
-      });
-    } else {
-      console.error('reCAPTCHA script not loaded correctly');
-    }
-  };
+        });
+      } else {
+        console.error('reCAPTCHA script not loaded correctly');
+      }
+    };
 
-  script.onerror = () => {
-    console.error('Failed to load reCAPTCHA script');
-  };
+    script.onerror = () => {
+      console.error('Failed to load reCAPTCHA script');
+    };
 });
-
 
 async function onSubmit() {
   const result = await v$.value.$validate();
