@@ -99,44 +99,91 @@ eventQuery.onResult(({ data }) => {
 const BATCH_SIZE = 5;
 const BATCH_DELAY = 1000; // 1 second
 
+// Verbesserte Fehlerextraktion
+function extractErrorMessage(error) {
+  if (error.graphQLErrors?.[0]?.message) {
+    return error.graphQLErrors[0].message;
+  }
+  if (error.networkError?.message) {
+    return error.networkError.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  return error.message || 'Ein unbekannter Fehler ist aufgetreten';
+}
+
 // Process a single user with retry logic
 async function processUser(userData, isTokenBased, maxRetries = 3) {
+  let lastError;
+  
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       const mutate = isTokenBased ? createEventUserToken : createEventUserStandard;
       const result = await mutate({ input: userData });
-      return result;
+      
+      if (import.meta.env.DEV) {
+        console.log(`User created successfully: ${userData.username || userData.email}`);
+      }
+      
+      return { success: true, data: result };
+      
     } catch (error) {
-      if (attempt === maxRetries - 1) throw error;
-      // Exponential backoff
-      await new Promise(resolve => 
-        setTimeout(resolve, Math.pow(2, attempt) * 1000)
-      );
+      lastError = error;
+      
+      if (import.meta.env.DEV) {
+        console.error(`Attempt ${attempt + 1} failed for user: ${userData.username || userData.email}`, error);
+      }
+
+      // Wenn der Nutzer bereits existiert, brechen wir sofort ab
+      if (error.graphQLErrors?.[0]?.message?.includes('already exists')) {
+        break;
+      }
+      
+      // Bei anderen Fehlern versuchen wir es nochmal, wenn wir noch Versuche haben
+      if (attempt < maxRetries - 1) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+        continue;
+      }
     }
   }
+
+  // Wenn wir hier ankommen, sind alle Versuche fehlgeschlagen
+  return {
+    success: false,
+    error: extractErrorMessage(lastError)
+  };
 }
 
 // Process a batch of users
 async function processBatch(batch, isTokenBased, results) {
-  const batchPromises = batch.map(userData => 
-    processUser(userData, isTokenBased)
-      .then(result => {
+  for (const userData of batch) {
+    try {
+      const result = await processUser(userData, isTokenBased);
+      
+      if (result.success) {
         results.successful.push({ 
           username: userData.username || userData.email, 
-          result 
+          result: result.data 
         });
-        progress.current++;
-      })
-      .catch(error => {
+      } else {
         results.failed.push({ 
           username: userData.username || userData.email, 
-          error: error.message 
+          error: result.error 
         });
-        progress.current++;
-      })
-  );
-
-  await Promise.all(batchPromises);
+      }
+      
+    } catch (error) {
+      // Fehler beim Processing selbst (sollte eigentlich nicht vorkommen)
+      results.failed.push({ 
+        username: userData.username || userData.email, 
+        error: extractErrorMessage(error)
+      });
+    } finally {
+      // Immer den Fortschritt erhöhen, egal ob Erfolg oder Fehler
+      progress.current++;
+    }
+  }
 }
 
 // Create users in batches
@@ -153,10 +200,18 @@ async function createUsersInBatches(userDataList, isTokenBased) {
   }
 
   // Process each batch
-  for (const batch of batches) {
-    await processBatch(batch, isTokenBased, results);
-    // Wait between batches
-    if (batches.indexOf(batch) !== batches.length - 1) {
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    
+    try {
+      await processBatch(batch, isTokenBased, results);
+    } catch (error) {
+      // Selbst wenn ein ganzer Batch fehlschlägt, machen wir mit dem nächsten weiter
+      console.error(`Batch ${i + 1} failed:`, error);
+    }
+
+    // Warte zwischen den Batches, außer beim letzten
+    if (i < batches.length - 1) {
       await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
     }
   }
@@ -164,7 +219,7 @@ async function createUsersInBatches(userDataList, isTokenBased) {
   return results;
 }
 
-// Submit handler
+// Submit handler bleibt größtenteils gleich, aber mit verbessertem Error Handling
 async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin }) {
   isProcessing.value = true;
   progress.current = 0;
@@ -173,7 +228,6 @@ async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin })
   errorSummary.errors = [];
 
   try {
-    // Prepare user data
     const userDataList = usernames.map(username => ({
       eventId: id,
       verified: true,
@@ -182,29 +236,44 @@ async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin })
       [tokenBasedLogin ? "email" : "username"]: username
     }));
 
-    // Process users in batches
     const results = await createUsersInBatches(userDataList, tokenBasedLogin);
 
     // Update error summary
     errorSummary.total = usernames.length;
     errorSummary.success = results.successful.length;
     errorSummary.failed = results.failed.length;
-    errorSummary.errors = results.failed;
+    errorSummary.errors = results.failed.map(fail => ({
+      username: fail.username,
+      message: fail.error
+    }));
     errorSummary.show = results.failed.length > 0;
 
-    // Show success message if any users were created
+    // Show appropriate messages
     if (results.successful.length > 0) {
-      toast(t("success.organizer.eventUser.createdSuccessfully"), {
-        type: "success"
-      });
+      toast.success(
+        t("success.organizer.eventUser.createdSuccessfully", {
+          count: results.successful.length
+        })
+      );
     }
 
-    // Only redirect if all users were created successfully
+    if (results.failed.length > 0) {
+      toast.warning(
+        t("warning.organizer.eventUser.someUsersFailed", {
+          failed: results.failed.length,
+          total: usernames.length
+        })
+      );
+    }
+
+    // Nur weiterleiten wenn alle erfolgreich waren
     if (results.failed.length === 0) {
       await router.push({ name: RouteOrganizerMemberRoom });
     }
+
   } catch (error) {
     handleError(error);
+    toast.error(t("error.organizer.eventUser.processingFailed"));
   } finally {
     isProcessing.value = false;
   }
