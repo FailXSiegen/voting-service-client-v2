@@ -147,6 +147,7 @@
             "endDatetime": "Enddatum (Nur für Briefwahl)",
             "eventUser": {
               "submit": "Benutzer speichern",
+              "processing": "Benutzer werden gespeichert",
               "createNew": "Neuen Benutzer erstellen",
               "update": "Benutzer bearbeiten",
               "allowToVote": "Teilnehmer mit Stimmrecht",
