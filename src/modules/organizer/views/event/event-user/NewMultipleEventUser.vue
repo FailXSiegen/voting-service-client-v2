@@ -81,6 +81,10 @@ const eventQuery = useQuery(
   { fetchPolicy: "no-cache" }
 );
 
+// Mutations setup - declare these at the component level
+const { mutate: createEventUserStandard } = useMutation(CREATE_EVENT_USER);
+const { mutate: createEventUserToken } = useMutation(CREATE_EVENT_USER_AUTH_TOKEN);
+
 eventQuery.onResult(({ data }) => {
   if (null === data?.event) {
     handleError(new NetworkError());
@@ -95,34 +99,32 @@ eventQuery.onResult(({ data }) => {
 const BATCH_SIZE = 5;
 const BATCH_DELAY = 1000; // 1 second
 
-// Create users in batches
-async function createUsersInBatches(userDataList, mutation) {
-  const results = {
-    successful: [],
-    failed: []
-  };
-
-  // Split into batches
-  const batches = [];
-  for (let i = 0; i < userDataList.length; i += BATCH_SIZE) {
-    batches.push(userDataList.slice(i, i + BATCH_SIZE));
+// Process a single user with retry logic
+async function processUser(userData, isTokenBased, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const mutate = isTokenBased ? createEventUserToken : createEventUserStandard;
+      const result = await mutate({ input: userData });
+      return result;
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      // Exponential backoff
+      await new Promise(resolve => 
+        setTimeout(resolve, Math.pow(2, attempt) * 1000)
+      );
+    }
   }
-
-  // Process each batch
-  for (const batch of batches) {
-    await processBatch(batch, mutation, results);
-    await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
-  }
-
-  return results;
 }
 
-// Process a single batch
-async function processBatch(batch, mutation, results) {
+// Process a batch of users
+async function processBatch(batch, isTokenBased, results) {
   const batchPromises = batch.map(userData => 
-    processUser(userData, mutation)
+    processUser(userData, isTokenBased)
       .then(result => {
-        results.successful.push({ username: userData.username || userData.email, result });
+        results.successful.push({ 
+          username: userData.username || userData.email, 
+          result 
+        });
         progress.current++;
       })
       .catch(error => {
@@ -137,23 +139,29 @@ async function processBatch(batch, mutation, results) {
   await Promise.all(batchPromises);
 }
 
-// Process a single user with retry logic
-async function processUser(userData, mutation, maxRetries = 3) {
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const { mutate: createEventUser } = useMutation(mutation, {
-        variables: { input: userData }
-      });
-      const result = await createEventUser();
-      return result;
-    } catch (error) {
-      if (attempt === maxRetries - 1) throw error;
-      // Exponential backoff
-      await new Promise(resolve => 
-        setTimeout(resolve, Math.pow(2, attempt) * 1000)
-      );
+// Create users in batches
+async function createUsersInBatches(userDataList, isTokenBased) {
+  const results = {
+    successful: [],
+    failed: []
+  };
+
+  // Split into batches
+  const batches = [];
+  for (let i = 0; i < userDataList.length; i += BATCH_SIZE) {
+    batches.push(userDataList.slice(i, i + BATCH_SIZE));
+  }
+
+  // Process each batch
+  for (const batch of batches) {
+    await processBatch(batch, isTokenBased, results);
+    // Wait between batches
+    if (batches.indexOf(batch) !== batches.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
     }
   }
+
+  return results;
 }
 
 // Submit handler
@@ -165,8 +173,6 @@ async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin })
   errorSummary.errors = [];
 
   try {
-    const mutation = tokenBasedLogin ? CREATE_EVENT_USER_AUTH_TOKEN : CREATE_EVENT_USER;
-    
     // Prepare user data
     const userDataList = usernames.map(username => ({
       eventId: id,
@@ -177,7 +183,7 @@ async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin })
     }));
 
     // Process users in batches
-    const results = await createUsersInBatches(userDataList, mutation);
+    const results = await createUsersInBatches(userDataList, tokenBasedLogin);
 
     // Update error summary
     errorSummary.total = usernames.length;
@@ -186,14 +192,14 @@ async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin })
     errorSummary.errors = results.failed;
     errorSummary.show = results.failed.length > 0;
 
-    // Show success message
+    // Show success message if any users were created
     if (results.successful.length > 0) {
       toast(t("success.organizer.eventUser.createdSuccessfully"), {
         type: "success"
       });
     }
 
-    // If all users were created successfully, redirect
+    // Only redirect if all users were created successfully
     if (results.failed.length === 0) {
       await router.push({ name: RouteOrganizerMemberRoom });
     }
