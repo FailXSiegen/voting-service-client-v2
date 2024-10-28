@@ -1,7 +1,5 @@
 <template>
-  <PageLayout
-    :meta-title="$t('navigation.views.organizerEventUserMultipleNew')"
-  >
+  <PageLayout :meta-title="$t('navigation.views.organizerEventUserMultipleNew')">
     <template #title>
       <div class="events-new-title">
         {{ $t("navigation.views.organizerEventUserMultipleNew") }} -
@@ -12,46 +10,78 @@
       <EventNavigation :routes="routes" />
     </template>
     <template #content>
-      <MultipleNewEventUserForm @submit="onSubmit" />
+      <MultipleNewEventUserForm 
+        @submit="onSubmit" 
+        :is-processing="isProcessing"
+        :progress="progress"
+      />
+      <!-- Error Summary -->
+      <div v-if="errorSummary.show" class="alert alert-warning mt-3">
+        <h5>{{ $t('view.event.create.labels.eventUser.errorSummary.title') }}</h5>
+        <p>{{ $t('view.event.create.labels.eventUser.errorSummary.description', { 
+          total: errorSummary.total,
+          success: errorSummary.success,
+          failed: errorSummary.failed 
+        }) }}</p>
+        <ul v-if="errorSummary.errors.length">
+          <li v-for="(error, index) in errorSummary.errors" :key="index">
+            {{ error.username }}: {{ error.message }}
+          </li>
+        </ul>
+      </div>
     </template>
   </PageLayout>
 </template>
 
 <script setup>
+import { ref, reactive } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useMutation, useQuery } from "@vue/apollo-composable";
+import { toast } from "vue3-toastify";
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
 import MultipleNewEventUserForm from "@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue";
-import {
-  RouteOrganizerDashboard,
-  RouteOrganizerMemberRoom,
-} from "@/router/routes";
+import { RouteOrganizerDashboard, RouteOrganizerMemberRoom } from "@/router/routes";
 import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
-import { useMutation, useQuery } from "@vue/apollo-composable";
 import { EVENT } from "@/modules/organizer/graphql/queries/event";
+import { CREATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/create-event-user";
+import { CREATE_EVENT_USER_AUTH_TOKEN } from "@/modules/organizer/graphql/mutation/create-event-user-auth-token";
 import { handleError } from "@/core/error/error-handler";
 import { NetworkError } from "@/core/error/NetworkError";
-import { CREATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/create-event-user";
-import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
-import { CREATE_EVENT_USER_AUTH_TOKEN } from "@/modules/organizer/graphql/mutation/create-event-user-auth-token";
 
+// Store and Router setup
 const coreStore = useCore();
 const router = useRouter();
 const route = useRoute();
 const id = route.params.id;
+
+// Reactive state
 const loaded = ref(false);
 const event = ref(null);
+const isProcessing = ref(false);
+const progress = reactive({
+  current: 0,
+  total: 0,
+  processing: false
+});
 
-// Try to fetch event by id and organizer id.
+const errorSummary = reactive({
+  show: false,
+  total: 0,
+  success: 0,
+  failed: 0,
+  errors: []
+});
+
+// Event query
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: "no-cache" }
 );
+
 eventQuery.onResult(({ data }) => {
-  // Check if the event could be fetched successfully. redirect to list if not.
   if (null === data?.event) {
     handleError(new NetworkError());
     router.push({ name: RouteOrganizerDashboard });
@@ -61,36 +91,127 @@ eventQuery.onResult(({ data }) => {
   loaded.value = true;
 });
 
-async function onSubmit({
-  usernames,
-  allowToVote,
-  voteAmount,
-  tokenBasedLogin,
-}) {
-  const mutation = tokenBasedLogin
-    ? CREATE_EVENT_USER_AUTH_TOKEN
-    : CREATE_EVENT_USER;
-  // Create new Event users.
-  for (const username of usernames) {
-    const input = {
+// Batch processing configuration
+const BATCH_SIZE = 5;
+const BATCH_DELAY = 1000; // 1 second
+
+// Create users in batches
+async function createUsersInBatches(userDataList, mutation) {
+  const results = {
+    successful: [],
+    failed: []
+  };
+
+  // Split into batches
+  const batches = [];
+  for (let i = 0; i < userDataList.length; i += BATCH_SIZE) {
+    batches.push(userDataList.slice(i, i + BATCH_SIZE));
+  }
+
+  // Process each batch
+  for (const batch of batches) {
+    await processBatch(batch, mutation, results);
+    await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+  }
+
+  return results;
+}
+
+// Process a single batch
+async function processBatch(batch, mutation, results) {
+  const batchPromises = batch.map(userData => 
+    processUser(userData, mutation)
+      .then(result => {
+        results.successful.push({ username: userData.username || userData.email, result });
+        progress.current++;
+      })
+      .catch(error => {
+        results.failed.push({ 
+          username: userData.username || userData.email, 
+          error: error.message 
+        });
+        progress.current++;
+      })
+  );
+
+  await Promise.all(batchPromises);
+}
+
+// Process a single user with retry logic
+async function processUser(userData, mutation, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const { mutate: createEventUser } = useMutation(mutation, {
+        variables: { input: userData }
+      });
+      const result = await createEventUser();
+      return result;
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      // Exponential backoff
+      await new Promise(resolve => 
+        setTimeout(resolve, Math.pow(2, attempt) * 1000)
+      );
+    }
+  }
+}
+
+// Submit handler
+async function onSubmit({ usernames, allowToVote, voteAmount, tokenBasedLogin }) {
+  isProcessing.value = true;
+  progress.current = 0;
+  progress.total = usernames.length;
+  errorSummary.show = false;
+  errorSummary.errors = [];
+
+  try {
+    const mutation = tokenBasedLogin ? CREATE_EVENT_USER_AUTH_TOKEN : CREATE_EVENT_USER;
+    
+    // Prepare user data
+    const userDataList = usernames.map(username => ({
       eventId: id,
       verified: true,
       allowToVote,
       voteAmount: voteAmount || 0,
-    };
-    input[tokenBasedLogin ? "email" : "username"] = username;
-    const { mutate: createEventUser } = useMutation(mutation, {
-      variables: { input },
-    });
-    await createEventUser();
+      [tokenBasedLogin ? "email" : "username"]: username
+    }));
+
+    // Process users in batches
+    const results = await createUsersInBatches(userDataList, mutation);
+
+    // Update error summary
+    errorSummary.total = usernames.length;
+    errorSummary.success = results.successful.length;
+    errorSummary.failed = results.failed.length;
+    errorSummary.errors = results.failed;
+    errorSummary.show = results.failed.length > 0;
+
+    // Show success message
+    if (results.successful.length > 0) {
+      toast(t("success.organizer.eventUser.createdSuccessfully"), {
+        type: "success"
+      });
+    }
+
+    // If all users were created successfully, redirect
+    if (results.failed.length === 0) {
+      await router.push({ name: RouteOrganizerMemberRoom });
+    }
+  } catch (error) {
+    handleError(error);
+  } finally {
+    isProcessing.value = false;
   }
-
-  // Back to member room.
-  await router.push({ name: RouteOrganizerMemberRoom });
-
-  // Show success message.
-  toast(t("success.organizer.eventUser.createdSuccessfully"), {
-    type: "success",
-  });
 }
 </script>
+
+<style lang="scss" scoped>
+.alert {
+  max-width: 840px;
+  
+  ul {
+    margin-top: 1rem;
+    margin-bottom: 0;
+  }
+}
+</style>
