@@ -214,7 +214,9 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     }
 
     // Open the poll modal.
-    pollModal.value.showModal();
+    if (eventUser.value.voteAmount >= 1 && eventUser.value.allowToVote) {
+      pollModal.value.showModal();
+    }
   } else if (pollState.value === "closed") {
     // Close the poll modal.
     pollModal.value.hideModal();
