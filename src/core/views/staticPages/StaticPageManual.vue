@@ -1,6 +1,19 @@
 <template>
   <CorePageLayout meta-title="Anleitung">
     <div class="manual">
+      <div class="alert alert-danger">
+        <div class="row align-items-center">
+          <div class="col-2 text-center">
+            <i class="bi bi-exclamation-circle bi--6xl" />
+          </div>
+          <div class="col text-center">
+            <p class="display-4 mb-3">HINWEIS</p>
+            <p>Aufgrund einer technischen Aktualisierung hat sich die Link/URL Struktur von Veranstaltungen geändert!</p>
+            <p>digitalwahl.org/<b>event/</b>meine-veranstaltung</p>
+            <p class="mb-0">Bitte aktualisieren Sie vorhandene Anleitungen und Vorlagen.</p>
+          </div>
+        </div>
+      </div>
       <h1>Anleitungen</h1>
 
       <ul class="list-unstyled">
@@ -405,7 +418,7 @@
               <li>Parameter publicname - Füllt das Feld "Anzeige-Name" aus</li>
             </ul>
             <code class="py-3 align-self-center">
-              digitalwahl.org/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
+              digitalwahl.org/event/meine-veranstaltung?username=0123456789&publicname=Felix%20Herrmann
             </code>
             <p>
               Die Links können in eine, Tabellenverarbeitungsprogramm wie
