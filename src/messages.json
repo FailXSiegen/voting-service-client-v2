@@ -129,7 +129,7 @@
           "labels": {
             "title": "Veranstaltungstitel",
             "slug": "Slug",
-            "slugHelp": "Pfadsegment für URL: \"digitalwahl.org/meine-veranstaltung\" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.",
+            "slugHelp": "Pfadsegment für URL: \"digitalwahl.org/event/meine-veranstaltung\" | Bevorzugt Kleinschreibung sowie ohne Leer- und Sonderzeichen.",
             "description": "Veranstaltungsbeschreibung",
             "descriptionHelp": "Veranstaltungsbeschreibung",
             "scheduledDatetime": "Startdatum",
