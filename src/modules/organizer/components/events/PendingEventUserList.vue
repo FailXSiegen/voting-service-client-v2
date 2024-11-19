@@ -42,7 +42,7 @@
         </span>
       </template>
       <template #item-id="item">
-        <div class="btn-group float-right" role="group">
+        <div class="btn-group float-end" role="group">
           <button
             class="btn btn-success me-2"
             @click="onUpdateToParticipant(item.id)"

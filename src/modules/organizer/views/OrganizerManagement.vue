@@ -35,7 +35,7 @@
         </template>
         <template #item-id="item">
           <div v-if="currentOrganizerSessionId != item.id">
-            <div class="float-right">
+            <div class="float-end">
               <button
                 v-if="item.verified"
                 class="btn btn-danger d-inline-block mx-1"

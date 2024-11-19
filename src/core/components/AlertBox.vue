@@ -1,5 +1,5 @@
 <template>
-  <div :class="'alert text-left ' + config.wrapperClass" role="alert">
+  <div :class="'alert text-start ' + config.wrapperClass" role="alert">
     <div class="icon">
       <i
         v-if="useIcon"

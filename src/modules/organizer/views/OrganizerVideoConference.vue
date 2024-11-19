@@ -34,7 +34,7 @@
         theme-color="#007bff"
       >
         <template #item-id="item">
-          <div class="btn-group float-right" role="group">
+          <div class="btn-group float-end" role="group">
             <router-link
               :to="{
                 name: RouteOrganizerVideoConferenceEdit,

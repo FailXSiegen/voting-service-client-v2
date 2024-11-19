@@ -9,7 +9,7 @@
           <p class="register-organizer-subheadline">
             {{ $t("view.register.subheadline") }}
           </p>
-          <div class="jumbotron jumbotron-fluid">
+          <div class="p-5 mb-4 bg-body-tertiary rounded-3">
             <p
               class="register__description"
               v-html="$t('view.register.description')"
@@ -22,7 +22,7 @@
           <form
             v-else
             id="register-form"
-            class="register__form border p-3 text-left"
+            class="register__form border p-3 text-start"
             @submit.prevent="onSubmit"
           >
             <!-- Form Fields -->
@@ -132,7 +132,7 @@
 
             <!-- reCAPTCHA -->
             <div id="recaptcha-container" class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
-            <button class="btn btn-primary btn-block float-right mt-3" :disabled="!recaptchaVerified">
+            <button class="btn btn-primary btn-block float-end mt-3" :disabled="!recaptchaVerified">
               {{ $t("view.register.submit") }}
             </button>
           </form>

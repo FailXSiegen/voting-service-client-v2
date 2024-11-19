@@ -704,7 +704,7 @@
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal">
                 <span aria-hidden="true">&times;</span
-                ><span class="sr-only">Schließen</span>
+                ><span class="visually-hidden">Schließen</span>
               </button>
               <h4 id="popLoginLabel" class="modal-title d-none d-print-block">
                 Vergrößerung
