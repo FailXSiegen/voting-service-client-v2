@@ -11,9 +11,9 @@
       @input="(event) => $emit('update:checked', event.target.checked)"
     />
     <label class="form-check-label" :for="id" v-html="label" />
-    <small v-if="helpText" class="form-text text-muted">
+    <div v-if="helpText" class="form-text text-muted">
       <span v-html="helpText" />
-    </small>
+    </div>
     <span
       v-for="error in errors"
       :key="error.uid"

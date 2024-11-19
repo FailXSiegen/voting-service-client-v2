@@ -9,7 +9,7 @@
     <template #content>
       <div v-if="organizerLoaded">
         <form class="profile-form" @submit.prevent="onSubmit">
-          <div class="form-group">
+          <div class="mb-3">
             <EmailInput
               :label="$t('view.profile.label.email')"
               :errors="v$.email?.$errors"
@@ -22,7 +22,7 @@
               "
             />
           </div>
-          <div class="form-group">
+          <div class="mb-3">
             <BaseInput
               :label="$t('view.profile.label.fullName')"
               :errors="v$.publicName?.$errors"
@@ -35,7 +35,7 @@
               "
             />
           </div>
-          <div class="form-group">
+          <div class="mb-3">
             <BaseInput
               :label="$t('view.profile.label.currentPassword')"
               :errors="v$.currentPassword?.$errors"
@@ -51,7 +51,7 @@
           </div>
           <div class="card mb-3">
             <div class="card-header">
-              <div class="form-group">
+              <div class="mb-3">
                 <CheckboxInput
                   v-model:checked="formData.changePassword"
                   label="Reset password"
@@ -66,7 +66,7 @@
               </div>
             </div>
             <div v-if="formData.changePassword" class="card-body">
-              <div class="form-group">
+              <div class="mb-3">
                 <BaseInput
                   :label="$t('view.profile.label.newPassword')"
                   :errors="v$.newPassword?.$errors"
@@ -80,7 +80,7 @@
                   "
                 />
               </div>
-              <div class="form-group">
+              <div class="mb-3">
                 <BaseInput
                   :label="$t('view.profile.label.repeatPassword')"
                   :errors="v$.newPasswordRepeated?.$errors"

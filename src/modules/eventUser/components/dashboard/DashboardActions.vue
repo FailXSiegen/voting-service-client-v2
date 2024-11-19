@@ -6,14 +6,14 @@
         class="actions-item btn btn-danger d-print-none"
         @click="onLogout"
       >
-        <i class="mr-2 bi bi-x-square" />{{ $t("navigation.logOut") }}
+        <i class="me-2 bi bi-x-square" />{{ $t("navigation.logOut") }}
       </button>
       <button
         v-else
         class="actions-item btn btn-danger d-print-none"
         @click="onTerminateTokenSession"
       >
-        <i class="mr-2 bi bi-x-square" />{{
+        <i class="me-2 bi bi-x-square" />{{
           $t("navigation.terminateTokenSession")
         }}
       </button>
@@ -21,7 +21,7 @@
         class="actions-item btn btn-secondary d-print-none"
         @click="onReloadPage"
       >
-        <i class="mr-2 bi bi-arrow-repeat" />{{ $t("navigation.reload") }}
+        <i class="me-2 bi bi-arrow-repeat" />{{ $t("navigation.reload") }}
       </button>
     </div>
   </div>

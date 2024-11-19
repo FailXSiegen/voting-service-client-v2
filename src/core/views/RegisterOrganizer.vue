@@ -26,7 +26,7 @@
             @submit.prevent="onSubmit"
           >
             <!-- Form Fields -->
-            <div class="form-group">
+            <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.username')"
                 :errors="v$.username.$errors"
@@ -38,7 +38,7 @@
                 "
               />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <EmailInput
                 :label="$t('view.register.label.email')"
                 :errors="v$.email.$errors"
@@ -50,7 +50,7 @@
                 "
               />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.password')"
                 :errors="v$.password.$errors"
@@ -63,7 +63,7 @@
                 "
               />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.repeatPassword')"
                 :errors="v$.passwordRepeated.$errors"
@@ -76,7 +76,7 @@
                 "
               />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.publicName')"
                 :errors="v$.publicName.$errors"
@@ -88,7 +88,7 @@
                 "
               />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.publicOrganisation')"
                 :errors="v$.publicOrganisation.$errors"
@@ -103,7 +103,7 @@
                 {{ $t("view.register.label.publicOrganisationHint") }}
               </small>
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <CheckboxInput
                 v-model:checked="formData.dataProtectionAccepted"
                 :label="$t('view.register.label.dataProtection')"
@@ -116,7 +116,7 @@
                 "
               />
             </div>
-            <div class="form-group">
+            <div class="mb-3">
               <CheckboxInput
                 v-model:checked="formData.isBetaAccepted"
                 :label="$t('view.register.label.beta')"

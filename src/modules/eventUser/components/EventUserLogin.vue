@@ -19,7 +19,7 @@
           autocomplete="off"
           @submit.prevent="onSubmit"
         >
-          <div class="form-group">
+          <div class="mb-3">
             <BaseInput
               :label="$t('view.login.label.username')"
               :errors="v$.username?.$errors"
@@ -35,7 +35,7 @@
               "
             />
           </div>
-          <div class="form-group">
+          <div class="mb-3">
             <BaseInput
               :label="$t('view.login.label.password')"
               :errors="v$.password?.$errors"
@@ -51,7 +51,7 @@
               "
             />
           </div>
-          <div class="form-group">
+          <div class="mb-3">
             <BaseInput
               :label="$t('view.login.label.publicName')"
               :errors="v$.publicName?.$errors"

@@ -13,7 +13,7 @@
             {{ type.title }}
           </option>
         </select>
-        <div class="input-group-append">
+        <div class="input-group-text p-0">
           <router-link
             :to="{ name: RouteOrganizerVideoConferenceNew }"
             class="btn btn-secondary"

@@ -12,7 +12,7 @@
             @submit.prevent="onSubmit"
           >
             <div class="card-body">
-              <div class="form-group">
+              <div class="mb-3">
                 <BaseInput
                   :label="$t('view.profile.label.newPassword')"
                   :errors="v$.password.$errors"
@@ -26,7 +26,7 @@
                   "
                 />
               </div>
-              <div class="form-group">
+              <div class="mb-3">
                 <BaseInput
                   :label="$t('view.profile.label.repeatPassword')"
                   :errors="v$.passwordRepeated.$errors"

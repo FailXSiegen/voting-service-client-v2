@@ -19,12 +19,12 @@
         @click.prevent="onToggleVideoConference"
       >
         <template v-if="dashboardForeground">
-          <i class="bi bi bi-fullscreen mr-2" /><span>{{
+          <i class="bi bi bi-fullscreen me-2" /><span>{{
             $t("view.event.meeting.backToMeeting")
           }}</span>
         </template>
         <template v-else>
-          <i class="bi bi-fullscreen-exit mr-2" /><span>{{
+          <i class="bi bi-fullscreen-exit me-2" /><span>{{
             $t("view.event.meeting.backToDashboard")
           }}</span>
         </template>

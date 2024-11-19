@@ -61,7 +61,7 @@
           <img
             src="../../../assets/images/teilnehmer/loginmaske.png"
             alt="loginmaske"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -118,7 +118,7 @@
           <img
             src="../../../assets/images/teilnehmer/warteraum.png"
             alt="Warteraum"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -144,7 +144,7 @@
           <img
             src="../../../assets/images/teilnehmer/gast.png"
             alt="Gast"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -164,7 +164,7 @@
           <img
             src="../../../assets/images/teilnehmer/stimmrecht.png"
             alt="Stimmrecht"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -187,7 +187,7 @@
           <img
             src="../../../assets/images/teilnehmer/demoabstimmung.png"
             alt="Demo-Abstimmung"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -222,7 +222,7 @@
           <img
             src="../../../assets/images/organisator/dashboard.png"
             alt="Dashboard"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -240,7 +240,7 @@
           <img
             src="../../../assets/images/organisator/uebersicht.png"
             alt="Event-Übersicht"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -285,7 +285,7 @@
           <img
             src="../../../assets/images/organisator/eventerstellen.png"
             alt="Event erstellen"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -374,7 +374,7 @@
           <img
             src="../../../assets/images/organisator/event-teilnehmer.png"
             alt="Event Teilnehmer"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -437,7 +437,7 @@
           <img
             src="../../../assets/images/organisator/teilnehmer-erstellen-buttons.png"
             alt="Event Teilnehmer erstellen Buttons"
-            class="mr-3 me-3 click-enlarge img-thumbnail mb-3"
+            class="me-3 me-3 click-enlarge img-thumbnail mb-3"
             width="300"
             @click="onClickImage"
           />
@@ -445,14 +445,14 @@
           <img
             src="../../../assets/images/organisator/teilnehmer-erstellen-default.png"
             alt="Event Teilnehmer"
-            class="mr-3 me-3 click-enlarge img-thumbnail mb-3"
+            class="me-3 me-3 click-enlarge img-thumbnail mb-3"
             width="300"
             @click="onClickImage"
           /><br />
           <img
             src="../../../assets/images/organisator/teilnehmer-erstellen-token.png"
             alt="Event Teilnehmer"
-            class="mr-3 me-3 click-enlarge img-thumbnail mb-3"
+            class="me-3 me-3 click-enlarge img-thumbnail mb-3"
             width="300"
             @click="onClickImage"
           />
@@ -508,7 +508,7 @@
           <img
             src="../../../assets/images/organisator/teilnehmer-editieren.png"
             alt="Teilnehmer editieren"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -535,7 +535,7 @@
           <img
             src="../../../assets/images/organisator/event-warteraum.png"
             alt="Teilnehmer warteraum"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -558,7 +558,7 @@
           <img
             src="../../../assets/images/organisator/abstimmung-erstellen.png"
             alt="Abstimmung erstellen"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -612,7 +612,7 @@
           <img
             src="../../../assets/images/organisator/abstimmung-beenden.png"
             alt="Abstimmung beenden"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -637,7 +637,7 @@
           <img
             src="../../../assets/images/organisator/ergebnisliste.png"
             alt="Ergebnisliste"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />
@@ -666,7 +666,7 @@
           <img
             src="../../../assets/images/organisator/zoom-anleitung.png"
             alt="Zoom Anleitung"
-            class="mr-3 me-3 click-enlarge img-thumbnail"
+            class="me-3 me-3 click-enlarge img-thumbnail"
             width="300"
             @click="onClickImage"
           />

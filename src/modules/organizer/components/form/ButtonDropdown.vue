@@ -4,12 +4,12 @@
       <button
         id="btnGroupDropdown"
         type="button"
-        class="btn btn-secondary dropdown-toggle pr-3 pl-3"
-        data-toggle="dropdown"
+        class="btn btn-secondary dropdown-toggle pe-3 ps-3"
+        data-bs-toggle="dropdown"
         aria-haspopup="true"
         aria-expanded="false"
       >
-        <span :class="['mr-2', 'nav-icon', 'bi', icon]" /><span class="mr-2">{{
+        <span :class="['me-2', 'nav-icon', 'bi', icon]" /><span class="me-2">{{
           label
         }}</span>
       </button>

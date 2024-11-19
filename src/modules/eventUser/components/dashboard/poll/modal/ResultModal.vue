@@ -4,14 +4,13 @@
       id="resultModal"
       class="modal fade"
       tabindex="-1"
-      role="dialog"
-      data-keyboard="false"
-      data-backdrop="static"
+      data-bs-keyboard="false"
+      data-bs-backdrop="static"
       aria-hidden="true"
+      ref="modal"
     >
       <div
         class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
-        role="document"
       >
         <div v-if="pollResult" class="modal-content">
           <div class="modal-header">
@@ -20,12 +19,10 @@
             </h5>
             <button
               type="button"
-              class="close"
+              class="btn-close"
               aria-label="Close"
               @click="hideModal()"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
+            ></button>
           </div>
           <div class="modal-body">
             <result-item :poll-result="pollResult" :event-record="event" />
@@ -49,10 +46,13 @@
 </template>
 
 <script setup>
-// TODO Remove me with bootstrap 5.
-import $ from "jquery";
+import { ref, onMounted } from 'vue';
+import { Modal } from 'bootstrap';
 import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
 import t from "@/core/util/l18n";
+
+const modal = ref(null);
+let bootstrapModal = null;
 
 defineProps({
   pollResult: {
@@ -66,17 +66,18 @@ defineProps({
   },
 });
 
+onMounted(() => {
+  bootstrapModal = new Modal(modal.value);
+});
+
 function showModal() {
-  // TODO Remove me with bootstrap 5.
-  $("#resultModal").modal("show");
+  bootstrapModal?.show();
 }
 
 function hideModal() {
-  $("#resultModal").modal("hide");
-  // TODO Remove me with bootstrap 5.
+  bootstrapModal?.hide();
 }
 
-// Make these methods available for the parent component.
 defineExpose({
   showModal,
   hideModal,
