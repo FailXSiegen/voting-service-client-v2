@@ -13,15 +13,15 @@
       :type="type"
       @keyup="onChange"
     />
-    <div class="input-group-append">
-      <button class="btn btn-secondary" @click.prevent="onGenerateSlug">
+    <div class="input-group-text p-0">
+      <button class="btn btn-transparent" @click.prevent="onGenerateSlug">
         <i class="bi bi-arrow-clockwise" />
       </button>
     </div>
   </div>
-  <small v-if="helpText" class="form-text text-muted">
+  <div v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
-  </small>
+  </div>
   <span
     v-for="error in errors"
     :key="error.uid"

@@ -19,9 +19,9 @@
       {{ videoConference.title }}
     </option>
   </select>
-  <small v-if="helpText" class="form-text text-muted">
+  <div v-if="helpText" class="form-text text-muted">
     {{ helpText }}
-  </small>
+  </div>
   <span
     v-for="error in errors"
     :key="error.uid"

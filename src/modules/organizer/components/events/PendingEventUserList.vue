@@ -1,6 +1,6 @@
 <template>
   <div v-if="eventUsers?.length > 0" class="pending-event-users">
-    <div class="form-group">
+    <div class="mb-3">
       <label for="filterByUsername">
         {{ $t("eventUser.filter.byUsername") }}
       </label>
@@ -12,7 +12,7 @@
           :placeholder="$t('eventUser.filter.byUsername')"
           @input="onFilter"
         />
-        <div class="input-group-append">
+        <div class="input-group-text p-0">
           <button class="btn btn-secondary" @click.prevent="onResetFilter">
             {{ $t("eventUser.filter.reset") }}
           </button>
@@ -33,32 +33,32 @@
       <template #item-online="item">
         <span
           v-if="item.online"
-          class="badge badge-success badge-pill status-indicator"
+          class="badge text-bg-success badge-pill status-indicator"
         >
           {{ $t("eventUser.onlineState.online") }}
         </span>
-        <span v-else class="badge badge-danger badge-pill status-indicator">
+        <span v-else class="badge text-bg-danger badge-pill status-indicator">
           {{ $t("eventUser.onlineState.offline") }}
         </span>
       </template>
       <template #item-id="item">
         <div class="btn-group float-right" role="group">
           <button
-            class="btn btn-success mr-2"
+            class="btn btn-success me-2"
             @click="onUpdateToParticipant(item.id)"
           >
             {{ $t("view.event.user.verifyAs") }}
             {{ $t("view.event.user.member") }}
           </button>
           <button
-            class="btn btn-secondary mr-2"
+            class="btn btn-secondary me-2"
             @click="onUpdateToGuest(item.id)"
           >
             {{ $t("view.event.user.verifyAs") }}
             {{ $t("view.event.user.visitor") }}
           </button>
           <button
-            class="btn btn-danger mr-2"
+            class="btn btn-danger me-2"
             :disabled="item.online"
             @click="onDelete(item.id)"
           >

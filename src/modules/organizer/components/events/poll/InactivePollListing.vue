@@ -17,7 +17,7 @@
           </h5>
           <button
             v-if="showStartButton"
-            class="btn btn-success my-2 mr-2"
+            class="btn btn-success my-2 me-2"
             :disabled="disabled || currentOnlineUserCount === 0"
             :title="$t('view.polls.listing.start')"
             @click="onStart(poll.id)"
@@ -25,7 +25,7 @@
             <i class="bi bi-play-fill bi--2xl" />
           </button>
           <button
-            class="btn btn-secondary my-2 mr-2"
+            class="btn btn-secondary my-2 me-2"
             :title="$t('view.polls.listing.edit')"
             :disabled="disabled"
             @click="onEdit(poll.id)"
@@ -33,7 +33,7 @@
             <i class="bi bi-pencil-square bi--2xl" />
           </button>
           <button
-            class="btn btn-secondary my-2 mr-2"
+            class="btn btn-secondary my-2 me-2"
             :title="$t('view.polls.listing.copy')"
             :disabled="disabled"
             @click="onCopy(poll.id)"
@@ -41,7 +41,7 @@
             <i class="bi bi-files bi--2xl" />
           </button>
           <button
-            class="btn btn-danger my-2 mr-2"
+            class="btn btn-danger my-2 me-2"
             :title="$t('view.polls.listing.delete')"
             :disabled="disabled"
             @click="onRemove(poll.id)"

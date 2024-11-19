@@ -1,6 +1,6 @@
 <template>
   <button class="btn btn-primary" @click.prevent="onJoinMeeting">
-    <i class="bi bi-camera-video-fill mr-2" />{{
+    <i class="bi bi-camera-video-fill me-2" />{{
       $t("view.event.meeting.join")
     }}
   </button>

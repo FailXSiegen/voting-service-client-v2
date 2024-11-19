@@ -6,8 +6,8 @@
     <button
       class="navbar-toggler"
       type="button"
-      data-toggle="collapse"
-      data-target="#navbarCollapse"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarCollapse"
       aria-controls="navbarCollapse"
       aria-expanded="false"
       aria-label="Toggle navigation"
@@ -18,7 +18,7 @@
       <div v-if="showProfileLink" class="mb-5">
         <router-link
           :to="{ name: RouteOrganizerProfile }"
-          class="btn btn-secondary btn-block py-3 px-0"
+          class="btn btn-secondary btn-block py-3 px-0 w-100"
         >
           <span class="nav-title">{{
             $t("navigation.views." + RouteOrganizerProfile)
@@ -78,7 +78,7 @@
       class="logout btn btn-danger py-1 d-flex align-items-center"
       @click="onLogout"
     >
-      <i class="mr-md-3 bi bi-x-square bi--2xl" />
+      <i class="me-md-3 bi bi-x-square bi--2xl" />
       <span class="d-none d-md-block">{{ $t("navigation.logOut") }}</span>
     </button>
   </nav>

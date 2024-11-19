@@ -4,14 +4,13 @@
       id="pollModal"
       class="modal fade"
       tabindex="-1"
-      role="dialog"
-      data-keyboard="false"
-      data-backdrop="static"
+      data-bs-keyboard="false"
+      data-bs-backdrop="static"
       aria-hidden="true"
+      ref="modal"
     >
       <div
         class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
-        role="document"
       >
         <div v-if="poll" class="modal-content">
           <div class="modal-header">
@@ -52,12 +51,14 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import { Modal } from 'bootstrap';
 import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
-import { ref } from "vue";
-// TODO Remove me with bootstrap 5.
-import $ from "jquery";
 
 const emit = defineEmits(["submit"]);
+const modal = ref(null);
+let bootstrapModal = null;
+
 const props = defineProps({
   poll: {
     type: Object,
@@ -77,27 +78,27 @@ const props = defineProps({
     required: true,
   },
 });
-// This key is only a small hack to force a rerender of this component.
+
 const pollFormKey = ref(1);
 
-// Events.
+onMounted(() => {
+  bootstrapModal = new Modal(modal.value);
+});
+
 function onSubmit(data) {
   emit("submit", data);
   pollFormKey.value += 1;
 }
 
 function showModal() {
-  // TODO Remove me with bootstrap 5.
-  $("#pollModal").modal("show");
+  bootstrapModal?.show();
 }
 
 function hideModal() {
-  $("#pollModal").modal("hide");
-  // TODO Remove me with bootstrap 5.
+  bootstrapModal?.hide();
   pollFormKey.value += 1;
 }
 
-// Make these methods available for the parent component.
 defineExpose({
   showModal,
   hideModal,
@@ -105,7 +106,6 @@ defineExpose({
 </script>
 
 <style>
-/* TODO do we need this? */
 .pulse {
   background: rgba(23, 162, 184, 0.15);
   box-shadow: 0 0 0 0 rgba(23, 162, 184, 0.5);

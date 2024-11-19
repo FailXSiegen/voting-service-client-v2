@@ -2,7 +2,7 @@
   <div class="cd-popup is-visible" role="alert">
     <div class="cd-popup-container p-3 border-info">
       <p>{{ message }}</p>
-      <button class="btn btn-danger mr-3" @click="emit('confirm')">
+      <button class="btn btn-danger me-3" @click="emit('confirm')">
         {{ $t("general.confirm") }}
       </button>
       <button class="btn btn-secondary" @click="emit('cancel')">

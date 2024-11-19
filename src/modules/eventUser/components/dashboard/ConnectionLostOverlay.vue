@@ -9,7 +9,7 @@
         class="btn-lg btn btn-secondary py-2 d-print-none"
         @click="onReloadPage"
       >
-        <i class="mr-3 bi bi-arrow-repeat bi--1xl" />
+        <i class="me-3 bi bi-arrow-repeat bi--1xl" />
         {{ $t("navigation.reload") }}
       </button>
     </span>
