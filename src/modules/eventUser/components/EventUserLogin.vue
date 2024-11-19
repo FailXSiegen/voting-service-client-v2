@@ -66,7 +66,7 @@
               "
             />
           </div>
-          <button class="btn btn-primary btn-block float-right">
+          <button class="btn btn-primary btn-block float-end">
             {{ $t("view.login.submitToEvent") }}
           </button>
         </form>

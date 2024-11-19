@@ -48,7 +48,7 @@
         </span>
       </template>
       <template #item-id="item">
-        <div class="btn-group float-right" role="group">
+        <div class="btn-group float-end" role="group">
           <button
             v-if="!item.allowToVote"
             class="h-100 btn btn-success"

@@ -5,7 +5,7 @@
       style="width: 3rem; height: 3rem"
       role="status"
     >
-      <span class="sr-only">Loading...</span>
+      <span class="visually-hidden">Loading...</span>
     </div>
     <h1>{{ $t("view.user.pending.tankYou") }}</h1>
     <h2>
