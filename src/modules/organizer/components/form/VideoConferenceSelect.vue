@@ -1,24 +1,26 @@
 <template>
-  <label v-if="label" :for="id">
-    {{ label }}
-  </label>
-  <select
-    v-if="videoConferences"
-    :id="id"
-    v-model="inputValue"
-    :name="name"
-    :class="['custom-select', hasErrors ? 'is-invalid' : null, ...classes]"
-    @change="onChange"
-  >
-    <option value="0" selected="selected">---</option>
-    <option
-      v-for="videoConference in videoConferences"
-      :key="videoConference.id"
-      :value="videoConference.id"
+  <div class="input-group mb-3">
+    <label v-if="label" :for="id" class="input-group-text">
+      {{ label }}
+    </label>
+    <select
+      v-if="videoConferences"
+      :id="id"
+      v-model="inputValue"
+      :name="name"
+      :class="['custom-select form-select', hasErrors ? 'is-invalid' : null, ...classes]"
+      @change="onChange"
     >
-      {{ videoConference.title }}
-    </option>
-  </select>
+      <option value="0" selected="selected">---</option>
+      <option
+        v-for="videoConference in videoConferences"
+        :key="videoConference.id"
+        :value="videoConference.id"
+      >
+        {{ videoConference.title }}
+      </option>
+    </select>
+  </div>
   <div v-if="helpText" class="form-text text-muted">
     {{ helpText }}
   </div>
