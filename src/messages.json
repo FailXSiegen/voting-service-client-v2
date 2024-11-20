@@ -478,6 +478,12 @@
         "reset": "Filter zurücksetzen"
       }
     },
+    "common": {
+      "loading": "Ladevorgang",
+      "error": {
+        "loading": "Fehler beim Laden der Daten."
+      }
+    },
     "router": {
       "redirect": {
         "activeOrganizerSession": "Sie wurden automatisch weitergeleitet, da Sie noch als Organisator angemeldet sind.",
