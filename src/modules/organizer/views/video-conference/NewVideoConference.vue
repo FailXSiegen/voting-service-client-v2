@@ -4,9 +4,9 @@
       {{ $t("navigation.views.organizerVideoConferenceNew") }}
       <router-link
         :to="{ name: RouteOrganizerVideoConference }"
-        class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
+        class="btn btn-secondary mb-3 mt-2 float-end d-none d-md-inline-block"
       >
-        <i class="bi-arrow-left bi--1xl mr-1" />
+        <i class="bi-arrow-left bi--1xl me-1" />
         <span class="align-middle">
           {{ $t("view.videoConference.backToListView") }}
         </span>
@@ -17,7 +17,7 @@
     </template>
     <template #content>
       <form class="video-conference-new" @submit.prevent="onSubmit">
-        <div class="form-group">
+        <div class="mb-3">
           <BaseInput
             :label="$t('view.videoConference.formData.title')"
             :errors="v$.title?.$errors"
@@ -30,7 +30,7 @@
             "
           />
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <BaseInput
             :label="$t('view.videoConference.formData.sdkKey')"
             :errors="v$.sdkKey?.$errors"
@@ -43,7 +43,7 @@
             "
           />
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <BaseInput
             :label="$t('view.videoConference.formData.sdkSecret')"
             :errors="v$.sdkSecret?.$errors"

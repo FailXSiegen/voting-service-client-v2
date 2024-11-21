@@ -1,6 +1,6 @@
 <template>
   <form v-if="loaded" class="mutate-poll">
-    <div class="form-group">
+    <div class="mb-3">
       <BaseInput
         :label="$t('view.polls.create.labels.title')"
         :errors="v$.title?.$errors"
@@ -15,7 +15,7 @@
       />
     </div>
     <p>{{ $t("view.polls.headlines.answerOptionsTitle") }}</p>
-    <div class="form-group card card-body bg-light">
+    <div class="mb-3 card card-body bg-light">
       <RadioInput
         id="poll-answer-options"
         :items="answerOptions"
@@ -75,7 +75,7 @@
         />
       </div>
     </div>
-    <div class="form-group card card-body bg-light">
+    <div class="mb-3 card card-body bg-light">
       <RadioInput
         id="poll-answer-options"
         :items="pollTypes"

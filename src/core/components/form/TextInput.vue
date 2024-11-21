@@ -12,9 +12,9 @@
     :autocomplete="autocomplete"
     @keyup="onChange"
   />
-  <small v-if="helpText" class="form-text text-muted">
+  <div v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
-  </small>
+  </div>
   <span
     v-for="error in errors"
     :key="error.uid"

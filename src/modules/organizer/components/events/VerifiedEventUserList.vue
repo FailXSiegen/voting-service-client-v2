@@ -1,6 +1,6 @@
 <template>
   <div v-if="eventUsers?.length > 0" class="pending-event-users">
-    <div class="form-group">
+    <div class="mb-3">
       <label for="filterByUsername">
         {{ $t("eventUser.filter.byUsername") }}
       </label>
@@ -12,8 +12,8 @@
           :placeholder="$t('eventUser.filter.byUsername')"
           @input="onFilter"
         />
-        <div class="input-group-append">
-          <button class="btn btn-secondary" @click.prevent="onResetFilter">
+        <div class="input-group-text p-0">
+          <button class="btn btn-transparent" @click.prevent="onResetFilter">
             {{ $t("eventUser.filter.reset") }}
           </button>
         </div>
@@ -39,16 +39,16 @@
       <template #item-online="item">
         <span
           v-if="item.online"
-          class="badge badge-success badge-pill status-indicator"
+          class="badge text-bg-success badge-pill status-indicator"
         >
           {{ $t("eventUser.onlineState.online") }}
         </span>
-        <span v-else class="badge badge-danger badge-pill status-indicator">
+        <span v-else class="badge text-bg-danger badge-pill status-indicator">
           {{ $t("eventUser.onlineState.offline") }}
         </span>
       </template>
       <template #item-id="item">
-        <div class="btn-group float-right" role="group">
+        <div class="btn-group float-end" role="group">
           <button
             v-if="!item.allowToVote"
             class="h-100 btn btn-success"

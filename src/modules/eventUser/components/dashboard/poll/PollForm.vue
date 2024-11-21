@@ -64,7 +64,7 @@
     </template>
 
     <hr />
-    <button type="submit" class="btn btn-primary float-right">
+    <button type="submit" class="btn btn-primary float-end">
       {{ $t("view.polls.modal.submitPoll") }}
     </button>
   </form>

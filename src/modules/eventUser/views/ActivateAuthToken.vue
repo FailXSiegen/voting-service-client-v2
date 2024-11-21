@@ -22,7 +22,7 @@
       ></p>
 
       <form class="card p-3 border-primary" @submit.prevent="onSubmit">
-        <div class="form-group">
+        <div class="mb-3">
           <BaseInput
             :label="$t('view.event.create.labels.eventUser.username')"
             :errors="v$.username?.$errors"
@@ -35,7 +35,7 @@
             "
           />
         </div>
-        <div class="form-group">
+        <div class="mb-3">
           <BaseInput
             :label="$t('view.event.create.labels.eventUser.publicName')"
             :errors="v$.publicName?.$errors"

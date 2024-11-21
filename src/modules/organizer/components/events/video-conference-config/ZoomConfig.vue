@@ -1,6 +1,6 @@
 <template>
   <div v-if="resolvedConfig">
-    <div class="form-group">
+    <div class="mb-3">
       <BaseInput
         :label="
           $t('view.event.create.labels.videoConferenceConfig.zoom.meetingId')
@@ -9,7 +9,7 @@
         @change="onChangeMeetingId"
       />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <BaseInput
         :label="
           $t('view.event.create.labels.videoConferenceConfig.zoom.password')

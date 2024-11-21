@@ -3,7 +3,7 @@
     <form @submit.prevent="onSubmit">
       <div class="row">
         <div class="col-12 col-md-6">
-          <div class="form-group">
+          <div class="mb-3">
             <BaseInput
               :label="$t('view.event.create.labels.title')"
               :errors="v$.title?.$errors"
@@ -18,7 +18,7 @@
           </div>
         </div>
         <div class="col-12 col-md-6">
-          <div class="form-group">
+          <div class="mb-3">
             <SlugInput
               :label="$t('view.event.create.labels.slug')"
               :errors="v$.slug?.$errors"
@@ -35,7 +35,7 @@
           </div>
         </div>
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <TextInput
           :rows="3"
           :label="$t('view.event.create.labels.description')"
@@ -50,7 +50,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <DateInput
           :label="$t('view.event.create.labels.scheduledDatetime')"
           :errors="v$.scheduledDatetime?.$errors"
@@ -64,7 +64,7 @@
         />
       </div>
       <template v-if="formData.async">
-        <div class="form-group">
+        <div class="mb-3">
           <DateInput
             :label="$t('view.event.create.labels.endDatetime')"
             :errors="v$.endDatetime?.$errors"
@@ -74,7 +74,7 @@
           />
         </div>
       </template>
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           v-model:checked="formData.lobbyOpen"
           :label="$t('view.event.create.labels.lobbyOpen')"
@@ -87,7 +87,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           v-model:checked="formData.active"
           :label="$t('view.event.create.labels.active')"
@@ -100,7 +100,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           v-model:checked="formData.async"
           :label="$t('view.event.create.labels.async')"
@@ -115,7 +115,7 @@
       </div>
       <div class="card">
         <div class="card-body">
-          <div class="form-group">
+          <div class="mb-3">
             <VideoConferenceSelect
               :label="$t('view.event.create.labels.videoConferenceSelect')"
               :errors="v$.videoConference?.$errors"

@@ -7,7 +7,7 @@
     <h2 class="mb-4">
       {{ $t("view.login.headline.orgaLogin") }}
     </h2>
-    <div class="form-group">
+    <div class="mb-3">
       <BaseInput
         id="organizer-login-username"
         :label="$t('view.login.label.onlyUsername')"
@@ -20,7 +20,7 @@
         "
       />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <BaseInput
         id="organizer-login-password"
         :label="$t('view.login.label.password')"
@@ -35,7 +35,7 @@
         "
       />
     </div>
-    <div class="form-group">
+    <div class="mb-3">
       <button
         id="organizer-login-submit"
         type="submit"
