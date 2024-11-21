@@ -3,7 +3,7 @@
     <div :id="`faq-${name}-${id}-head`" class="card-header">
       <h2 class="mb-0">
         <button
-          class="btn btn-block text-start d-flex align-items-center"
+          class="btn btn-block text-start d-flex align-items-center w-100"
           type="button"
           data-bs-toggle="collapse"
           :data-bs-target="`#faq-${name}-${id}`"
