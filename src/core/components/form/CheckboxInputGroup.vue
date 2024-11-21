@@ -2,7 +2,7 @@
   <div class="check-group">
     <p v-if="maxCheckedItems && leftCheckCount > 0">
       Sie können noch
-      <span class="badge badge-primary">{{ leftCheckCount }}</span> Stimmen
+      <span class="badge bg-primary">{{ leftCheckCount }}</span> Stimmen
       abgeben.
     </p>
     <p v-else-if="maxCheckedItems && leftCheckCount === 0">
