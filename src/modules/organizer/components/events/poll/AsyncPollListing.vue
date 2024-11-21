@@ -2,7 +2,7 @@
   <router-link
     v-if="!eventIsRunning"
     :to="{ name: RouteOrganizerPollsNew }"
-    class="btn btn-success my-3 mr-3"
+    class="btn btn-success my-3 me-3"
   >
     <i class="bi-plus bi--2xl align-middle" />
     <span class="align-middle">

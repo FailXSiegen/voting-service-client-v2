@@ -6,8 +6,8 @@
     <button
       class="navbar-toggler"
       type="button"
-      data-toggle="collapse"
-      data-target="#navbarCollapse"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarCollapse"
       aria-controls="navbarCollapse"
       aria-expanded="false"
       aria-label="Toggle navigation"
@@ -33,7 +33,7 @@
               ]"
               :title="$t('navigation.views.' + RouteOrganizerMemberRoom)"
             />
-            <span class="badge badge-success badge-pill">
+            <span class="badge text-bg-success badge-pill">
               {{ verifiedUsersCount }}
             </span>
           </router-link>
@@ -55,7 +55,7 @@
               ]"
               :title="$t('navigation.views.' + RouteOrganizerLobbyRoom)"
             />
-            <span class="badge badge-warning badge-pill">
+            <span class="badge text-bg-warning badge-pill">
               {{ pendingUsersCount }}
             </span>
           </router-link>

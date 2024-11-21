@@ -50,7 +50,7 @@
                   >
                     {{ answer.length }}
                   </span>
-                  <span class="ml-2 small"
+                  <span class="ms-2 small"
                     >({{
                       getAnswerPercentage(
                         answer.length,
@@ -69,8 +69,8 @@
           <button
             class="btn btn-primary btn-result d-print-none"
             type="button"
-            data-toggle="collapse"
-            :data-target="'#poll-' + pollResult.id + '-ResultVoters'"
+            data-bs-toggle="collapse"
+            :data-bs-target="'#poll-' + pollResult.id + '-ResultVoters'"
             aria-expanded="false"
             :aria-controls="'poll-' + pollResult.id + '-ResultVoters'"
           >
@@ -98,8 +98,8 @@
             v-if="pollResult.type === 'PUBLIC'"
             class="btn btn-primary btn-result d-print-none"
             type="button"
-            data-toggle="collapse"
-            :data-target="'#poll-' + pollResult.id + '-ResultDetails'"
+            data-bs-toggle="collapse"
+            :data-bs-target="'#poll-' + pollResult.id + '-ResultDetails'"
             aria-expanded="false"
             :aria-controls="'poll-' + pollResult.id + '-ResultDetails'"
           >

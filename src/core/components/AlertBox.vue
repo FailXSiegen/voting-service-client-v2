@@ -1,9 +1,9 @@
 <template>
-  <div :class="'alert text-left ' + config.wrapperClass" role="alert">
+  <div :class="'alert text-start ' + config.wrapperClass" role="alert">
     <div class="icon">
       <i
         v-if="useIcon"
-        :class="'bi flex-shrink-0 me-2 ' + config.icon + ' mr-2'"
+        :class="'bi flex-shrink-0 me-2 ' + config.icon + ' me-2'"
       />
     </div>
     <div class="message">

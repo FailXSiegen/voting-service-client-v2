@@ -5,9 +5,9 @@
       <span v-if="event?.title">{{ event?.title }}</span>
       <router-link
         :to="{ name: RouteOrganizerEvents }"
-        class="btn btn-secondary mb-3 float-right d-none d-md-inline-block"
+        class="btn btn-secondary mb-3 mt-2 float-end d-none d-md-inline-block"
       >
-        <i class="bi-arrow-left bi--1xl mr-1" />
+        <i class="bi-arrow-left bi--1xl me-1" />
         <span class="align-middle">
           {{ $t("navigation.backToEvents") }}
         </span>

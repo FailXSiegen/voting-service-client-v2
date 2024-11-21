@@ -1,7 +1,7 @@
 <template>
   <div class="mutate-event-user">
     <form @submit.prevent="onSubmit">
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           v-model:checked="formData.verified"
           :label="$t('view.event.create.labels.eventUser.verified')"
@@ -14,7 +14,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           v-model:checked="formData.allowToVote"
           :label="$t('view.event.create.labels.eventUser.allowToVote')"
@@ -27,7 +27,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <BaseInput
           :label="$t('view.event.create.labels.eventUser.username')"
           :errors="v$.username?.$errors"
@@ -40,7 +40,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <BaseInput
           :label="$t('view.event.create.labels.eventUser.publicName')"
           :errors="v$.publicName?.$errors"
@@ -53,7 +53,7 @@
           "
         />
       </div>
-      <div v-if="formData.allowToVote" class="form-group">
+      <div v-if="formData.allowToVote" class="mb-3">
         <BaseInput
           :label="$t('view.event.create.labels.eventUser.voteAmount')"
           :errors="v$.voteAmount?.$errors"

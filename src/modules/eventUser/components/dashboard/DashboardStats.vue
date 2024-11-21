@@ -15,15 +15,15 @@
       }}</span>
       <span v-if="eventUser.allowToVote">
         | Anzahl Stimmen:
-        <span class="badge badge-info">{{ eventUser.voteAmount }}</span></span
+        <span class="badge text-bg-info">{{ eventUser.voteAmount }}</span></span
       >
       <span> | Status: </span>
       <span
         v-if="eventUser.online"
-        class="badge badge-success badge-pill status-indicator"
+        class="badge text-bg-success badge-pill status-indicator"
         >online</span
       >
-      <span v-else class="badge badge-danger badge-pill status-indicator"
+      <span v-else class="badge text-bg-danger badge-pill status-indicator"
         >offline</span
       >
     </p>

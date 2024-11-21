@@ -1,7 +1,7 @@
 <template>
   <div class="multiple-event-user-new">
     <form @submit.prevent="onSubmit">
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           id="allowToVote"
           v-model:checked="formData.allowToVote"
@@ -15,7 +15,7 @@
           "
         />
       </div>
-      <div v-if="formData.allowToVote" class="form-group">
+      <div v-if="formData.allowToVote" class="mb-3">
         <BaseInput
           id="voteAmount"
           :label="$t('view.event.create.labels.eventUser.voteAmount')"
@@ -30,7 +30,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <CheckboxInput
           id="tokenBasedLogin"
           v-model:checked="formData.tokenBasedLogin"
@@ -47,7 +47,7 @@
           "
         />
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <TextInput
           id="eventMultipleUser"
           :label="

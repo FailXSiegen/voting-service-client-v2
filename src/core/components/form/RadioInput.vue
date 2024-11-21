@@ -21,9 +21,9 @@
       >
         {{ item.label }}
       </label>
-      <small v-if="item.helpText" class="form-text text-muted">
+      <div v-if="item.helpText" class="form-text text-muted">
         <span v-html="item.helpText" />
-      </small>
+      </div>
     </div>
   </template>
 

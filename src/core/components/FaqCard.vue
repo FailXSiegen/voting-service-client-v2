@@ -3,14 +3,14 @@
     <div :id="`faq-${name}-${id}-head`" class="card-header">
       <h2 class="mb-0">
         <button
-          class="btn btn-block text-left d-flex align-items-center"
+          class="btn btn-block text-start d-flex align-items-center"
           type="button"
-          data-toggle="collapse"
-          :data-target="`#faq-${name}-${id}`"
+          data-bs-toggle="collapse"
+          :data-bs-target="`#faq-${name}-${id}`"
           :aria-expanded="expanded ? 'true' : 'false'"
           :aria-controls="`faq-${name}-${id}`"
         >
-          <i class="bi bi-plus mr-2 mb-0 h2"></i>
+          <i class="bi bi-plus me-2 mb-0 h2"></i>
           {{ title }}
         </button>
       </h2>
