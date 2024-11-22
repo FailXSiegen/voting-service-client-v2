@@ -297,7 +297,8 @@
           "PUBLIC": "offen"
         },
         "showMore": "Weitere Ergebnisse anzeigen",
-        "noMoreResults": "Keine weitere Ergebnisse verfügbar"
+        "noMoreResults": "Keine weitere Ergebnisse verfügbar",
+        "noResults": "Keine Ergebnisse verfügbar"
       },
       "user": {
         "pending": {
