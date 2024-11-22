@@ -46,14 +46,14 @@
               </button>
               <button
                 v-else
-                class="btn btn-success d-inline-block mx-1"
+                class="btn btn-success d-inline-block mx-1 mb-3"
                 :title="$t('view.organizers.verify')"
                 @click.prevent="onVerify(item, true)"
               >
                 <i class="bi-check2-square bi--xl" />
               </button>
               <button
-                class="btn btn-danger d-inline-block mx-1"
+                class="btn btn-danger d-inline-block mx-1 mb-3"
                 :title="$t('view.organizers.delete')"
                 @click.prevent="onDelete(item)"
               >
