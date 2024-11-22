@@ -57,3 +57,16 @@ i {
 .form-check-input.is-valid~.form-check-label {
   color: inherit;
 }
+
+i.bi {
+  display: inline-block;
+  transition: transform 0.2s ease-in-out;
+}
+
+.collapsed .bi-caret-right-fill {
+  transform: rotate(0deg);
+}
+
+[aria-expanded="true"] .bi-caret-right-fill {
+  transform: rotate(90deg);
+}

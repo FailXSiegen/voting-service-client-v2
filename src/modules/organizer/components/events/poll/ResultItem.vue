@@ -112,26 +112,33 @@
             class="collapse"
           >
             <div class="card card-body">
-              <ul v-if="eventRecord.multivoteType == 1" class="list-group">
+              <ul class="list-group">
                 <li
-                  v-for="(
-                    participantWithAnswer, index
-                  ) in pollResult.pollAnswer"
-                  :key="index"
-                  class="list-group-item d-flex justify-content-between align-items-center"
+                  v-for="(user, userId) in groupedUserAnswers"
+                  :key="userId"
+                  class="list-group-item"
                 >
-                  {{ getPublicName(participantWithAnswer.pollUserId) }} -
-                  {{ participantWithAnswer.answerContent }}
-                </li>
-              </ul>
-              <ul v-if="eventRecord.multivoteType == 2" class="list-group">
-                <li
-                  v-for="(user, index) in pollAnswerGroupByUser"
-                  :key="index"
-                  class="list-group-item d-flex justify-content-between align-items-center"
-                >
-                  {{ getPublicName(index) }} - {{ user.length }} x
-                  {{ user[0].answerContent }}
+                  <div class="d-flex justify-content-between">
+                    <span>{{ getPublicName(userId) }}</span>
+                    <div class="d-flex gap-2 mt-1">
+                      <span 
+                        v-for="(count, answer) in user" 
+                        :key="answer"
+                        class="d-flex align-items-center"
+                      >
+                        <span
+                          class="badge rounded-pill"
+                          :class="{
+                            'bg-success': answer === 'Ja',
+                            'bg-danger': answer === 'Nein',
+                            'bg-secondary': answer !== 'Ja' && answer !== 'Nein'
+                          }"
+                        >
+                          {{ answer }} x{{ count }}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
                 </li>
               </ul>
             </div>
@@ -185,6 +192,26 @@ const pollAnswerGroupByUser = computed(() => {
   return groupBy(props.pollResult.pollAnswer, "pollUserId");
 });
 
+const groupedUserAnswers = computed(() => {
+  const grouped = {};
+  
+  // Gruppiere zunächst nach Benutzer-ID
+  props.pollResult.pollAnswer.forEach(answer => {
+    if (!grouped[answer.pollUserId]) {
+      grouped[answer.pollUserId] = {};
+    }
+    
+    // Zähle die Antworten pro Benutzer
+    if (!grouped[answer.pollUserId][answer.answerContent]) {
+      grouped[answer.pollUserId][answer.answerContent] = 1;
+    } else {
+      grouped[answer.pollUserId][answer.answerContent]++;
+    }
+  });
+  
+  return grouped;
+});
+
 // Functions.
 
 function groupBy(array, key) {
@@ -221,6 +248,10 @@ function getAnswerPercentage(answerLength, answerTotal, pollResult) {
 .btn-result {
   width: 100%;
   text-align: left;
+}
+
+.gap-2 {
+  gap: 0.5rem;
 }
 
 @media print {
