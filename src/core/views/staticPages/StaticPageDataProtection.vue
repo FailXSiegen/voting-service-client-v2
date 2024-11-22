@@ -38,7 +38,7 @@
             <i class="bi-question-circle bi-2xl" /> </a
           >: automatischer Server-Protokoll Eintrag
         </li>
-        <li>Zeitpunkt: Datum, Uhrzeit)</li>
+        <li>Zeitpunkt: Datum, Uhrzeit</li>
         <li>Systeminformationen: Betriebssystem, Browser, Version</li>
       </ul>
 
@@ -57,7 +57,7 @@
       </p>
       <ul>
         <li>
-          Selbst angegebener Name, E-Mail-Adresse und das verschlüsselte
+          Selbst angegebener Name, Benutzername (Abhängig vom Veranstalter: E-Mail Adresse nicht zwingend erfoderlich!) und das verschlüsselte
           Passwort
         </li>
         <li>Abstimmungsteilnahme</li>
@@ -70,7 +70,7 @@
         (Wahlergebnisse, Teilnehmer) obliegt dem/der Organisator*in
       </p>
       <p>
-        Die benutzerbezogenen Daten werden in einer MySQL Datenbank gespeichert.
+        Die benutzerbezogenen Daten werden in einer Datenbank gespeichert.
         Jeder Teilnehmer einer Veranstaltung ist ein individueller Eintrag. Ein
         Teilnehmerdatensatz ist immer einmalig pro Veranstaltung. Es gibt keine
         Verknüpfung, wenn ein Nutzer mit den gleichen Zugangsdaten bei einem

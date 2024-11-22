@@ -458,7 +458,7 @@
     },
     "notice": {
       "logout": {
-        "wrongEvent": "Sie waren noch in einer anderen Veranslatung angemeldet. Bitte melden Sie sich für die diese Veranslatung erneut an."
+        "wrongEvent": "Sie waren noch in einer anderen Veranstaltung angemeldet. Bitte melden Sie sich für die diese Veranstaltung erneut an."
       }
     },
     "eventUser": {
