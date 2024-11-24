@@ -188,8 +188,9 @@ async function onSubmitPoll(pollFormData) {
 
 async function onVotingCompleted() {
   completedPolls.value.push(activePoll.value);
-  activePoll.value = null;
   pollModal.value.hideModal();
+  activePoll.value = null;
+  
   toast(l18n.global.tc("view.user.verified.voted"), {
     type: "success",
     autoClose: 3000, // verschwindet nach 3 Sekunden
