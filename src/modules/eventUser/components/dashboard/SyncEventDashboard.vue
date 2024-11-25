@@ -93,7 +93,7 @@ const props = defineProps({
 const eventUser = ref(coreStore.getEventUser);
 const meetingFrameIsActive = ref(false);
 const page = ref(0);
-const pageSize = ref(1);
+const pageSize = ref(3);
 const showMoreEnabled = ref(true);
 const pollState = ref("closed");
 const poll = ref(null);
@@ -147,25 +147,25 @@ const pollResultsQuery = useQuery(
   { eventId: props.event.id, page, pageSize },
   { fetchPolicy: "cache-and-network" },
 );
+
 pollResultsQuery.onResult(({ data }) => {
-  if (data?.pollResult && data?.pollResult?.length >= pageSize.value) {
-    showMoreEnabled.value = true;
+  if (!data?.pollResult) return;
+  
+  // Initial check if there are less items than pageSize
+  if (page.value === 0 && data.pollResult.length < pageSize.value) {
+    showMoreEnabled.value = false;
   }
 
-  if (data?.pollResult?.length > 0) {
-    // Make sure to only add new poll results.
-    for (let pollResult of data.pollResult) {
-      if (!pollResults.value.find((x) => x.id === pollResult.id)) {
-        pollResults.value.push(pollResult);
-      }
-    }
-    // Sort the result.
-    pollResults.value = pollResults.value.sort(
-      (a, b) => b.createDatetime - a.createDatetime,
-    );
-  }
-  if (data?.pollResult) {
-    lastPollResult.value = data.pollResult[0];
+  if (data.pollResult.length > 0) {
+    // Add new poll results
+    pollResults.value = [
+      ...pollResults.value.filter(existing => 
+        !data.pollResult.some(newResult => newResult.id === existing.id)
+      ),
+      ...data.pollResult
+    ].sort((a, b) => b.createDatetime - a.createDatetime);
+    
+    lastPollResult.value = pollResults.value[0];
   }
 });
 
@@ -244,19 +244,16 @@ function onShowMorePollResults() {
       pageSize: pageSize.value,
     },
     updateQuery: (previousResult, { fetchMoreResult }) => {
-      if (!fetchMoreResult?.pollResult) {
+      if (!fetchMoreResult?.pollResult || 
+          fetchMoreResult.pollResult.length < pageSize.value) {
         showMoreEnabled.value = false;
         toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
-        return;
+        return previousResult;
       }
-
-      const pollResult = previousResult?.pollResult
-        ? [...previousResult.pollResult, ...fetchMoreResult.pollResult]
-        : [...fetchMoreResult.pollResult];
 
       return {
         ...previousResult,
-        pollResult,
+        pollResult: [...(previousResult?.pollResult || []), ...fetchMoreResult.pollResult]
       };
     },
   });
