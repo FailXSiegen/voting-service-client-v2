@@ -2,17 +2,13 @@
   <div v-if="pollResult.poll" class="card mb-3">
     <div class="card-header">
       <h5 class="h4 mb-1">
-        {{ pollResult.poll.title }} ({{
-          $t("view.results.type." + pollResult.type)
-        }}) -
+        {{ pollResult.poll.title }} ({{ $t("view.results.type." + pollResult.type) }}) - 
         {{ getCreateDatetime }}
       </h5>
       <p class="small text-muted">
         {{ $t("view.event.user.member") }}: {{ pollResult.pollUser.length }} |
-        {{ $t("view.results.givenVotes") }}
-        {{ pollResult.pollAnswer.length }} |
-        {{ $t("view.results.voters") }}
-        {{ pollResult.maxVotes }}
+        {{ $t("view.results.givenVotes") }} {{ pollResult.pollAnswer.length }} |
+        {{ $t("view.results.voters") }} {{ pollResult.maxVotes }}
       </p>
     </div>
 
@@ -50,20 +46,15 @@
                   >
                     {{ answer.length }}
                   </span>
-                  <span class="ms-2 small"
-                    >({{
-                      getAnswerPercentage(
-                        answer.length,
-                        pollResult.pollAnswer.length,
-                        pollResult,
-                      )
-                    }})</span
-                  >
+                  <span v-if="index !== 'Enthaltung'" class="ms-2 small">
+                    ({{ getAnswerPercentage(answer.length) }})
+                  </span>
                 </span>
               </li>
             </ul>
           </div>
         </div>
+        
         <div class="col-12 col-md-6">
           <p>{{ $t("general.member") }}</p>
           <button
@@ -90,7 +81,9 @@
               </ul>
             </div>
           </div>
+          
           <hr class="divider mx-2" />
+          
           <p v-if="pollResult.type === 'PUBLIC'">
             {{ $t("view.results.detailResult") }}
           </p>
@@ -150,7 +143,6 @@
 </template>
 
 <script setup>
-// @todo refactor this mess.
 import { computed } from "vue";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 
@@ -165,54 +157,37 @@ const props = defineProps({
   },
 });
 
-// computed.
+const totalValidVotes = computed(() => {
+  return props.pollResult.pollAnswer.filter(answer => 
+    answer.answerContent !== 'Enthaltung'
+  ).length;
+});
 
 const pollAnswerGroups = computed(() => {
-  // Gruppieren der Antworten
   const grouped = groupBy(props.pollResult.pollAnswer, "answerContent");
-
-  // Umwandeln des Objekts in ein Array von [Schlüssel, Werte]-Paaren
   const groupsArray = Object.entries(grouped);
-
-  // Sortieren der Gruppen basierend auf der Länge der Antworten in absteigender Reihenfolge
   groupsArray.sort((a, b) => b[1].length - a[1].length);
-
-  // Zurück in ein Objekt umwandeln, falls nötig
   return groupsArray.reduce(
     (acc, [key, value]) => ({ ...acc, [key]: value }),
     {},
   );
 });
 
-const getCreateDatetime = computed(() => {
-  return createFormattedDateFromTimeStamp(props.pollResult.createDatetime);
-});
-
-const pollAnswerGroupByUser = computed(() => {
-  return groupBy(props.pollResult.pollAnswer, "pollUserId");
-});
-
 const groupedUserAnswers = computed(() => {
   const grouped = {};
-  
-  // Gruppiere zunächst nach Benutzer-ID
   props.pollResult.pollAnswer.forEach(answer => {
     if (!grouped[answer.pollUserId]) {
       grouped[answer.pollUserId] = {};
     }
-    
-    // Zähle die Antworten pro Benutzer
-    if (!grouped[answer.pollUserId][answer.answerContent]) {
-      grouped[answer.pollUserId][answer.answerContent] = 1;
-    } else {
-      grouped[answer.pollUserId][answer.answerContent]++;
-    }
+    grouped[answer.pollUserId][answer.answerContent] = 
+      (grouped[answer.pollUserId][answer.answerContent] || 0) + 1;
   });
-  
   return grouped;
 });
 
-// Functions.
+const getCreateDatetime = computed(() => {
+  return createFormattedDateFromTimeStamp(props.pollResult.createDatetime);
+});
 
 function groupBy(array, key) {
   const result = {};
@@ -229,18 +204,11 @@ function getPublicName(pollUserId) {
   const userFound = props.pollResult.pollUser.find(
     (user) => user.id === pollUserId,
   );
-  if (!userFound) {
-    return "Unknown";
-  }
-  return userFound.publicName;
+  return userFound ? userFound.publicName : "Unknown";
 }
 
-function getAnswerPercentage(answerLength, answerTotal, pollResult) {
-  if (pollResult.poll.pollAnswer !== "custom") {
-    return ((answerLength / answerTotal) * 100).toFixed(2) + "%";
-  } else {
-    return ((answerLength / answerTotal) * 100).toFixed(2) + "%";
-  }
+function getAnswerPercentage(answerLength) {
+  return ((answerLength / totalValidVotes.value) * 100).toFixed(2) + "%";
 }
 </script>
 
