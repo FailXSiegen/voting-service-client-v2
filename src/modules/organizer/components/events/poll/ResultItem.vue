@@ -7,7 +7,14 @@
       </h5>
       <p class="small text-muted">
         {{ $t("view.event.user.member") }}: {{ pollResult.pollUser.length }} |
-        {{ $t("view.results.givenVotes") }} {{ pollResult.pollAnswer.length }} |
+        <template v-if="hasAbstentions">
+          {{ $t("view.results.givenVotes") }} {{ totalValidVotes }} {{ $t("view.results.withoutAbstentions") }} |
+          {{ $t("view.results.abstentions") }} {{ abstentionCount }} |
+          {{ $t("view.results.totalVotes") }} {{ pollResult.pollAnswer.length }} |
+        </template>
+        <template v-else>
+          {{ $t("view.results.givenVotes") }} {{ pollResult.pollAnswer.length }} |
+        </template>
         {{ $t("view.results.voters") }} {{ pollResult.maxVotes }}
       </p>
     </div>
@@ -161,6 +168,16 @@ const totalValidVotes = computed(() => {
   return props.pollResult.pollAnswer.filter(answer => 
     answer.answerContent !== 'Enthaltung'
   ).length;
+});
+
+const abstentionCount = computed(() => {
+  return props.pollResult.pollAnswer.filter(answer => 
+    answer.answerContent === 'Enthaltung'
+  ).length;
+});
+
+const hasAbstentions = computed(() => {
+  return abstentionCount.value > 0;
 });
 
 const pollAnswerGroups = computed(() => {

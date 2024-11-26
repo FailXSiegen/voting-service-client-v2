@@ -284,7 +284,10 @@
       },
       "results": {
         "pastResults": "Vergangene Abstimmungen",
-        "givenVotes": "Anzahl abgegebener Stimmen:",
+        "givenVotes": "Anzahl Stimmen:",
+        "withoutAbstentions": "(ohne Enthaltungen)",
+        "abstentions": "Enthaltungen:",
+        "totalVotes": "Gesamt:",
         "voters": "Maximale Stimmenanzahl:",
         "mainResult": "Gesamtergebnis",
         "showMemberList": "Teilnehmerliste Anzeigen",
