@@ -284,7 +284,7 @@
       },
       "results": {
         "pastResults": "Vergangene Abstimmungen",
-        "givenVotes": "Anzahl Stimmen:",
+        "givenVotes": "Gültige Stimmen:",
         "withoutAbstentions": "(ohne Enthaltungen)",
         "abstentions": "Enthaltungen:",
         "totalVotes": "Gesamt:",
