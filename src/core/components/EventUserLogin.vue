@@ -29,7 +29,7 @@
 
 <script setup>
 import { reactive } from "vue";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";

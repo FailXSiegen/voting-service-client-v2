@@ -1,8 +1,6 @@
 <template>
   <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
-    <span class="h5 my-3 d-block text-white"
-    >Digitalwahl</span
-    >
+    <span class="h5 my-3 d-block text-white">Digitalwahl</span>
     <button
       class="navbar-toggler"
       type="button"
@@ -12,7 +10,7 @@
       aria-expanded="false"
       aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon"/>
+      <span class="navbar-toggler-icon" />
     </button>
     <div id="navbarCollapse" class="collapse navbar-collapse bg-dark">
       <ul class="list-group">
@@ -22,8 +20,8 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{
-                $t("navigation.views." + RouteOrganizerMemberRoom)
-              }}</span>
+              $t("navigation.views." + RouteOrganizerMemberRoom)
+            }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -44,8 +42,8 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{
-                $t("navigation.views." + RouteOrganizerLobbyRoom)
-              }}</span>
+              $t("navigation.views." + RouteOrganizerLobbyRoom)
+            }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -66,8 +64,8 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{
-                $t("navigation.views." + RouteOrganizerPolls)
-              }}</span>
+              $t("navigation.views." + RouteOrganizerPolls)
+            }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -85,8 +83,8 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{
-                $t("navigation.views." + RouteOrganizerPollResults)
-              }}</span>
+              $t("navigation.views." + RouteOrganizerPollResults)
+            }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -123,12 +121,12 @@ import {
   RouteOrganizerPolls,
   RouteOrganizerPollResults,
 } from "@/router/routes";
-import {computed, ref} from "vue";
-import {useRoute} from "vue-router";
-import {useQuery, useSubscription} from "@vue/apollo-composable";
-import {EVENT_USERS} from "@/modules/organizer/graphql/queries/event-users";
-import {NEW_EVENT_USER} from "@/modules/organizer/graphql/subscription/new-event-user";
-import {EVENT_USER_LIFE_CYCLE} from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
+import { computed, ref } from "vue";
+import { useRoute } from "vue-router";
+import { useQuery, useSubscription } from "@vue/apollo-composable";
+import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
+import { NEW_EVENT_USER } from "@/modules/organizer/graphql/subscription/new-event-user";
+import { EVENT_USER_LIFE_CYCLE } from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
 
 const route = useRoute();
 const eventId = route.params.id;
@@ -138,10 +136,10 @@ const eventUsers = ref([]);
 // Fetch event users..
 const eventUsersQuery = useQuery(
   EVENT_USERS,
-  {eventId},
-  {fetchPolicy: "cache-and-network"},
+  { eventId },
+  { fetchPolicy: "cache-and-network" },
 );
-eventUsersQuery.onResult(({data}) => {
+eventUsersQuery.onResult(({ data }) => {
   if (data?.eventUsers) {
     eventUsers.value = data?.eventUsers;
   }
@@ -160,7 +158,7 @@ const pendingUsersCount = computed(
 // Subscriptions.
 
 const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
-newEventUserSubscription.onResult(({data}) => {
+newEventUserSubscription.onResult(({ data }) => {
   if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(eventId, 10)) {
     // This event user does not belong to our event.
     return;
@@ -168,13 +166,13 @@ newEventUserSubscription.onResult(({data}) => {
 
   // We have to make a copy to add a new entry to the event users array.
   const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
-  copyOfEventUsers.push({...data?.newEventUser});
+  copyOfEventUsers.push({ ...data?.newEventUser });
 
   eventUsers.value = copyOfEventUsers;
 });
 
 const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE);
-eventUserLifeCycleSubscription.onResult(({data}) => {
+eventUserLifeCycleSubscription.onResult(({ data }) => {
   // We have to make a copy to add a new entry to the event users array.
   const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
   const eventUser = copyOfEventUsers.find((user) => {

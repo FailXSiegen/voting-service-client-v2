@@ -54,14 +54,14 @@
             $t(
               formData.tokenBasedLogin
                 ? 'view.event.create.labels.eventMultipleUser.emails'
-                : 'view.event.create.labels.eventMultipleUser.usernames'
+                : 'view.event.create.labels.eventMultipleUser.usernames',
             )
           "
           :help-text="
             $t(
               formData.tokenBasedLogin
                 ? 'view.event.create.labels.eventMultipleUser.emailsHint'
-                : 'view.event.create.labels.eventMultipleUser.usernamesHint'
+                : 'view.event.create.labels.eventMultipleUser.usernamesHint',
             )
           "
           :errors="v$.usernames?.$errors"
@@ -87,26 +87,27 @@
           </div>
         </div>
         <small class="text-muted">
-          {{ $t('view.event.create.labels.eventUser.processing') }}
+          {{ $t("view.event.create.labels.eventUser.processing") }}
           <span v-if="progress.current > 0 && progress.total > 0">
             ({{ Math.round((progress.current / progress.total) * 100) }}%)
           </span>
         </small>
       </div>
 
-      <button
-        class="btn btn-primary mt-5 mb-3"
-        :disabled="isProcessing"
-      >
+      <button class="btn btn-primary mt-5 mb-3" :disabled="isProcessing">
         <i
           :class="[
             isProcessing ? 'bi-hourglass-split' : 'bi-play',
-            'bi--2xl align-middle'
+            'bi--2xl align-middle',
           ]"
         />
         <span class="align-middle">
           {{
-            $t(isProcessing ? 'view.event.create.labels.eventUser.processing' : 'view.event.create.labels.eventUser.submit')
+            $t(
+              isProcessing
+                ? "view.event.create.labels.eventUser.processing"
+                : "view.event.create.labels.eventUser.submit",
+            )
           }}
         </span>
       </button>
@@ -115,29 +116,29 @@
 </template>
 
 <script setup>
-import {computed, reactive, ref} from "vue";
-import {required, requiredIf} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
-import {handleError} from "@/core/error/error-handler";
-import {InvalidFormError} from "@/core/error/InvalidFormError";
+import { computed, reactive, ref } from "vue";
+import { required, requiredIf } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
+import { handleError } from "@/core/error/error-handler";
+import { InvalidFormError } from "@/core/error/InvalidFormError";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import TextInput from "@/core/components/form/TextInput.vue";
-import {NetworkError} from "@/core/error/NetworkError";
-import {isValidEmail} from "@/core/util/email-validator";
+import { NetworkError } from "@/core/error/NetworkError";
+import { isValidEmail } from "@/core/util/email-validator";
 
 defineProps({
   isProcessing: {
     type: Boolean,
-    default: false
+    default: false,
   },
   progress: {
     type: Object,
     default: () => ({
       current: 0,
-      total: 0
-    })
-  }
+      total: 0,
+    }),
+  },
 });
 
 const emit = defineEmits(["submit"]);
@@ -154,7 +155,7 @@ const formData = reactive({
 // Validation rules
 const rules = computed(() => {
   return {
-    usernames: {required},
+    usernames: { required },
     voteAmount: {
       requiredIf: requiredIf(formData.allowToVote),
     },
@@ -183,21 +184,21 @@ function parseUsernamesText() {
       });
     }
 
-    formData.usernames = usernames.map(username => username.trim());
+    formData.usernames = usernames.map((username) => username.trim());
     return true;
   } catch (index) {
     const numberOfRow = index + 1;
     handleError(
       new NetworkError(
-        `Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ${numberOfRow}`
-      )
+        `Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ${numberOfRow}`,
+      ),
     );
     return false;
   }
 }
 
 // Event handlers
-function onChangeUsernamesText({value}) {
+function onChangeUsernamesText({ value }) {
   usernamesText.value = value;
 }
 

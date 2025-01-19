@@ -51,8 +51,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Modal } from 'bootstrap';
+import { ref, onMounted } from "vue";
+import { Modal } from "bootstrap";
 import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
 
 const emit = defineEmits(["submit"]);

@@ -1,9 +1,13 @@
 <template>
-  <div id="recaptcha-container" class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
+  <div
+    id="recaptcha-container"
+    class="g-recaptcha"
+    :data-sitekey="recaptchaSiteKey"
+  ></div>
 </template>
 
 <script setup>
-import {ref, onMounted} from "vue";
+import { ref, onMounted } from "vue";
 
 const emit = defineEmits(["verified", "expired"]);
 const env = import.meta.env;
@@ -14,18 +18,18 @@ const recaptchaSiteKey = env.VITE_RECAPTCHA_SITE_KEY;
 function onCaptchaVerified(response) {
   recaptchaResponse.value = response;
   recaptchaVerified.value = true;
-  emit('verified');
+  emit("verified");
 }
 
 function onCaptchaExpired() {
   recaptchaResponse.value = null;
   recaptchaVerified.value = false;
-  emit('expired');
+  emit("expired");
 }
 
 onMounted(() => {
-  const script = document.createElement('script');
-  script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
+  const script = document.createElement("script");
+  script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
   script.async = true;
   script.defer = true;
   document.head.appendChild(script);
@@ -38,18 +42,19 @@ onMounted(() => {
 
     window.grecaptcha.ready(() => {
       try {
-        window.grecaptcha.render('recaptcha-container', {
+        window.grecaptcha.render("recaptcha-container", {
           sitekey: recaptchaSiteKey,
           callback: onCaptchaVerified,
-          'expired-callback': onCaptchaExpired,
+          "expired-callback": onCaptchaExpired,
         });
       } catch (error) {
-        console.error('Error rendering reCAPTCHA:', error);
+        console.error("Error rendering reCAPTCHA:", error);
       }
     });
   }
 
   script.onload = tryToRenderRecaptcha;
-  script.onerror = (error) => console.error('Failed to load reCAPTCHA script:', error);
+  script.onerror = (error) =>
+    console.error("Failed to load reCAPTCHA script:", error);
 });
 </script>
