@@ -75,9 +75,9 @@
       <!-- Progress Feedback -->
       <div v-if="isProcessing" class="progress-feedback mt-3">
         <div class="progress">
-          <div 
-            class="progress-bar" 
-            role="progressbar" 
+          <div
+            class="progress-bar"
+            role="progressbar"
             :style="{ width: `${(progress.current / progress.total) * 100}%` }"
             :aria-valuenow="progress.current"
             :aria-valuemin="0"
@@ -94,18 +94,20 @@
         </small>
       </div>
 
-      <button 
+      <button
         class="btn btn-primary mt-5 mb-3"
         :disabled="isProcessing"
       >
-        <i 
+        <i
           :class="[
             isProcessing ? 'bi-hourglass-split' : 'bi-play',
             'bi--2xl align-middle'
-          ]" 
+          ]"
         />
         <span class="align-middle">
-          {{ $t(isProcessing ? 'view.event.create.labels.eventUser.processing' : 'view.event.create.labels.eventUser.submit') }}
+          {{
+            $t(isProcessing ? 'view.event.create.labels.eventUser.processing' : 'view.event.create.labels.eventUser.submit')
+          }}
         </span>
       </button>
     </form>
@@ -113,19 +115,18 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
-import { required, requiredIf } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
+import {computed, reactive, ref} from "vue";
+import {required, requiredIf} from "@vuelidate/validators";
+import {useVuelidate} from "@vuelidate/core";
+import {handleError} from "@/core/error/error-handler";
+import {InvalidFormError} from "@/core/error/InvalidFormError";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import TextInput from "@/core/components/form/TextInput.vue";
-import { NetworkError } from "@/core/error/NetworkError";
-import { isValidEmail } from "@/core/util/email-validator";
+import {NetworkError} from "@/core/error/NetworkError";
+import {isValidEmail} from "@/core/util/email-validator";
 
-// Props
-const props = defineProps({
+defineProps({
   isProcessing: {
     type: Boolean,
     default: false
@@ -153,7 +154,7 @@ const formData = reactive({
 // Validation rules
 const rules = computed(() => {
   return {
-    usernames: { required },
+    usernames: {required},
     voteAmount: {
       requiredIf: requiredIf(formData.allowToVote),
     },
@@ -196,14 +197,14 @@ function parseUsernamesText() {
 }
 
 // Event handlers
-function onChangeUsernamesText({ value }) {
+function onChangeUsernamesText({value}) {
   usernamesText.value = value;
 }
 
 async function onSubmit() {
   const parsedSuccessfully = parseUsernamesText();
   const result = await v$.value.$validate();
-  
+
   if (!result || !parsedSuccessfully) {
     handleError(new InvalidFormError());
     return;
@@ -227,7 +228,7 @@ async function onSubmit() {
       height: 20px;
       background-color: #e9ecef;
       border-radius: 0.25rem;
-      
+
       .progress-bar {
         min-width: 2em;
         background-color: #0d6efd;

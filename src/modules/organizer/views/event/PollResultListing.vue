@@ -7,12 +7,12 @@
       </div>
     </template>
     <template #header>
-      <EventNavigation />
+      <EventNavigation/>
     </template>
     <template #content>
-      <ButtonDropdown :buttons="exportButtons" label="Export" />
+      <ButtonDropdown :buttons="exportButtons" label="Export"/>
 
-      <hr />
+      <hr/>
 
       <!-- Loading State -->
       <div v-if="isLoading" class="d-flex justify-content-center my-5">
@@ -46,7 +46,7 @@
               :disabled="isLoadingMore"
               @click="showMorePollResults"
             >
-              <i class="me-3 bi bi-plus-square-fill bi--2xl" />
+              <i class="me-3 bi bi-plus-square-fill bi--2xl"/>
               {{ isLoadingMore ? $t("common.loading") : $t("view.results.showMore") }}
             </button>
 
@@ -67,19 +67,19 @@
 <script setup>
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import { RouteOrganizerDashboard } from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { ref, computed, watch, nextTick, KeepAlive } from "vue";
+import {RouteOrganizerDashboard} from "@/router/routes";
+import {useCore} from "@/core/store/core";
+import {useRoute, useRouter} from "vue-router";
+import {useQuery} from "@vue/apollo-composable";
+import {EVENT} from "@/modules/organizer/graphql/queries/event";
+import {handleError} from "@/core/error/error-handler";
+import {NetworkError} from "@/core/error/NetworkError";
+import {ref, computed, watch, nextTick} from "vue";
 import ResultListing from "@/modules/organizer/components/events/poll/ResultListing.vue";
-import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results";
-import { toast } from "vue3-toastify";
+import {POLLS_RESULTS} from "@/modules/organizer/graphql/queries/poll-results";
+import {toast} from "vue3-toastify";
 import l18n from "@/l18n";
-import { exportPollResultsCsv } from "@/modules/organizer/requests/export-results-csv";
+import {exportPollResultsCsv} from "@/modules/organizer/requests/export-results-csv";
 import ButtonDropdown from "@/modules/organizer/components/form/ButtonDropdown.vue";
 
 const coreStore = useCore();
@@ -124,8 +124,8 @@ let pollResultsQuery;
 // Event Query
 const eventQuery = useQuery(
   EVENT,
-  { id, organizerId: coreStore.user.id },
-  { 
+  {id, organizerId: coreStore.user.id},
+  {
     fetchPolicy: "network-only",
     notifyOnNetworkStatusChange: true,
   }
@@ -143,13 +143,13 @@ eventQuery.onError((err) => {
 });
 
 // Event query result handler
-eventQuery.onResult(({ data }) => {
+eventQuery.onResult(({data}) => {
   if (null === data?.event) {
     handleError(new NetworkError());
-    router.push({ name: RouteOrganizerDashboard });
+    router.push({name: RouteOrganizerDashboard});
     return;
   }
-  
+
   event.value = data?.event;
   setupPollResultsQuery();
 });
@@ -162,7 +162,7 @@ function setupPollResultsQuery() {
       page: page.value,
       pageSize: pageSize.value,
     },
-    { 
+    {
       fetchPolicy: "network-only",
     }
   );
@@ -173,7 +173,7 @@ function setupPollResultsQuery() {
   });
 
   // Handle poll results
-  pollResultsQuery.onResult(({ data }) => {
+  pollResultsQuery.onResult(({data}) => {
     if (!data?.pollResult) {
       showMoreEnabled.value = false;
       return;
@@ -191,42 +191,41 @@ function setupPollResultsQuery() {
 }
 
 async function showMorePollResults() {
-  if (isLoadingMore.value) return;
-  
+  if (isLoadingMore.value) {
+    return;
+  }
+
   isLoadingMore.value = true;
   const nextPage = page.value + 1;
-  
-  // Speichern der aktuellen Position des "Mehr laden" Buttons
   const loadMoreButton = document.querySelector('.poll-results-container');
   const buttonPosition = loadMoreButton?.getBoundingClientRect().bottom + window.pageYOffset;
-  
+
   try {
-    const { data } = await pollResultsQuery.fetchMore({
+    await pollResultsQuery.fetchMore({
       variables: {
         eventId: event.value?.id,
         page: nextPage,
         pageSize: pageSize.value,
       },
-      updateQuery: (prev, { fetchMoreResult }) => {
+      updateQuery: (prev, {fetchMoreResult}) => {
         if (!fetchMoreResult?.pollResult?.length) {
           showMoreEnabled.value = false;
-          toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
+          toast(l18n.global.tc("view.results.noMoreResults"), {type: "info"});
           return prev;
         }
 
         const updatedResults = {
           pollResult: [...prev.pollResult, ...fetchMoreResult.pollResult]
         };
-        
+
         pollResults.value = updatedResults.pollResult;
         page.value = nextPage;
         showMoreEnabled.value = fetchMoreResult.pollResult.length >= pageSize.value;
-        
+
         return updatedResults;
       },
     });
 
-    // Nach dem Update und Rendern zur gespeicherten Position scrollen
     nextTick(() => {
       window.scrollTo({
         top: buttonPosition,
@@ -236,7 +235,7 @@ async function showMorePollResults() {
 
   } catch (error) {
     console.error('Error loading more results:', error);
-    toast(l18n.global.tc("common.error.loading"), { type: "error" });
+    toast(l18n.global.tc("common.error.loading"), {type: "error"});
   } finally {
     isLoadingMore.value = false;
   }
@@ -264,7 +263,7 @@ async function exportPollEventUsersVoted() {
 }
 
 async function downloadCsv(responseText, filename) {
-  const blob = new Blob([responseText], { type: "text/csv" });
+  const blob = new Blob([responseText], {type: "text/csv"});
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
   link.download = filename;

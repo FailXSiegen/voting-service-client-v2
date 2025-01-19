@@ -11,9 +11,9 @@
     </template>
     <template #content>
       <MultipleNewEventUserForm 
-        @submit="onSubmit" 
-        :is-processing="isProcessing"
+        :is-processing="isProcessing" 
         :progress="progress"
+        @submit="onSubmit"
       />
       <!-- Error Summary -->
       <div v-if="errorSummary.show" class="alert alert-warning mt-3">
