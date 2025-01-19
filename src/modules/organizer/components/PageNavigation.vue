@@ -1,7 +1,7 @@
 <template>
   <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
     <span class="h5 my-3 d-block text-white"
-      >Digitalwahl</span
+    >Digitalwahl</span
     >
     <button
       class="navbar-toggler"
@@ -12,7 +12,7 @@
       aria-expanded="false"
       aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon" />
+      <span class="navbar-toggler-icon"/>
     </button>
     <div id="navbarCollapse" class="collapse navbar-collapse bg-dark">
       <div v-if="showProfileLink" class="mb-5">
@@ -21,8 +21,8 @@
           class="btn btn-secondary btn-block py-3 px-0 w-100"
         >
           <span class="nav-title">{{
-            $t("navigation.views." + RouteOrganizerProfile)
-          }}</span>
+              $t("navigation.views." + RouteOrganizerProfile)
+            }}</span>
           <span
             class="nav-icon bi--2xl bi-person"
             :title="$t('navigation.views.' + RouteOrganizerProfile)"
@@ -41,8 +41,8 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{
-              $t("navigation.views." + navigationItemRoute.name)
-            }}</span>
+                $t("navigation.views." + navigationItemRoute.name)
+              }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -59,8 +59,8 @@
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
             <span class="nav-title">{{
-              $t("navigation.views." + navigationItemRoute.name)
-            }}</span>
+                $t("navigation.views." + navigationItemRoute.name)
+              }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -78,24 +78,22 @@
       class="logout btn btn-danger py-1 d-flex align-items-center"
       @click="onLogout"
     >
-      <i class="me-md-3 bi bi-x-square bi--2xl" />
+      <i class="me-md-3 bi bi-x-square bi--2xl"/>
       <span class="d-none d-md-block">{{ $t("navigation.logOut") }}</span>
     </button>
   </nav>
 </template>
 
 <script setup>
-import { RouteOrganizerProfile, RouteMainLogin } from "@/router/routes";
-import { inject } from "vue";
-import { logout } from "@/core/auth/login";
-import { toast } from "vue3-toastify";
+import {RouteOrganizerProfile, RouteMainLogin} from "@/router/routes";
+import {logout} from "@/core/auth/login";
+import {toast} from "vue3-toastify";
 import t from "@/core/util/l18n";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
+import {useCore} from "@/core/store/core";
+import {useRoute, useRouter} from "vue-router";
 
 const coreStore = useCore();
 const router = useRouter();
-const appVersion = inject("appVersion");
 const props = defineProps({
   routes: {
     type: Array,
@@ -117,8 +115,8 @@ const params = useRoute().params;
 
 function onLogout() {
   logout()
-    .then(() => router.push({ name: RouteMainLogin }))
-    .then(() => toast(t("success.logout.organizer"), { type: "success" }));
+    .then(() => router.push({name: RouteMainLogin}))
+    .then(() => toast(t("success.logout.organizer"), {type: "success"}));
 }
 
 function isRouteAccessible(route) {

@@ -2,12 +2,12 @@
   <div class="container-modal d-print-none">
     <div
       id="pollModal"
+      ref="modal"
       class="modal fade"
       tabindex="-1"
       data-bs-keyboard="false"
       data-bs-backdrop="static"
       aria-hidden="true"
-      ref="modal"
     >
       <div
         class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"

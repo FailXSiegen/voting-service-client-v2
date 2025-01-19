@@ -27,6 +27,7 @@
 </template>
 <script>
 export default {
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

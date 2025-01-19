@@ -3,9 +3,9 @@
     <h2>Registrierung und Einrichtung</h2>
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Wie können sich Vereine und Verbände auf digitalwahl.org registrieren?"
         name="registration"
-        :id="1"
       >
         <p>
           Vereine und Verbände können sich auf digitalwahl.org wie folgt
@@ -45,9 +45,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="2"
         title="Welche Voraussetzungen müssen für die Registrierung erfüllt sein?"
         name="registration"
-        :id="2"
       >
         <p>
           Für die Registrierung eines Vereins oder Verbands auf digitalwahl.org
@@ -86,9 +86,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="3"
         title="Wie erstellt man eine Wahl oder Abstimmung?"
         name="registration"
-        :id="3"
       >
         <p>
           Erfahren Sie hierzu mehr in der <a href="/anleitung">Anleitung</a>
@@ -104,6 +104,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

@@ -3,9 +3,9 @@
     <h2>Wahlergebnisse und Berichte</h2>
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Wie werden die Wahlergebnisse präsentiert?"
         name="results"
-        :id="1"
       >
         <p>
           Auf digitalwahl.org werden die Wahlergebnisse auf eine klare und
@@ -48,9 +48,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="2"
         title="Bestätigung und Export der Wahlergebnisse"
         name="results"
-        :id="2"
       >
         <p>
           Die Gültigkeit der Wahlergebnisse auf digitalwahl.org wird in
@@ -98,6 +98,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

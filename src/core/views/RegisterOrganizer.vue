@@ -129,9 +129,7 @@
                 "
               />
             </div>
-
-            <!-- reCAPTCHA -->
-            <div id="recaptcha-container" class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
+            <GoogleRecaptcha @verified="recaptchaVerified = true" @expired="recaptchaVerified = false"/>
             <button class="btn btn-primary btn-block float-end mt-3" :disabled="!recaptchaVerified">
               {{ $t("view.register.submit") }}
             </button>
@@ -144,23 +142,21 @@
 
 <script setup>
 import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import { reactive, ref, onMounted } from "vue";
-import { required, sameAs as equal } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { create } from "@/modules/organizer/requests/create";
-import { sameAs } from "@/core/form/validation/same-as";
+import {reactive, ref} from "vue";
+import {required, sameAs as equal} from "@vuelidate/validators";
+import {useVuelidate} from "@vuelidate/core";
+import {handleError} from "@/core/error/error-handler";
+import {InvalidFormError} from "@/core/error/InvalidFormError";
+import {create} from "@/modules/organizer/requests/create";
+import {sameAs} from "@/core/form/validation/same-as";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import EmailInput from "@/core/components/form/EmailInput.vue";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
 import AlertBox from "@/core/components/AlertBox.vue";
+import GoogleRecaptcha from "@/core/components/form/GoogleRecaptcha.vue";
 
 const submitSuccess = ref(false);
-const recaptchaResponse = ref(null);
 const recaptchaVerified = ref(false);
-const recaptchaSiteKey = "6LcAzPQpAAAAAPoCUtR_DcuHNHi6b6AFi3Y8TpXD";
-let recaptchaWidgetId = null;
 
 // Form and validation setup.
 const formData = reactive({
@@ -175,70 +171,20 @@ const formData = reactive({
 });
 
 const rules = {
-  username: { required },
-  email: { required },
-  password: { required },
+  username: {required},
+  email: {required},
+  password: {required},
   passwordRepeated: {
     required,
     sameAs: sameAs("password", formData),
   },
-  publicName: { required },
-  publicOrganisation: { required },
-  dataProtectionAccepted: { required, checked: equal(true) },
-  isBetaAccepted: { required, checked: equal(true) },
+  publicName: {required},
+  publicOrganisation: {required},
+  dataProtectionAccepted: {required, checked: equal(true)},
+  isBetaAccepted: {required, checked: equal(true)},
 };
 
 const v$ = useVuelidate(rules, formData);
-
-function onCaptchaVerified(response) {
-  console.log('Captcha verified:', response); // Debugging output
-  recaptchaResponse.value = response;
-  recaptchaVerified.value = true;
-}
-
-function onCaptchaExpired() {
-  console.log('Captcha expired'); // Debugging output
-  recaptchaResponse.value = null;
-  recaptchaVerified.value = false;
-}
-
-onMounted(() => {
-  const script = document.createElement('script');
-  script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-
-  function tryRenderRecaptcha() {
-    if (window.grecaptcha && window.grecaptcha.render) {
-      console.log('reCAPTCHA is ready, rendering now');
-      window.grecaptcha.ready(() => {
-        try {
-          recaptchaWidgetId = window.grecaptcha.render('recaptcha-container', {
-            sitekey: recaptchaSiteKey,
-            callback: onCaptchaVerified,
-            'expired-callback': onCaptchaExpired,
-          });
-          console.log('reCAPTCHA rendered successfully');
-        } catch (error) {
-          console.error('Error rendering reCAPTCHA:', error);
-        }
-      });
-    } else {
-      console.log('reCAPTCHA not ready, retrying in 100ms');
-      setTimeout(tryRenderRecaptcha, 100);
-    }
-  }
-
-  script.onload = () => {
-    console.log('reCAPTCHA script loaded, attempting to render');
-    tryRenderRecaptcha();
-  };
-
-  script.onerror = (error) => {
-    console.error('Failed to load reCAPTCHA script:', error);
-  };
-});
 
 async function onSubmit() {
   const result = await v$.value.$validate();

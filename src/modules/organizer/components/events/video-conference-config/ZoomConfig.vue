@@ -5,7 +5,7 @@
         :label="
           $t('view.event.create.labels.videoConferenceConfig.zoom.meetingId')
         "
-        :value="config.meetingId"
+        :value="appliedConfig.meetingId"
         @change="onChangeMeetingId"
       />
     </div>
@@ -14,7 +14,7 @@
         :label="
           $t('view.event.create.labels.videoConferenceConfig.zoom.password')
         "
-        :value="config.password"
+        :value="appliedConfig.password"
         @change="onChangePassword"
       />
     </div>
@@ -23,7 +23,7 @@
 
 <script setup>
 import BaseInput from "@/core/components/form/BaseInput.vue";
-import { reactive } from "vue";
+import {reactive} from "vue";
 
 const props = defineProps({
   recordId: {
@@ -39,31 +39,31 @@ const props = defineProps({
 const emit = defineEmits(["change"]);
 
 const resolvedConfig = JSON.parse(props.config);
-const config = reactive({
+const appliedConfig = reactive({
   meetingId: resolvedConfig?.credentials?.meetingId ?? "",
   password: resolvedConfig?.credentials?.password ?? "",
 });
 
 function onChangeMeetingId(value) {
-  config.meetingId = value.value;
+  appliedConfig.meetingId = value.value;
   emit("change", {
     id: parseInt(props.recordId, 10),
     type: 1,
     credentials: {
-      meetingId: config.meetingId,
-      password: config.password,
+      meetingId: appliedConfig.meetingId,
+      password: appliedConfig.password,
     },
   });
 }
 
 function onChangePassword(value) {
-  config.password = value.value;
+  appliedConfig.password = value.value;
   emit("change", {
     id: parseInt(props.recordId, 10),
     type: 1,
     credentials: {
-      meetingId: config.meetingId,
-      password: config.password,
+      meetingId: appliedConfig.meetingId,
+      password: appliedConfig.password,
     },
   });
 }

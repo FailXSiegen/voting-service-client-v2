@@ -4,9 +4,9 @@
 
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Wie kann Feedback zur Plattform gegeben werden?"
         name="feedback"
-        :id="1"
       >
         <p>
           Wir freuen uns, wenn Sie Feedback, egal welcher Art, an
@@ -15,9 +15,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="2"
         title="Werden neue Funktionen basierend auf Nutzerfeedback hinzugefügt?"
         name="feedback"
-        :id="2"
       >
         <p>
           Wenn Sie spezielle Anforderungen haben, die Funktional eine
@@ -36,6 +36,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

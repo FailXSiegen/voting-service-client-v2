@@ -3,9 +3,9 @@
     <h2>Sicherheit und Datenschutz</h2>
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Wie wird die Sicherheit der Wahl gewährleistet?"
         name="security"
-        :id="1"
       >
         <p>
           Die Sicherheit der Wahl auf digitalwahl.org wird durch mehrere
@@ -45,9 +45,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="2"
         title="Wie wird der Datenschutz auf digitalwahl.org gehandhabt?"
         name="security"
-        :id="2"
       >
         <p>
           Der Datenschutz ist ein wesentlicher Bestandteil der Plattform
@@ -94,9 +94,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="3"
         title="Werden persönliche Daten der Teilnehmer*innen gespeichert?"
         name="security"
-        :id="3"
       >
         <p>
           Auf Digitalwahl.org werden die persönlichen Daten der Teilnehmer unter
@@ -129,9 +129,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="4"
         title="Token-basierte Authentifizierung auf digitalwahl.org"
         name="security"
-        :id="4"
       >
         <p>
           Die token-basierte Authentifizierung ist ein Verfahren, das auf
@@ -186,7 +186,7 @@
         </p>
       </FaqCard>
 
-      <FaqCard title="Geheime Wahlen" name="security" :id="5">
+      <FaqCard :id="5" title="Geheime Wahlen" name="security">
         <p>
           Bei der Durchführung geheimer Wahlen auf digitalwahl.org wird
           besonderes Augenmerk auf die Anonymität und Privatsphäre der
@@ -234,6 +234,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },
