@@ -23,7 +23,7 @@
 
 <script setup>
 import BaseInput from "@/core/components/form/BaseInput.vue";
-import {reactive} from "vue";
+import { reactive } from "vue";
 
 const props = defineProps({
   recordId: {

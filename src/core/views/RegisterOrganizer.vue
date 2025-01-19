@@ -129,8 +129,14 @@
                 "
               />
             </div>
-            <GoogleRecaptcha @verified="recaptchaVerified = true" @expired="recaptchaVerified = false"/>
-            <button class="btn btn-primary btn-block float-end mt-3" :disabled="!recaptchaVerified">
+            <GoogleRecaptcha
+              @verified="recaptchaVerified = true"
+              @expired="recaptchaVerified = false"
+            />
+            <button
+              class="btn btn-primary btn-block float-end mt-3"
+              :disabled="!recaptchaVerified"
+            >
               {{ $t("view.register.submit") }}
             </button>
           </form>
@@ -142,13 +148,13 @@
 
 <script setup>
 import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import {reactive, ref} from "vue";
-import {required, sameAs as equal} from "@vuelidate/validators";
-import {useVuelidate} from "@vuelidate/core";
-import {handleError} from "@/core/error/error-handler";
-import {InvalidFormError} from "@/core/error/InvalidFormError";
-import {create} from "@/modules/organizer/requests/create";
-import {sameAs} from "@/core/form/validation/same-as";
+import { reactive, ref } from "vue";
+import { required, sameAs as equal } from "@vuelidate/validators";
+import { useVuelidate } from "@vuelidate/core";
+import { handleError } from "@/core/error/error-handler";
+import { InvalidFormError } from "@/core/error/InvalidFormError";
+import { create } from "@/modules/organizer/requests/create";
+import { sameAs } from "@/core/form/validation/same-as";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import EmailInput from "@/core/components/form/EmailInput.vue";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
@@ -171,17 +177,17 @@ const formData = reactive({
 });
 
 const rules = {
-  username: {required},
-  email: {required},
-  password: {required},
+  username: { required },
+  email: { required },
+  password: { required },
   passwordRepeated: {
     required,
     sameAs: sameAs("password", formData),
   },
-  publicName: {required},
-  publicOrganisation: {required},
-  dataProtectionAccepted: {required, checked: equal(true)},
-  isBetaAccepted: {required, checked: equal(true)},
+  publicName: { required },
+  publicOrganisation: { required },
+  dataProtectionAccepted: { required, checked: equal(true) },
+  isBetaAccepted: { required, checked: equal(true) },
 };
 
 const v$ = useVuelidate(rules, formData);
@@ -198,7 +204,7 @@ async function onSubmit() {
       email: formData.email,
       password: formData.password,
       publicName: formData.publicName,
-      publicOrganisation: formData.publicOrganisation
+      publicOrganisation: formData.publicOrganisation,
     });
     submitSuccess.value = true;
   } catch (error) {

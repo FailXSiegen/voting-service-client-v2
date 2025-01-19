@@ -8,7 +8,11 @@
       :id="id"
       v-model="inputValue"
       :name="name"
-      :class="['custom-select form-select', hasErrors ? 'is-invalid' : null, ...classes]"
+      :class="[
+        'custom-select form-select',
+        hasErrors ? 'is-invalid' : null,
+        ...classes,
+      ]"
       @change="onChange"
     >
       <option value="0" selected="selected">---</option>

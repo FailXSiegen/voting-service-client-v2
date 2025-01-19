@@ -2,18 +2,23 @@
   <div v-if="pollResult.poll" class="card mb-3">
     <div class="card-header">
       <h5 class="h4 mb-1">
-        {{ pollResult.poll.title }} ({{ $t("view.results.type." + pollResult.type) }}) - 
+        {{ pollResult.poll.title }} ({{
+          $t("view.results.type." + pollResult.type)
+        }}) -
         {{ getCreateDatetime }}
       </h5>
       <p class="small text-muted">
         {{ $t("view.event.user.member") }}: {{ pollResult.pollUser.length }} |
         <template v-if="hasAbstentions">
-          {{ $t("view.results.givenVotes") }} {{ totalValidVotes }} {{ $t("view.results.withoutAbstentions") }} |
+          {{ $t("view.results.givenVotes") }} {{ totalValidVotes }}
+          {{ $t("view.results.withoutAbstentions") }} |
           {{ $t("view.results.abstentions") }} {{ abstentionCount }} |
-          {{ $t("view.results.totalVotes") }} {{ pollResult.pollAnswer.length }} |
+          {{ $t("view.results.totalVotes") }}
+          {{ pollResult.pollAnswer.length }} |
         </template>
         <template v-else>
-          {{ $t("view.results.givenVotes") }} {{ pollResult.pollAnswer.length }} |
+          {{ $t("view.results.givenVotes") }}
+          {{ pollResult.pollAnswer.length }} |
         </template>
         {{ $t("view.results.voters") }} {{ pollResult.maxVotes }}
       </p>
@@ -61,7 +66,7 @@
             </ul>
           </div>
         </div>
-        
+
         <div class="col-12 col-md-6">
           <p>{{ $t("general.member") }}</p>
           <button
@@ -88,9 +93,9 @@
               </ul>
             </div>
           </div>
-          
+
           <hr class="divider mx-2" />
-          
+
           <p v-if="pollResult.type === 'PUBLIC'">
             {{ $t("view.results.detailResult") }}
           </p>
@@ -121,8 +126,8 @@
                   <div class="d-flex justify-content-between">
                     <span>{{ getPublicName(userId) }}</span>
                     <div class="d-flex gap-2 mt-1">
-                      <span 
-                        v-for="(count, answer) in user" 
+                      <span
+                        v-for="(count, answer) in user"
                         :key="answer"
                         class="d-flex align-items-center"
                       >
@@ -131,7 +136,8 @@
                           :class="{
                             'bg-success': answer === 'Ja',
                             'bg-danger': answer === 'Nein',
-                            'bg-secondary': answer !== 'Ja' && answer !== 'Nein'
+                            'bg-secondary':
+                              answer !== 'Ja' && answer !== 'Nein',
                           }"
                         >
                           {{ answer }} x{{ count }}
@@ -165,14 +171,14 @@ const props = defineProps({
 });
 
 const totalValidVotes = computed(() => {
-  return props.pollResult.pollAnswer.filter(answer => 
-    answer.answerContent !== 'Enthaltung'
+  return props.pollResult.pollAnswer.filter(
+    (answer) => answer.answerContent !== "Enthaltung",
   ).length;
 });
 
 const abstentionCount = computed(() => {
-  return props.pollResult.pollAnswer.filter(answer => 
-    answer.answerContent === 'Enthaltung'
+  return props.pollResult.pollAnswer.filter(
+    (answer) => answer.answerContent === "Enthaltung",
   ).length;
 });
 
@@ -192,11 +198,11 @@ const pollAnswerGroups = computed(() => {
 
 const groupedUserAnswers = computed(() => {
   const grouped = {};
-  props.pollResult.pollAnswer.forEach(answer => {
+  props.pollResult.pollAnswer.forEach((answer) => {
     if (!grouped[answer.pollUserId]) {
       grouped[answer.pollUserId] = {};
     }
-    grouped[answer.pollUserId][answer.answerContent] = 
+    grouped[answer.pollUserId][answer.answerContent] =
       (grouped[answer.pollUserId][answer.answerContent] || 0) + 1;
   });
   return grouped;

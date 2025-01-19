@@ -41,11 +41,11 @@
           rechtzeitige Einladung zur Veranstaltung inklusive der Bereitstellung
           aller notwendigen Unterlagen sowie die Planung von Wahl- und
           Abstimmungsprozessen.
-          <br/><br/>Für weitere Informationen besuchen Sie bitte
+          <br /><br />Für weitere Informationen besuchen Sie bitte
           <a
             href="https://remix.medialepfade.org/ein-demokratie-hotspot/digitale-mitgliederversammlungen/"
             target="_blank"
-          >diese Seite</a
+            >diese Seite</a
           >.
         </p>
 
@@ -55,11 +55,11 @@
           Anleitungen und Videos bereitgestellt, die auf Erfahrungen von
           Chorverbänden basieren. Diese Ressourcen können erweitert und
           angepasst werden, um spezifischen Bedürfnissen gerecht zu werden.
-          <br/><br/>Weitere Details finden Sie unter
+          <br /><br />Weitere Details finden Sie unter
           <a
             href="https://remix.medialepfade.org/ein-demokratie-hotspot/digitale-mitgliederversammlungen/"
             target="_blank"
-          >diesem Link</a
+            >diesem Link</a
           >.
         </p>
       </FaqCard>

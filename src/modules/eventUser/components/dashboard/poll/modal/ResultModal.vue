@@ -46,8 +46,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Modal } from 'bootstrap';
+import { ref, onMounted } from "vue";
+import { Modal } from "bootstrap";
 import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
 import t from "@/core/util/l18n";
 

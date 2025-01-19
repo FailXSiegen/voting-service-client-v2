@@ -34,8 +34,8 @@ const componentNames = [
 
 export default {
   components: componentNames.reduce((components, name) => {
-    components[name] = defineAsyncComponent(() =>
-      import(`@/core/views/staticPages/Faq/${name}.vue`),
+    components[name] = defineAsyncComponent(
+      () => import(`@/core/views/staticPages/Faq/${name}.vue`),
     );
     return components;
   }, {}),
