@@ -39,15 +39,15 @@
       </button>
     </td>
     <td v-if="showOrganizer" class="align-middle">
-    <template v-if="event.organizer?.publicName">
-      <b>{{ event.organizer.publicName }}</b> <br />
-      {{ event.organizer.username }}<br />
-      {{ event.organizer.email }}<br />
-    </template>
-    <template v-else>
-      Event ID: {{ event.id || 'Unknown' }} <br />
-      Organizer ID: {{ event.organizer || 'Unknown' }}
-    </template>
+      <template v-if="event.organizer?.publicName">
+        <b>{{ event.organizer.publicName }}</b> <br />
+        {{ event.organizer.username }}<br />
+        {{ event.organizer.email }}<br />
+      </template>
+      <template v-else>
+        Event ID: {{ event.id || "Unknown" }} <br />
+        Organizer ID: {{ event.organizer || "Unknown" }}
+      </template>
     </td>
     <td class="align-middle">
       {{ getCreateDatetime }}

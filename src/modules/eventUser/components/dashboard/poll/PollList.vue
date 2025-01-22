@@ -8,8 +8,8 @@
       <div>
         <h5 class="mb-1">
           {{ poll.title }}
-          <i 
-            v-if="isDisabled(poll)" 
+          <i
+            v-if="isDisabled(poll)"
             class="bi bi-check-circle-fill text-success ms-2"
             :title="$t('view.polls.completed')"
           />

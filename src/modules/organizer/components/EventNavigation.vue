@@ -1,8 +1,6 @@
 <template>
   <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
-    <span class="h5 my-3 d-block text-white"
-      >Digitalwahl</span
-    >
+    <span class="h5 my-3 d-block text-white">Digitalwahl</span>
     <button
       class="navbar-toggler"
       type="button"
@@ -118,13 +116,12 @@
 <script setup>
 import {
   getRouteByName,
-  RouteOrganizerEvents,
   RouteOrganizerMemberRoom,
   RouteOrganizerLobbyRoom,
   RouteOrganizerPolls,
   RouteOrganizerPollResults,
 } from "@/router/routes";
-import { computed, inject, ref } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useQuery, useSubscription } from "@vue/apollo-composable";
 import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
@@ -133,7 +130,6 @@ import { EVENT_USER_LIFE_CYCLE } from "@/modules/organizer/graphql/subscription/
 
 const route = useRoute();
 const eventId = route.params.id;
-const appVersion = inject("appVersion");
 const params = useRoute().params;
 const eventUsers = ref([]);
 

@@ -57,7 +57,8 @@
       </p>
       <ul>
         <li>
-          Selbst angegebener Name, Benutzername (Abhängig vom Veranstalter: E-Mail Adresse nicht zwingend erfoderlich!) und das verschlüsselte
+          Selbst angegebener Name, Benutzername (Abhängig vom Veranstalter:
+          E-Mail Adresse nicht zwingend erfoderlich!) und das verschlüsselte
           Passwort
         </li>
         <li>Abstimmungsteilnahme</li>
@@ -70,8 +71,8 @@
         (Wahlergebnisse, Teilnehmer) obliegt dem/der Organisator*in
       </p>
       <p>
-        Die benutzerbezogenen Daten werden in einer Datenbank gespeichert.
-        Jeder Teilnehmer einer Veranstaltung ist ein individueller Eintrag. Ein
+        Die benutzerbezogenen Daten werden in einer Datenbank gespeichert. Jeder
+        Teilnehmer einer Veranstaltung ist ein individueller Eintrag. Ein
         Teilnehmerdatensatz ist immer einmalig pro Veranstaltung. Es gibt keine
         Verknüpfung, wenn ein Nutzer mit den gleichen Zugangsdaten bei einem
         anderen Event teilnimmt. Hier wird ein neuer Nutzerdatensatz generiert

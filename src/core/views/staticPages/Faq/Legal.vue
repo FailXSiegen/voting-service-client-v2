@@ -4,9 +4,9 @@
 
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Erfüllt digitalwahl.org die rechtlichen Anforderungen für Vereinswahlen?"
         name="legal"
-        :id="1"
       >
         <p>
           digitalwahl.org ist darauf ausgerichtet, die rechtlichen Anforderungen
@@ -20,9 +20,9 @@
         </p>
       </FaqCard>
       <FaqCard
+        :id="2"
         title="Wie werden Änderungen in gesetzlichen Bestimmungen berücksichtigt?"
         name="legal"
-        :id="2"
       >
         <p>
           Änderungen in gesetzlichen Bestimmungen werden auf digitalwahl.org
@@ -47,6 +47,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

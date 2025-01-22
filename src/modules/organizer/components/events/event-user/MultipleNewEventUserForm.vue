@@ -54,14 +54,14 @@
             $t(
               formData.tokenBasedLogin
                 ? 'view.event.create.labels.eventMultipleUser.emails'
-                : 'view.event.create.labels.eventMultipleUser.usernames'
+                : 'view.event.create.labels.eventMultipleUser.usernames',
             )
           "
           :help-text="
             $t(
               formData.tokenBasedLogin
                 ? 'view.event.create.labels.eventMultipleUser.emailsHint'
-                : 'view.event.create.labels.eventMultipleUser.usernamesHint'
+                : 'view.event.create.labels.eventMultipleUser.usernamesHint',
             )
           "
           :errors="v$.usernames?.$errors"
@@ -75,9 +75,9 @@
       <!-- Progress Feedback -->
       <div v-if="isProcessing" class="progress-feedback mt-3">
         <div class="progress">
-          <div 
-            class="progress-bar" 
-            role="progressbar" 
+          <div
+            class="progress-bar"
+            role="progressbar"
             :style="{ width: `${(progress.current / progress.total) * 100}%` }"
             :aria-valuenow="progress.current"
             :aria-valuemin="0"
@@ -87,25 +87,28 @@
           </div>
         </div>
         <small class="text-muted">
-          {{ $t('view.event.create.labels.eventUser.processing') }}
+          {{ $t("view.event.create.labels.eventUser.processing") }}
           <span v-if="progress.current > 0 && progress.total > 0">
             ({{ Math.round((progress.current / progress.total) * 100) }}%)
           </span>
         </small>
       </div>
 
-      <button 
-        class="btn btn-primary mt-5 mb-3"
-        :disabled="isProcessing"
-      >
-        <i 
+      <button class="btn btn-primary mt-5 mb-3" :disabled="isProcessing">
+        <i
           :class="[
             isProcessing ? 'bi-hourglass-split' : 'bi-play',
-            'bi--2xl align-middle'
-          ]" 
+            'bi--2xl align-middle',
+          ]"
         />
         <span class="align-middle">
-          {{ $t(isProcessing ? 'view.event.create.labels.eventUser.processing' : 'view.event.create.labels.eventUser.submit') }}
+          {{
+            $t(
+              isProcessing
+                ? "view.event.create.labels.eventUser.processing"
+                : "view.event.create.labels.eventUser.submit",
+            )
+          }}
         </span>
       </button>
     </form>
@@ -124,19 +127,18 @@ import TextInput from "@/core/components/form/TextInput.vue";
 import { NetworkError } from "@/core/error/NetworkError";
 import { isValidEmail } from "@/core/util/email-validator";
 
-// Props
-const props = defineProps({
+defineProps({
   isProcessing: {
     type: Boolean,
-    default: false
+    default: false,
   },
   progress: {
     type: Object,
     default: () => ({
       current: 0,
-      total: 0
-    })
-  }
+      total: 0,
+    }),
+  },
 });
 
 const emit = defineEmits(["submit"]);
@@ -182,14 +184,14 @@ function parseUsernamesText() {
       });
     }
 
-    formData.usernames = usernames.map(username => username.trim());
+    formData.usernames = usernames.map((username) => username.trim());
     return true;
   } catch (index) {
     const numberOfRow = index + 1;
     handleError(
       new NetworkError(
-        `Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ${numberOfRow}`
-      )
+        `Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ${numberOfRow}`,
+      ),
     );
     return false;
   }
@@ -203,7 +205,7 @@ function onChangeUsernamesText({ value }) {
 async function onSubmit() {
   const parsedSuccessfully = parseUsernamesText();
   const result = await v$.value.$validate();
-  
+
   if (!result || !parsedSuccessfully) {
     handleError(new InvalidFormError());
     return;
@@ -227,7 +229,7 @@ async function onSubmit() {
       height: 20px;
       background-color: #e9ecef;
       border-radius: 0.25rem;
-      
+
       .progress-bar {
         min-width: 2em;
         background-color: #0d6efd;

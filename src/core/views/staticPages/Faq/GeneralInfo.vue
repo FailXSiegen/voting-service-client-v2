@@ -2,7 +2,7 @@
   <div>
     <h2>Allgmeine Informationen</h2>
     <div class="accordion">
-      <FaqCard title="Was ist digitalwahl.org?" name="generalInfo" :id="1">
+      <FaqCard :id="1" title="Was ist digitalwahl.org?" name="generalInfo">
         <p>
           digitalwahl.org ist eine Plattform, die Vereinen und Verbänden eine
           Lösung zur Durchführung digitaler Wahlen bietet. Der Fokus liegt
@@ -15,9 +15,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="2"
         title="Für wen ist digitalwahl.org geeignet?"
         name="generalInfo"
-        :id="2"
       >
         <p>
           Digitalwahl.org ist eine Online-Plattform, die speziell für
@@ -60,9 +60,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="3"
         title="Ist die Nutzung von digitalwahl.org wirklich kostenlos?"
         name="generalInfo"
-        :id="3"
       >
         <p>
           Ja, die Nutzung der Plattform <strong>digitalwahl.org</strong> ist für
@@ -82,6 +82,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

@@ -11,7 +11,7 @@ import * as ConfirmDialog from "vuejs-confirm-dialog";
 import Vue3EasyDataTable from "vue3-easy-data-table";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { createPinia } from "pinia";
-import jQuery from 'jquery';
+import jQuery from "jquery";
 window.$ = window.jQuery = jQuery;
 
 import "vue3-easy-data-table/dist/style.css";

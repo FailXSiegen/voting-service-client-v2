@@ -3,9 +3,9 @@
     <h2>Technische Anforderungen</h2>
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Welche technischen Voraussetzungen sind nötig, um digitalwahl.org zu nutzen?"
         name="requirement"
-        :id="1"
       >
         <p>
           Um digitalwahl.org effektiv nutzen zu können, sind folgende technische
@@ -44,9 +44,9 @@
       </FaqCard>
 
       <FaqCard
+        :id="2"
         title="Integration von Video-Konferenzen (aktuell Zoom)"
         name="requirement"
-        :id="2"
       >
         <p>
           digitalwahl.org bietet eine nahtlose und benutzerfreundliche
@@ -92,6 +92,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },

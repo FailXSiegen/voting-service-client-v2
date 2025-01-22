@@ -1,7 +1,7 @@
 <template>
   <form id="poll-form" class="needs-validation" @submit.prevent="onSubmit">
     <!-- Force answer/s for each vote -->
-    <fieldset class="alert alert-info" v-if="canSubmitAnswerForEachVote">
+    <fieldset v-if="canSubmitAnswerForEachVote" class="alert alert-info">
       <CheckboxInput
         id="submit-answer-for-each-vote"
         :label="

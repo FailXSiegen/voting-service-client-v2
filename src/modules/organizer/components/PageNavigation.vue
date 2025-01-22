@@ -1,8 +1,6 @@
 <template>
   <nav id="mainNavigation" class="navbar navbar-dark fixed-top bg-dark">
-    <span class="h5 my-3 d-block text-white"
-      >Digitalwahl</span
-    >
+    <span class="h5 my-3 d-block text-white">Digitalwahl</span>
     <button
       class="navbar-toggler"
       type="button"
@@ -86,7 +84,6 @@
 
 <script setup>
 import { RouteOrganizerProfile, RouteMainLogin } from "@/router/routes";
-import { inject } from "vue";
 import { logout } from "@/core/auth/login";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
@@ -95,7 +92,6 @@ import { useRoute, useRouter } from "vue-router";
 
 const coreStore = useCore();
 const router = useRouter();
-const appVersion = inject("appVersion");
 const props = defineProps({
   routes: {
     type: Array,
