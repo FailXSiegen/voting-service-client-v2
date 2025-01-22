@@ -150,7 +150,7 @@ const pollResultsQuery = useQuery(
 
 pollResultsQuery.onResult(({ data }) => {
   if (!data?.pollResult) return;
-  
+
   // Initial check if there are less items than pageSize
   if (page.value === 0 && data.pollResult.length < pageSize.value) {
     showMoreEnabled.value = false;
@@ -159,12 +159,13 @@ pollResultsQuery.onResult(({ data }) => {
   if (data.pollResult.length > 0) {
     // Add new poll results
     pollResults.value = [
-      ...pollResults.value.filter(existing => 
-        !data.pollResult.some(newResult => newResult.id === existing.id)
+      ...pollResults.value.filter(
+        (existing) =>
+          !data.pollResult.some((newResult) => newResult.id === existing.id),
       ),
-      ...data.pollResult
+      ...data.pollResult,
     ].sort((a, b) => b.createDatetime - a.createDatetime);
-    
+
     lastPollResult.value = pollResults.value[0];
   }
 });
@@ -244,8 +245,10 @@ function onShowMorePollResults() {
       pageSize: pageSize.value,
     },
     updateQuery: (previousResult, { fetchMoreResult }) => {
-      if (!fetchMoreResult?.pollResult || 
-          fetchMoreResult.pollResult.length < pageSize.value) {
+      if (
+        !fetchMoreResult?.pollResult ||
+        fetchMoreResult.pollResult.length < pageSize.value
+      ) {
         showMoreEnabled.value = false;
         toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
         return previousResult;
@@ -253,7 +256,10 @@ function onShowMorePollResults() {
 
       return {
         ...previousResult,
-        pollResult: [...(previousResult?.pollResult || []), ...fetchMoreResult.pollResult]
+        pollResult: [
+          ...(previousResult?.pollResult || []),
+          ...fetchMoreResult.pollResult,
+        ],
       };
     },
   });

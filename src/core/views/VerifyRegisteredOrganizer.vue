@@ -7,14 +7,16 @@
             {{ $t("view.register.headline") }}
           </h1>
           <AlertBox v-if="requestFinished && !requestFailed">
-            <b>{{ $t("view.register.verify.success") }}</b><br />
+            <b>{{ $t("view.register.verify.success") }}</b
+            ><br />
             {{ $t("view.register.verify.successDescription") }}
           </AlertBox>
           <AlertBox v-else-if="requestFailed" type="danger">
             <b>{{ $t("view.register.verify.failed") }}</b>
           </AlertBox>
           <AlertBox v-else type="info">
-            <b>{{ $t("view.register.verify.processing") }}</b><br />
+            <b>{{ $t("view.register.verify.processing") }}</b
+            ><br />
             {{ $t("view.register.verify.processingDescription") }}
           </AlertBox>
         </div>

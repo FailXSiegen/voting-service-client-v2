@@ -8,9 +8,14 @@
           </div>
           <div class="col text-center">
             <p class="display-4 mb-3">HINWEIS</p>
-            <p>Aufgrund einer technischen Aktualisierung hat sich die Link/URL Struktur von Veranstaltungen geändert!</p>
+            <p>
+              Aufgrund einer technischen Aktualisierung hat sich die Link/URL
+              Struktur von Veranstaltungen geändert!
+            </p>
             <p>digitalwahl.org/<b>event/</b>meine-veranstaltung</p>
-            <p class="mb-0">Bitte aktualisieren Sie vorhandene Anleitungen und Vorlagen.</p>
+            <p class="mb-0">
+              Bitte aktualisieren Sie vorhandene Anleitungen und Vorlagen.
+            </p>
           </div>
         </div>
       </div>
@@ -702,7 +707,11 @@
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close btn btn-danger" data-bs-dismiss="modal">
+              <button
+                type="button"
+                class="close btn btn-danger"
+                data-bs-dismiss="modal"
+              >
                 <span aria-hidden="true">&times;</span
                 ><span class="visually-hidden">Schließen</span>
               </button>
@@ -719,7 +728,11 @@
               />
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+              <button
+                type="button"
+                class="btn btn-danger"
+                data-bs-dismiss="modal"
+              >
                 Schließen
               </button>
             </div>

@@ -29,7 +29,7 @@
 
 <script setup>
 import { reactive } from "vue";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
@@ -38,20 +38,20 @@ import { InvalidFormError } from "@/core/error/InvalidFormError";
 
 const router = useRouter();
 const formData = reactive({
- eventSlug: "",
+  eventSlug: "",
 });
 const rules = {
- eventSlug: { required },
+  eventSlug: { required },
 };
 const v$ = useVuelidate(rules, formData);
 
 async function onRedirectToEvent() {
- const result = await v$.value.$validate();
- if (!result) {
-   handleError(new InvalidFormError());
-   return;
- }
+  const result = await v$.value.$validate();
+  if (!result) {
+    handleError(new InvalidFormError());
+    return;
+  }
 
- router.push(`/event/${formData.eventSlug}`);
+  router.push(`/event/${formData.eventSlug}`);
 }
 </script>

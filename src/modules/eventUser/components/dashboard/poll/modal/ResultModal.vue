@@ -2,12 +2,12 @@
   <div class="container-modal d-print-none">
     <div
       id="resultModal"
+      ref="modal"
       class="modal fade"
       tabindex="-1"
       data-bs-keyboard="false"
       data-bs-backdrop="static"
       aria-hidden="true"
-      ref="modal"
     >
       <div
         class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
@@ -46,8 +46,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { Modal } from 'bootstrap';
+import { ref, onMounted } from "vue";
+import { Modal } from "bootstrap";
 import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
 import t from "@/core/util/l18n";
 

@@ -1,4 +1,4 @@
-import {defineStore} from "pinia";
+import { defineStore } from "pinia";
 import {
   apolloClient,
   AUTH_TOKEN,
@@ -6,20 +6,20 @@ import {
   resetClient,
   terminateClient,
 } from "@/apollo-client";
-import {decodeJsonWebToken} from "@/core/auth/jwt-util";
+import { decodeJsonWebToken } from "@/core/auth/jwt-util";
 import {
   loginByEventUserAuthToken,
   logout,
   USER_TYPE_EVENT_USER,
   USER_TYPE_ORGANIZER,
 } from "@/core/auth/login";
-import {provideApolloClient, useQuery} from "@vue/apollo-composable";
-import {ORGANIZER} from "@/modules/organizer/graphql/queries/organizer";
-import {EVENT_USER} from "@/modules/eventUser/graphql/queries/event-user";
-import {reactive, ref} from "vue";
-import {getCookie} from "../util/cookie";
-import {handleError} from "../error/error-handler";
-import {EventUserNotFoundError} from "@/core/error/EventUserNotFoundError";
+import { provideApolloClient, useQuery } from "@vue/apollo-composable";
+import { ORGANIZER } from "@/modules/organizer/graphql/queries/organizer";
+import { EVENT_USER } from "@/modules/eventUser/graphql/queries/event-user";
+import { reactive, ref } from "vue";
+import { getCookie } from "../util/cookie";
+import { handleError } from "../error/error-handler";
+import { EventUserNotFoundError } from "@/core/error/EventUserNotFoundError";
 
 // WATCH OUT: You can not use the router here. This will result in errors.
 
@@ -83,7 +83,7 @@ export const useCore = defineStore("core", {
         // Try to login the user by "event user auth token", if the related cookie is present.
         if (getCookie(EVENT_USER_AUTH_TOKEN)) {
           // The token is invalid, so we request a new one.
-          const {token} = await loginByEventUserAuthToken();
+          const { token } = await loginByEventUserAuthToken();
           if (token) {
             // Login the user width the new token.
             await this.loginUser(token);
@@ -110,7 +110,7 @@ export const useCore = defineStore("core", {
 
       // Decode jwt.
       try {
-        const {payload} = decodeJsonWebToken(token);
+        const { payload } = decodeJsonWebToken(token);
         // Update user data.
         // todo: Add a validation of the response, so we can be sure to fetch real and good user data.
         this.user = {
@@ -173,8 +173,8 @@ export const useCore = defineStore("core", {
         provideApolloClient(apolloClient);
         const organizerQuery = useQuery(
           ORGANIZER,
-          {organizerId: this.user?.id},
-          {fetchPolicy: "no-cache"},
+          { organizerId: this.user?.id },
+          { fetchPolicy: "no-cache" },
         );
         organizerQuery.onResult((result) => {
           const organizer = result?.data?.organizer || null;
@@ -200,8 +200,8 @@ export const useCore = defineStore("core", {
         provideApolloClient(apolloClient);
         const eventUserQuery = useQuery(
           EVENT_USER,
-          {id: this.user?.id},
-          {fetchPolicy: "no-cache"},
+          { id: this.user?.id },
+          { fetchPolicy: "no-cache" },
         );
         eventUserQuery.onResult((result) => {
           const eventUser = result?.data?.eventUser || null;

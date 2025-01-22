@@ -47,7 +47,11 @@
               @click="showMorePollResults"
             >
               <i class="me-3 bi bi-plus-square-fill bi--2xl" />
-              {{ isLoadingMore ? $t("common.loading") : $t("view.results.showMore") }}
+              {{
+                isLoadingMore
+                  ? $t("common.loading")
+                  : $t("view.results.showMore")
+              }}
             </button>
 
             <p v-if="!showMoreEnabled" class="alert alert-light mx-auto my-5">
@@ -74,7 +78,7 @@ import { useQuery } from "@vue/apollo-composable";
 import { EVENT } from "@/modules/organizer/graphql/queries/event";
 import { handleError } from "@/core/error/error-handler";
 import { NetworkError } from "@/core/error/NetworkError";
-import { ref, computed, watch, nextTick, KeepAlive } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import ResultListing from "@/modules/organizer/components/events/poll/ResultListing.vue";
 import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results";
 import { toast } from "vue3-toastify";
@@ -98,7 +102,9 @@ const showMoreEnabled = ref(true);
 const isEventLoading = ref(true);
 const isPollResultsLoading = ref(true);
 const isLoadingMore = ref(false);
-const isLoading = computed(() => isEventLoading.value || isPollResultsLoading.value);
+const isLoading = computed(
+  () => isEventLoading.value || isPollResultsLoading.value,
+);
 
 const exportButtons = [
   {
@@ -125,16 +131,19 @@ let pollResultsQuery;
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { 
+  {
     fetchPolicy: "network-only",
     notifyOnNetworkStatusChange: true,
-  }
+  },
 );
 
 // Update loading state for event
-watch(() => eventQuery.loading.value, (loading) => {
-  isEventLoading.value = loading;
-});
+watch(
+  () => eventQuery.loading.value,
+  (loading) => {
+    isEventLoading.value = loading;
+  },
+);
 
 // Handle event query errors
 eventQuery.onError((err) => {
@@ -149,7 +158,7 @@ eventQuery.onResult(({ data }) => {
     router.push({ name: RouteOrganizerDashboard });
     return;
   }
-  
+
   event.value = data?.event;
   setupPollResultsQuery();
 });
@@ -162,15 +171,18 @@ function setupPollResultsQuery() {
       page: page.value,
       pageSize: pageSize.value,
     },
-    { 
+    {
       fetchPolicy: "network-only",
-    }
+    },
   );
 
   // Update loading state for poll results
-  watch(() => pollResultsQuery.loading.value, (loading) => {
-    isPollResultsLoading.value = loading;
-  });
+  watch(
+    () => pollResultsQuery.loading.value,
+    (loading) => {
+      isPollResultsLoading.value = loading;
+    },
+  );
 
   // Handle poll results
   pollResultsQuery.onResult(({ data }) => {
@@ -191,17 +203,18 @@ function setupPollResultsQuery() {
 }
 
 async function showMorePollResults() {
-  if (isLoadingMore.value) return;
-  
+  if (isLoadingMore.value) {
+    return;
+  }
+
   isLoadingMore.value = true;
   const nextPage = page.value + 1;
-  
-  // Speichern der aktuellen Position des "Mehr laden" Buttons
-  const loadMoreButton = document.querySelector('.poll-results-container');
-  const buttonPosition = loadMoreButton?.getBoundingClientRect().bottom + window.pageYOffset;
-  
+  const loadMoreButton = document.querySelector(".poll-results-container");
+  const buttonPosition =
+    loadMoreButton?.getBoundingClientRect().bottom + window.pageYOffset;
+
   try {
-    const { data } = await pollResultsQuery.fetchMore({
+    await pollResultsQuery.fetchMore({
       variables: {
         eventId: event.value?.id,
         page: nextPage,
@@ -215,27 +228,26 @@ async function showMorePollResults() {
         }
 
         const updatedResults = {
-          pollResult: [...prev.pollResult, ...fetchMoreResult.pollResult]
+          pollResult: [...prev.pollResult, ...fetchMoreResult.pollResult],
         };
-        
+
         pollResults.value = updatedResults.pollResult;
         page.value = nextPage;
-        showMoreEnabled.value = fetchMoreResult.pollResult.length >= pageSize.value;
-        
+        showMoreEnabled.value =
+          fetchMoreResult.pollResult.length >= pageSize.value;
+
         return updatedResults;
       },
     });
 
-    // Nach dem Update und Rendern zur gespeicherten Position scrollen
     nextTick(() => {
       window.scrollTo({
         top: buttonPosition,
-        behavior: 'auto'
+        behavior: "auto",
       });
     });
-
   } catch (error) {
-    console.error('Error loading more results:', error);
+    console.error("Error loading more results:", error);
     toast(l18n.global.tc("common.error.loading"), { type: "error" });
   } finally {
     isLoadingMore.value = false;

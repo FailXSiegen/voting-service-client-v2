@@ -3,9 +3,9 @@
     <h2>Support und Hilfe</h2>
     <div class="accordion">
       <FaqCard
+        :id="1"
         title="Wie können Vereinsverantwortliche technische Unterstützung erhalten?"
         name="support"
-        :id="1"
       >
         <p>
           Vereinsverantwortliche können auf digitalwahl.org auf verschiedene
@@ -32,7 +32,7 @@
           </li>
         </ul>
       </FaqCard>
-      <FaqCard title="Auf was muss ich alles achten?" name="support" :id="2">
+      <FaqCard :id="2" title="Auf was muss ich alles achten?" name="support">
         <h3>Planung und Vorbereitung digitaler Mitgliederversammlungen</h3>
         <p>
           Die effektive Durchführung digitaler Mitgliederversammlungen erfordert
@@ -73,6 +73,7 @@ export default {
   components: {
     FaqCard,
   },
+  emits: ["loaded"],
   mounted() {
     this.$emit("loaded", this.htmlContent);
   },
