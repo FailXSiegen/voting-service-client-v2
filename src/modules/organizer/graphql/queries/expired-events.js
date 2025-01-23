@@ -13,6 +13,7 @@ export const EXPIRED_EVENTS = gql`
       lobbyOpen
       active
       async
+      allowMagicLink
       finished
       endDatetime
     }
