@@ -68,6 +68,7 @@ const prefillData = reactive({
   description: "",
   scheduledDatetime: Math.floor(Date.now() / 1000),
   lobbyOpen: false,
+  allowMagicLink: false,
   active: false,
   orgnaizerId: coreStore.user?.id ?? 0,
   multivoteType: 1,
@@ -100,6 +101,7 @@ eventQuery.onResult(({ data }) => {
   prefillData.active = event.value?.active ?? false;
   prefillData.multivoteType = event.value?.multivoteType ?? 1;
   prefillData.async = event.value?.async ?? false;
+  prefillData.allowMagicLink = event.value?.allowMagicLink ?? false;
   prefillData.endDatetime = event.value?.endDatetime ?? 0;
 
   const resolvedVideoConferenceConfig = JSON.parse(
@@ -140,6 +142,7 @@ async function onSubmit(formData) {
         multivoteType: formData.multivoteType,
         videoConferenceConfig: formData.videoConferenceConfig,
         async: formData.async,
+        allowMagicLink: formData.allowMagicLink,
         endDatetime: formData.endDatetime,
       },
     },
