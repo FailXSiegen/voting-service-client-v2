@@ -91,7 +91,7 @@
 import PageLayout from "@/modules/eventUser/components/PageLayout.vue";
 import BaseInput from "@/core/components/form/BaseInput.vue";
 import AlertBox from "@/core/components/AlertBox.vue";
-import { computed, reactive, watch } from "vue";
+import { computed, reactive } from "vue";
 import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import { handleError } from "@/core/error/error-handler";
