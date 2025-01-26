@@ -145,6 +145,12 @@
             "multivoteRadio2Help": "Bsp.: Teilnehmer hat 5 Stimmen. Bei Abstimmung wählt der Teilnehmer nur einmal, es wird 5 fach gewertet.",
             "async": "Die Abstimmungen der Veranstaltung finden asynchron statt (Briefwahl).",
             "allowMagicLink": "Zugang über Magic-Link erlauben",
+            "magicLink": {
+              "popover": {
+                "title": "Was ist ein Magic-Link?",
+                "description": "Mit dem Magic-Link können Teilnehmer ohne Passworteingabe an der Veranstaltung teilnehmen.<br>Die Links, welche <br><span class=\"text-nowrap\">?username=#BENUTERZERNAME#</span><br>als <b>Parameter</b> beinhalten, sind von der Passworteingabe befreit."
+              }
+            },
             "endDatetime": "Enddatum (Nur für Briefwahl)",
             "eventUser": {
               "submit": "Benutzer speichern",
