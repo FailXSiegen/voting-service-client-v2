@@ -38,7 +38,7 @@
           </div>
           <div class="mb-3">
             <input
-              v-if="event.allowMagicLink"
+              v-if="event.allowMagicLink && readOnlyUsername"
               :value="formData.password"
               type="hidden"
             />
@@ -50,7 +50,7 @@
               type="password"
               autocomplete="one-time-code"
               :help-text="$t('view.login.label.passwordHelp')"
-              v-if="!event.allowMagicLink"
+              v-if="!readOnlyUsername"
               @change="
                 ({ value }) => {
                   formData.password = value;
