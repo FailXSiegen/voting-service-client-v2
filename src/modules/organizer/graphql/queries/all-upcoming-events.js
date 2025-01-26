@@ -19,6 +19,7 @@ export const ALL_UPCOMING_EVENTS = gql`
       lobbyOpen
       active
       async
+      allowMagicLink
       finished
       endDatetime
     }
