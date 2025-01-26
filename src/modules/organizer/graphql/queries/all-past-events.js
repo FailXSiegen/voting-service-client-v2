@@ -19,6 +19,7 @@ export const ALL_PAST_EVENTS = gql`
       lobbyOpen
       active
       async
+      allowMagicLink
       finished
       endDatetime
     }

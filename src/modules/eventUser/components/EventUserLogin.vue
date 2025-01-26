@@ -25,9 +25,10 @@
               :errors="v$.username?.$errors"
               :has-errors="v$.username?.$errors?.length > 0"
               :value="formData.username"
-              :help-text="$t('view.login.label.usernameHelp')"
+              :help-text="!readOnlyUsername ? $t('view.login.label.usernameHelp') : ''"
               :autocomplete="off"
               :readonly="readOnlyUsername"
+              :classes="[readOnlyUsername ? 'form-control-plaintext' : '']"
               @change="
                 ({ value }) => {
                   formData.username = value;
@@ -36,6 +37,11 @@
             />
           </div>
           <div class="mb-3">
+            <input
+              v-if="event.allowMagicLink"
+              :value="formData.password"
+              type="hidden"
+            />
             <BaseInput
               :label="$t('view.login.label.password')"
               :errors="v$.password?.$errors"
@@ -44,6 +50,7 @@
               type="password"
               autocomplete="one-time-code"
               :help-text="$t('view.login.label.passwordHelp')"
+              v-if="!event.allowMagicLink"
               @change="
                 ({ value }) => {
                   formData.password = value;
@@ -52,7 +59,7 @@
             />
           </div>
           <div class="mb-3">
-            <BaseInput
+            <BaseInput 
               :label="$t('view.login.label.publicName')"
               :errors="v$.publicName?.$errors"
               :has-errors="v$.publicName?.$errors?.length > 0"
@@ -93,7 +100,7 @@ import { loginEventUser } from "@/core/auth/login";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 import { useCore } from "@/core/store/core";
-
+import { hashString } from "@/core/util/hashString";
 // Data.
 
 const emit = defineEmits(["exit"]);
@@ -106,11 +113,14 @@ const props = defineProps({
 const coreStore = useCore();
 const urlParams = new URLSearchParams(window.location.search);
 
-// Form and validation setup.
 
+// Set username readonly, if it is set in the url.
+const readOnlyUsername = urlParams.get("username") !== null ?? false;
+// Form and validation setup.
 const formData = reactive({
   username: urlParams.get("username") ?? "",
-  password: "",
+  password: readOnlyUsername && props.event.allowMagicLink ? 
+    hashString(urlParams.get("username") + props.event.createDatetime) : "",
   publicName: urlParams.get("publicname") ?? "",
 });
 const rules = computed(() => {
@@ -121,9 +131,6 @@ const rules = computed(() => {
   };
 });
 const v$ = useVuelidate(rules, formData);
-
-// Set username readonly, if it is set in the url.
-const readOnlyUsername = urlParams.get("username") !== null ?? false;
 
 // Events.
 

@@ -113,6 +113,20 @@
           "
         />
       </div>
+
+      <div class="mb-3">
+        <CheckboxInput
+          v-model:checked="formData.allowMagicLink"
+          :label="$t('view.event.create.labels.allowMagicLink')"
+          :errors="v$.allowMagicLink?.$errors"
+          :has-errors="v$.allowMagicLink?.$errors?.length > 0"
+          @update="
+            ({ value }) => {
+              formData.allowMagicLink = value;
+            }
+          "
+        />
+      </div>     
       <div class="card">
         <div class="card-body">
           <div class="mb-3">
@@ -214,6 +228,7 @@ const formData = reactive({
   videoConferenceConfig: props.prefillData?.videoConferenceConfig ?? "{}",
   videoConference: props.prefillData?.videoConference ?? null,
   async: props.prefillData?.async ?? false,
+  allowMagicLink: props.prefillData?.allowMagicLink ?? false,
   endDatetime: props.prefillData?.endDatetime ?? Math.floor(Date.now() / 1000),
 });
 
@@ -229,6 +244,7 @@ const rules = computed(() => {
     lobbyOpen: { required },
     active: { required },
     async: { required },
+    allowMagicLink: { required },
     orgnaizerId: { required },
     multivoteType: { required },
   };

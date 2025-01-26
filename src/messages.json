@@ -18,7 +18,7 @@
           "passwordHelp": "Bitte verwenden Sie ein Kennwort mit mindestens 6 Zeichen. Das Kennwort wird zur Wiedereinwahl zur Veranstaltung benötigt, falls Sie wegen Inaktivität oder Unterbrechung wieder teilnehmen möchten.",
           "lostPassword": "Passwort vergessen? Hier Link anfordern",
           "publicName": "Anzeige-Name *",
-          "publicNameHelp": "Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten. Für den Login relevant sind allerdings die oberen 2 Felder.",
+          "publicNameHelp": "Hier geben Sie bitte den Namen ein mit dem sie angezeigt werden möchten und bei Abstimmungen sichtbar sind.",
           "eventIdent": "Veranstaltungs-ID eingeben *",
           "onlyUsername": "Benutzername *"
         },
@@ -144,6 +144,7 @@
             "multivoteRadio2Label": "Benutzer geben IMMER alle Stimmen auf einmal ab",
             "multivoteRadio2Help": "Bsp.: Teilnehmer hat 5 Stimmen. Bei Abstimmung wählt der Teilnehmer nur einmal, es wird 5 fach gewertet.",
             "async": "Die Abstimmungen der Veranstaltung finden asynchron statt (Briefwahl).",
+            "allowMagicLink": "Zugang über Magic-Link erlauben",
             "endDatetime": "Enddatum (Nur für Briefwahl)",
             "eventUser": {
               "submit": "Benutzer speichern",
