@@ -192,7 +192,6 @@ import ZoomConfig from "@/modules/organizer/components/events/video-conference-c
 import VideoConferenceSelect from "@/modules/organizer/components/form/VideoConferenceSelect.vue";
 import RadioInput from "@/core/components/form/RadioInput.vue";
 import * as bootstrap from "bootstrap";
-import { html } from "../../../../../../../../.cache/typescript/5.7/node_modules/parse5/dist/index";
 const popoverTrigger = ref(null);
 
 onMounted(() => {
