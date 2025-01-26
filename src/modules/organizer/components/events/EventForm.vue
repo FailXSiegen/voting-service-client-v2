@@ -176,7 +176,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, shallowRef, watch, onMounted, ref } from "vue";
+import { computed, reactive, shallowRef, watch, onMounted, onUnmounted, ref } from "vue";
 import { required, requiredIf } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import BaseInput from "@/core/components/form/BaseInput.vue";
@@ -196,12 +196,26 @@ const popoverTrigger = ref(null);
 
 onMounted(() => {
   if (popoverTrigger.value) {
-    new bootstrap.Popover(popoverTrigger.value, {
+    const popover = new bootstrap.Popover(popoverTrigger.value, {
       title: t("view.event.create.labels.magicLink.popover.title"),
       content: t("view.event.create.labels.magicLink.popover.description"),
       trigger: "click focus",
       placement: "top",
       html: true,
+    });
+    const clickHandler = (event) => {
+      const clickedElement = event.target;
+      if (!popoverTrigger.value.contains(clickedElement) && 
+          !document.querySelector('.popover')?.contains(clickedElement)) {
+        popover.hide();
+      }
+    };
+
+    document.addEventListener('click', clickHandler);
+
+    onUnmounted(() => {
+      document.removeEventListener('click', clickHandler);
+      popover.dispose();
     });
   }
 });
