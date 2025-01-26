@@ -114,7 +114,7 @@
         />
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 d-flex">
         <CheckboxInput
           v-model:checked="formData.allowMagicLink"
           :label="$t('view.event.create.labels.allowMagicLink')"
@@ -126,6 +126,10 @@
             }
           "
         />
+        <div class="ms-2">
+          <i class="bi bi-question-circle" ref="popoverTrigger"></i>
+        </div>
+        
       </div>     
       <div class="card">
         <div class="card-body">
@@ -172,7 +176,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, shallowRef, watch } from "vue";
+import { computed, reactive, shallowRef, watch, onMounted, ref } from "vue";
 import { required, requiredIf } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import BaseInput from "@/core/components/form/BaseInput.vue";
@@ -187,6 +191,21 @@ import DateInput from "@/core/components/form/DateInput.vue";
 import ZoomConfig from "@/modules/organizer/components/events/video-conference-config/ZoomConfig.vue";
 import VideoConferenceSelect from "@/modules/organizer/components/form/VideoConferenceSelect.vue";
 import RadioInput from "@/core/components/form/RadioInput.vue";
+import * as bootstrap from "bootstrap";
+import { html } from "../../../../../../../../.cache/typescript/5.7/node_modules/parse5/dist/index";
+const popoverTrigger = ref(null);
+
+onMounted(() => {
+  if (popoverTrigger.value) {
+    new bootstrap.Popover(popoverTrigger.value, {
+      title: t("view.event.create.labels.magicLink.popover.title"),
+      content: t("view.event.create.labels.magicLink.popover.description"),
+      trigger: "click focus",
+      placement: "top",
+      html: true,
+    });
+  }
+});
 
 const emit = defineEmits(["submit"]);
 const props = defineProps({
