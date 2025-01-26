@@ -100,6 +100,7 @@ import { loginEventUser } from "@/core/auth/login";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 import { useCore } from "@/core/store/core";
+import { hashString } from "@/core/util/hashString";
 // Data.
 
 const emit = defineEmits(["exit"]);
@@ -130,17 +131,6 @@ const rules = computed(() => {
   };
 });
 const v$ = useVuelidate(rules, formData);
-
-
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) { 
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(36);
-}
 
 // Events.
 
