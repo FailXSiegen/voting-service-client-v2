@@ -25,7 +25,9 @@
               :errors="v$.username?.$errors"
               :has-errors="v$.username?.$errors?.length > 0"
               :value="formData.username"
-              :help-text="!readOnlyUsername ? $t('view.login.label.usernameHelp') : ''"
+              :help-text="
+                !readOnlyUsername ? $t('view.login.label.usernameHelp') : ''
+              "
               :autocomplete="off"
               :readonly="readOnlyUsername"
               :classes="[readOnlyUsername ? 'form-control-plaintext' : '']"
@@ -59,7 +61,7 @@
             />
           </div>
           <div class="mb-3">
-            <BaseInput 
+            <BaseInput
               :label="$t('view.login.label.publicName')"
               :errors="v$.publicName?.$errors"
               :has-errors="v$.publicName?.$errors?.length > 0"
@@ -113,14 +115,15 @@ const props = defineProps({
 const coreStore = useCore();
 const urlParams = new URLSearchParams(window.location.search);
 
-
 // Set username readonly, if it is set in the url.
 const readOnlyUsername = urlParams.get("username") !== null ?? false;
 // Form and validation setup.
 const formData = reactive({
   username: urlParams.get("username") ?? "",
-  password: readOnlyUsername && props.event.allowMagicLink ? 
-    hashString(urlParams.get("username") + props.event.createDatetime) : "",
+  password:
+    readOnlyUsername && props.event.allowMagicLink
+      ? hashString(urlParams.get("username") + props.event.createDatetime)
+      : "",
   publicName: urlParams.get("publicname") ?? "",
 });
 const rules = computed(() => {

@@ -22,6 +22,10 @@
       :event-user="eventUser"
     />
     <PollStatus :exist-active-poll="existActivePoll" :poll-state="pollState" />
+    <VotingDetails
+      v-if="poll?.type === 'PUBLIC' && existActivePoll"
+      :active-poll-event-user="activePollEventUser"
+    />
     <ResultListing
       v-if="event && pollResults?.length > 0"
       :event-record="event"
@@ -46,6 +50,7 @@
       :event="event"
       :event-user="eventUser"
       :vote-counter="voteCounter"
+      :active-poll-event-user="activePollEventUser"
       @submit="onSubmitPoll"
     />
     <ResultModal
@@ -57,13 +62,13 @@
 </template>
 
 <script setup>
-// TODO what about the user lost connection after the frist vote. What about the left votes?
 import NotVerifiedWidget from "@/modules/eventUser/components/dashboard/NotVerifiedWidget.vue";
 import ConnectionLostOverlay from "@/modules/eventUser/components/dashboard/ConnectionLostOverlay.vue";
 import DashboardStats from "@/modules/eventUser/components/dashboard/DashboardStats.vue";
 import JoinMeetingControl from "@/modules/eventUser/components/dashboard/meeting/JoinMeetingControl.vue";
 import MeetingContainer from "@/modules/eventUser/components/dashboard/meeting/MeetingContainer.vue";
 import PollStatus from "@/modules/eventUser/components/dashboard/poll/PollStatus.vue";
+import VotingDetails from "@/modules/eventUser/components/dashboard/poll/VotingDetails.vue";
 import ResultListing from "@/modules/organizer/components/events/poll/ResultListing.vue";
 import AlertBox from "@/core/components/AlertBox.vue";
 import PollModal from "@/modules/eventUser/components/dashboard/poll/modal/PollModal.vue";
@@ -79,6 +84,7 @@ import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/sub
 import { POLL_LIFE_CYCLE_SUBSCRIPTION } from "@/modules/eventUser/graphql/subscription/poll-life-cycle";
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
+import { POLL_ANSWER_LIVE_CYCLE } from "@/modules/organizer/graphql/subscription/poll-answer-life-cycle";
 
 const coreStore = useCore();
 const props = defineProps({
@@ -105,6 +111,9 @@ const highlightStatusChange = ref(false);
 const pollStatePersistence = usePollStatePersistence();
 const votingProcess = useVotingProcess(eventUser, props.event);
 const voteCounter = votingProcess.voteCounter;
+const activePollEventUser = ref(null);
+const pollUserVotedCount = ref(0);
+
 votingProcess.setVotingCompletedCallback(() => {
   if (pollState.value !== "closed") {
     pollState.value = "voted";
@@ -130,6 +139,7 @@ activePollEventUserQuery.onResult(({ data }) => {
   if (!data?.activePollEventUser) {
     return;
   }
+  activePollEventUser.value = data.activePollEventUser;
   poll.value = data.activePollEventUser.poll;
   pollState.value = data.activePollEventUser.state;
   // check if user already voted
@@ -194,6 +204,7 @@ const pollLifeCycleSubscription = useSubscription(
   { eventId: props.event.id },
 );
 pollLifeCycleSubscription.onResult(async ({ data }) => {
+  await activePollEventUserQuery.refetch();
   if (!data?.pollLifeCycle) {
     return;
   }
@@ -210,7 +221,7 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     resultModal.value.hideModal();
 
     if (!poll.value) {
-      console.warn("missing current poll.");
+      console.warn("Missing current poll. Try to refetch.");
       await activePollEventUserQuery.refetch();
     }
 
@@ -229,6 +240,17 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     pollResults.value = [];
     pollResultsQuery.refetch();
   }
+});
+
+const pollAnswerLifeCycleSubscription = useSubscription(POLL_ANSWER_LIVE_CYCLE);
+pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
+  if (
+    parseInt(data?.pollAnswerLifeCycle.eventId) !== parseInt(props.event.id)
+  ) {
+    return;
+  }
+  await activePollEventUserQuery.refetch();
+  pollUserVotedCount.value = data?.pollAnswerLifeCycle?.pollUserVotedCount;
 });
 
 // Events.

@@ -9,7 +9,7 @@
       </div>
     </template>
     <template #header>
-      <EventNavigation :routes="routes" />
+      <EventNavigation :routes="routes"/>
     </template>
     <template #content>
       <MultipleNewEventUserForm
@@ -42,10 +42,10 @@
 </template>
 
 <script setup>
-import { ref, reactive } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { toast } from "vue3-toastify";
+import {ref, reactive} from "vue";
+import {useRouter, useRoute} from "vue-router";
+import {useMutation, useQuery} from "@vue/apollo-composable";
+import {toast} from "vue3-toastify";
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
 import MultipleNewEventUserForm from "@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue";
@@ -53,12 +53,12 @@ import {
   RouteOrganizerDashboard,
   RouteOrganizerMemberRoom,
 } from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { CREATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/create-event-user";
-import { CREATE_EVENT_USER_AUTH_TOKEN } from "@/modules/organizer/graphql/mutation/create-event-user-auth-token";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
+import {useCore} from "@/core/store/core";
+import {EVENT} from "@/modules/organizer/graphql/queries/event";
+import {CREATE_EVENT_USER} from "@/modules/organizer/graphql/mutation/create-event-user";
+import {CREATE_EVENT_USER_AUTH_TOKEN} from "@/modules/organizer/graphql/mutation/create-event-user-auth-token";
+import {handleError} from "@/core/error/error-handler";
+import {NetworkError} from "@/core/error/NetworkError";
 import t from "@/core/util/l18n";
 
 // Store and Router setup
@@ -88,20 +88,20 @@ const errorSummary = reactive({
 // Event query
 const eventQuery = useQuery(
   EVENT,
-  { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  {id, organizerId: coreStore.user.id},
+  {fetchPolicy: "no-cache"},
 );
 
 // Mutations setup - declare these at the component level
-const { mutate: createEventUserStandard } = useMutation(CREATE_EVENT_USER);
-const { mutate: createEventUserToken } = useMutation(
+const {mutate: createEventUserStandard} = useMutation(CREATE_EVENT_USER);
+const {mutate: createEventUserToken} = useMutation(
   CREATE_EVENT_USER_AUTH_TOKEN,
 );
 
-eventQuery.onResult(({ data }) => {
+eventQuery.onResult(({data}) => {
   if (null === data?.event) {
     handleError(new NetworkError());
-    router.push({ name: RouteOrganizerDashboard });
+    router.push({name: RouteOrganizerDashboard});
     return;
   }
   event.value = data?.event;
@@ -135,15 +135,15 @@ async function processUser(userData, isTokenBased, maxRetries = 3) {
       const mutate = isTokenBased
         ? createEventUserToken
         : createEventUserStandard;
-      const result = await mutate({ input: userData });
+      const result = await mutate({input: userData});
 
       if (import.meta.env.DEV) {
-        console.log(
+        console.info(
           `User created successfully: ${userData.username || userData.email}`,
         );
       }
 
-      return { success: true, data: result };
+      return {success: true, data: result};
     } catch (error) {
       lastError = error;
 
@@ -243,11 +243,11 @@ async function createUsersInBatches(userDataList, isTokenBased) {
 
 // Submit handler bleibt größtenteils gleich, aber mit verbessertem Error Handling
 async function onSubmit({
-  usernames,
-  allowToVote,
-  voteAmount,
-  tokenBasedLogin,
-}) {
+                          usernames,
+                          allowToVote,
+                          voteAmount,
+                          tokenBasedLogin,
+                        }) {
   isProcessing.value = true;
   progress.current = 0;
   progress.total = usernames.length;
@@ -295,7 +295,7 @@ async function onSubmit({
 
     // Nur weiterleiten wenn alle erfolgreich waren
     if (results.failed.length === 0) {
-      await router.push({ name: RouteOrganizerMemberRoom });
+      await router.push({name: RouteOrganizerMemberRoom});
     }
   } catch (error) {
     handleError(error);
