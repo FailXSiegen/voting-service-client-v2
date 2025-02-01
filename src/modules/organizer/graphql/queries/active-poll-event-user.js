@@ -29,6 +29,12 @@ export const ACTIVE_POLL_EVENT_USER = gql`
         publicName
         pollResultId
       }
+      pollAnswers {
+        id
+        pollResultId
+        answerContent
+        pollUserId
+      }
     }
   }
 `;
