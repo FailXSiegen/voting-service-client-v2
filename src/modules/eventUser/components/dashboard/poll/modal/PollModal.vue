@@ -23,6 +23,11 @@
           </div>
 
           <div class="modal-body">
+            <VotingDetails
+              v-if="poll.type === 'PUBLIC' && activePollEventUser"
+              :active-poll-event-user="activePollEventUser"
+            />
+
             <p v-if="poll.maxVotes === 1">
               {{ $t("view.polls.modal.maxVote1") }}
             </p>
@@ -54,6 +59,7 @@
 import { ref, onMounted } from "vue";
 import { Modal } from "bootstrap";
 import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
+import VotingDetails from "@/modules/eventUser/components/dashboard/poll/VotingDetails.vue";
 
 const emit = defineEmits(["submit"]);
 const modal = ref(null);
@@ -72,6 +78,11 @@ const props = defineProps({
   eventUser: {
     type: Object,
     required: true,
+  },
+  activePollEventUser: {
+    type: Object,
+    required: false,
+    default: null,
   },
   voteCounter: {
     type: Number,
