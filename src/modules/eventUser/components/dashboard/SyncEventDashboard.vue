@@ -46,6 +46,7 @@
     />
     <PollModal
       ref="pollModal"
+      v-if="showVotingModal"
       :poll="poll"
       :event="event"
       :event-user="eventUser"
@@ -113,6 +114,9 @@ const votingProcess = useVotingProcess(eventUser, props.event);
 const voteCounter = votingProcess.voteCounter;
 const activePollEventUser = ref(null);
 const pollUserVotedCount = ref(0);
+const showVotingModal = computed(() => {
+  return eventUser.value?.voteAmount >= 1 && eventUser.value?.allowToVote;
+});
 
 votingProcess.setVotingCompletedCallback(() => {
   if (pollState.value !== "closed") {
@@ -218,7 +222,7 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     // Reset voteCounter.
     voteCounter.value = 1;
     // Close the result modal.
-    resultModal.value.hideModal();
+    resultModal.value?.hideModal();
 
     if (!poll.value) {
       console.warn("Missing current poll. Try to refetch.");
@@ -226,14 +230,14 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     }
 
     // Open the poll modal.
-    if (eventUser.value.voteAmount >= 1 && eventUser.value.allowToVote) {
-      pollModal.value.showModal();
+    if (showVotingModal.value) {
+      pollModal.value?.showModal();
     }
   } else if (pollState.value === "closed") {
     // Close the poll modal.
-    pollModal.value.hideModal();
+    pollModal.value?.hideModal();
     // Open the result modal.
-    resultModal.value.showModal();
+    resultModal.value?.showModal();
     // Refresh poll results.
     showMoreEnabled.value = true;
     page.value = 0;

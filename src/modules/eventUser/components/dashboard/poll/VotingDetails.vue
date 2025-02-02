@@ -14,7 +14,7 @@
           <div
             v-for="(pollUser, index) in activePollEventUser.pollUser"
             :key="pollUser.id"
-            class="d-flex align-items-center px-3"
+            class="d-flex align-items-center px-3 mb-3"
             :class="{ 'border-end border-secondary': index < activePollEventUser.pollUser.length - 1 }"
           >
             <span v-html="hasVoted(pollUser) ? '<i class=\'bi bi-check-square text-success\'></i>' : '<i class=\'bi bi-x-square text-danger\'></i>'"></span>
