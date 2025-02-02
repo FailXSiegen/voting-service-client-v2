@@ -120,6 +120,7 @@ import {
   RouteOrganizerLobbyRoom,
   RouteOrganizerPolls,
   RouteOrganizerPollResults,
+  RouteOrganizerEvents
 } from "@/router/routes";
 import { computed, ref } from "vue";
 import { useRoute } from "vue-router";

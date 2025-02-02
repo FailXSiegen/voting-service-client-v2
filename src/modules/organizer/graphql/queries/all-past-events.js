@@ -20,6 +20,7 @@ export const ALL_PAST_EVENTS = gql`
       active
       async
       allowMagicLink
+      publicVoteVisible
       finished
       endDatetime
     }

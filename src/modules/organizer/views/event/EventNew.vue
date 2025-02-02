@@ -68,6 +68,7 @@ async function onSubmit(formData) {
         videoConferenceConfig: formData.videoConferenceConfig,
         async: formData.async,
         allowMagicLink: formData.allowMagicLink,
+        publicVoteVisible: formData.publicVoteVisible,
         endDatetime: formData.endDatetime,
       },
     },

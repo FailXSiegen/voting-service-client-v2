@@ -23,10 +23,7 @@
           </div>
 
           <div class="modal-body">
-            <VotingDetails
-              v-if="poll.type === 'PUBLIC' && activePollEventUser"
-              :active-poll-event-user="activePollEventUser"
-            />
+            
 
             <p v-if="poll.maxVotes === 1">
               {{ $t("view.polls.modal.maxVote1") }}
@@ -48,6 +45,13 @@
               :vote-counter="voteCounter"
               @submit="onSubmit"
             />
+            <div class="d-inline-block w-100" v-if="poll.type === 'PUBLIC' && activePollEventUser && event.publicVoteVisible">
+              <hr />
+              <VotingDetails
+                :active-poll-event-user="activePollEventUser"
+              />
+            </div>
+            
           </div>
         </div>
       </div>

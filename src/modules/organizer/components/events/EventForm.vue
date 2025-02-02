@@ -130,6 +130,20 @@
           <i class="bi bi-question-circle" ref="popoverTrigger"></i>
         </div>
       </div>
+
+      <div class="mb-3 d-flex">
+        <CheckboxInput
+          v-model:checked="formData.publicVoteVisible"
+          :label="$t('view.event.create.labels.publicVoteVisible')"
+          :errors="v$.publicVoteVisible?.$errors"
+          :has-errors="v$.publicVoteVisible?.$errors?.length > 0"
+          @update="
+            ({ value }) => {
+              formData.publicVoteVisible = value;
+            }
+          "
+        />
+      </div>
       <div class="card">
         <div class="card-body">
           <div class="mb-3">
@@ -270,6 +284,7 @@ const formData = reactive({
   videoConference: props.prefillData?.videoConference ?? null,
   async: props.prefillData?.async ?? false,
   allowMagicLink: props.prefillData?.allowMagicLink ?? false,
+  publicVoteVisible: props.prefillData?.publicVoteVisible ?? true,
   endDatetime: props.prefillData?.endDatetime ?? Math.floor(Date.now() / 1000),
 });
 
@@ -286,6 +301,7 @@ const rules = computed(() => {
     active: { required },
     async: { required },
     allowMagicLink: { required },
+    publicVoteVisible: { required },
     orgnaizerId: { required },
     multivoteType: { required },
   };

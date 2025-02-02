@@ -23,7 +23,7 @@
     />
     <PollStatus :exist-active-poll="existActivePoll" :poll-state="pollState" />
     <VotingDetails
-      v-if="poll?.type === 'PUBLIC' && existActivePoll"
+      v-if="poll?.type === 'PUBLIC' && existActivePoll && event.publicVoteVisible"
       :active-poll-event-user="activePollEventUser"
     />
     <ResultListing

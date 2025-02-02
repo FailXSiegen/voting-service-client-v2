@@ -20,6 +20,7 @@ export const ALL_UPCOMING_EVENTS = gql`
       active
       async
       allowMagicLink
+      publicVoteVisible
       finished
       endDatetime
     }
