@@ -129,8 +129,7 @@
         <div class="ms-2">
           <i class="bi bi-question-circle" ref="popoverTrigger"></i>
         </div>
-        
-      </div>     
+      </div>
       <div class="card">
         <div class="card-body">
           <div class="mb-3">
@@ -176,7 +175,15 @@
 </template>
 
 <script setup>
-import { computed, reactive, shallowRef, watch, onMounted, onUnmounted, ref } from "vue";
+import {
+  computed,
+  reactive,
+  shallowRef,
+  watch,
+  onMounted,
+  onUnmounted,
+  ref,
+} from "vue";
 import { required, requiredIf } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import BaseInput from "@/core/components/form/BaseInput.vue";
@@ -205,16 +212,18 @@ onMounted(() => {
     });
     const clickHandler = (event) => {
       const clickedElement = event.target;
-      if (!popoverTrigger.value.contains(clickedElement) && 
-          !document.querySelector('.popover')?.contains(clickedElement)) {
+      if (
+        !popoverTrigger.value.contains(clickedElement) &&
+        !document.querySelector(".popover")?.contains(clickedElement)
+      ) {
         popover.hide();
       }
     };
 
-    document.addEventListener('click', clickHandler);
+    document.addEventListener("click", clickHandler);
 
     onUnmounted(() => {
-      document.removeEventListener('click', clickHandler);
+      document.removeEventListener("click", clickHandler);
       popover.dispose();
     });
   }
