@@ -15,6 +15,7 @@ export const CREATE_EVENT = gql`
       videoConferenceConfig
       async
       allowMagicLink
+      publicVoteVisible
       endDatetime
     }
   }

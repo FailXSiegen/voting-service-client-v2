@@ -64,8 +64,8 @@
     </template>
 
     <hr />
-    <button type="submit" class="btn btn-primary float-end">
-      {{ $t("view.polls.modal.submitPoll") }}
+    <button type="submit" class="btn btn-primary mx-auto d-block h1">
+      <span class="h3">{{ $t("view.polls.modal.submitPoll") }}</span>
     </button>
   </form>
 </template>
