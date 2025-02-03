@@ -3,19 +3,25 @@
     v-if="activePollEventUser && activePollEventUser.pollUser"
     class="card mb-3"
   >
-    <div class="card-header">
-      <h5 class="card-title">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">
         {{ $t("view.polls.active.title") }}
       </h5>
+      <button 
+        class="btn btn-sm btn-outline-secondary" 
+        @click="isCollapsed = !isCollapsed"
+      >
+        <i :class="isCollapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up'"></i>
+      </button>
     </div>
-    <div class="card-body">
+    <div class="card-body" v-show="!isCollapsed">
       <div class="row">
         <div class="d-flex flex-wrap">
           <div
-            v-for="(pollUser, index) in activePollEventUser.pollUser"
+            v-for="(pollUser, index) in sortedPollUsers"
             :key="pollUser.id"
             class="d-flex align-items-center px-3 mb-3"
-            :class="{ 'border-end border-secondary': index < activePollEventUser.pollUser.length - 1 }"
+            :class="{ 'border-end border-secondary': index < sortedPollUsers.length - 1 }"
           >
             <span v-html="hasVoted(pollUser) ? '<i class=\'bi bi-check-square text-success\'></i>' : '<i class=\'bi bi-x-square text-danger\'></i>'"></span>
             <span class="mx-2">{{ pollUser.publicName }}</span>
@@ -23,7 +29,7 @@
               <span
                 v-for="(count, answer) in groupUserAnswers(pollUser.id)"
                 :key="answer"
-                class="badge rounded-pill mt-1"
+                class="badge rounded-pill mt-0"
                 :class="{
                   'bg-success': answer === 'Ja',
                   'bg-danger': answer === 'Nein',
@@ -33,31 +39,26 @@
                 {{ answer }} <template v-if="count > 1">x{{ count }}</template>
               </span>
             </template>
-            <span v-else class="badge rounded-pill bg-secondary mt-1">?</span>
+            <span v-else class="badge rounded-pill bg-secondary mt-0">?</span>
           </div>
         </div>
-      </div>
-
-      <div v-if="false" class="col-12 col-md-auto">
-        <h4>{{ t("view.polls.active.alreadyVoted") }}</h4>
-        <ul class="list-group">
-          <li
-            v-for="(pollUserVoted, index) in activePollEventUser.pollUserVoted"
-            :key="index"
-            class="list-group-item d-flex justify-content-between align-items-center align-content-center"
-          >
-            {{ index + 1 }} - {{ pollUserVoted.publicName }} [{{
-              pollUserVoted.eventUserId
-            }}]
-          </li>
-        </ul>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, computed, watch } from 'vue';
 import t from "@/core/util/l18n";
+
+const STORAGE_KEY = 'active_poll_collapsed';
+
+const stored = localStorage.getItem(STORAGE_KEY);
+const isCollapsed = ref(stored ? JSON.parse(stored) : false);
+
+watch(isCollapsed, (newValue) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(newValue));
+});
 
 const props = defineProps({
   activePollEventUser: {
@@ -65,6 +66,20 @@ const props = defineProps({
     required: true,
   },
 });
+
+const sortedPollUsers = computed(() => {
+  if (!props.activePollEventUser?.pollUser) return [];
+  
+  return [...props.activePollEventUser.pollUser].sort((a, b) => {
+    const aVoted = hasVoted(a);
+    const bVoted = hasVoted(b);
+    if (aVoted && !bVoted) return -1;
+    if (!aVoted && bVoted) return 1;
+    
+    return a.publicName.localeCompare(b.publicName);
+  });
+});
+
 function getPollUserAnswers(userId) {
   return props.activePollEventUser?.pollAnswers?.filter(
     (a) => a.pollUserId === userId
@@ -80,15 +95,6 @@ function groupUserAnswers(userId) {
   });
   
   return grouped;
-}
-function renderPollAnswer(pollUser) {
-  const answers = props.activePollEventUser?.pollAnswers?.filter(
-    (a) => a.pollUserId === pollUser.id,
-  );
-  if (!answers || answers?.length === 0) {
-    return "?";
-  }
-  return answers.map((a) => a.answerContent).join(", ");
 }
 
 function hasVoted(pollUser) {
