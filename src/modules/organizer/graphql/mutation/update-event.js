@@ -7,6 +7,7 @@ export const UPDATE_EVENT = gql`
       title
       slug
       description
+      styles
       scheduledDatetime
       lobbyOpen
       active

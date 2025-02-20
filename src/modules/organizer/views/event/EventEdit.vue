@@ -66,6 +66,7 @@ const prefillData = reactive({
   title: "",
   slug: "",
   description: "",
+  styles: "",
   scheduledDatetime: Math.floor(Date.now() / 1000),
   lobbyOpen: false,
   allowMagicLink: false,
@@ -97,6 +98,7 @@ eventQuery.onResult(({ data }) => {
   prefillData.title = event.value?.title ?? "";
   prefillData.slug = event.value?.slug ?? "";
   prefillData.description = event.value?.description ?? "";
+  prefillData.styles = event.value?.styles ?? "";
   prefillData.scheduledDatetime = event.value?.scheduledDatetime ?? 0;
   prefillData.lobbyOpen = event.value?.lobbyOpen ?? false;
   prefillData.active = event.value?.active ?? false;
@@ -129,7 +131,7 @@ eventQuery.onResult(({ data }) => {
   });
 });
 
-async function onSubmit(formData) {
+async function onSubmit({ formData, action }) {
   // Update Events.
   const { mutate: updateEvent } = useMutation(UPDATE_EVENT, {
     variables: {
@@ -138,6 +140,7 @@ async function onSubmit(formData) {
         title: formData.title,
         slug: formData.slug,
         description: formData.description,
+        styles: formData.styles,
         scheduledDatetime: formData.scheduledDatetime,
         lobbyOpen: formData.lobbyOpen,
         active: formData.active,
@@ -156,8 +159,14 @@ async function onSubmit(formData) {
   coreStore.queryOrganizer();
 
   // Back to list.
-  await router.push({ name: RouteOrganizerEvents });
-
+  if (action === 'save_and_continue') {
+    // Stay on the current page
+    // Optionally refetch the event data
+    await eventQuery.refetch();
+  } else {
+    // Back to list
+    await router.push({ name: RouteOrganizerEvents });
+  }
   // Show success message.
   toast(t("success.organizer.events.updatedSuccessfully"), { type: "success" });
 }

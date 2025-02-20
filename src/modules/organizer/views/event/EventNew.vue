@@ -52,7 +52,7 @@ const routes = getRoutesByName([
 const coreStore = useCore();
 const router = useRouter();
 
-async function onSubmit(formData) {
+async function onSubmit({ formData, action }) {
   // Create new Events.
   const { mutate: createEvent } = useMutation(CREATE_EVENT, {
     variables: {
@@ -61,6 +61,7 @@ async function onSubmit(formData) {
         title: formData.title,
         slug: formData.slug,
         description: formData.description,
+        styles: formData.styles,
         scheduledDatetime: formData.scheduledDatetime,
         lobbyOpen: formData.lobbyOpen,
         active: formData.active,
@@ -79,8 +80,16 @@ async function onSubmit(formData) {
   coreStore.queryOrganizer();
 
   // Back to list.
-  await router.push({ name: RouteOrganizerEvents });
-
+  if (action === 'save_and_continue') {
+    // Redirect to edit page of the new event
+    await router.push({ 
+      name: 'RouteOrganizerEventsEdit', 
+      params: { id: newEventId } 
+    });
+  } else {
+    // Back to list
+    await router.push({ name: RouteOrganizerEvents });
+  }
   // Show success message.
   toast(t("success.organizer.events.createdSuccessfully"), { type: "success" });
 }

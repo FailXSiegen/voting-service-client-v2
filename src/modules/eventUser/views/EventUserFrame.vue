@@ -1,3 +1,4 @@
+//EventUserFrame.vue
 <template>
   <div :id="'event-' + event.slug">
     <component
@@ -11,7 +12,7 @@
 
 <script setup>
 import { useCore } from "@/core/store/core";
-import { onMounted, shallowRef } from "vue";
+import { onMounted, onUnmounted, shallowRef } from "vue";
 import EventUserLogin from "@/modules/eventUser/components/EventUserLogin.vue";
 import EventUserDashboard from "@/modules/eventUser/components/EventUserDashboard.vue";
 import { terminateWebsocketClient } from "@/apollo-client";
@@ -19,14 +20,31 @@ import { logout } from "@/core/auth/login";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
 
-// Data.
-
+// Data
 const coreStore = useCore();
 const event = coreStore.event;
 const eventUser = coreStore.eventUser.value;
 const activeComponent = shallowRef(null);
 
-// Check if event user is in wrong event.
+// Style handling
+function applyEventStyles() {
+  if (event?.styles) {
+    try {
+      const stylesObject = typeof event.styles === 'string' 
+        ? JSON.parse(event.styles) 
+        : event.styles;
+      coreStore.updateEventStyles(stylesObject);
+    } catch (error) {
+      console.error('Style processing error:', error);
+    }
+  }
+}
+
+function removeEventStyles() {
+  coreStore.resetEventStyles();
+}
+
+// Event user validation
 if (
   eventUser?.eventId &&
   parseInt(event.id, 10) !== parseInt(eventUser?.eventId, 10)
@@ -37,8 +55,7 @@ if (
     .then(() => toast(t("notice.logout.wrongEvent"), { type: "info" }));
 }
 
-// Terminate websocket connection, if the user change the tab.
-
+// Websocket handling
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState !== "visible") {
     console.warn("Tab is inactive. Now terminating websocket connection.");
@@ -46,13 +63,10 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-// Define active component.
-
+// Component management
 activeComponent.value = coreStore.isActiveEventUserSession
   ? EventUserDashboard
   : EventUserLogin;
-
-// Functions.
 
 function determineActiveComponent() {
   activeComponent.value = coreStore.isActiveEventUserSession
@@ -60,7 +74,13 @@ function determineActiveComponent() {
     : EventUserLogin;
 }
 
+// Lifecycle hooks
 onMounted(() => {
   determineActiveComponent();
+  applyEventStyles();
+});
+
+onUnmounted(() => {
+  removeEventStyles();
 });
 </script>

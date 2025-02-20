@@ -9,6 +9,7 @@ export const UPCOMING_EVENTS = gql`
       title
       slug
       description
+      styles
       scheduledDatetime
       lobbyOpen
       active
