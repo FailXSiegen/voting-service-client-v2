@@ -9,6 +9,7 @@ export const EXPIRED_EVENTS = gql`
       title
       slug
       description
+      styles
       scheduledDatetime
       lobbyOpen
       active

@@ -1,189 +1,236 @@
 <template>
   <div class="events-new">
-    <form @submit.prevent="onSubmit">
-      <div class="row">
-        <div class="col-12 col-md-6">
+    <form @submit.prevent="onSubmit('save')">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item">
+          <button 
+            class="nav-link active" 
+            id="general-tab"
+            data-bs-toggle="tab" 
+            data-bs-target="#general"
+            type="button"
+            role="tab"
+            aria-controls="general"
+            aria-selected="true"
+          >
+            {{ $t('view.event.create.tabs.general') }}
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link" 
+            id="rules-tab"
+            data-bs-toggle="tab" 
+            data-bs-target="#rules"
+            type="button"
+            role="tab"
+            aria-controls="rules"
+            aria-selected="false"
+          >
+            {{ $t('view.event.create.tabs.rules') }}
+          </button>
+        </li>
+        <li class="nav-item">
+          <button 
+            class="nav-link" 
+            id="styling-tab"
+            data-bs-toggle="tab" 
+            data-bs-target="#styling"
+            type="button"
+            role="tab"
+            aria-controls="styling"
+            aria-selected="false"
+          >
+            {{ $t('view.event.create.tabs.styling') }}
+          </button>
+        </li>
+      </ul>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- General Settings -->
+        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+          <div class="row">
+            <div class="col-12 col-md-6">
+              <div class="mb-3">
+                <BaseInput
+                  :label="$t('view.event.create.labels.title')"
+                  :errors="v$.title?.$errors"
+                  :has-errors="v$.title?.$errors?.length > 0"
+                  :value="formData.title"
+                  @change="({ value }) => { formData.title = value; }"
+                />
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="mb-3">
+                <SlugInput
+                  :label="$t('view.event.create.labels.slug')"
+                  :errors="v$.slug?.$errors"
+                  :has-errors="v$.slug?.$errors?.length > 0"
+                  :value="formData.slug"
+                  :base-value="formData.title"
+                  :help-text="$t('view.event.create.labels.slugHelp')"
+                  @change="({ value }) => { formData.slug = value; }"
+                />
+              </div>
+            </div>
+          </div>
+
           <div class="mb-3">
-            <BaseInput
-              :label="$t('view.event.create.labels.title')"
-              :errors="v$.title?.$errors"
-              :has-errors="v$.title?.$errors?.length > 0"
-              :value="formData.title"
-              @change="
-                ({ value }) => {
-                  formData.title = value;
-                }
-              "
+            <TextInput
+              :rows="3"
+              :label="$t('view.event.create.labels.description')"
+              :errors="v$.description?.$errors"
+              :has-errors="v$.description?.$errors?.length > 0"
+              :value="formData.description"
+              :help-text="$t('view.event.create.labels.descriptionHelp')"
+              @change="({ value }) => { formData.description = value; }"
             />
           </div>
-        </div>
-        <div class="col-12 col-md-6">
+
           <div class="mb-3">
-            <SlugInput
-              :label="$t('view.event.create.labels.slug')"
-              :errors="v$.slug?.$errors"
-              :has-errors="v$.slug?.$errors?.length > 0"
-              :value="formData.slug"
-              :base-value="formData.title"
-              :help-text="$t('view.event.create.labels.slugHelp')"
-              @change="
-                ({ value }) => {
-                  formData.slug = value;
-                }
-              "
+            <DateInput
+              :label="$t('view.event.create.labels.scheduledDatetime')"
+              :errors="v$.scheduledDatetime?.$errors"
+              :has-errors="v$.scheduledDatetime?.$errors?.length > 0"
+              :value="formData.scheduledDatetime"
+              @change="({ value }) => { formData.scheduledDatetime = value; }"
             />
           </div>
+
+          <template v-if="formData.async">
+            <div class="mb-3">
+              <DateInput
+                :label="$t('view.event.create.labels.endDatetime')"
+                :errors="v$.endDatetime?.$errors"
+                :has-errors="v$.endDatetime?.$errors?.length > 0"
+                :value="formData.endDatetime"
+                @change="({ value }) => (formData.endDatetime = value)"
+              />
+            </div>
+          </template>
+
+          <div class="mb-3">
+            <CheckboxInput
+              v-model:checked="formData.lobbyOpen"
+              :label="$t('view.event.create.labels.lobbyOpen')"
+              :errors="v$.lobbyOpen?.$errors"
+              :has-errors="v$.lobbyOpen?.$errors?.length > 0"
+              @update="({ value }) => { formData.lobbyOpen = value; }"
+            />
+          </div>
+
+          <div class="mb-3">
+            <CheckboxInput
+              v-model:checked="formData.active"
+              :label="$t('view.event.create.labels.active')"
+              :errors="v$.active?.$errors"
+              :has-errors="v$.lobbyOpen?.active?.length > 0"
+              @update="({ value }) => { formData.active = value; }"
+            />
+          </div>
+
+          <div class="mb-3">
+            <CheckboxInput
+              v-model:checked="formData.async"
+              :label="$t('view.event.create.labels.async')"
+              :errors="v$.async?.$errors"
+              :has-errors="v$.async?.$errors?.length > 0"
+              @update="({ value }) => { formData.async = value; }"
+            />
+          </div>
+
+          <div class="mb-3 d-flex">
+            <CheckboxInput
+              v-model:checked="formData.allowMagicLink"
+              :label="$t('view.event.create.labels.allowMagicLink')"
+              :errors="v$.allowMagicLink?.$errors"
+              :has-errors="v$.allowMagicLink?.$errors?.length > 0"
+              @update="({ value }) => { formData.allowMagicLink = value; }"
+            />
+            <div class="ms-2">
+              <i class="bi bi-question-circle" ref="popoverTrigger"></i>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div class="mb-3">
+                <VideoConferenceSelect
+                  :label="$t('view.event.create.labels.videoConferenceSelect')"
+                  :errors="v$.videoConference?.$errors"
+                  :has-errors="v$.videoConference?.$errors?.length > 0"
+                  :value="formData.videoConference?.id"
+                  @change="onChangeVideoConference"
+                />
+              </div>
+              <component
+                :is="videoConfigComponent"
+                v-if="videoConfigComponent && formData.videoConference?.id"
+                :record-id="formData.videoConference?.id"
+                :config="formData?.videoConferenceConfig"
+                @change="onChangeVideoConfig"
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="mb-3">
-        <TextInput
-          :rows="3"
-          :label="$t('view.event.create.labels.description')"
-          :errors="v$.description?.$errors"
-          :has-errors="v$.description?.$errors?.length > 0"
-          :value="formData.description"
-          :help-text="$t('view.event.create.labels.descriptionHelp')"
-          @change="
-            ({ value }) => {
-              formData.description = value;
-            }
-          "
-        />
-      </div>
-      <div class="mb-3">
-        <DateInput
-          :label="$t('view.event.create.labels.scheduledDatetime')"
-          :errors="v$.scheduledDatetime?.$errors"
-          :has-errors="v$.scheduledDatetime?.$errors?.length > 0"
-          :value="formData.scheduledDatetime"
-          @change="
-            ({ value }) => {
-              formData.scheduledDatetime = value;
-            }
-          "
-        />
-      </div>
-      <template v-if="formData.async">
-        <div class="mb-3">
-          <DateInput
-            :label="$t('view.event.create.labels.endDatetime')"
-            :errors="v$.endDatetime?.$errors"
-            :has-errors="v$.endDatetime?.$errors?.length > 0"
-            :value="formData.endDatetime"
-            @change="({ value }) => (formData.endDatetime = value)"
+
+        <!-- Rules Tab -->
+        <div class="tab-pane fade" id="rules" role="tabpanel" aria-labelledby="rules-tab">
+          <h3>{{ $t("view.event.create.labels.multivoteTypeTitle") }}</h3>
+          <p class="text-muted">
+            {{ $t("view.event.create.labels.multivoteTypeInfo") }}
+          </p>
+          <RadioInput
+            :items="radioOptions"
+            :value="formData.multivoteType.toString()"
+            @change="({ value }) => { formData.multivoteType = parseInt(value, 10); }"
           />
+
+          <div class="mb-3 d-flex mt-4">
+            <CheckboxInput
+              v-model:checked="formData.publicVoteVisible"
+              :label="$t('view.event.create.labels.publicVoteVisible')"
+              :errors="v$.publicVoteVisible?.$errors"
+              :has-errors="v$.publicVoteVisible?.$errors?.length > 0"
+              @update="({ value }) => { formData.publicVoteVisible = value; }"
+            />
+          </div>
         </div>
-      </template>
-      <div class="mb-3">
-        <CheckboxInput
-          v-model:checked="formData.lobbyOpen"
-          :label="$t('view.event.create.labels.lobbyOpen')"
-          :errors="v$.lobbyOpen?.$errors"
-          :has-errors="v$.lobbyOpen?.$errors?.length > 0"
-          @update="
-            ({ value }) => {
-              formData.lobbyOpen = value;
-            }
-          "
-        />
-      </div>
-      <div class="mb-3">
-        <CheckboxInput
-          v-model:checked="formData.active"
-          :label="$t('view.event.create.labels.active')"
-          :errors="v$.active?.$errors"
-          :has-errors="v$.lobbyOpen?.active?.length > 0"
-          @update="
-            ({ value }) => {
-              formData.active = value;
-            }
-          "
-        />
-      </div>
-      <div class="mb-3">
-        <CheckboxInput
-          v-model:checked="formData.async"
-          :label="$t('view.event.create.labels.async')"
-          :errors="v$.async?.$errors"
-          :has-errors="v$.async?.$errors?.length > 0"
-          @update="
-            ({ value }) => {
-              formData.async = value;
-            }
-          "
-        />
+
+        <!-- Styling Tab -->
+        <div class="tab-pane fade" id="styling" role="tabpanel" aria-labelledby="styling-tab">
+          <div class="mb-3">
+            <BootstrapStylesInput
+              v-model="formData.styles"
+              :label="$t('view.event.create.labels.styles')"
+              :errors="v$.styles?.$errors"
+              :has-errors="v$.styles?.$errors?.length > 0"
+              :help-text="$t('view.event.create.labels.stylesHelp')"
+              @change="({ value }) => { formData.styles = value; }"
+            />
+          </div>
+        </div>
       </div>
 
-      <div class="mb-3 d-flex">
-        <CheckboxInput
-          v-model:checked="formData.allowMagicLink"
-          :label="$t('view.event.create.labels.allowMagicLink')"
-          :errors="v$.allowMagicLink?.$errors"
-          :has-errors="v$.allowMagicLink?.$errors?.length > 0"
-          @update="
-            ({ value }) => {
-              formData.allowMagicLink = value;
-            }
-          "
-        />
-        <div class="ms-2">
-          <i class="bi bi-question-circle" ref="popoverTrigger"></i>
-        </div>
-      </div>
+      <!-- Submit Buttons -->
+      <div class="d-flex gap-2 mt-5 mb-3">
+        <button type="submit" class="btn btn-primary me-2">
+          <i class="bi-play bi--2xl align-middle" />
+          <span class="align-middle">
+            {{ $t("view.event.create.labels.submit") }}
+          </span>
+        </button>
 
-      <div class="mb-3 d-flex">
-        <CheckboxInput
-          v-model:checked="formData.publicVoteVisible"
-          :label="$t('view.event.create.labels.publicVoteVisible')"
-          :errors="v$.publicVoteVisible?.$errors"
-          :has-errors="v$.publicVoteVisible?.$errors?.length > 0"
-          @update="
-            ({ value }) => {
-              formData.publicVoteVisible = value;
-            }
-          "
-        />
+        <button type="button" class="btn btn-secondary" @click="onSubmit('save_and_continue')">
+          <i class="bi-pencil bi--2xl align-middle" />
+          <span class="align-middle">
+            {{ $t("view.event.create.labels.submitAndContinue") }}
+          </span>
+        </button>
       </div>
-      <div class="card">
-        <div class="card-body">
-          <div class="mb-3">
-            <VideoConferenceSelect
-              :label="$t('view.event.create.labels.videoConferenceSelect')"
-              :errors="v$.videoConference?.$errors"
-              :has-errors="v$.videoConference?.$errors?.length > 0"
-              :value="formData.videoConference?.id"
-              @change="onChangeVideoConference"
-            />
-          </div>
-          <component
-            :is="videoConfigComponent"
-            v-if="videoConfigComponent && formData.videoConference?.id"
-            :record-id="formData.videoConference?.id"
-            :config="formData?.videoConferenceConfig"
-            @change="onChangeVideoConfig"
-          />
-        </div>
-      </div>
-      <hr />
-      <h3>{{ $t("view.event.create.labels.multivoteTypeTitle") }}</h3>
-      <p class="text-muted">
-        {{ $t("view.event.create.labels.multivoteTypeInfo") }}
-      </p>
-      <RadioInput
-        :items="radioOptions"
-        :value="formData.multivoteType.toString()"
-        @change="
-          ({ value }) => {
-            formData.multivoteType = parseInt(value, 10);
-          }
-        "
-      />
-      <button class="btn btn-primary mt-5 mb-3">
-        <i class="bi-play bi--2xl align-middle" />
-        <span class="align-middle">
-          {{ $t("view.event.create.labels.submit") }}
-        </span>
-      </button>
     </form>
   </div>
 </template>
@@ -212,6 +259,7 @@ import DateInput from "@/core/components/form/DateInput.vue";
 import ZoomConfig from "@/modules/organizer/components/events/video-conference-config/ZoomConfig.vue";
 import VideoConferenceSelect from "@/modules/organizer/components/form/VideoConferenceSelect.vue";
 import RadioInput from "@/core/components/form/RadioInput.vue";
+import BootstrapStylesInput from "@/core/components/form/BootstrapStylesInput.vue";
 import * as bootstrap from "bootstrap";
 const popoverTrigger = ref(null);
 
@@ -274,6 +322,7 @@ const formData = reactive({
   title: props.prefillData?.title ?? "",
   slug: props.prefillData?.slug ?? "",
   description: props.prefillData?.description ?? "",
+  styles: props.prefillData?.styles ?? "",
   scheduledDatetime:
     props.prefillData?.scheduledDatetime ?? Math.floor(Date.now() / 1000),
   lobbyOpen: props.prefillData?.lobbyOpen ?? false,
@@ -293,6 +342,7 @@ const rules = computed(() => {
     title: { required },
     slug: { required },
     description: { required },
+    styles: {},
     scheduledDatetime: { required },
     endDatetime: {
       requiredIf: requiredIf(formData.async),
@@ -334,7 +384,7 @@ function onChangeVideoConfig(config) {
   formData.videoConferenceConfig = JSON.stringify(config);
 }
 
-async function onSubmit() {
+async function onSubmit(action = 'save') {
   const result = await v$.value.$validate();
   if (!result) {
     handleError(new InvalidFormError());
@@ -346,7 +396,7 @@ async function onSubmit() {
     delete formData.endDatetime;
   }
 
-  emit("submit", formData);
+  emit("submit", { formData, action });
 }
 
 // Reset videoConferenceConfig if videoConference is unset.

@@ -3,6 +3,33 @@
 // Required first
 @import "../../node_modules/bootstrap/scss/bootstrap";
 
+:root {
+  --event-primary: var(--bs-primary);
+  --event-secondary: var(--bs-secondary);
+  --event-btn-bg: var(--bs-btn-bg);
+  --event-btn-color: var(--bs-btn-color);
+  --event-btn-hover-bg: var(--bs-btn-hover-bg);
+  --event-btn-active-bg: var(--bs-btn-active-bg);
+  --event-card-border-color: var(--bs-card-border-color);
+  --event-btn-border-color: var(--bs-btn-border-color);
+}
+
+.btn-primary {
+  --bs-btn-color: var(--event-btn-color, #fff) !important;
+  --bs-btn-bg: var(--event-btn-bg, var(--bs-primary)) !important;
+  --bs-btn-border-color: var(--event-btn-border-color, var(--bs-primary)) !important;
+  --bs-btn-hover-color: var(--event-btn-hover-color, #fff) !important;
+  --bs-btn-hover-bg: var(--event-btn-hover-bg, var(--bs-link-hover-color)) !important;
+  --bs-btn-hover-border-color: var(--event-btn-hover-border-color, var(--bs-link-hover-color)) !important;
+  --bs-btn-active-color: var(--event-btn-active-color, #fff) !important;
+  --bs-btn-active-bg: var(--event-btn-active-bg, var(--bs-link-hover-color)) !important;
+  --bs-btn-active-border-color: var(--event-btn-active-border-color, var(--bs-primary)) !important;
+}
+
+.card {
+  border-color: var(--event-card-border-color, var(--bs-card-border-color)) !important;
+}
+
 // Components
 @import "components/toast";
 @import "frame/frame";
@@ -10,11 +37,8 @@
 @import "organizer/organizers";
 
 // Bootstrap Icons Font
-$bootstrap-icons-font-src:
-  url("../assets/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d")
-    format("woff2"),
-  url("../assets/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d")
-    format("woff");
+$bootstrap-icons-font-src: url("../assets/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
+  url("../assets/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");
 @import "../../node_modules/bootstrap-icons/font/bootstrap-icons";
 
 // Custom Styles
@@ -56,8 +80,8 @@ i {
   }
 }
 
-.was-validated .form-check-input:valid ~ .form-check-label,
-.form-check-input.is-valid ~ .form-check-label {
+.was-validated .form-check-input:valid~.form-check-label,
+.form-check-input.is-valid~.form-check-label {
   color: inherit;
 }
 

@@ -21,7 +21,36 @@ import { getCookie } from "../util/cookie";
 import { handleError } from "../error/error-handler";
 import { EventUserNotFoundError } from "@/core/error/EventUserNotFoundError";
 
-// WATCH OUT: You can not use the router here. This will result in errors.
+class StyleManager {
+  static setDynamicVariable(name, value) {
+    document.documentElement.style.setProperty(`--${name}`, value);
+  }
+
+  static cleanStyles(styles) {
+    // Ensures we have a clean object with only valid properties
+    const cleanObject = {};
+    Object.entries(styles).forEach(([key, value]) => {
+      if (typeof key === 'string' && isNaN(parseInt(key))) {
+        cleanObject[key] = value;
+      }
+    });
+    return cleanObject;
+  }
+
+  static updateEventStyles(styles) {
+    const cleanStyles = this.cleanStyles(styles);
+    Object.entries(cleanStyles).forEach(([key, value]) => {
+      this.setDynamicVariable(key, value);
+    });
+    return cleanStyles;
+  }
+
+  static resetStyles(styles) {
+    Object.keys(styles).forEach(key => {
+      document.documentElement.style.removeProperty(`--${key}`);
+    });
+  }
+}
 
 export const useCore = defineStore("core", {
   state: () => ({
@@ -36,6 +65,7 @@ export const useCore = defineStore("core", {
     organizer: ref({}),
     eventUser: ref({}),
     eventUserAuthorizedViaToken: false,
+    eventStyles: {},
   }),
   getters: {
     isActiveOrganizerSession: (state) =>
@@ -53,6 +83,7 @@ export const useCore = defineStore("core", {
     isEventUserAuthorizedViaToken: (state) =>
       state.eventUserAuthorizedViaToken === true,
     getAuthToken: () => localStorage.getItem(AUTH_TOKEN),
+    getCurrentEventStyles: (state) => state.eventStyles,
   },
   actions: {
     async init() {
@@ -160,7 +191,7 @@ export const useCore = defineStore("core", {
       // Reset organizer and event user data.
       this.organizer.value = {};
       this.eventUser.value = {};
-
+      this.resetEventStyles();
       // Reset apollo client.
       await terminateClient();
     },
@@ -191,6 +222,15 @@ export const useCore = defineStore("core", {
         });
       });
     },
+    /**
+     * Updates the event styles and applies them
+     * @param {Object} styles
+     */
+    updateEventStyles(styles) {
+      // Ensure we're working with a clean object
+      const cleanStyles = StyleManager.updateEventStyles(styles);
+      this.eventStyles = cleanStyles;
+    },
 
     /**
      * @returns {Promise<Object>}
@@ -220,11 +260,21 @@ export const useCore = defineStore("core", {
     },
 
     /**
+     * Resets event styles to default
+     */
+    resetEventStyles() {
+      StyleManager.resetStyles(this.eventStyles);
+      this.eventStyles = {};
+    },
+    /**
      * @param {Object} event
      * @returns void
      */
     setEvent(event) {
       this.event = event;
+      if (event?.styles) {
+        this.updateEventStyles(event.styles);
+      }
     },
 
     /**

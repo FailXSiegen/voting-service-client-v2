@@ -136,6 +136,7 @@
             "lobbyOpen": "Lobby aktivieren / vorzeitiger Login und Anzeige der Veranstaltung auf der Startseite",
             "active": "Veranstaltung direkt aktiv schalten?",
             "submit": "Diese Veranstaltungen speichern",
+            "submitAndContinue": "Diese Veranstaltungen speichern und weiter bearbeiten",
             "videoConferenceSelect": "Videokonferenz-System-Auswahl",
             "multivoteTypeTitle": "Mehrfachstimmenabgabe",
             "multivoteTypeInfo": "Wahlmöglichkeit zur Vorgabe der stimmberechtigten Teilnehmer die mehr als eine Stimme haben",
@@ -182,7 +183,14 @@
                 "meetingId": "Meeting ID",
                 "password": "Passwort"
               }
-            }
+            },
+            "styles": "Bootstrap Styles",
+            "stylesHelp": "Define custom Bootstrap variables for this event"
+          },
+          "tabs": {
+            "general": "Allgemein",
+            "rules": "Mehrfachstimmenabgabe",
+            "styling": "Design"
           }
         },
         "listing": {
@@ -500,6 +508,11 @@
       "redirect": {
         "activeOrganizerSession": "Sie wurden automatisch weitergeleitet, da Sie noch als Organisator angemeldet sind.",
         "invalidEventSlug": "Das event mit der URL \"{slug}\" existiert nicht."
+      }
+    },
+    "form": {
+      "bootstrapStyles": {
+        "addVariable": "Add Bootstrap Variable"
       }
     }
   },
