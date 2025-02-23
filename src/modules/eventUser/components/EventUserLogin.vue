@@ -1,5 +1,15 @@
 <template>
   <PageLayout>
+    <template #logo>
+      <div class="container text-center">
+        <img 
+          v-if="event.logo" 
+          :src="event.logo" 
+          alt="Event Logo" 
+          class="event-logo img img-fluid"
+        />
+      </div>
+    </template>
     <template #title>
       {{ event.title }}
     </template>

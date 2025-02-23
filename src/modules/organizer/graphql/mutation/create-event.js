@@ -9,6 +9,7 @@ export const CREATE_EVENT = gql`
       slug
       description
       styles
+      logo
       scheduledDatetime
       lobbyOpen
       active
