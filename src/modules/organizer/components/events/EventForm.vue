@@ -203,6 +203,15 @@
         <!-- Styling Tab -->
         <div class="tab-pane fade" id="styling" role="tabpanel" aria-labelledby="styling-tab">
           <div class="mb-3">
+            <LogoUpload
+              v-model="formData.logo"
+              :label="$t('view.event.create.labels.logo')"
+              :errors="v$.logo?.$errors"
+              :has-errors="v$.logo?.$errors?.length > 0"
+              @change="({ value }) => { formData.logo = value; }"
+            />
+          </div>
+          <div class="mb-3">
             <BootstrapStylesInput
               v-model="formData.styles"
               :label="$t('view.event.create.labels.styles')"
@@ -260,6 +269,7 @@ import ZoomConfig from "@/modules/organizer/components/events/video-conference-c
 import VideoConferenceSelect from "@/modules/organizer/components/form/VideoConferenceSelect.vue";
 import RadioInput from "@/core/components/form/RadioInput.vue";
 import BootstrapStylesInput from "@/core/components/form/BootstrapStylesInput.vue";
+import LogoUpload from "@/core/components/form/LogoUpload.vue";
 import * as bootstrap from "bootstrap";
 const popoverTrigger = ref(null);
 
@@ -323,6 +333,7 @@ const formData = reactive({
   slug: props.prefillData?.slug ?? "",
   description: props.prefillData?.description ?? "",
   styles: props.prefillData?.styles ?? "",
+  logo: props.prefillData?.logo ?? "",
   scheduledDatetime:
     props.prefillData?.scheduledDatetime ?? Math.floor(Date.now() / 1000),
   lobbyOpen: props.prefillData?.lobbyOpen ?? false,
@@ -343,6 +354,7 @@ const rules = computed(() => {
     slug: { required },
     description: { required },
     styles: {},
+    logo: {},
     scheduledDatetime: { required },
     endDatetime: {
       requiredIf: requiredIf(formData.async),

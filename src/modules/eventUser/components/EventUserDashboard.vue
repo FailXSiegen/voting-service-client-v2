@@ -1,10 +1,20 @@
 <template>
   <PageLayout>
     <template #actions>
-      <DashboardActions
-        @logout="onLogout"
-        @terminate-token-session="onTerminateTokenSession"
-      />
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="me-3">
+            <img 
+              v-if="event.logo" 
+              :src="event.logo" 
+              alt="Event Logo" 
+              class="event-logo img img-fluid"
+            />
+        </span>
+        <DashboardActions
+          @logout="onLogout"
+          @terminate-token-session="onTerminateTokenSession"
+        />
+      </div>
     </template>
     <template #content>
       <AsyncEventDashboard v-if="eventIsAsync" :event="event" />

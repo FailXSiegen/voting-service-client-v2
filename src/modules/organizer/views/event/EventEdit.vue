@@ -67,6 +67,7 @@ const prefillData = reactive({
   slug: "",
   description: "",
   styles: "",
+  logo: "",
   scheduledDatetime: Math.floor(Date.now() / 1000),
   lobbyOpen: false,
   allowMagicLink: false,
@@ -99,6 +100,7 @@ eventQuery.onResult(({ data }) => {
   prefillData.slug = event.value?.slug ?? "";
   prefillData.description = event.value?.description ?? "";
   prefillData.styles = event.value?.styles ?? "";
+  prefillData.logo = event.value?.logo ?? "";
   prefillData.scheduledDatetime = event.value?.scheduledDatetime ?? 0;
   prefillData.lobbyOpen = event.value?.lobbyOpen ?? false;
   prefillData.active = event.value?.active ?? false;
@@ -141,6 +143,7 @@ async function onSubmit({ formData, action }) {
         slug: formData.slug,
         description: formData.description,
         styles: formData.styles,
+        logo: formData.logo,
         scheduledDatetime: formData.scheduledDatetime,
         lobbyOpen: formData.lobbyOpen,
         active: formData.active,

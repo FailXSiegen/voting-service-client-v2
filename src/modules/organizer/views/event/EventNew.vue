@@ -30,6 +30,7 @@ import {
   RouteOrganizerAllEvents,
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
+  RouteOrganizerEventsEdit,
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
@@ -53,45 +54,52 @@ const coreStore = useCore();
 const router = useRouter();
 
 async function onSubmit({ formData, action }) {
-  // Create new Events.
-  const { mutate: createEvent } = useMutation(CREATE_EVENT, {
-    variables: {
-      input: {
-        organizerId: coreStore.getOrganizer?.id,
-        title: formData.title,
-        slug: formData.slug,
-        description: formData.description,
-        styles: formData.styles,
-        scheduledDatetime: formData.scheduledDatetime,
-        lobbyOpen: formData.lobbyOpen,
-        active: formData.active,
-        multivoteType: formData.multivoteType,
-        videoConferenceConfig: formData.videoConferenceConfig,
-        async: formData.async,
-        allowMagicLink: formData.allowMagicLink,
-        publicVoteVisible: formData.publicVoteVisible,
-        endDatetime: formData.endDatetime,
+  try {
+    // Create new Events.
+    const { mutate: createEvent } = useMutation(CREATE_EVENT, {
+      variables: {
+        input: {
+          organizerId: coreStore.getOrganizer?.id,
+          title: formData.title,
+          slug: formData.slug,
+          description: formData.description,
+          styles: formData.styles,
+          logo: formData.logo,
+          scheduledDatetime: formData.scheduledDatetime,
+          lobbyOpen: formData.lobbyOpen,
+          active: formData.active,
+          multivoteType: formData.multivoteType,
+          videoConferenceConfig: formData.videoConferenceConfig,
+          async: formData.async,
+          allowMagicLink: formData.allowMagicLink,
+          publicVoteVisible: formData.publicVoteVisible,
+          endDatetime: formData.endDatetime,
+        },
       },
-    },
-  });
-  await createEvent();
-
-  // Refetch organizer record.
-  coreStore.queryOrganizer();
-
-  // Back to list.
-  if (action === 'save_and_continue') {
-    // Redirect to edit page of the new event
-    await router.push({ 
-      name: 'RouteOrganizerEventsEdit', 
-      params: { id: newEventId } 
     });
-  } else {
-    // Back to list
-    await router.push({ name: RouteOrganizerEvents });
+    const response = await createEvent();
+    const newEventId = response?.data?.createEvent?.id;
+
+    // Refetch organizer record.
+    coreStore.queryOrganizer();
+
+    // Back to list.
+    if (action === 'save_and_continue' && newEventId) {
+      // Redirect to edit page of the new event
+      await router.push({ 
+        name: RouteOrganizerEventsEdit, 
+        params: { id: newEventId } 
+      });
+    } else {
+      // Back to list
+      await router.push({ name: RouteOrganizerEvents });
+    }
+    // Show success message.
+    toast(t("success.organizer.events.createdSuccessfully"), { type: "success" });
+  } catch (error) {
+    console.error('Error creating event:', error);
+    toast(t("error.general"), { type: "error" });
   }
-  // Show success message.
-  toast(t("success.organizer.events.createdSuccessfully"), { type: "success" });
 }
 </script>
 

@@ -1,6 +1,7 @@
 <template>
   <main class="container mt-5">
     <slot name="actions" />
+    <slot name="logo" />
     <div class="title d-block mb-5">
       <h1 class="text-center">
         <slot name="title" />
