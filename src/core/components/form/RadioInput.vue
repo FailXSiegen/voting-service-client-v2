@@ -1,12 +1,12 @@
 <template>
   <template v-for="item in items" :key="item.value">
-    <div class="form-check d-flex align-items-center mb-2">
+    <div class="form-check">
       <input
         :id="id + '-' + item.value"
         v-model="inputValue"
         :name="name"
         :class="[
-          'form-check-input h4 mb-0 me-2',
+          'form-check-input',
           hasErrors ? 'is-invalid' : null,
           ...classes,
         ]"
@@ -16,7 +16,7 @@
       />
       <label
         v-if="item.label"
-        class="form-check-label h4 mb-0"
+        class="form-check-label"
         :for="id + '-' + item.value"
       >
         {{ item.label }}

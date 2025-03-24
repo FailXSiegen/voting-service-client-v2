@@ -45,7 +45,7 @@
         
         <!-- Vote slider and input -->
         <div class="row mb-2">
-          <div class="col-12 col-md-8 d-flex align-items-center">
+          <div class="col-12 col-lg-8 d-flex align-items-center">
             <input 
               type="range" 
               class="form-range flex-grow-1 me-2" 
@@ -56,7 +56,7 @@
             >
           </div>
           <!-- Numerical input -->
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-lg-4">
             <div class="input-group">
               <input 
                 type="number" 
@@ -89,7 +89,7 @@
       </div>
     </fieldset>
     <hr v-if="hasMultipleVotes" />
-    <div class="d-flex justify-content-center">
+    <div class="d-flex justify-content-center answer-wrapper">
       <!-- Can only select one. -->
       <fieldset v-if="voteType === VOTE_TYPE_SINGLE" :disabled="isSubmitting">
         <RadioInput
@@ -97,6 +97,7 @@
           :items="possibleAnswers"
           :value="null"
           :has-errors="v$.singleAnswer?.$errors?.length > 0"
+          ckl
           @change="
             ({ value }) => {
               formData.singleAnswer = parseInt(value, 10);

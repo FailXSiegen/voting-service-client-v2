@@ -97,3 +97,9 @@ i.bi {
 [aria-expanded="true"] .bi-caret-right-fill {
   transform: rotate(90deg);
 }
+
+.answer-wrapper {
+  .form-check {
+    font-size: 24px;
+  }
+}
