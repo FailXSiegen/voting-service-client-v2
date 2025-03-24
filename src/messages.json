@@ -290,7 +290,7 @@
           "result": "Ergebnis",
           "voteAllocation": "Stimmenverteilung ({voteAmount} Stimmen verfügbar)",
           "votes": "Stimmen",
-          "useAllVotes": "Alle verfügbaren Stimmen auf einmal nutzene",
+          "useAllVotes": "100 % der Stimmen verwenden",
           "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmen Sie für diese Umfrage verwenden möchten."
         },
         "active": {
