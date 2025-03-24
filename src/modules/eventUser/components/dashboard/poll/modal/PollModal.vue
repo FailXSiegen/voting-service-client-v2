@@ -23,8 +23,6 @@
           </div>
 
           <div class="modal-body">
-            
-
             <p v-if="poll.maxVotes === 1">
               {{ $t("view.polls.modal.maxVote1") }}
             </p>
@@ -38,6 +36,7 @@
             </p>
 
             <PollForm
+              ref="pollForm"
               :key="pollFormKey"
               :event="event"
               :event-user="eventUser"
@@ -67,6 +66,7 @@ import VotingDetails from "@/modules/eventUser/components/dashboard/poll/VotingD
 
 const emit = defineEmits(["submit"]);
 const modal = ref(null);
+const pollForm = ref(null);
 let bootstrapModal = null;
 
 const props = defineProps({
@@ -102,7 +102,12 @@ onMounted(() => {
 
 function onSubmit(data) {
   emit("submit", data);
-  pollFormKey.value += 1;
+  // Nach einer kurzen Verzögerung den Ladezustand zurücksetzen, falls das Modal nicht geschlossen wurde
+  setTimeout(() => {
+    if (pollForm.value && pollForm.value.isSubmitting) {
+      pollForm.value.isSubmitting = false;
+    }
+  }, 5000); // 5 Sekunden Timeout als Sicherheitsmaßnahme
 }
 
 function showModal() {
@@ -110,6 +115,10 @@ function showModal() {
 }
 
 function hideModal() {
+  // Wenn das Modal geschlossen wird, setze auch den Ladezustand im Formular zurück
+  if (pollForm.value && pollForm.value.isSubmitting) {
+    pollForm.value.isSubmitting = false;
+  }
   bootstrapModal?.hide();
   pollFormKey.value += 1;
 }

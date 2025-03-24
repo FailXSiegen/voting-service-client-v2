@@ -1,16 +1,16 @@
 <template>
-  <div class="form-check">
+  <div class="form-check d-flex align-items-center mb-2">
     <input
       :id="id"
       :name="name"
-      :class="['form-check-input', hasErrors ? 'is-invalid' : null, ...classes]"
+      :class="['form-check-input  h4 mb-0 me-2', hasErrors ? 'is-invalid' : null, ...classes]"
       :value="value ?? 1"
       :checked="checked"
       :disabled="disabled"
       type="checkbox"
       @input="(event) => $emit('update:checked', event.target.checked)"
     />
-    <label class="form-check-label" :for="id" v-html="label" />
+    <label class="form-check-label h4 mb-0" :for="id" v-html="label" />
     <div v-if="helpText" class="form-text text-muted">
       <span v-html="helpText" />
     </div>

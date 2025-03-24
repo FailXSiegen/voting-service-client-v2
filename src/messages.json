@@ -277,6 +277,7 @@
         },
         "modal": {
           "submitPoll": "Jetzt abstimmen",
+          "submitting": "Stimme wird abgegeben...",
           "abstain": "Enthaltung",
           "abstainHelptext": "Entwertet oben ausgewählte Felder; Stimme wird komplett als Enthaltung gezählt!",
           "buttonStart": "Abstimmung starten",
@@ -284,9 +285,13 @@
           "maxVoteGreater1": "Achtung: Sie können mehrere Positionen auswählen: ",
           "minVoteGreater0": "Achtung: Sie müssen eine Mindestanzahl auswählen: ",
           "canSubmitAnswerForEachVote": "Alle {voteAmount} Stimmen auf einmal abgeben",
-          "canSubmitAnswerForEachVoteHelptext": "Nur bei der ersten Stimme möglich.",
+          "canSubmitAnswerForEachVoteHelptext": "Alle verfügbaren Stimmen auf einmal abgeben",
           "close": "Schließen",
-          "result": "Ergebnis"
+          "result": "Ergebnis",
+          "voteAllocation": "Stimmenverteilung ({voteAmount} Stimmen verfügbar)",
+          "votes": "Stimmen",
+          "useAllVotes": "Alle verfügbaren Stimmen auf einmal nutzene",
+          "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmen Sie für diese Umfrage verwenden möchten."
         },
         "active": {
           "title": "Aktuelle Abstimmung",
@@ -298,7 +303,10 @@
         },
         "userUpdate": "Ihr Status wurde aktualisiert.",
         "eventIsNotRunning": "Die Veranstaltung startet am {date} um {time} Uhr.",
-        "eventIsFinish": "Die Veranstaltung wurde beendet."
+        "eventIsFinish": "Die Veranstaltung wurde beendet.",
+        "error": {
+          "submission": "Es ist ein Fehler bei der Abgabe Ihrer Stimme aufgetreten. Bitte wenden Sie sich bei wiederholten Problemen an den Veranstalter."
+        }
       },
       "results": {
         "pastResults": "Vergangene Abstimmungen",
