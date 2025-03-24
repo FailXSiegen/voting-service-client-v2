@@ -131,9 +131,6 @@ const connectionLost = computed(
   () => !eventUser.value?.online || !eventUser.value?.id,
 );
 
-// Queries.
-
-// Try to fetch the active poll.
 const activePollEventUserQuery = useQuery(
   ACTIVE_POLL_EVENT_USER,
   { eventId: props.event.id },
@@ -146,7 +143,6 @@ activePollEventUserQuery.onResult(({ data }) => {
   activePollEventUser.value = data.activePollEventUser;
   poll.value = data.activePollEventUser.poll;
   pollState.value = data.activePollEventUser.state;
-  // check if user already voted
   if (
     pollStatePersistence.canVote(poll.value.id, eventUser.value, props.event)
   ) {
@@ -165,13 +161,11 @@ const pollResultsQuery = useQuery(
 pollResultsQuery.onResult(({ data }) => {
   if (!data?.pollResult) return;
 
-  // Initial check if there are less items than pageSize
   if (page.value === 0 && data.pollResult.length < pageSize.value) {
     showMoreEnabled.value = false;
   }
 
   if (data.pollResult.length > 0) {
-    // Add new poll results
     pollResults.value = [
       ...pollResults.value.filter(
         (existing) =>
@@ -184,7 +178,6 @@ pollResultsQuery.onResult(({ data }) => {
   }
 });
 
-// Subscriptions.
 const updateEventUserAccessRightsSubscription = useSubscription(
   UPDATE_EVENT_USER_ACCESS_RIGHTS,
   { eventUserId: eventUser.value.id },
@@ -212,33 +205,26 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
   if (!data?.pollLifeCycle) {
     return;
   }
-  // Set the current poll;
+  
   poll.value = data.pollLifeCycle.poll;
-  // Set the actual poll state
   pollState.value = data.pollLifeCycle.state;
 
-  // Handle poll state.
   if (pollState.value === "new") {
-    // Reset voteCounter.
+    votingProcess.resetVoteCounts();
+    
     voteCounter.value = 1;
-    // Close the result modal.
     resultModal.value?.hideModal();
 
     if (!poll.value) {
       console.warn("Missing current poll. Try to refetch.");
       await activePollEventUserQuery.refetch();
     }
-
-    // Open the poll modal.
     if (showVotingModal.value) {
       pollModal.value?.showModal();
     }
   } else if (pollState.value === "closed") {
-    // Close the poll modal.
     pollModal.value?.hideModal();
-    // Open the result modal.
     resultModal.value?.showModal();
-    // Refresh poll results.
     showMoreEnabled.value = true;
     page.value = 0;
     pollResults.value = [];
@@ -256,9 +242,6 @@ pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
   await activePollEventUserQuery.refetch();
   pollUserVotedCount.value = data?.pollAnswerLifeCycle?.pollUserVotedCount;
 });
-
-// Events.
-
 function onJoinMeeting() {
   meetingFrameIsActive.value = true;
 }
@@ -292,6 +275,23 @@ function onShowMorePollResults() {
 }
 
 async function onSubmitPoll(pollFormData) {
-  await votingProcess.handleFormSubmit(pollFormData, poll);
+  try {
+    if (pollFormData.votesToUse && parseInt(pollFormData.votesToUse, 10) > 0) {
+      const votesToUse = parseInt(pollFormData.votesToUse, 10);
+    
+      
+      if (votesToUse === eventUser.value.voteAmount) {
+        pollFormData.useAllAvailableVotes = true;
+        await votingProcess.handleFormSubmit(pollFormData, poll);
+      } else {
+        await votingProcess.handleFormSubmit(pollFormData, poll, votesToUse);
+      }
+    } else {
+      await votingProcess.handleFormSubmit(pollFormData, poll);
+    }
+  } catch (error) {
+    console.error('Fehler bei der Stimmabgabe:', error);
+    toast(l18n.global.tc("view.polls.error.submission"), { type: "error" });
+  }
 }
 </script>

@@ -70,7 +70,6 @@ import l18n from "@/l18n";
 
 import { POLLS } from "@/modules/eventUser/graphql/queries/polls";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
-// import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 import {
   getCurrentUnixTimeStamp,
@@ -87,8 +86,6 @@ const props = defineProps({
   },
 });
 
-// Data
-
 const coreStore = useCore();
 const eventUser = ref(coreStore.getEventUser);
 const activePoll = ref(null);
@@ -97,7 +94,8 @@ const highlightStatusChange = ref(false);
 const availablePolls = ref([]);
 const completedPolls = ref([]);
 const pollResults = ref([]);
-const { canVote } = usePollStatePersistence();
+const pollStatePersistence = usePollStatePersistence();
+const { canVote } = pollStatePersistence;
 const votingProcess = useVotingProcess(eventUser, props.event);
 const voteCounter = votingProcess.voteCounter;
 votingProcess.setVotingCompletedCallback(onVotingCompleted);
@@ -120,8 +118,6 @@ const eventStartTime = computed(() =>
   convertTimeStampToTimeString(props.event?.scheduledDatetime),
 );
 
-// Queries
-
 const pollsQuery = useQuery(
   POLLS,
   { eventId: props.event.id },
@@ -133,8 +129,13 @@ pollsQuery.onResult(({ data }) => {
     return;
   }
 
+  if (activePoll.value === null && availablePolls.value.length > 0) {
+    votingProcess.resetVoteCounts && votingProcess.resetVoteCounts();
+  }
+
+  completedPolls.value = [];
   availablePolls.value.forEach((availablePoll) => {
-    if (!canVote(availablePoll.id, eventUser, props.event)) {
+    if (!canVote(availablePoll.id, eventUser.value, props.event)) {
       completedPolls.value.push(availablePoll);
     }
   });
@@ -151,8 +152,6 @@ pollResultsQuery.onResult(({ data }) => {
   }
   pollResults.value = data.pollResult;
 });
-
-// Subscriptions
 
 const updateEventUserAccessRightsSubscription = useSubscription(
   UPDATE_EVENT_USER_ACCESS_RIGHTS,
@@ -172,28 +171,50 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   }
 });
 
-// Events
-
 function onClickPlayPoll(poll) {
+  if (activePoll.value?.id !== poll.id) {
+    votingProcess.resetVoteCounts && votingProcess.resetVoteCounts();
+    voteCounter.value = 1;
+  }
+  
   activePoll.value = poll;
-  // Reset voteCounter.
-  voteCounter.value = 1;
-  // Open the poll modal.
   pollModal.value.showModal();
 }
 
 async function onSubmitPoll(pollFormData) {
-  await votingProcess.handleFormSubmit(pollFormData, activePoll);
+  try {
+    if (pollFormData.votesToUse && parseInt(pollFormData.votesToUse, 10) > 0) {
+      const votesToUse = parseInt(pollFormData.votesToUse, 10);
+      
+      if (votesToUse === eventUser.value.voteAmount) {
+        pollFormData.useAllAvailableVotes = true;
+        await votingProcess.handleFormSubmit(pollFormData, activePoll);
+      } else {
+        await votingProcess.handleFormSubmit(pollFormData, activePoll, votesToUse);
+      }
+    } else {
+      await votingProcess.handleFormSubmit(pollFormData, activePoll);
+    }
+  } catch (error) {
+    toast(l18n.global.tc("view.polls.error.submission"), { type: "error" });
+  }
 }
 
 async function onVotingCompleted() {
-  completedPolls.value.push(activePoll.value);
-  pollModal.value.hideModal();
-  activePoll.value = null;
+  if (activePoll.value) {
+    if (!completedPolls.value.some(poll => poll.id === activePoll.value.id)) {
+      completedPolls.value.push(activePoll.value);
+    }
+    
+    pollStatePersistence.saveVote(activePoll.value.id, eventUser.value, props.event);
+    
+    pollModal.value.hideModal();
+    activePoll.value = null;
+  }
 
   toast(l18n.global.tc("view.user.verified.voted"), {
     type: "success",
-    autoClose: 3000, // verschwindet nach 3 Sekunden
+    autoClose: 3000,
     hideProgressBar: false,
     closeButton: true,
     position: "top-right",
