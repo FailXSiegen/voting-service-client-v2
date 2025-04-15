@@ -89,12 +89,20 @@
                   <span v-if="index !== 'Enthaltung'" class="ms-2 small">
                     ({{ getAnswerPercentage(answer.length) }})
                     <span v-if="isMajority(answer.length)" class="text-success ms-1">
-                      <i class="bi bi-check-circle-fill"></i>
-                      {{ 
-                        isAbsoluteMajority(answer.length) 
-                          ? $t("view.results.absoluteMajority") 
-                          : $t("view.results.relativeMajority") 
-                      }}
+                      <span v-if="isAbsoluteMajority(answer.length)" 
+                            class="majority-indicator"
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            :title="$t('Absolute Mehrheit: Mehr als 50% der Stimmen je nach ausgewählter Berechnungsmethode')">
+                        {{ $t("view.results.absoluteMajority") }}
+                      </span>
+                      <span v-else
+                            class="majority-indicator"
+                            data-bs-toggle="tooltip" 
+                            data-bs-placement="top" 
+                            :title="$t('Relative Mehrheit: Die meisten Stimmen von allen Optionen, aber nicht über 50%')">
+                        {{ $t("view.results.relativeMajority") }}
+                      </span>
                     </span>
                   </span>
                 </span>
@@ -206,8 +214,19 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
+
+// Bootstrap Tooltips initialisieren
+onMounted(() => {
+  // Tooltips initialisieren
+  if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  }
+});
 
 const props = defineProps({
   eventRecord: {
@@ -437,6 +456,11 @@ function isAbsoluteMajority(answerLength) {
 
 .gap-2 {
   gap: 0.5rem;
+}
+
+.majority-indicator {
+  cursor: help;
+  text-decoration: underline dotted;
 }
 
 @media print {
