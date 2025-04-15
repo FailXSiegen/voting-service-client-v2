@@ -25,7 +25,20 @@
             ></button>
           </div>
           <div class="modal-body">
-            <result-item :poll-result="pollResult" :event-record="event" />
+            <!-- 
+              Wichtig: v-if hinzugefügt, um sicherzustellen, dass die Komponente nur 
+              gerendert wird, wenn pollResult vorhanden ist
+            -->
+            <result-item 
+              v-if="pollResult && pollResult.poll" 
+              :poll-result="pollResult" 
+              :event-record="event"
+              :initial-percentage-type="modalPercentageType"
+              @percentage-type-change="handlePercentageTypeChange" 
+            />
+            <div v-else class="alert alert-info">
+              Lade Ergebnisse...
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -54,7 +67,10 @@ import t from "@/core/util/l18n";
 const modal = ref(null);
 let bootstrapModal = null;
 
-defineProps({
+// Eigener State für die Prozentanzeige innerhalb des Modals
+const modalPercentageType = ref("validVotes");
+
+const props = defineProps({
   pollResult: {
     type: Object,
     required: false,
@@ -63,6 +79,7 @@ defineProps({
   event: {
     type: Object,
     required: true,
+    default: () => ({}),  // Fallback-Wert als leeres Objekt
   },
 });
 
@@ -71,11 +88,18 @@ onMounted(() => {
 });
 
 function showModal() {
+  // Reset percentage type to default when opening modal
+  modalPercentageType.value = "validVotes";
   bootstrapModal?.show();
 }
 
 function hideModal() {
   bootstrapModal?.hide();
+}
+
+// Behandelt Änderungen des Prozenttyps von ResultItem
+function handlePercentageTypeChange(newType) {
+  modalPercentageType.value = newType;
 }
 
 defineExpose({

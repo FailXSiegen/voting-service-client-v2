@@ -11,6 +11,8 @@ export const POLLS_RESULTS = gql`
       poll {
         title
         pollAnswer
+        minVotes
+        maxVotes
       }
       pollAnswer {
         id

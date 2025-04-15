@@ -330,7 +330,19 @@
         },
         "showMore": "Weitere Ergebnisse anzeigen",
         "noMoreResults": "Keine weitere Ergebnisse verfügbar",
-        "noResults": "Keine Ergebnisse verfügbar"
+        "noResults": "Keine Ergebnisse verfügbar",
+        "percentageOfValidVotes": "% der gültigen Stimmen",
+        "percentageOfPotentialVotes": "% der potenziellen Stimmen",
+        "percentageOfMaxPossibleVotes": "% der maximal möglichen Stimmen",
+        "percentageOfMaxPerOption": "% der maximalen Stimmen pro Option",
+        "percentageExplanation": "Methode der Prozentberechnung",
+        "validVotesExplanation": "Prozentangaben basieren auf gültigen Stimmen (ohne Enthaltungen)",
+        "potentialVotesExplanation": "Prozentangaben basieren auf potenziellen Stimmen aller Teilnehmer ({potentialVotes} potenzielle Stimmen = {participantCount} Teilnehmer × {maxOptionsPerVoter} Optionen pro Wähler). Werte über 100% werden angezeigt, wenn mehr Stimmen als theoretisch möglich abgegeben wurden.",
+        "maxPossibleVotesExplanation": "Prozentangaben basieren auf maximal möglichen Stimmen ({maxPossibleVotes})",
+        "maxPerOptionExplanation": "Prozentangaben basieren auf maximalen Stimmen pro Option ({maxVotesPerOption} Stimmen)",
+        "relativeMajority": "Relative Mehrheit",
+        "absoluteMajority": "Absolute Mehrheit",
+        "maxVotesPerOption": "Maximalstimmen pro Option"
       },
       "user": {
         "pending": {
@@ -529,5 +541,21 @@
       }
     }
   },
-  "en": {}
+  "en": {
+    "view": {
+      "results": {
+        "percentageOfValidVotes": "% of Valid Votes",
+        "percentageOfPotentialVotes": "% of Potential Votes",
+        "percentageOfMaxPossibleVotes": "% of Max Possible Votes",
+        "percentageOfMaxPerOption": "% of Max Per Option",
+        "percentageExplanation": "Percentage Calculation Method",
+        "validVotesExplanation": "Showing percentages based on valid votes only (excluding abstentions)",
+        "potentialVotesExplanation": "Showing percentages based on potential votes from all participants ({potentialVotes} potential votes = {participantCount} participants × {maxOptionsPerVoter} options per voter). Values above 100% are shown when more votes than theoretically possible were cast.",
+        "maxPossibleVotesExplanation": "Showing percentages based on maximum possible votes ({maxPossibleVotes})",
+        "maxPerOptionExplanation": "Showing percentages based on maximum votes per option ({maxVotesPerOption} votes)",
+        "relativeMajority": "Relative Majority",
+        "absoluteMajority": "Absolute Majority"
+      }
+    }
+  }
 }
