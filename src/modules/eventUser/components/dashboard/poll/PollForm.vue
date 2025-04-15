@@ -12,32 +12,32 @@
           <button 
             type="button" 
             class="btn btn-outline-primary" 
-            @click="setVotePercentage(25)"
             :disabled="isSubmitting"
+            @click="setVotePercentage(25)"
           >
             25%
           </button>
           <button 
             type="button" 
             class="btn btn-outline-primary" 
-            @click="setVotePercentage(50)"
             :disabled="isSubmitting"
+            @click="setVotePercentage(50)"
           >
             50%
           </button>
           <button 
             type="button" 
             class="btn btn-outline-primary" 
-            @click="setVotePercentage(75)"
             :disabled="isSubmitting"
+            @click="setVotePercentage(75)"
           >
             75%
           </button>
           <button 
             type="button" 
             class="btn btn-outline-primary" 
-            @click="setVotePercentage(100)"
             :disabled="isSubmitting"
+            @click="setVotePercentage(100)"
           >
             100%
           </button>
@@ -47,11 +47,11 @@
         <div class="row mb-2">
           <div class="col-12 col-lg-8 d-flex align-items-center">
             <input 
+              v-model.number="formData.votesToUse" 
               type="range" 
               class="form-range flex-grow-1 me-2" 
               min="1" 
-              :max="remainingVotes" 
-              v-model.number="formData.votesToUse"
+              :max="remainingVotes"
               :disabled="isSubmitting"
             >
           </div>
@@ -59,11 +59,11 @@
           <div class="col-12 col-lg-4">
             <div class="input-group">
               <input 
+                v-model.number="formData.votesToUse" 
                 type="number" 
                 class="form-control" 
                 min="1" 
-                :max="remainingVotes" 
-                v-model.number="formData.votesToUse"
+                :max="remainingVotes"
                 :disabled="isSubmitting"
               >
               <span class="input-group-text">{{ $t('view.polls.modal.votes') }}</span>
@@ -82,8 +82,8 @@
             :label="$t('view.polls.modal.useAllVotes')"
             :help-text="$t('view.polls.modal.canSubmitAnswerForEachVoteHelptext')"
             :checked="formData.useAllAvailableVotes"
-            @update:checked="onCheckboxChange"
             :disabled="isSubmitting"
+            @update:checked="onCheckboxChange"
           />
         </div>
       </div>
@@ -95,7 +95,7 @@
         <RadioInput
           id="poll-answer"
           :items="possibleAnswers"
-          :value="null"
+          :value="formData.singleAnswer"
           :has-errors="v$.singleAnswer?.$errors?.length > 0"
           ckl
           @change="
@@ -116,6 +116,7 @@
           :has-errors="v$.multipleAnswers?.$errors?.length > 0"
           :max-checked-items="poll.maxVotes || null"
           :min-checked-items="poll.minVotes || null"
+          :selected-values="formData.multipleAnswers"
           @change="
             (value) => {
               formData.multipleAnswers = value;
@@ -132,31 +133,56 @@
           id="allow-abstain"
           :label="$t('view.polls.modal.abstain')"
           :help-text="$t('view.polls.modal.abstainHelptext')"
+          :checked="formData.abstain"
           @update:checked="formData.abstain = !formData.abstain"
         />
       </fieldset>
     </template>
 
     <hr />
-    <button type="submit" class="btn btn-primary mx-auto d-block h1" :disabled="isSubmitting">
-      <span v-if="!isSubmitting" class="h3">{{ $t("view.polls.modal.submitPoll") }}</span>
-      <span v-else class="d-flex align-items-center justify-content-center">
-        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-        <span class="h3">{{ $t("view.polls.modal.submitting") }}</span>
-      </span>
-    </button>
+    <div class="overlay-container position-relative">
+      <!-- ABSOLUTE GARANTIERTE SPERRUNG mit der gleichen verstärkten Bedingung wie im Modal -->
+      <div
+v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
+           class="position-absolute w-100 h-100 top-0 start-0 z-1" 
+           style="background-color: rgba(255,255,255,0.95); cursor: not-allowed;">
+        <div class="position-absolute top-50 start-50 translate-middle text-center">
+          <span class="spinner-border spinner-border-lg text-primary" role="status"></span>
+          <div class="mt-2 fw-bold text-dark">{{ $t("view.polls.modal.submitting") }}...</div>
+          <div class="mt-2 small">Bitte warten Sie, Ihre Stimmen werden gezählt</div>
+          
+          <!-- Fortschrittsanzeige für viele Stimmen -->
+          <div v-if="votingProcess.usedVotesCount?.value > 0" class="mt-2">
+            Fortschritt: {{ votingProcess.usedVotesCount?.value }} von {{ props.eventUser.voteAmount }} Stimmen
+          </div>
+        </div>
+      </div>
+      
+      <!-- KRITISCH: Die gleiche absolut garantierte Sperrungsbedingung für den Button -->
+      <button
+type="submit" class="btn btn-primary mx-auto d-block h1" 
+              :disabled="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
+              :class="{ 'opacity-50': isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) }">
+        <span v-if="!(isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount))" class="h3">{{ $t("view.polls.modal.submitPoll") }}</span>
+        <span v-else class="d-flex align-items-center justify-content-center">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          <span class="h3">{{ $t("view.polls.modal.submitting") }}</span>
+        </span>
+      </button>
+    </div>
   </form>
 </template>
 
 <script setup>
 import { handleError } from "@/core/error/error-handler";
 import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { computed, reactive, watch, onMounted, ref } from "vue";
+import { computed, reactive, watch, onMounted, onUnmounted, ref, inject } from "vue";
 import { and, or, required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import RadioInput from "@/core/components/form/RadioInput.vue";
 import CheckboxInputGroup from "@/core/components/form/CheckboxInputGroup.vue";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
+import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 import {
   minLength,
   objectPropertyIsEqual,
@@ -188,6 +214,11 @@ const props = defineProps({
   },
 });
 
+// Instanziere votingProcess für den Zugriff auf usedVotesCount und andere Status
+// KRITISCH: Die direkten Flags von votingProcess werden für Sperrung verwendet
+const votingProcess = useVotingProcess(props.eventUser, props.event);
+
+// Einfacher lokaler State
 const isSubmitting = ref(false);
 
 const voteType = computed(() => {
@@ -260,6 +291,11 @@ function onCheckboxChange(isChecked) {
   
   if (isChecked) {
     formData.votesToUse = remainingVotes.value;
+  }
+  
+  // Überprüfe, ob wir bei jedem UI-Event den Button-Status aktualisieren sollten
+  if (window.pollFormSubmitting !== undefined) {
+    isSubmitting.value = window.pollFormSubmitting;
   }
 }
 
@@ -345,6 +381,12 @@ async function onSubmit() {
   }
   
   try {
+    // Explizite Prüfung auf gültige Auswahl
+    if (!formData.singleAnswer && (!formData.multipleAnswers || formData.multipleAnswers.length === 0) && !formData.abstain) {
+      alert('Bitte treffen Sie eine Auswahl');
+      return;
+    }
+    
     // Validierung
     const result = await v$.value.$validate();
     if (!result) {
@@ -355,15 +397,72 @@ async function onSubmit() {
     isSubmitting.value = true;
     
     formData.type = voteType.value;
-    emit("submit", formData);
+    emit("submit", {...formData}); // Kopie des Objekts übergeben
+    
+    // Status wird durch pollAnswerLifeCycle-Event oder Fehlerbehandlung zurückgesetzt
+    // Explizites Zurücksetzen geschieht in SyncEventDashboard.vue, nicht hier
     
   } catch (error) {
     console.error("Fehler beim Absenden:", error);
+    // Bei Fehler lokal zurücksetzen
     isSubmitting.value = false;
   }
 }
 
+// Es gibt zwei Arten von Reset: Entweder nur den Submitting-Status oder alles
+function resetSubmitState() {
+  isSubmitting.value = false;
+  
+  // Stelle sicher, dass auch der Button-Text und die Overlay-Anzeige aktualisiert werden
+  // Sofort nochmal setzen, um eine bessere Reaktivität zu gewährleisten
+  isSubmitting.value = false;
+}
+
+function reset(keepSelection = false) {
+  isSubmitting.value = false;
+  
+  if (!keepSelection) {
+    // Formularwerte zurücksetzen
+    formData.singleAnswer = null;
+    formData.multipleAnswers = [];
+    formData.abstain = false;
+    
+    // Votenzähler auf Maximum setzen, wenn wir mehrere Stimmen haben
+    if (hasMultipleVotes.value) {
+      // Auf 100% setzen (alle verbleibenden Stimmen)
+      formData.votesToUse = remainingVotes.value;
+      formData.useAllAvailableVotes = true;
+    }
+    
+    // Formularvalidierung zurücksetzen
+    v$.value.$reset();
+    
+    // Manuelles DOM-Update erzwingen, um die Radiobuttons visuell zurückzusetzen
+    // und die 100%-Vorauswahl visuell zu aktualisieren
+    // In einer setTimeout, um nach dem Reactive-Update ausgeführt zu werden
+    setTimeout(() => {
+      // Nach der RadioInput-Gruppe suchen und manuell zurücksetzen
+      const radioInputs = document.querySelectorAll('input[type="radio"]');
+      radioInputs.forEach(input => {
+        input.checked = false;
+      });
+      
+      // Nach der "Use all votes" Checkbox suchen und aktivieren
+      const checkbox = document.querySelector('#submit-answer-for-each-vote');
+      if (checkbox && hasMultipleVotes.value) {
+        checkbox.checked = true;
+      }
+    }, 50);
+  }
+  
+  // Stelle sicher, dass auch der Button-Text und die Overlay-Anzeige aktualisiert werden
+  // Sofort nochmal setzen, um eine bessere Reaktivität zu gewährleisten
+  isSubmitting.value = false;
+}
+
 defineExpose({
-  isSubmitting
+  isSubmitting,
+  reset,
+  resetSubmitState
 });
 </script>

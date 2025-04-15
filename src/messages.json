@@ -306,6 +306,9 @@
         "eventIsFinish": "Die Veranstaltung wurde beendet.",
         "error": {
           "submission": "Es ist ein Fehler bei der Abgabe Ihrer Stimme aufgetreten. Bitte wenden Sie sich bei wiederholten Problemen an den Veranstalter."
+        },
+        "info": {
+          "stillProcessing": "Eine Abstimmung wird gerade verarbeitet. Bitte warten Sie, bis der Vorgang abgeschlossen ist."
         }
       },
       "results": {

@@ -243,11 +243,11 @@ async function createUsersInBatches(userDataList, isTokenBased) {
 
 // Submit handler bleibt größtenteils gleich, aber mit verbessertem Error Handling
 async function onSubmit({
-                          usernames,
-                          allowToVote,
-                          voteAmount,
-                          tokenBasedLogin,
-                        }) {
+  usernames,
+  allowToVote,
+  voteAmount,
+  tokenBasedLogin,
+}) {
   isProcessing.value = true;
   progress.current = 0;
   progress.total = usernames.length;
