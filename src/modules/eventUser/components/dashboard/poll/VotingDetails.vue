@@ -14,7 +14,7 @@
         <i :class="isCollapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up'"></i>
       </button>
     </div>
-    <div class="card-body" v-show="!isCollapsed">
+    <div v-show="!isCollapsed" class="card-body">
       <div class="row">
         <div class="d-flex flex-wrap">
           <div
