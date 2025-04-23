@@ -33,3 +33,4 @@ coverage
 
 # public
 public/lib
+playwright-report

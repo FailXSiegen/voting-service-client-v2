@@ -9,6 +9,8 @@
     "test:unit": "vitest --environment jsdom --root src/",
     "test:e2e": "start-server-and-test preview :4173 'cypress run --e2e'",
     "test:e2e:dev": "start-server-and-test 'vite dev --port 4173' :4173 'cypress open --e2e'",
+    "test:load": "npx playwright test tests/load-test.js",
+    "test:load:simple": "npx playwright test tests/load-test.js --project=chromium --grep \"Simple load test\"",
     "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
     "format": "prettier src --write"
   },
@@ -39,6 +41,7 @@
     "vuejs-confirm-dialog": "^0.5.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@rollup/plugin-inject": "^5.0.5",
     "@vitejs/plugin-vue": "^4.5.1",
     "@vue/test-utils": "^2.4.3",
