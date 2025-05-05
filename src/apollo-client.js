@@ -4,6 +4,7 @@ import {
   InMemoryCache,
   HttpLink,
   ApolloLink,
+  gql,
 } from "@apollo/client/core";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { onError } from "@apollo/client/link/error";
@@ -82,39 +83,136 @@ const httpLink = new HttpLink({
   },
 });
 
-// Create the webSocket link.
+// Create the webSocket link with enhanced stability settings.
 // @info The server side authentication is done via refreshToken (cookie).
 const wsLink = new GraphQLWsLink(
   createClient({
     url: URLS.SUBSCRIPTION_URL,
     reconnect: true,
-    lazy: true,
-    timeout: 30000,
-    inactivityTimeout: 30000,
+    // VERBESSERT: Lazy-Loading deaktiviert, um Verbindung sofort herzustellen und zu halten
+    lazy: false, 
+    // VERBESSERT: Längere Timeouts für die Stabilität
+    timeout: 60000, // 60 Sekunden statt 30 Sekunden
+    inactivityTimeout: 120000, // 2 Minuten statt 30 Sekunden
+    // VERBESSERT: Robustere Reconnect-Logik
+    retryAttempts: 10,
+    retryWait: (retries) => Math.min(retries * 1000, 10000), // Exponentielles Backoff bis max. 10 Sekunden
+    keepAlive: 45000, // 45 Sekunden Ping-Intervall
+    // VERBESSERT: Verbindung auch bei Inaktivität halten
+    shouldRetry: () => true,
+    connectionParams: {
+      // Zusätzliche Parameter für bessere Zuverlässigkeit
+      connectionPresence: true,
+      forceReconnect: true
+    }
   }),
 );
 
+// VERBESSERT: Detailliertere WebSocket-Ereignisbehandlung mit Retry-Logik
+let wsReconnectCount = 0;
+const MAX_WS_RECONNECT_ATTEMPTS = 10;
+
 wsLink.client.on("connecting", () => {
-  console.info("[Websocket] Connecting...");
+  console.info(`[Websocket] Connecting... (Versuch ${++wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})`);
 });
 
 wsLink.client.on("connected", () => {
-  console.info("[Websocket] Is connected.");
+  // Zurücksetzen des Reconnect-Zählers bei erfolgreicher Verbindung
+  wsReconnectCount = 0;
+  console.info("[Websocket] Erfolgreich verbunden");
+  
   // Mark current event user as online.
   const coreStore = useCore();
   if (coreStore.isActiveEventUserSession) {
     coreStore.setEventUserOnlineState(true);
   }
+  
+  // Start eines Ping-Intervalls zum Halten der Verbindung
+  startWebSocketKeepAlive();
 });
 
-wsLink.client.on("closed", () => {
-  console.info("[Websocket] Is disconnected");
+// VERBESSERT: Zusätzliche Ereignisbehandlung für Fehler
+wsLink.client.on("error", (error) => {
+  console.error("[Websocket] Fehler bei der Verbindung:", error);
+  
+  // Bei Verbindungsfehlern automatisch versuchen, wieder zu verbinden
+  if (wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
+    console.info(`[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
+    setTimeout(() => {
+      try {
+        // Manueller Reconnect-Versuch
+        wsLink.client.restart();
+      } catch (e) {
+        console.error("[Websocket] Fehler beim Neustart der Verbindung:", e);
+      }
+    }, Math.min(wsReconnectCount * 1000, 5000)); // Exponentielles Backoff
+  }
+});
+
+wsLink.client.on("closed", (event) => {
+  console.info(`[Websocket] Verbindung geschlossen mit Code ${event?.code || 'unbekannt'}, Grund: ${event?.reason || 'keiner'}`);
+  
   // Mark current event user as offline.
   const coreStore = useCore();
   if (coreStore.isActiveEventUserSession) {
     coreStore.setEventUserOnlineState(false);
   }
+  
+  // Stoppe das Ping-Intervall, wenn die Verbindung geschlossen wird
+  stopWebSocketKeepAlive();
+  
+  // Bei normaler Schließung nicht neu verbinden, bei abnormaler Schließung versuchen, neu zu verbinden
+  const isAbnormalClosure = !event || event.code !== 1000;
+  if (isAbnormalClosure && wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
+    console.info(`[Websocket] Abnormale Schließung, versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
+    setTimeout(() => {
+      try {
+        // Manueller Reconnect-Versuch
+        wsLink.client.restart();
+      } catch (e) {
+        console.error("[Websocket] Fehler beim Neustart der Verbindung nach Schließung:", e);
+      }
+    }, Math.min(wsReconnectCount * 1000, 5000)); // Exponentielles Backoff
+  }
 });
+
+// VERBESSERT: Keep-Alive-Mechanismus für die WebSocket-Verbindung
+let wsKeepAliveInterval = null;
+
+function startWebSocketKeepAlive() {
+  // Stoppe zuerst eventuell laufende Intervalle
+  stopWebSocketKeepAlive();
+  
+  // Starte ein neues Intervall, das regelmäßig eine No-Op-Anfrage sendet, um die Verbindung am Leben zu halten
+  wsKeepAliveInterval = setInterval(() => {
+    try {
+      // Da wsLink.client.ping() nicht existiert, senden wir eine leere GraphQL-Anfrage
+      // Die GraphQL-Spezifikation erlaubt eine Ping-Operation mit einer introspection query
+      apolloClient.query({
+        query: gql`
+          query KeepAlive {
+            __typename
+          }
+        `,
+        fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+      }).then(() => {
+        console.debug("[Websocket] Keep-alive Anfrage erfolgreich");
+      }).catch((error) => {
+        console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
+      });
+      
+    } catch (e) {
+      console.error("[Websocket] Fehler beim Senden des Keep-alive:", e);
+    }
+  }, 30000); // Alle 30 Sekunden
+}
+
+function stopWebSocketKeepAlive() {
+  if (wsKeepAliveInterval) {
+    clearInterval(wsKeepAliveInterval);
+    wsKeepAliveInterval = null;
+  }
+}
 
 // Create the Error link.
 const errorLink = onError(async (error) => {
@@ -193,9 +291,21 @@ export async function terminateClient() {
 
 export async function terminateWebsocketClient() {
   try {
+    // Stoppe zuerst das Keep-Alive-Intervall
+    stopWebSocketKeepAlive();
+    
+    // Versuche, die Verbindung ordnungsgemäß zu schließen
+    console.info("[Websocket] Beende WebSocket-Verbindung...");
+    
+    // Setze den Reconnect-Zähler zurück, um weitere automatische Reconnects zu verhindern
+    wsReconnectCount = MAX_WS_RECONNECT_ATTEMPTS;
+    
+    // Ordnungsgemäßes Beenden mit Code 1000 (Normal Closure)
     await wsLink.client.terminate();
+    
+    console.info("[Websocket] WebSocket-Verbindung erfolgreich beendet");
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error(error);
+    console.error("[Websocket] Fehler beim Beenden der WebSocket-Verbindung:", error);
   }
 }

@@ -294,10 +294,24 @@ activePollEventUserQuery.onResult(({ data }) => {
       
       // NOCHMAL prüfen, ob wirklich Stimmen übrig sind, bevor das Modal geöffnet wird
       if (voteCounter.value <= totalAllowedVotes) {
+        // WICHTIG: Stelle sicher, dass keine alten Formular-Daten für diese Poll existieren
+        if (poll.value && poll.value.id) {
+          localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+          console.log(`[DEBUG:DASHBOARD] Lösche lokale Formulardaten vor Modal-Öffnung für Poll ${poll.value.id}`);
+        }
+        
         // Kleine Verzögerung vor dem Öffnen des Modals, um sicherzustellen, 
         // dass alle zuvor gesetzten Zustände vollständig zurückgesetzt wurden
         setTimeout(() => {
-          pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+          // Vollständiges Zurücksetzen des Formulars erzwingen
+          pollModal.value?.reset(false);
+          
+          // Sicherheitscheck: Nochmals prüfen, ob alte localStorage-Daten gelöscht wurden
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+          }
+          
+          // Jetzt erst das Modal öffnen
           pollModal.value.showModal();
         }, 100);
       } else {
@@ -367,8 +381,26 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     return;
   }
   
+  // OLD POLL: Speichere alte Poll-ID für Lösch-Operationen
+  const oldPollId = poll.value?.id;
+  
   poll.value = data.pollLifeCycle.poll;
   pollState.value = data.pollLifeCycle.state;
+  
+  // KRITISCH: Wenn wir ein pollLifeCycle-Event erhalten und die Poll-ID hat sich geändert,
+  // müssen wir alle alten Formular-Daten löschen
+  if (oldPollId && poll.value && poll.value.id && oldPollId !== poll.value.id) {
+    // Lösche die Formular-Daten der alten Abstimmung
+    localStorage.removeItem(`poll_form_data_${oldPollId}`);
+    console.log(`[DEBUG:DASHBOARD] Lösche lokale Formulardaten beim Poll-Wechsel: Old=${oldPollId}, New=${poll.value.id}`);
+  }
+  
+  // ZUSÄTZLICH: Bei jeder Poll-Statusänderung sicherstellen, dass für die neue/geänderte Poll
+  // keine alten ungültigen Formular-Daten vorhanden sind
+  if (poll.value && poll.value.id) {
+    localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+    console.log(`[DEBUG:DASHBOARD] Lösche zur Sicherheit lokale Formulardaten für aktuelle Poll ${poll.value.id} bei Status "${pollState.value}"`);
+  }
 
   if (pollState.value === "new") {
     // Vollständiges Zurücksetzen aller Zähler und Status-Werte
@@ -401,6 +433,13 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       // Setze den Status auf "abgestimmt", ohne das Modal zu öffnen
       pollState.value = "voted";
       return;
+    }
+    
+    // WICHTIG: Lokalen Storage für die aktuelle und vorherige Abstimmung löschen
+    if (poll.value && poll.value.id) {
+      // Lösche alle Formular-Daten für diese Abstimmung
+      localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+      console.log(`[DEBUG:DASHBOARD] Lösche lokale Formulardaten für neue Poll ${poll.value.id}`);
     }
     
     // Keine Abstimmung anzeigen, wenn gerade ein Abstimmungsprozess läuft

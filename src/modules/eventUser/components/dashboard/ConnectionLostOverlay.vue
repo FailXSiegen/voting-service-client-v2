@@ -5,20 +5,53 @@
   >
     <span class="content alert alert-danger">
       <h1>{{ $t("error.network.connectionLost") }}</h1>
-      <button
-        class="btn-lg btn btn-secondary py-2 d-print-none"
-        @click="onReloadPage"
-      >
-        <i class="me-3 bi bi-arrow-repeat bi--1xl" />
-        {{ $t("navigation.reload") }}
-      </button>
+      <div class="d-flex justify-content-center gap-3">
+        <button
+          class="btn-lg btn btn-secondary py-2 d-print-none"
+          @click="onReloadPage"
+        >
+          <i class="me-3 bi bi-arrow-repeat bi--1xl" />
+          {{ $t("navigation.reload") }}
+        </button>
+        <button
+          class="btn-lg btn btn-danger py-2 d-print-none"
+          @click="onLogout"
+        >
+          <i class="me-3 bi bi-x-square bi--1xl" />
+          {{ $t("navigation.logOut") }}
+        </button>
+      </div>
     </span>
   </div>
 </template>
 
 <script setup>
+import { logout } from "@/core/auth/login";
+import { useCore } from "@/core/store/core";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+const store = useCore();
+
 function onReloadPage() {
   location.reload();
+}
+
+async function onLogout() {
+  try {
+    await logout();
+    // Manuelle Bereinigung des LocalStorage für den Fall, dass die Verbindung zum Server nicht hergestellt werden kann
+    localStorage.clear();
+    // Zustand des Stores zurücksetzen
+    await store.logoutUser();
+    // Zur Login-Seite navigieren
+    router.push({ name: "login" });
+  } catch (error) {
+    console.error("Fehler beim Logout:", error);
+    // Im Fehlerfall trotzdem LocalStorage löschen und zur Login-Seite navigieren
+    localStorage.clear();
+    router.push({ name: "login" });
+  }
 }
 </script>
 
