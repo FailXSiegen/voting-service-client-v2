@@ -79,6 +79,7 @@ import { computed, ref } from "vue";
 import { useQuery, useSubscription } from "@vue/apollo-composable";
 import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results";
 import { ACTIVE_POLL_EVENT_USER } from "@/modules/organizer/graphql/queries/active-poll-event-user.js";
+import { USER_VOTE_CYCLE } from "@/modules/eventUser/graphql/queries/user-vote-cycle";
 import { toast } from "vue3-toastify";
 import l18n from "@/l18n";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
@@ -172,27 +173,136 @@ activePollEventUserQuery.onResult(({ data }) => {
   if (
     pollStatePersistence.canVote(poll.value.id, eventUser.value, props.event)
   ) {
-    // Stelle sicher, dass der Zähler korrekt initialisiert wird
-    voteCounter.value = pollStatePersistence.restoreVoteCounter(poll.value.id);
-    
-    // Zurücksetzen aller Verarbeitungszustände vor dem Öffnen des Modals
-    votingProcess.pollFormSubmitting.value = false;
-    votingProcess.currentlyProcessingBatch.value = false;
-    votingProcess.isProcessingVotes.value = false;
-    currentPollSubmissionId.value = null;
-    
-    // Zähler für die Erkennung des Batch-Abschlusses zurücksetzen
-    pollUserVotedCount.value = 0;
-    
-    // NOCHMAL prüfen, ob wirklich Stimmen übrig sind, bevor das Modal geöffnet wird
-    if (voteCounter.value <= totalAllowedVotes) {
-      // Kleine Verzögerung vor dem Öffnen des Modals, um sicherzustellen, 
-      // dass alle zuvor gesetzten Zustände vollständig zurückgesetzt wurden
-      setTimeout(() => {
-        pollModal.value.showModal();
-      }, 100);
+    // Server-seitigen Vote-Cycle für den Benutzer abrufen
+    if (eventUser.value?.id && poll.value?.id) {
+      const eventUserId = eventUser.value?.id?.toString();
+      const pollId = poll.value?.id?.toString();
+      
+      console.log('Starte userVoteCycle-Abfrage:', { eventUserId, pollId });
+      
+      if (!eventUserId || !pollId) {
+        console.error('Ungültige Parameter für userVoteCycle:', { eventUserId, pollId });
+        return;
+      }
+      
+      const userVoteCycleQuery = useQuery(
+        USER_VOTE_CYCLE,
+        { 
+          eventUserId,
+          pollId
+        },
+        { 
+          fetchPolicy: "network-only",
+          errorPolicy: "all" // Explizit Fehler zurückgeben, um sie im Log zu sehen
+        }
+      );
+      
+      // Fehlerbehandlung
+      userVoteCycleQuery.onError((error) => {
+        console.error('GraphQL-Fehler bei userVoteCycle:', error);
+      });
+      
+      userVoteCycleQuery.onResult(({ data }) => {
+        if (data?.userVoteCycle) {
+          // Server-seitigen Vote-Cycle als verlässlichere Quelle verwenden
+          const serverVoteCycle = data.userVoteCycle.voteCycle || 0;
+          const maxVotes = data.userVoteCycle.maxVotes || eventUser.value.voteAmount;
+          
+          // Die verwendeten Stimmen direkt übernehmen
+          votingProcess.usedVotesCount.value = serverVoteCycle;
+          
+          // Stelle sicher, dass der Zähler korrekt initialisiert wird
+          voteCounter.value = serverVoteCycle + 1;
+          
+          // Persistieren, damit future Loads konsistent sind
+          pollStatePersistence.upsertPollState(poll.value.id, voteCounter.value, serverVoteCycle, props.event.id);
+          
+          // Prüfen, ob bereits alle Stimmen abgegeben wurden
+          if (serverVoteCycle >= maxVotes) {
+            pollState.value = "voted";
+            return;
+          }
+          
+          // Zurücksetzen aller Verarbeitungszustände vor dem Öffnen des Modals
+          votingProcess.pollFormSubmitting.value = false;
+          votingProcess.currentlyProcessingBatch.value = false;
+          votingProcess.isProcessingVotes.value = false;
+          currentPollSubmissionId.value = null;
+          
+          // Zähler für die Erkennung des Batch-Abschlusses zurücksetzen
+          pollUserVotedCount.value = 0;
+          
+          // NOCHMAL prüfen, ob wirklich Stimmen übrig sind, bevor das Modal geöffnet wird
+          if (voteCounter.value <= maxVotes) {
+            // Kleine Verzögerung vor dem Öffnen des Modals, um sicherzustellen, 
+            // dass alle zuvor gesetzten Zustände vollständig zurückgesetzt wurden
+            setTimeout(() => {
+              pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+              pollModal.value.showModal();
+            }, 100);
+          } else {
+            pollState.value = "voted";
+          }
+        } else {
+          // Fallback zum lokalen Storage, wenn der Server keine Daten zurückgibt
+          // Stelle sicher, dass der Zähler korrekt initialisiert wird
+          voteCounter.value = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
+          
+          // Synchronisiere den verwendeten Stimmen-Zähler mit dem gespeicherten Zustand
+          // Dies ist wichtig, um nach einem Reload den korrekten Stimmenzähler wiederherzustellen
+          votingProcess.usedVotesCount.value = pollStatePersistence.getUsedVotes(poll.value.id, props.event.id);
+          
+          // Zurücksetzen aller Verarbeitungszustände vor dem Öffnen des Modals
+          votingProcess.pollFormSubmitting.value = false;
+          votingProcess.currentlyProcessingBatch.value = false;
+          votingProcess.isProcessingVotes.value = false;
+          currentPollSubmissionId.value = null;
+          
+          // Zähler für die Erkennung des Batch-Abschlusses zurücksetzen
+          pollUserVotedCount.value = 0;
+          
+          // NOCHMAL prüfen, ob wirklich Stimmen übrig sind, bevor das Modal geöffnet wird
+          if (voteCounter.value <= totalAllowedVotes) {
+            // Kleine Verzögerung vor dem Öffnen des Modals, um sicherzustellen, 
+            // dass alle zuvor gesetzten Zustände vollständig zurückgesetzt wurden
+            setTimeout(() => {
+              pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+              pollModal.value.showModal();
+            }, 100);
+          } else {
+            pollState.value = "voted";
+          }
+        }
+      });
     } else {
-      pollState.value = "voted";
+      // Fallback, wenn keine Poll- oder EventUser-ID verfügbar ist
+      // Stelle sicher, dass der Zähler korrekt initialisiert wird
+      voteCounter.value = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
+      
+      // Synchronisiere den verwendeten Stimmen-Zähler mit dem gespeicherten Zustand
+      // Dies ist wichtig, um nach einem Reload den korrekten Stimmenzähler wiederherzustellen
+      votingProcess.usedVotesCount.value = pollStatePersistence.getUsedVotes(poll.value.id, props.event.id);
+      
+      // Zurücksetzen aller Verarbeitungszustände vor dem Öffnen des Modals
+      votingProcess.pollFormSubmitting.value = false;
+      votingProcess.currentlyProcessingBatch.value = false;
+      votingProcess.isProcessingVotes.value = false;
+      currentPollSubmissionId.value = null;
+      
+      // Zähler für die Erkennung des Batch-Abschlusses zurücksetzen
+      pollUserVotedCount.value = 0;
+      
+      // NOCHMAL prüfen, ob wirklich Stimmen übrig sind, bevor das Modal geöffnet wird
+      if (voteCounter.value <= totalAllowedVotes) {
+        // Kleine Verzögerung vor dem Öffnen des Modals, um sicherzustellen, 
+        // dass alle zuvor gesetzten Zustände vollständig zurückgesetzt wurden
+        setTimeout(() => {
+          pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+          pollModal.value.showModal();
+        }, 100);
+      } else {
+        pollState.value = "voted";
+      }
     }
   }
 });
@@ -266,7 +376,14 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     // Auch die aktuelle Abstimmungs-ID zurücksetzen
     currentPollSubmissionId.value = null;
     
+    // Setze den Zähler auf 1 für einen frischen Start
     voteCounter.value = 1;
+    
+    // Für einen neuen Poll auch den persistenten Zustand zurücksetzen
+    if (poll.value && poll.value.id && props.event && props.event.id) {
+      pollStatePersistence.resetVoteState(poll.value.id, props.event.id);
+    }
+    
     resultModal.value?.hideModal();
 
     if (!poll.value) {
@@ -288,18 +405,100 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     
     // Keine Abstimmung anzeigen, wenn gerade ein Abstimmungsprozess läuft
     if (showVotingModal.value) {
-      // Kleine Verzögerung, um sicherzustellen, dass alle Status zurückgesetzt sind
-      setTimeout(() => {
-        // Sicherstellen, dass der voteCounter neu initialisiert wird
-        voteCounter.value = 1;
+      // Server-seitigen Vote-Cycle für den Benutzer abrufen für die neue Poll
+      if (eventUser.value?.id && poll.value?.id) {
+        const eventUserId = eventUser.value?.id?.toString();
+        const pollId = poll.value?.id?.toString();
         
-        // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
-        if (eventUser.value?.voteAmount > 0 && votingProcess.usedVotesCount.value < eventUser.value.voteAmount) {
-          pollModal.value?.showModal();
-        } else {
-          pollState.value = "voted";
+        console.log('Starte userVoteCycle-Abfrage für neue Poll:', { eventUserId, pollId });
+        
+        if (!eventUserId || !pollId) {
+          console.error('Ungültige Parameter für userVoteCycle (neue Poll):', { eventUserId, pollId });
+          return;
         }
-      }, 100);
+        
+        const userVoteCycleQuery = useQuery(
+          USER_VOTE_CYCLE,
+          { 
+            eventUserId,
+            pollId
+          },
+          { 
+            fetchPolicy: "network-only", 
+            errorPolicy: "all" // Explizit Fehler zurückgeben, um sie im Log zu sehen
+          }
+        );
+        
+        // Fehlerbehandlung
+        userVoteCycleQuery.onError((error) => {
+          console.error('GraphQL-Fehler bei userVoteCycle (neue Poll):', error);
+        });
+        
+        userVoteCycleQuery.onResult(({ data }) => {
+          if (data?.userVoteCycle) {
+            // Server-seitigen Vote-Cycle als verlässlichere Quelle verwenden
+            const serverVoteCycle = data.userVoteCycle.voteCycle || 0;
+            const maxVotes = data.userVoteCycle.maxVotes || eventUser.value.voteAmount;
+            
+            // Die verwendeten Stimmen direkt übernehmen
+            votingProcess.usedVotesCount.value = serverVoteCycle;
+            
+            // Stelle sicher, dass der Zähler korrekt initialisiert wird
+            voteCounter.value = serverVoteCycle + 1;
+            
+            // Persistieren, damit future Loads konsistent sind
+            pollStatePersistence.upsertPollState(poll.value.id, voteCounter.value, serverVoteCycle, props.event.id);
+            
+            // Prüfen, ob bereits alle Stimmen abgegeben wurden
+            if (serverVoteCycle >= maxVotes) {
+              pollState.value = "voted";
+              return;
+            }
+            
+            // Kleine Verzögerung, um sicherzustellen, dass alle Status zurückgesetzt sind
+            setTimeout(() => {
+              // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
+              if (maxVotes > 0 && serverVoteCycle < maxVotes) {
+                // Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
+                pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+                pollModal.value?.showModal();
+              } else {
+                pollState.value = "voted";
+              }
+            }, 100);
+          } else {
+            // Fallback - Keine Server-Daten verfügbar, normales Verhalten
+            setTimeout(() => {
+              // Sicherstellen, dass der voteCounter neu initialisiert wird
+              voteCounter.value = 1;
+              
+              // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
+              if (eventUser.value?.voteAmount > 0 && votingProcess.usedVotesCount.value < eventUser.value.voteAmount) {
+                // Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
+                pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+                pollModal.value?.showModal();
+              } else {
+                pollState.value = "voted";
+              }
+            }, 100);
+          }
+        });
+      } else {
+        // Fallback - Keine IDs verfügbar, normales Verhalten
+        setTimeout(() => {
+          // Sicherstellen, dass der voteCounter neu initialisiert wird
+          voteCounter.value = 1;
+          
+          // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
+          if (eventUser.value?.voteAmount > 0 && votingProcess.usedVotesCount.value < eventUser.value.voteAmount) {
+            // Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
+            pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
+            pollModal.value?.showModal();
+          } else {
+            pollState.value = "voted";
+          }
+        }, 100);
+      }
     }
   } else if (pollState.value === "closed") {
     pollModal.value?.hideModal();
@@ -562,6 +761,22 @@ async function onSubmitPoll(pollFormData) {
       // Verarbeitung der Stimmen - Wir überlassen die Session-Verwaltung nun vollständig dem voting-process
       if (pollFormData.votesToUse && parseInt(pollFormData.votesToUse, 10) > 0) {
         const votesToUse = parseInt(pollFormData.votesToUse, 10);
+        
+        // WICHTIG: Speichere die gewählte Stimmenzahl für Persistenz zwischen Seiten-Reloads
+        if (poll.value && poll.value.id && props.event && props.event.id) {
+          // GARANTIERT GENAU DIE VOM NUTZER GEWÄHLTE ANZAHL SPEICHERN
+          pollStatePersistence.setMaxVotesToUse(poll.value.id, props.event.id, votesToUse);
+          
+          // Zur Sicherheit direkt danach prüfen, ob der Wert auch korrekt gespeichert wurde
+          const saved = pollStatePersistence.getMaxVotesToUse(poll.value.id, props.event.id);
+          console.log(`[DEBUG:VOTING] Speichere Nutzerauswahl von ${votesToUse} Stimmen für persistente Verwendung. Gespeichert: ${saved}`);
+          
+          // Wenn der Wert nicht korrekt gespeichert wurde, nochmal versuchen
+          if (saved === null || saved !== votesToUse) {
+            console.log(`[DEBUG:VOTING] KRITISCH! Wert nicht korrekt gespeichert, versuche erneut...`);
+            pollStatePersistence.setMaxVotesToUse(poll.value.id, props.event.id, votesToUse);
+          }
+        }
       
         if (votesToUse === eventUser.value.voteAmount) {
           pollFormData.useAllAvailableVotes = true;
@@ -570,6 +785,20 @@ async function onSubmitPoll(pollFormData) {
           success = await votingProcess.handleFormSubmit(pollFormData, poll, votesToUse);
         }
       } else {
+        // Hier wird mit 1 Stimme abgestimmt, dies ebenfalls speichern
+        if (poll.value && poll.value.id && props.event && props.event.id) {
+          pollStatePersistence.setMaxVotesToUse(poll.value.id, props.event.id, 1);
+          
+          // Zur Sicherheit direkt danach prüfen, ob der Wert auch korrekt gespeichert wurde
+          const saved = pollStatePersistence.getMaxVotesToUse(poll.value.id, props.event.id);
+          console.log(`[DEBUG:VOTING] Speichere Standardauswahl von 1 Stimme für persistente Verwendung. Gespeichert: ${saved}`);
+          
+          // Wenn der Wert nicht korrekt gespeichert wurde, nochmal versuchen
+          if (saved === null || saved !== 1) {
+            console.log(`[DEBUG:VOTING] KRITISCH! Wert nicht korrekt gespeichert, versuche erneut...`);
+            pollStatePersistence.setMaxVotesToUse(poll.value.id, props.event.id, 1);
+          }
+        }
         success = await votingProcess.handleFormSubmit(pollFormData, poll);
       }
       

@@ -96,8 +96,7 @@
           id="poll-answer"
           :items="possibleAnswers"
           :value="formData.singleAnswer"
-          :has-errors="v$.singleAnswer?.$errors?.length > 0"
-          ckl
+          :has-errors="false"
           @change="
             ({ value }) => {
               formData.singleAnswer = parseInt(value, 10);
@@ -263,12 +262,14 @@ const formData = reactive({
   singleAnswer: null,
   multipleAnswers: [],
   abstain: false,
-  useAllAvailableVotes: false,
+  useAllAvailableVotes: true, // Standardmäßig "Alle Stimmen verwenden" aktivieren
   votesToUse: 1,
 });
 
 onMounted(() => {
-  formData.votesToUse = Math.min(remainingVotes.value, Math.max(1, formData.votesToUse));
+  // Immer mit maximaler Stimmenzahl starten
+  formData.useAllAvailableVotes = true;
+  formData.votesToUse = remainingVotes.value;
 });
 
 function setVotePercentage(percentage) {
@@ -381,16 +382,35 @@ async function onSubmit() {
   }
   
   try {
-    // Explizite Prüfung auf gültige Auswahl
+    // Verbesserte explizite Prüfung auf gültige Auswahl
     if (!formData.singleAnswer && (!formData.multipleAnswers || formData.multipleAnswers.length === 0) && !formData.abstain) {
       alert('Bitte treffen Sie eine Auswahl');
       return;
     }
     
+    // Debug-Ausgabe für besseres Verständnis der Validierung
+    console.log(`[DEBUG:FORM] Validiere Form mit: singleAnswer=${formData.singleAnswer}, multipleAnswers=${JSON.stringify(formData.multipleAnswers)}, abstain=${formData.abstain}, votesToUse=${formData.votesToUse}`);
+    
+    // Prüfe, ob ein Radio-Button ausgewählt wurde bei Single-Choice-Abstimmungen
+    if (voteType.value === VOTE_TYPE_SINGLE && !formData.singleAnswer && !formData.abstain) {
+      console.error('Keine Antwort bei Single-Choice ausgewählt');
+      alert('Bitte wählen Sie eine Antwort aus.');
+      return;
+    }
+    
+    // Sicher gehen, dass votesToUse einen gültigen Wert hat
+    if (typeof formData.votesToUse !== 'number' || formData.votesToUse < 1) {
+      formData.votesToUse = 1;
+    }
+    
     // Validierung
     const result = await v$.value.$validate();
     if (!result) {
-      handleError(new InvalidFormError());
+      console.error(`[ERROR:FORM] Validierungsfehler:`, v$.value.$errors);
+      
+      // Stelle sicher, dass wir den Nutzer gut informieren
+      const errorMessages = v$.value.$errors.map(e => e.$message).join(', ');
+      alert(`Bitte überprüfen Sie Ihre Eingaben: ${errorMessages}`);
       return;
     }
     
@@ -427,12 +447,10 @@ function reset(keepSelection = false) {
     formData.multipleAnswers = [];
     formData.abstain = false;
     
-    // Votenzähler auf Maximum setzen, wenn wir mehrere Stimmen haben
-    if (hasMultipleVotes.value) {
-      // Auf 100% setzen (alle verbleibenden Stimmen)
-      formData.votesToUse = remainingVotes.value;
-      formData.useAllAvailableVotes = true;
-    }
+    // Votenzähler IMMER auf Maximum setzen, unabhängig von der Stimmanzahl
+    // Auf 100% setzen (alle verbleibenden Stimmen)
+    formData.votesToUse = remainingVotes.value;
+    formData.useAllAvailableVotes = true;
     
     // Formularvalidierung zurücksetzen
     v$.value.$reset();
@@ -447,9 +465,9 @@ function reset(keepSelection = false) {
         input.checked = false;
       });
       
-      // Nach der "Use all votes" Checkbox suchen und aktivieren
+      // Nach der "Use all votes" Checkbox suchen und IMMER aktivieren
       const checkbox = document.querySelector('#submit-answer-for-each-vote');
-      if (checkbox && hasMultipleVotes.value) {
+      if (checkbox) {
         checkbox.checked = true;
       }
     }, 50);
