@@ -40,6 +40,18 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
           </div>
 
           <div class="modal-body">
+            <!-- NEUE WARNUNG: Anzeige wenn Umfrage geschlossen ist -->
+            <div v-if="poll.closed" class="alert alert-warning mb-3">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              <strong>Diese Abstimmung ist geschlossen und kann nicht mehr verwendet werden.</strong>
+            </div>
+            
+            <!-- NEUE WARNUNG: Anzeige wenn alle Stimmen abgegeben wurden -->
+            <div v-else-if="votingProcess.votingFullyCompleted?.value || (eventUser.voteAmount && votingProcess.usedVotesCount?.value >= eventUser.voteAmount)" class="alert alert-info mb-3">
+              <i class="bi bi-check-circle me-2"></i>
+              <strong>Sie haben alle verfügbaren Stimmen für diese Abstimmung abgegeben.</strong>
+            </div>
+
             <p v-if="poll.maxVotes === 1">
               {{ $t("view.polls.modal.maxVote1") }}
             </p>
@@ -52,7 +64,9 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
               {{ poll.minVotes }}
             </p>
 
+            <!-- Form conditionally disabled when poll is closed or all votes used -->
             <PollForm
+              v-if="!poll.closed && !(votingProcess.votingFullyCompleted?.value || (eventUser.voteAmount && votingProcess.usedVotesCount?.value >= eventUser.voteAmount))"
               ref="pollForm"
               :key="pollFormKey"
               :event="event"
@@ -128,6 +142,12 @@ const modalState = computed(() => {
 
 onMounted(() => {
   bootstrapModal = new Modal(modal.value);
+  
+  // Setup completion handler to show appropriate UI state when voting is complete
+  votingProcess.setVotingCompletedCallback(() => {
+    // Force UI update to show completion state
+    votingProcess.votingFullyCompleted.value = true;
+  });
 });
 
 function onSubmit(data) {

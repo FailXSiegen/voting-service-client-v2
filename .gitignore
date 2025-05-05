@@ -34,3 +34,5 @@ coverage
 # public
 public/lib
 playwright-report
+test-results/
+voting-results/

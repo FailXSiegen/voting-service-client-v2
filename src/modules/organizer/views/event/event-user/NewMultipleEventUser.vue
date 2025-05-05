@@ -109,8 +109,8 @@ eventQuery.onResult(({data}) => {
 });
 
 // Batch processing configuration
-const BATCH_SIZE = 5;
-const BATCH_DELAY = 1000; // 1 second
+const BATCH_SIZE = 25;
+const BATCH_DELAY = 200; // 1 second
 
 // Verbesserte Fehlerextraktion
 function extractErrorMessage(error) {
