@@ -101,14 +101,14 @@ async function interactWithModal(page, userIndex) {
             }
         }
 
-        // DEBUGGING: Screenshot nach Radiobutton-Auswahl
-        await page.screenshot({
-            path: path.join(screenshotsDir, `modal-after-radio-user-${userIndex}.png`),
-            fullPage: false
-        });
-
-        // Stark verkürzte Pause nach dem Klicken des Radiobuttons
-        await page.waitForTimeout(200);
+        // Keine Pause nach dem Klicken des Radiobuttons für maximale Geschwindigkeit
+        // Screenshots nur in 10% der Fälle machen, um Performance zu verbessern
+        if (Math.random() < 0.1) {
+            await page.screenshot({
+                path: path.join(screenshotsDir, `modal-after-radio-user-${userIndex}.png`),
+                fullPage: false
+            });
+        }
 
         // Verbesserte Submit-Button-Auswahl mit mehr Selektoren
         const submitSelectors = [
@@ -143,8 +143,7 @@ async function interactWithModal(page, userIndex) {
                         // Scroll zum Submit-Button, damit er sicher im sichtbaren Bereich ist
                         await submitButton.scrollIntoViewIfNeeded();
 
-                        // Reduzierte Wartezeit nach dem Scrollen
-                        await page.waitForTimeout(50);
+                        // Keine Wartezeit nach dem Scrollen für maximale Geschwindigkeit
 
                         // Klicke auf den Submit-Button
                         await submitButton.click({ force: true, timeout: 3000 });
@@ -240,9 +239,9 @@ async function interactWithModal(page, userIndex) {
         console.log(`User ${userIndex}: Vote submitted, waiting for processing...`);
         // Deutlich erhöhte Verarbeitungszeit, um sicherzustellen, dass die Verbindung lange genug bestehen bleibt
         
-        // Reduzierte Wartezeit zur Abstimmungsverarbeitung
-        console.log(`User ${userIndex}: Warte 1000ms auf Abstimmungsverarbeitung...`);
-        await page.waitForTimeout(1000);
+        // Stark reduzierte Wartezeit zur Abstimmungsverarbeitung
+        console.log(`User ${userIndex}: Warte 200ms auf Abstimmungsverarbeitung...`);
+        await page.waitForTimeout(200);
 
         // Prüfe auf Erfolg und mache Screenshots
         const success = await checkVotingSuccess(page, userIndex);
@@ -250,14 +249,16 @@ async function interactWithModal(page, userIndex) {
         if (success) {
             console.log(`User ${userIndex}: Vote successfully processed`);
 
-            // Erfolgs-Screenshot
-            try {
-                await page.screenshot({
-                    path: path.join(screenshotsDir, `vote-success-user-${userIndex}.png`),
-                    fullPage: false
-                });
-            } catch (screenshotError) {
-                console.error(`Failed to take success screenshot for user ${userIndex}:`, screenshotError.message);
+            // Erfolgs-Screenshot nur in 10% der Fälle für bessere Performance
+            if (Math.random() < 0.1) {
+                try {
+                    await page.screenshot({
+                        path: path.join(screenshotsDir, `vote-success-user-${userIndex}.png`),
+                        fullPage: false
+                    });
+                } catch (screenshotError) {
+                    console.error(`Failed to take success screenshot for user ${userIndex}:`, screenshotError.message);
+                }
             }
         } else {
             console.error(`User ${userIndex}: Vote submission appears to have failed`);
@@ -293,8 +294,25 @@ async function interactWithModal(page, userIndex) {
 
 // Verbesserte Abstimmungsfunktion mit mehreren Versuchen
 async function attemptVoting(page, userIndex, votingTimings) {
+    // Prüfen, ob die Page noch existiert
+    try {
+        // Ein einfacher Aufruf, um zu sehen, ob die Page noch existiert
+        await page.evaluate(() => true);
+    } catch (e) {
+        console.log(`User ${userIndex}: Page ist zu Beginn von attemptVoting bereits geschlossen`);
+        return false; // Page ist geschlossen, keine weiteren Aktionen möglich
+    }
+    
     for (let attempt = 0; attempt < CONFIG.MAX_RETRIES; attempt++) {
         try {
+            // Erneute Prüfung vor jedem Versuch
+            try {
+                await page.evaluate(() => true);
+            } catch (e) {
+                console.log(`User ${userIndex}: Page wurde zwischen Versuchen geschlossen`);
+                return false;
+            }
+            
             // Prüfe nur auf bereits abgestimmt, nachdem der erste Versuch fehlgeschlagen ist
             if (attempt > 0) {
                 // Prüfe, ob der Benutzer bereits abgestimmt hat und Ergebnisse von vorherigen Versuchen sichtbar sind
@@ -478,11 +496,9 @@ async function executeVotingInBatches(userPages, votingTimings) {
 
         console.log(`Starte Batch ${batch + 1}/${numBatches} mit ${currentBatchSize} Benutzern (${startIdx} bis ${endIdx - 1})...`);
         
-        // Minimale Pause vor jedem Batch
+        // Keine Pause vor Batches, um maximale Geschwindigkeit zu erreichen
         if (batch > 0) {
-            // Sehr kurze Verzögerung vor dem nächsten Batch
-            await new Promise(resolve => setTimeout(resolve, 200));
-            console.log(`Batch ${batch + 1} startet nach 200ms Verzögerung...`);
+            console.log(`Batch ${batch + 1} startet sofort...`);
         }
 
         // Führe die Abstimmungen für den aktuellen Batch parallel aus
