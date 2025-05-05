@@ -177,8 +177,7 @@ activePollEventUserQuery.onResult(({ data }) => {
     if (eventUser.value?.id && poll.value?.id) {
       const eventUserId = eventUser.value?.id?.toString();
       const pollId = poll.value?.id?.toString();
-      
-      console.log('Starte userVoteCycle-Abfrage:', { eventUserId, pollId });
+  
       
       if (!eventUserId || !pollId) {
         console.error('Ungültige Parameter für userVoteCycle:', { eventUserId, pollId });
@@ -297,7 +296,6 @@ activePollEventUserQuery.onResult(({ data }) => {
         // WICHTIG: Stelle sicher, dass keine alten Formular-Daten für diese Poll existieren
         if (poll.value && poll.value.id) {
           localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-          console.log(`[DEBUG:DASHBOARD] Lösche lokale Formulardaten vor Modal-Öffnung für Poll ${poll.value.id}`);
         }
         
         // Kleine Verzögerung vor dem Öffnen des Modals, um sicherzustellen, 
@@ -392,14 +390,12 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
   if (oldPollId && poll.value && poll.value.id && oldPollId !== poll.value.id) {
     // Lösche die Formular-Daten der alten Abstimmung
     localStorage.removeItem(`poll_form_data_${oldPollId}`);
-    console.log(`[DEBUG:DASHBOARD] Lösche lokale Formulardaten beim Poll-Wechsel: Old=${oldPollId}, New=${poll.value.id}`);
   }
   
   // ZUSÄTZLICH: Bei jeder Poll-Statusänderung sicherstellen, dass für die neue/geänderte Poll
   // keine alten ungültigen Formular-Daten vorhanden sind
   if (poll.value && poll.value.id) {
     localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-    console.log(`[DEBUG:DASHBOARD] Lösche zur Sicherheit lokale Formulardaten für aktuelle Poll ${poll.value.id} bei Status "${pollState.value}"`);
   }
 
   if (pollState.value === "new") {
@@ -439,7 +435,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     if (poll.value && poll.value.id) {
       // Lösche alle Formular-Daten für diese Abstimmung
       localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-      console.log(`[DEBUG:DASHBOARD] Lösche lokale Formulardaten für neue Poll ${poll.value.id}`);
     }
     
     // Keine Abstimmung anzeigen, wenn gerade ein Abstimmungsprozess läuft
@@ -448,8 +443,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       if (eventUser.value?.id && poll.value?.id) {
         const eventUserId = eventUser.value?.id?.toString();
         const pollId = poll.value?.id?.toString();
-        
-        console.log('Starte userVoteCycle-Abfrage für neue Poll:', { eventUserId, pollId });
         
         if (!eventUserId || !pollId) {
           console.error('Ungültige Parameter für userVoteCycle (neue Poll):', { eventUserId, pollId });
@@ -808,11 +801,9 @@ async function onSubmitPoll(pollFormData) {
           
           // Zur Sicherheit direkt danach prüfen, ob der Wert auch korrekt gespeichert wurde
           const saved = pollStatePersistence.getMaxVotesToUse(poll.value.id, props.event.id);
-          console.log(`[DEBUG:VOTING] Speichere Nutzerauswahl von ${votesToUse} Stimmen für persistente Verwendung. Gespeichert: ${saved}`);
           
           // Wenn der Wert nicht korrekt gespeichert wurde, nochmal versuchen
           if (saved === null || saved !== votesToUse) {
-            console.log(`[DEBUG:VOTING] KRITISCH! Wert nicht korrekt gespeichert, versuche erneut...`);
             pollStatePersistence.setMaxVotesToUse(poll.value.id, props.event.id, votesToUse);
           }
         }
@@ -830,11 +821,9 @@ async function onSubmitPoll(pollFormData) {
           
           // Zur Sicherheit direkt danach prüfen, ob der Wert auch korrekt gespeichert wurde
           const saved = pollStatePersistence.getMaxVotesToUse(poll.value.id, props.event.id);
-          console.log(`[DEBUG:VOTING] Speichere Standardauswahl von 1 Stimme für persistente Verwendung. Gespeichert: ${saved}`);
           
           // Wenn der Wert nicht korrekt gespeichert wurde, nochmal versuchen
           if (saved === null || saved !== 1) {
-            console.log(`[DEBUG:VOTING] KRITISCH! Wert nicht korrekt gespeichert, versuche erneut...`);
             pollStatePersistence.setMaxVotesToUse(poll.value.id, props.event.id, 1);
           }
         }
