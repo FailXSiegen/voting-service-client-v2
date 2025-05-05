@@ -5,8 +5,8 @@
       <ul class="nav nav-tabs mb-4" role="tablist">
         <li class="nav-item">
           <button 
-            class="nav-link active" 
-            id="general-tab"
+            id="general-tab" 
+            class="nav-link active"
             data-bs-toggle="tab" 
             data-bs-target="#general"
             type="button"
@@ -19,8 +19,8 @@
         </li>
         <li class="nav-item">
           <button 
-            class="nav-link" 
-            id="rules-tab"
+            id="rules-tab" 
+            class="nav-link"
             data-bs-toggle="tab" 
             data-bs-target="#rules"
             type="button"
@@ -33,8 +33,8 @@
         </li>
         <li class="nav-item">
           <button 
-            class="nav-link" 
-            id="styling-tab"
+            id="styling-tab" 
+            class="nav-link"
             data-bs-toggle="tab" 
             data-bs-target="#styling"
             type="button"
@@ -50,7 +50,7 @@
       <!-- Tab Content -->
       <div class="tab-content">
         <!-- General Settings -->
-        <div class="tab-pane fade show active" id="general" role="tabpanel" aria-labelledby="general-tab">
+        <div id="general" class="tab-pane fade show active" role="tabpanel" aria-labelledby="general-tab">
           <div class="row">
             <div class="col-12 col-md-6">
               <div class="mb-3">
@@ -151,7 +151,7 @@
               @update="({ value }) => { formData.allowMagicLink = value; }"
             />
             <div class="ms-2">
-              <i class="bi bi-question-circle" ref="popoverTrigger"></i>
+              <i ref="popoverTrigger" class="bi bi-question-circle"></i>
             </div>
           </div>
 
@@ -178,7 +178,7 @@
         </div>
 
         <!-- Rules Tab -->
-        <div class="tab-pane fade" id="rules" role="tabpanel" aria-labelledby="rules-tab">
+        <div id="rules" class="tab-pane fade" role="tabpanel" aria-labelledby="rules-tab">
           <h3>{{ $t("view.event.create.labels.multivoteTypeTitle") }}</h3>
           <p class="text-muted">
             {{ $t("view.event.create.labels.multivoteTypeInfo") }}
@@ -201,7 +201,7 @@
         </div>
 
         <!-- Styling Tab -->
-        <div class="tab-pane fade" id="styling" role="tabpanel" aria-labelledby="styling-tab">
+        <div id="styling" class="tab-pane fade" role="tabpanel" aria-labelledby="styling-tab">
           <div class="mb-3">
             <LogoUpload
               v-model="formData.logo"

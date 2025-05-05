@@ -97,3 +97,15 @@ i.bi {
 [aria-expanded="true"] .bi-caret-right-fill {
   transform: rotate(90deg);
 }
+
+.answer-wrapper {
+  .form-check-input {
+    background-color: $secondary;
+    border-color: $primary;
+
+  }
+
+  .form-check {
+    font-size: 24px;
+  }
+}

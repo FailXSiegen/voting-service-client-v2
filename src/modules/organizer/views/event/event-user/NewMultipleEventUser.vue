@@ -109,8 +109,8 @@ eventQuery.onResult(({data}) => {
 });
 
 // Batch processing configuration
-const BATCH_SIZE = 5;
-const BATCH_DELAY = 1000; // 1 second
+const BATCH_SIZE = 25;
+const BATCH_DELAY = 200; // 1 second
 
 // Verbesserte Fehlerextraktion
 function extractErrorMessage(error) {
@@ -243,11 +243,11 @@ async function createUsersInBatches(userDataList, isTokenBased) {
 
 // Submit handler bleibt größtenteils gleich, aber mit verbessertem Error Handling
 async function onSubmit({
-                          usernames,
-                          allowToVote,
-                          voteAmount,
-                          tokenBasedLogin,
-                        }) {
+  usernames,
+  allowToVote,
+  voteAmount,
+  tokenBasedLogin,
+}) {
   isProcessing.value = true;
   progress.current = 0;
   progress.total = usernames.length;
