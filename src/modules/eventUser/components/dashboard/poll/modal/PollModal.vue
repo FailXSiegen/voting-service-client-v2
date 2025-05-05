@@ -170,7 +170,6 @@ function showModal() {
   // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
   if (props.poll && props.poll.id) {
     localStorage.removeItem(`poll_form_data_${props.poll.id}`);
-    console.log(`[DEBUG:POLL_MODAL] Lösche lokale Formulardaten beim Öffnen des Modals für Poll ${props.poll.id}`);
   }
   
   // Formular bei JEDEM Öffnen zurücksetzen
@@ -181,7 +180,6 @@ function showModal() {
   
   // Erhöhe immer den pollFormKey, um sicherzustellen, dass das Formular neu instanziiert wird
   pollFormKey.value += 1;
-  console.log(`[DEBUG:POLL_MODAL] Neue PollForm Key: ${pollFormKey.value}`);
   
   // Um das "Wird abgestimmt" bei jedem Öffnen korrekt anzuzeigen, 
   // stellen wir sicher, dass die Komponente in einem frischen Zustand ist
@@ -198,7 +196,6 @@ function hideModal() {
   // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
   if (props.poll && props.poll.id) {
     localStorage.removeItem(`poll_form_data_${props.poll.id}`);
-    console.log(`[DEBUG:POLL_MODAL] Lösche lokale Formulardaten beim Schließen des Modals für Poll ${props.poll.id}`);
   }
   
   // Alle UI-relevanten Flags auf true setzen
@@ -219,7 +216,6 @@ function hideModal() {
     
     // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
     pollFormKey.value += 1;
-    console.log(`[DEBUG:POLL_MODAL] Neue PollForm Key nach Schließen: ${pollFormKey.value}`);
 
     // IMMER alle States zurücksetzen, sobald das Modal geschlossen ist
     // Aber mit einer Verzögerung, damit das Modal wirklich sauber entfernt ist
@@ -250,7 +246,6 @@ function reset(keepSelection = false) {
   // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
   if (props.poll && props.poll.id) {
     localStorage.removeItem(`poll_form_data_${props.poll.id}`);
-    console.log(`[DEBUG:POLL_MODAL] Lösche lokale Formulardaten beim Reset für Poll ${props.poll.id}`);
   }
   
   // Stelle sicher, dass auch das PollForm vollständig zurückgesetzt wird

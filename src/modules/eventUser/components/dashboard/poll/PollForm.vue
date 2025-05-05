@@ -270,11 +270,9 @@ const formData = reactive({
 // wenn zu einer neuen Abstimmung gewechselt wird
 watch(() => props.poll?.id, (newPollId, oldPollId) => {
   if (newPollId && oldPollId && newPollId !== oldPollId) {
-    console.log(`[DEBUG:FORM] Neue Poll ID erkannt: ${oldPollId} -> ${newPollId}`);
     
     // KRITISCH: Alte Poll-Daten aus localStorage löschen
     localStorage.removeItem(`poll_form_data_${oldPollId}`);
-    console.log(`[DEBUG:FORM] Lösche lokalen Formularcache für alte Poll ${oldPollId}`);
     
     // Formular vollständig zurücksetzen
     reset(false);
@@ -294,7 +292,6 @@ onMounted(() => {
   if (props.poll && props.poll.id) {
     // Alte Daten löschen
     localStorage.removeItem(`poll_form_data_${props.poll.id}`);
-    console.log(`[DEBUG:FORM] Initialisierung: Lösche lokalen Formularcache für Poll ${props.poll.id}`);
   }
 });
 
@@ -414,8 +411,6 @@ async function onSubmit() {
       return;
     }
     
-    // Debug-Ausgabe für besseres Verständnis der Validierung
-    console.log(`[DEBUG:FORM] Validiere Form mit: singleAnswer=${formData.singleAnswer}, multipleAnswers=${JSON.stringify(formData.multipleAnswers)}, abstain=${formData.abstain}, votesToUse=${formData.votesToUse}`);
     
     // Prüfe, ob ein Radio-Button ausgewählt wurde bei Single-Choice-Abstimmungen
     if (voteType.value === VOTE_TYPE_SINGLE && !formData.singleAnswer && !formData.abstain) {
@@ -476,7 +471,6 @@ function reset(keepSelection = false) {
     // WICHTIG: Lokalen Formular-Cache löschen
     if (props.poll && props.poll.id) {
       localStorage.removeItem(`poll_form_data_${props.poll.id}`);
-      console.log(`[DEBUG:FORM] Lösche lokalen Formularcache bei Reset für Poll ${props.poll.id}`);
     }
     
     // Votenzähler IMMER auf Maximum setzen, unabhängig von der Stimmanzahl
