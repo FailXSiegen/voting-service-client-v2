@@ -73,17 +73,17 @@ export function useVotingProcess(eventUser, event) {
       // Dies passiert typischerweise, wenn ein neuer Poll gestartet wird
       usedVotesCount.value = 0;
       voteCounter.value = 1;
-      
+
       // WICHTIG: Speichere die aktuelle Poll-ID, damit wir sie als "gesehen" markieren
       const oldPollId = currentPollId.value;
       currentPollId.value = newPollId;
       votingFullyCompleted.value = false;
-      
+
       // KRITISCH: Bei einem Page-Reload oder Navigation werden wir für die gleiche Poll
       // aufgerufen - in diesem Fall NICHT den persistenten Zustand zurücksetzen!
       // Wir setzen nur zurück, wenn wirklich eine neue Abstimmung gestartet wurde
       const eventObj = event && typeof event.value === 'object' ? event.value : event;
-      
+
       // KRITISCH: Prüfe, ob wir den gespeicherten Zustand wiederherstellen können
       if (eventObj && eventObj.id) {
         // Nur zurücksetzen, wenn oldPollId gesetzt war und sich wirklich geändert hat
@@ -92,10 +92,16 @@ export function useVotingProcess(eventUser, event) {
           // Stelle sicher, dass wir nicht versehentlich die gespeicherte Stimmanzahl löschen
           // Wenn die Poll schon einmal aktiv war, dann behalten wir die maxVotesToUse
           const existingMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
-          
+
           // Vollständiges Zurücksetzen der Stimmen, aber gespeicherte Stimmenzahl beibehalten
           pollStatePersistence.resetVoteStateButKeepMaxVotes(newPollId, eventObj.id, existingMaxVotes);
           console.log(`[DEBUG:VOTING] Zurücksetzen (ohne MaxVotes) des persistenten Zustands für neue Poll: pollId=${newPollId}, eventId=${eventObj.id}, behalte MaxVotes=${existingMaxVotes}`);
+
+          // WICHTIG: Bei einer neuen Abstimmung AUCH lokale Form-Daten zurücksetzen
+          // Insbesondere die ausgewählten Antworten (multipleAnswers, singleAnswer)
+          // Dies verhindert, dass alte Antwort-IDs von der vorherigen Abstimmung verwendet werden
+          localStorage.removeItem(`poll_form_data_${oldPollId}`);
+          console.log(`[DEBUG:VOTING] Lösche lokale Formulardaten der vorherigen Abstimmung: poll_form_data_${oldPollId}`);
         } else {
           // Bei einem Reload oder Navigation: Versuche den gespeicherten Zustand zu laden
           const savedMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
@@ -118,13 +124,13 @@ export function useVotingProcess(eventUser, event) {
       console.log("[DEBUG:VOTING_EARLY] Die Abstimmung ist bereits geschlossen");
       return false;
     }
-    
+
     // WICHTIG: Prüfe, ob wir eine gespeicherte maximale Stimmzahl haben
     // Diese hat Vorrang vor dem übergebenen Parameter, da sie vom Benutzer ausgewählt wurde
     const eventObj = event && typeof event.value === 'object' ? event.value : event;
     if (eventObj && eventObj.id && poll.value && poll.value.id) {
       const savedMaxVotes = pollStatePersistence.getMaxVotesToUse(poll.value.id, eventObj.id);
-      
+
       // Wenn gespeicherte Stimmen gefunden wurden, verwenden wir sie
       if (savedMaxVotes !== null && savedMaxVotes > 0) {
         if (votesToUse === null || votesToUse !== savedMaxVotes) {
@@ -146,7 +152,7 @@ export function useVotingProcess(eventUser, event) {
     const currentUsedVotes = usedVotesCount.value || 0;
     if (currentUsedVotes >= maxAllowedVotes) {
       console.log("[DEBUG:VOTING_EARLY] Keine verbleibenden Stimmen mehr (frühe Prüfung)");
-      
+
       // Abstimmung als vollständig abgeschlossen markieren
       votingFullyCompleted.value = true;
       return false;
@@ -226,9 +232,9 @@ export function useVotingProcess(eventUser, event) {
 
       // KRITISCH: Prüfe ob es bereits eine gespeicherte maximale Stimmanzahl gibt
       // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
-      const savedMaxVotes = pollId && eventObj && eventObj.id ? 
+      const savedMaxVotes = pollId && eventObj && eventObj.id ?
         pollStatePersistence.getMaxVotesToUse(pollId, eventObj.id) : null;
-        
+
       // Wenn gespeicherte Stimmen gefunden wurden, verwenden wir sie
       if (savedMaxVotes !== null && savedMaxVotes > 0) {
         if (votesToUse === null || votesToUse !== savedMaxVotes) {
@@ -247,16 +253,16 @@ export function useVotingProcess(eventUser, event) {
         if (pollId) {
           pollStatePersistence.upsertPollState(pollId, 99999);
         }
-        
+
         // UI sofort entsperren
         pollFormSubmitting.value = false;
         currentlyProcessingBatch.value = false;
         isProcessingVotes.value = false;
         deactivateVotingSession();
-        
+
         // Vollständigkeitswert setzen
         votingFullyCompleted.value = true;
-        
+
         await onVotingCompleted.value();
         return false;
       }
@@ -267,9 +273,9 @@ export function useVotingProcess(eventUser, event) {
       // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
       const maxStoredVotes = pollId && eventObj && eventObj.id ?
         pollStatePersistence.getMaxVotesToUse(pollId, eventObj.id) : null;
-        
+
       console.log(`[DEBUG:VOTE_LIMIT] Gespeicherte Stimmanzahl für Poll ${pollId}: ${maxStoredVotes}`);
-      
+
       if (pollFormData.useAllAvailableVotes) {
         actualVotesToUse = remainingVotes;
       } else if (maxStoredVotes !== null && maxStoredVotes > 0) {
@@ -282,7 +288,7 @@ export function useVotingProcess(eventUser, event) {
         const requested = parseInt(votesToUse, 10);
         actualVotesToUse = Math.min(requested, remainingVotes);
         console.log(`[DEBUG:VOTING] Nutzerwahl: ${requested} Stimmen, begrenze auf: ${actualVotesToUse} verbleibende Stimmen`);
-        
+
         // Speichere die ausgewählte Anzahl für zukünftige Page-Loads
         // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
         if (pollId && eventObj && eventObj.id) {
@@ -323,7 +329,7 @@ export function useVotingProcess(eventUser, event) {
       if (!isReload && adjustedVotesToUse > 0) {
         // Bei erster Abstimmung: erste Stimme sofort abgeben für schnelles Feedback
         const firstResult = await submitSingleVote(pollFormData, poll, false);
-        
+
         if (firstResult) {
           localSuccessCount++;
           // UI-Update für erste Stimme
@@ -345,20 +351,20 @@ export function useVotingProcess(eventUser, event) {
       if (adjustedVotesToUse > 1) {
         // OPTIMIERUNG FÜR LAST-TESTS:
         // Kleinere Batch-Größe und adaptive Pausen
-        const BATCH_SIZE = 6; // Reduziert für bessere Skalierbarkeit bei hoher Last
-        
+        const BATCH_SIZE = 25; // Reduziert für bessere Skalierbarkeit bei hoher Last
+
         // KRITISCH: Stelle sicher, dass wir die korrekte Anzahl verbleibender Stimmen verwenden
         // Hier NOCHMALS prüfen, ob wir eine gespeicherte Stimmenzahl haben
-        
+
         // LÖSUNG FÜR DAS RELOAD-PROBLEM: 
         // Wir brauchen eine Variable, die uns sagt, ob es sich um eine erste Abstimmung handelt
         // oder um ein Nachladen einer bestehenden Abstimmung
-        
+
         // Die Erkennung wurde bereits oben durchgeführt
         // Wir verwenden die Variable isReload, die bereits oben definiert wurde
-        
+
         let remainingVotesToProcess;
-        
+
         if (isReload) {
           // Bei einem Reload KEINE Stimme abziehen, da die erste Stimme bereits in usedVotesCount enthalten ist
           // und wir die gesamte gewünschte Anzahl neu verarbeiten müssen
@@ -369,17 +375,17 @@ export function useVotingProcess(eventUser, event) {
           remainingVotesToProcess = adjustedVotesToUse - 1;
           console.log(`[DEBUG:VOTING] Erste Abstimmung - ziehe erste Stimme ab, verbleiben ${remainingVotesToProcess} Stimmen`);
         }
-        
+
         // MEGA-WICHTIGE KORREKTURBERECHNUNG: limitiere die Anzahl der zu verarbeitenden Stimmen
         // auf die gespeicherte Stimmenzahl, falls vorhanden
         // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
         if (pollId && eventObj && eventObj.id) {
           const maxStored = pollStatePersistence.getMaxVotesToUse(pollId, eventObj.id);
           console.log(`[DEBUG:VOTING] Batch-Korrekturprüfung: gespeichertes Limit für Poll ${pollId} in Event ${eventObj.id}: ${maxStored}`);
-          
+
           if (maxStored !== null && maxStored > 0) {
             // KORREKTUR: Die Anzahl der zu verarbeitenden Stimmen sollte das gespeicherte Limit nicht überschreiten
-            
+
             // Bei einem Reload bzw. wenn wir einen Seitenwechsel haben, ist die Logik anders!
             if (isReload) {
               // Bei einem Reload begrenzen wir auf die volle gespeicherte Anzahl
@@ -398,12 +404,12 @@ export function useVotingProcess(eventUser, event) {
         } else {
           console.log(`[DEBUG:VOTING] Konnte gespeichertes Limit nicht abrufen: Poll=${pollId}, Event=${JSON.stringify(eventObj)}`);
         }
-        
+
         if (isReload) {
           console.log(`[DEBUG:VOTING] Verarbeite insgesamt ${remainingVotesToProcess} Stimmen nach Reload`);
         } else {
           console.log(`[DEBUG:VOTING] Verarbeite ${remainingVotesToProcess} weitere Stimmen nach der ersten Stimme`);
-        } 
+        }
 
         // Retry-Zähler für exponentielles Backoff
         let retryCount = 0;
@@ -537,14 +543,14 @@ export function useVotingProcess(eventUser, event) {
         };
       } else {
         voteCounter.value = usedVotesCount.value + 1;
-        
+
         // Auch für Teilabstimmungen die Event-ID mit übergeben, falls verfügbar
         if (event.value && event.value.id) {
           pollStatePersistence.upsertPollState(pollId, voteCounter.value, usedVotesCount.value, event.value.id);
         } else {
           pollStatePersistence.upsertPollState(pollId, voteCounter.value);
         }
-        
+
         updateCallback.value = () => { };
       }
 
@@ -621,22 +627,22 @@ export function useVotingProcess(eventUser, event) {
 
     // KRITISCH: voteCycle wird hier definiert, aber wir müssen sicherstellen,
     // dass wir nur die tatsächlich verbleibenden Stimmen verwenden
-    
+
     // Berechne die Anzahl der noch verfügbaren Stimmen
     const maxAllowedVotes = eventUser.value.voteAmount || 0;
     const currentUsedVotes = usedVotesCount.value || 0;
     const remainingVotes = Math.max(0, maxAllowedVotes - currentUsedVotes);
-    
+
     // ZUSÄTZLICHE SICHERHEITSPRÜFUNG: Blockiere Stimmabgabe wenn keine Stimmen mehr übrig
     if (remainingVotes <= 0) {
       console.log("[DEBUG:SINGLE_VOTE] Blockiere Stimmabgabe bei 0 verbleibenden Stimmen");
       return false;
     }
-    
+
     // Für useAllVotes: Wir senden die Anzahl der verbleibenden Stimmen statt des Zyklus
     // Sonst senden wir 1 für einzelne Stimmen
     const votesToSubmit = useAllVotes ? remainingVotes : 1;
-    
+
     const baseInput = {
       eventUserId: eventUser.value.id,
       pollId: poll.value?.id ?? 0,
@@ -657,23 +663,50 @@ export function useVotingProcess(eventUser, event) {
         await mutateAnswer(input);
       } else if (pollFormData.multipleAnswers?.length > 0) {
         let answerCounter = 1;
-        for await (const answerId of pollFormData.multipleAnswers) {
-          // Prüfe, ob poll.value.possibleAnswers existiert
-          if (!poll.value || !poll.value.possibleAnswers || !Array.isArray(poll.value.possibleAnswers)) {
-            console.error(`[ERROR:VOTING] possibleAnswers ist nicht verfügbar: ${JSON.stringify(poll.value)}`);
-            return false;
+
+        // WICHTIG: Vorprüfung - Stellen wir sicher, dass die possibleAnswers existieren
+        // und dass wir alle verwendeten Antwort-IDs auch wirklich finden können
+        if (!poll.value || !poll.value.possibleAnswers || !Array.isArray(poll.value.possibleAnswers)) {
+          console.error(`[ERROR:VOTING] possibleAnswers ist nicht verfügbar: ${JSON.stringify(poll.value)}`);
+          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+            console.log(`[DEBUG:VOTING] Lösche lokale Formulardaten wegen fehlender possibleAnswers: poll_form_data_${poll.value.id}`);
           }
-          
+          return false;
+        }
+
+        // PRÄ-VALIDIERUNG: Prüfe, ob alle ausgewählten Antwort-IDs gültig sind
+        const invalidAnswerIds = [];
+        for (const answerId of pollFormData.multipleAnswers) {
+          const answerExists = poll.value.possibleAnswers.some(
+            (x) => parseInt(x.id) === parseInt(answerId)
+          );
+
+          if (!answerExists) {
+            invalidAnswerIds.push(answerId);
+          }
+        }
+
+        // Wenn ungültige Antworten gefunden wurden, lokalen Speicher löschen und abbrechen
+        if (invalidAnswerIds.length > 0) {
+          console.error(`[ERROR:VOTING] Ungültige Antwort-IDs gefunden: ${invalidAnswerIds.join(', ')}. Aktuelle possibleAnswers:`, poll.value.possibleAnswers);
+
+          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+            console.log(`[DEBUG:VOTING] Lösche lokale Formulardaten wegen ungültiger Antwort-IDs: poll_form_data_${poll.value.id}`);
+          }
+
+          return false;
+        }
+
+        // Jetzt können wir sicher sein, dass alle IDs gültig sind
+        for await (const answerId of pollFormData.multipleAnswers) {
           const answer = poll.value.possibleAnswers.find(
             (x) => parseInt(x.id) === parseInt(answerId),
           );
-          
-          // Prüfe, ob die Antwort gefunden wurde
-          if (!answer) {
-            console.error(`[ERROR:VOTING] Antwort mit ID ${answerId} wurde nicht gefunden in möglichen Antworten:`, poll.value.possibleAnswers);
-            return false;
-          }
-          
+
           const input = {
             ...baseInput,
             answerContent: answer.content,
@@ -688,19 +721,36 @@ export function useVotingProcess(eventUser, event) {
         // Prüfe, ob poll.value.possibleAnswers existiert
         if (!poll.value || !poll.value.possibleAnswers || !Array.isArray(poll.value.possibleAnswers)) {
           console.error(`[ERROR:VOTING] possibleAnswers ist nicht verfügbar: ${JSON.stringify(poll.value)}`);
+          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+            console.log(`[DEBUG:VOTING] Lösche lokale Formulardaten wegen fehlender possibleAnswers bei singleAnswer: poll_form_data_${poll.value.id}`);
+          }
           return false;
         }
-        
+
+        // PRÄ-VALIDIERUNG: Prüfe, ob die einzelne Antwort-ID gültig ist
+        const answerExists = poll.value.possibleAnswers.some(
+          (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer)
+        );
+
+        if (!answerExists) {
+          console.error(`[ERROR:VOTING] Ungültige singleAnswer-ID: ${pollFormData.singleAnswer}. Aktuelle possibleAnswers:`, poll.value.possibleAnswers);
+
+          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+            console.log(`[DEBUG:VOTING] Lösche lokale Formulardaten wegen ungültiger singleAnswer-ID: poll_form_data_${poll.value.id}`);
+          }
+
+          return false;
+        }
+
+        // Jetzt können wir die Antwort sicher abrufen
         const answer = poll.value.possibleAnswers.find(
           (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer),
         );
-        
-        // Prüfe, ob die Antwort gefunden wurde
-        if (!answer) {
-          console.error(`[ERROR:VOTING] Antwort mit ID ${pollFormData.singleAnswer} wurde nicht gefunden in möglichen Antworten:`, poll.value.possibleAnswers);
-          return false;
-        }
-        
+
         const input = {
           ...baseInput,
           answerContent: answer.content,
@@ -723,7 +773,14 @@ export function useVotingProcess(eventUser, event) {
     // VOLLSTÄNDIGER Reset aller Zähler und Status-Werte
     usedVotesCount.value = 0;
     voteCounter.value = 1;
+
+    // Alte Poll-ID speichern, um lokale Daten zu löschen
+    const oldPollId = currentPollId.value;
+
+    // Poll-ID zurücksetzen
     currentPollId.value = null;
+
+    // UI-Status zurücksetzen
     isProcessingVotes.value = false;
     pollFormSubmitting.value = false;
     currentlyProcessingBatch.value = false;
@@ -735,6 +792,11 @@ export function useVotingProcess(eventUser, event) {
     // Auch die aktive Session deaktivieren
     deactivateVotingSession();
 
+    // WICHTIG: Lokale Form-Daten der alten Abstimmung löschen
+    if (oldPollId) {
+      localStorage.removeItem(`poll_form_data_${oldPollId}`);
+      console.log(`[DEBUG:VOTING] Lösche lokale Formulardaten bei resetVoteCounts: poll_form_data_${oldPollId}`);
+    }
   }
 
   // Eine explizite Methode zum kontrollierten Freigeben der UI

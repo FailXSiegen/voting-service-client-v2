@@ -167,11 +167,21 @@ function showModal() {
   // Vor dem Öffnen des Modals müssen wir sicherstellen, dass alle Status zurückgesetzt sind
   isSubmitting.value = false;
   
-  // Formular nur beim ersten Öffnen zurücksetzen, da die Modal-Events global für alle Clients ausgelöst werden
-  // Das verhindert, dass während einer Sitzung eines Clients das Formular bei anderen Clients zurückgesetzt wird
-  if (pollForm.value && pollFormKey.value === 1) {
+  // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
+  if (props.poll && props.poll.id) {
+    localStorage.removeItem(`poll_form_data_${props.poll.id}`);
+    console.log(`[DEBUG:POLL_MODAL] Lösche lokale Formulardaten beim Öffnen des Modals für Poll ${props.poll.id}`);
+  }
+  
+  // Formular bei JEDEM Öffnen zurücksetzen
+  // Entferne die Bedingung, damit das Formular IMMER zurückgesetzt wird
+  if (pollForm.value) {
     pollForm.value.reset(false); // komplett zurücksetzen
   }
+  
+  // Erhöhe immer den pollFormKey, um sicherzustellen, dass das Formular neu instanziiert wird
+  pollFormKey.value += 1;
+  console.log(`[DEBUG:POLL_MODAL] Neue PollForm Key: ${pollFormKey.value}`);
   
   // Um das "Wird abgestimmt" bei jedem Öffnen korrekt anzuzeigen, 
   // stellen wir sicher, dass die Komponente in einem frischen Zustand ist
@@ -184,6 +194,12 @@ function hideModal() {
   // WICHTIG: Stelle vor dem Schließen sicher, dass das Modal gesperrt ist,
   // damit keine weiteren Klicks möglich sind
   isSubmitting.value = true;
+  
+  // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
+  if (props.poll && props.poll.id) {
+    localStorage.removeItem(`poll_form_data_${props.poll.id}`);
+    console.log(`[DEBUG:POLL_MODAL] Lösche lokale Formulardaten beim Schließen des Modals für Poll ${props.poll.id}`);
+  }
   
   // Alle UI-relevanten Flags auf true setzen
   if (votingProcess) {
@@ -199,10 +215,11 @@ function hideModal() {
     bootstrapModal?.hide();
     
     // LOKAL states danach zurücksetzen (nicht vorher!)
-    reset();
+    reset(false); // Immer vollständiges Zurücksetzen erzwingen
     
     // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
     pollFormKey.value += 1;
+    console.log(`[DEBUG:POLL_MODAL] Neue PollForm Key nach Schließen: ${pollFormKey.value}`);
 
     // IMMER alle States zurücksetzen, sobald das Modal geschlossen ist
     // Aber mit einer Verzögerung, damit das Modal wirklich sauber entfernt ist
@@ -225,19 +242,32 @@ function hideModal() {
   }, 50);
 }
 
-function reset() {
+function reset(keepSelection = false) {
   // WICHTIG: Hier explizit auf false setzen, damit das Overlay verschwindet,
   // wenn die Verarbeitung vollständig abgeschlossen ist
   isSubmitting.value = false;
   
-  // Stelle sicher, dass auch das PollForm zurückgesetzt wird
+  // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
+  if (props.poll && props.poll.id) {
+    localStorage.removeItem(`poll_form_data_${props.poll.id}`);
+    console.log(`[DEBUG:POLL_MODAL] Lösche lokale Formulardaten beim Reset für Poll ${props.poll.id}`);
+  }
+  
+  // Stelle sicher, dass auch das PollForm vollständig zurückgesetzt wird
   if (pollForm.value) {
-    // Wir setzen nur den Submission-Status zurück, nicht die Formularauswahl
-    if (pollForm.value.resetSubmitState) {
-      pollForm.value.resetSubmitState();
+    if (!keepSelection) {
+      // Komplettes Zurücksetzen des Formulars, inklusive der Auswahl
+      if (pollForm.value.reset) {
+        pollForm.value.reset(false);
+      }
     } else {
-      // Fallback
-      pollForm.value.isSubmitting = false;
+      // Wir setzen nur den Submission-Status zurück, nicht die Formularauswahl
+      if (pollForm.value.resetSubmitState) {
+        pollForm.value.resetSubmitState();
+      } else {
+        // Fallback
+        pollForm.value.isSubmitting = false;
+      }
     }
   }
   
@@ -247,6 +277,11 @@ function reset() {
   // Nochmal setzen für sicherere Reaktivität
   setTimeout(() => {
     isSubmitting.value = false;
+    
+    // NOCHMALS sicherstellen, dass keine alten Formulardaten existieren
+    if (props.poll && props.poll.id) {
+      localStorage.removeItem(`poll_form_data_${props.poll.id}`);
+    }
   }, 50);
 }
 
