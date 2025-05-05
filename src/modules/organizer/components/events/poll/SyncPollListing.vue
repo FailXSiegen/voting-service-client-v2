@@ -320,9 +320,12 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
   // todo update active poll values
 });
 
-const pollAnswerLifeCycleSubscription = useSubscription(POLL_ANSWER_LIVE_CYCLE);
+const pollAnswerLifeCycleSubscription = useSubscription(
+  POLL_ANSWER_LIVE_CYCLE,
+  { eventId: props.event.id }
+);
 pollAnswerLifeCycleSubscription.onResult(({ data }) => {
-  if (parseInt(data?.pollAnswerLifeCycle.eventId) !== parseInt(id)) {
+  if (!data?.pollAnswerLifeCycle) {
     return;
   }
   activePollAnswerCount.value = data?.pollAnswerLifeCycle?.pollAnswersCount;

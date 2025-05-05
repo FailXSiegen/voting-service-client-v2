@@ -542,12 +542,18 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
   }
 });
 
-const pollAnswerLifeCycleSubscription = useSubscription(POLL_ANSWER_LIVE_CYCLE);
+const pollAnswerLifeCycleSubscription = useSubscription(
+  POLL_ANSWER_LIVE_CYCLE,
+  { eventId: props.event.id }
+);
 pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
   // Prüfe, ob das Event für unser Event ist
-  if (!data?.pollAnswerLifeCycle || parseInt(data.pollAnswerLifeCycle.eventId) !== parseInt(props.event.id)) {
+  if (!data?.pollAnswerLifeCycle) {
     return;
   }
+  
+  // Aktualisiere die Abstimmungsdaten, um VotingDetails zu aktualisieren
+  await activePollEventUserQuery.refetch();
   
   // ABSOLUT STRIKTE BROWSER-ISOLATION MIT VERBESSERTER SESSION-VERWALTUNG
   
