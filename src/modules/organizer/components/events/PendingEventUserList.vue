@@ -113,9 +113,10 @@ function formatTimestamp(timestamp) {
 function onFilter() {
   eventUsersCopy.value = props.eventUsers.filter(
     (eventUser) =>
-      !eventUser.verified && eventUser.username.includes(filter.username),
-  );
-}
+      !eventUser.verified && eventUser.username.includes(filter.username) ||
+      !eventUser.verified && eventUser.publicName.includes(filter.username),
+    );
+  }
 
 function onResetFilter() {
   filter.username = "";

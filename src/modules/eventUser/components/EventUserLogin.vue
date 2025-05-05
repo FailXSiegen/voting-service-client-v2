@@ -55,6 +55,7 @@
               type="hidden"
             />
             <BaseInput
+              v-if="!readOnlyUsername"
               :label="$t('view.login.label.password')"
               :errors="v$.password?.$errors"
               :has-errors="v$.password?.$errors?.length > 0"
@@ -62,7 +63,6 @@
               type="password"
               autocomplete="one-time-code"
               :help-text="$t('view.login.label.passwordHelp')"
-              v-if="!readOnlyUsername"
               @change="
                 ({ value }) => {
                   formData.password = value;

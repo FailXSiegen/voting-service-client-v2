@@ -51,6 +51,6 @@ defineProps({
   // eslint-disable-next-line vue/require-default-prop
   disabled: Boolean,
   // eslint-disable-next-line vue/require-default-prop
-  value: String,
+  value: [String, Number],
 });
 </script>

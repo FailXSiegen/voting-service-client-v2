@@ -17,10 +17,12 @@
               >
                 <option value="">Select variable</option>
                 <option value="custom">Custom variable...</option>
-                <optgroup v-for="(vars, group) in bootstrapVariables" 
+                <optgroup
+v-for="(vars, group) in bootstrapVariables" 
                          :key="group" 
                          :label="group">
-                  <option v-for="variable in vars" 
+                  <option
+v-for="variable in vars" 
                           :key="variable.name" 
                           :value="variable.name">
                     {{ variable.label }}
@@ -32,16 +34,16 @@
                 type="text"
                 class="form-control rounded-0 border-end-0"
                 :value="row.variable"
-                @input="updateVariable(index, $event.target.value)"
                 placeholder="variable-name"
+                @input="updateVariable(index, $event.target.value)"
               />
              
             </div>
             <button 
                 class="btn btn-outline-secondary border border-start-0" 
                 type="button"
-                @click="toggleInputType(index)"
                 :title="row.isCustom ? 'Switch to predefined variables' : 'Switch to custom input'"
+                @click="toggleInputType(index)"
               >
                 <i :class="row.isCustom ? 'bi-list' : 'bi-pencil'"></i>
               </button>
@@ -52,8 +54,8 @@
             type="text"
             class="form-control"
             :value="row.value"
-            @input="updateValue(index, $event.target.value)"
             placeholder="value"
+            @input="updateValue(index, $event.target.value)"
           />
         </div>
         <div class="col-2">
