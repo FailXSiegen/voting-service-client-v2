@@ -203,7 +203,6 @@ export function useVotingProcess(eventUser, event) {
 
       // NEUE PRÜFUNG: Prüfe, ob die Umfrage bereits geschlossen ist
       if (poll.value && poll.value.closed) {
-        console.log("[DEBUG:VOTING] Die Abstimmung ist bereits geschlossen und kann nicht mehr verwendet werden.");
         pollFormSubmitting.value = false;
         isProcessingVotes.value = false;
         currentlyProcessingBatch.value = false;
@@ -411,7 +410,6 @@ export function useVotingProcess(eventUser, event) {
               if (attempts < MAX_ATTEMPTS) {
                 // Exponentielles Backoff bei Fehlern
                 const backoffTime = Math.min(100 * (2 ** retryCount), 2000); // max 2 Sekunden
-                console.log(`Warte ${backoffTime}ms vor dem nächsten Versuch...`);
                 await new Promise(resolve => setTimeout(resolve, backoffTime));
               }
             }
@@ -462,7 +460,6 @@ export function useVotingProcess(eventUser, event) {
       // NEUE PRÜFUNG: Setze votingFullyCompleted wenn alle Stimmen verbraucht sind
       const totalAllowedVotes = eventUser.value.voteAmount;
       if (usedVotesCount.value >= totalAllowedVotes) {
-        console.log("[DEBUG:VOTING] Alle Stimmen verbraucht, markiere Abstimmung als vollständig abgeschlossen");
         votingFullyCompleted.value = true;
       }
 
@@ -583,7 +580,6 @@ export function useVotingProcess(eventUser, event) {
 
     // ZUSÄTZLICHE SICHERHEITSPRÜFUNG: Prüfe, ob die Umfrage bereits geschlossen ist
     if (poll.value && poll.value.closed) {
-      console.log("[DEBUG:SINGLE_VOTE] Blockiere Stimmabgabe für geschlossene Umfrage");
       return false;
     }
 
@@ -597,7 +593,6 @@ export function useVotingProcess(eventUser, event) {
 
     // ZUSÄTZLICHE SICHERHEITSPRÜFUNG: Blockiere Stimmabgabe wenn keine Stimmen mehr übrig
     if (remainingVotes <= 0) {
-      console.log("[DEBUG:SINGLE_VOTE] Blockiere Stimmabgabe bei 0 verbleibenden Stimmen");
       return false;
     }
 

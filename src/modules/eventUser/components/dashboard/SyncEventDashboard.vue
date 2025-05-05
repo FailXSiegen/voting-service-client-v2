@@ -177,8 +177,7 @@ activePollEventUserQuery.onResult(({ data }) => {
     if (eventUser.value?.id && poll.value?.id) {
       const eventUserId = eventUser.value?.id?.toString();
       const pollId = poll.value?.id?.toString();
-      
-      console.log('Starte userVoteCycle-Abfrage:', { eventUserId, pollId });
+  
       
       if (!eventUserId || !pollId) {
         console.error('Ungültige Parameter für userVoteCycle:', { eventUserId, pollId });
@@ -444,8 +443,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       if (eventUser.value?.id && poll.value?.id) {
         const eventUserId = eventUser.value?.id?.toString();
         const pollId = poll.value?.id?.toString();
-        
-        console.log('Starte userVoteCycle-Abfrage für neue Poll:', { eventUserId, pollId });
         
         if (!eventUserId || !pollId) {
           console.error('Ungültige Parameter für userVoteCycle (neue Poll):', { eventUserId, pollId });
