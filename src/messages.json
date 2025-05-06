@@ -286,14 +286,14 @@
           "maxVote1": "Sie können eine Position auswählen",
           "maxVoteGreater1": "Achtung: Sie können mehrere Positionen auswählen: ",
           "minVoteGreater0": "Achtung: Sie müssen eine Mindestanzahl auswählen: ",
-          "canSubmitAnswerForEachVote": "Alle {voteAmount} Stimmen auf einmal abgeben",
-          "canSubmitAnswerForEachVoteHelptext": "Alle verfügbaren Stimmen auf einmal abgeben",
+          "canSubmitAnswerForEachVote": "Alle {voteAmount} Stimmzettel auf einmal abgeben",
+          "canSubmitAnswerForEachVoteHelptext": "Alle verfügbaren Stimmzettel auf einmal abgeben",
           "close": "Schließen",
           "result": "Ergebnis",
-          "voteAllocation": "Stimmenverteilung ({voteAmount} Stimmen verfügbar)",
-          "votes": "Stimmen",
-          "useAllVotes": "100 % der Stimmen verwenden",
-          "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmen Sie für diese Umfrage verwenden möchten."
+          "voteAllocation": "Stimmenverteilung ({voteAmount} Stimmzettel verfügbar)",
+          "votes": "Stimmzettel",
+          "useAllVotes": "100 % der Stimmzettel verwenden",
+          "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmzettel Sie für diese Umfrage verwenden möchten."
         },
         "active": {
           "title": "Aktuelle Abstimmung",
