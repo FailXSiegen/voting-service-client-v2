@@ -25,7 +25,7 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
               <div class="mt-2 small">Bitte warten Sie, Ihre Stimmen werden gezählt</div>
               <!-- Fortschrittsanzeige für viele Stimmen -->
               <div v-if="votingProcess.usedVotesCount?.value > 0" class="mt-2">
-                Fortschritt: {{ votingProcess.usedVotesCount?.value }} von {{ eventUser.voteAmount }} Stimmen
+                Fortschritt: {{ votingProcess.usedVotesCount?.value }} von {{ eventUser.voteAmount }} Stimmzetteln
               </div>
             </div>
           </div>
@@ -34,7 +34,7 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
             <h5 class="modal-title">
               {{ poll.title }}<br />
               <small v-if="props.event.multivoteType !== 2" id="pollCounter">
-                <b>(Stimme {{ voteCounter }} von {{ eventUser.voteAmount }})</b>
+                <b>(Stimmzettel {{ voteCounter }} von {{ eventUser.voteAmount }})</b>
               </small>
             </h5>
           </div>
