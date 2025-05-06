@@ -29,7 +29,7 @@
               <span
                 v-for="(count, answer) in groupUserAnswers(pollUser.id)"
                 :key="answer"
-                class="badge rounded-pill mt-0"
+                class="badge rounded-pill mt-0 me-1 mb-1"
                 :class="{
                   'bg-success': answer === 'Ja',
                   'bg-danger': answer === 'Nein',
