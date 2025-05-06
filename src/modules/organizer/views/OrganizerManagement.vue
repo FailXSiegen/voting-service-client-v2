@@ -7,10 +7,29 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
+      <div v-if="organizers?.length > 0" class="mb-3">
+        <label for="organizer-filter">
+          {{ $t("view.organizers.filter.label") }}
+        </label>
+        <div class="input-group">
+          <input
+            id="organizer-filter"
+            v-model="searchFilter"
+            class="form-control"
+            :placeholder="$t('view.organizers.filter.placeholder')"
+            @input="onFilter"
+          />
+          <div class="input-group-text p-0">
+            <button class="btn btn-transparent" @click.prevent="onResetFilter">
+              {{ $t("view.organizers.filter.reset") }}
+            </button>
+          </div>
+        </div>
+      </div>
       <EasyDataTable
         v-if="organizers?.length > 0"
         :headers="headers"
-        :items="organizers"
+        :items="organizersFiltered"
         table-class-name="data-table"
         theme-color="#007bff"
       >
@@ -34,42 +53,58 @@
           </span>
         </template>
         <template #item-id="item">
-          <div v-if="currentOrganizerSessionId != item.id">
+          <div>
             <div class="float-end">
               <button
-                v-if="item.verified"
-                class="btn btn-danger d-inline-block mx-1 mb-3"
-                :title="$t('view.organizers.deny')"
-                @click.prevent="onVerify(item, false)"
+                class="btn btn-info d-inline-block mx-1 mb-3"
+                :title="$t('view.organizers.events.show')"
+                @click.prevent="showEventsModal(item)"
               >
-                <i class="bi-dash-square bi--xl" />
+                <i class="bi-calendar-event bi--xl" />
               </button>
-              <button
-                v-else
-                class="btn btn-success d-inline-block mx-1 mb-3"
-                :title="$t('view.organizers.verify')"
-                @click.prevent="onVerify(item, true)"
-              >
-                <i class="bi-check2-square bi--xl" />
-              </button>
-              <button
-                class="btn btn-danger d-inline-block mx-1 mb-3"
-                :title="$t('view.organizers.delete')"
-                @click.prevent="onDelete(item)"
-              >
-                <i class="bi-trash bi--xl" />
-              </button>
+              <template v-if="currentOrganizerSessionId != item.id">
+                <button
+                  v-if="item.verified"
+                  class="btn btn-danger d-inline-block mx-1 mb-3"
+                  :title="$t('view.organizers.deny')"
+                  @click.prevent="onVerify(item, false)"
+                >
+                  <i class="bi-dash-square bi--xl" />
+                </button>
+                <button
+                  v-else
+                  class="btn btn-success d-inline-block mx-1 mb-3"
+                  :title="$t('view.organizers.verify')"
+                  @click.prevent="onVerify(item, true)"
+                >
+                  <i class="bi-check2-square bi--xl" />
+                </button>
+                <button
+                  class="btn btn-danger d-inline-block mx-1 mb-3"
+                  :title="$t('view.organizers.delete')"
+                  @click.prevent="onDelete(item)"
+                >
+                  <i class="bi-trash bi--xl" />
+                </button>
+              </template>
             </div>
           </div>
         </template>
       </EasyDataTable>
     </template>
   </PageLayout>
+  
+  <!-- Organizer Events Modal -->
+  <OrganizerEventsModal 
+    :organizer="selectedOrganizer" 
+    :show="showModal"
+  />
 </template>
 
 <script setup>
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import OrganizerEventsModal from "@/modules/organizer/components/OrganizerEventsModal.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -78,9 +113,12 @@ import {
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
-import { useMutation, useQuery } from "@vue/apollo-composable";
+import { useMutation, useQuery, useLazyQuery } from "@vue/apollo-composable";
 import { ORGANIZERS } from "@/modules/organizer/graphql/queries/organizers";
-import { computed, ref } from "vue";
+import { ORGANIZER_HAS_EVENTS } from "@/modules/organizer/graphql/queries/organizer-has-events";
+import { ORGANIZER_HAS_EVENTS_WITH_ORIGINAL } from "@/modules/organizer/graphql/queries/organizer-has-events-with-original";
+import { ALL_EVENTS_WITH_ORIGINAL_OWNER } from "@/modules/organizer/graphql/queries/all-events-with-original-owner";
+import { computed, ref, onMounted } from "vue";
 import t from "@/core/util/l18n";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import { UPDATE_ORGANIZER } from "@/modules/organizer/graphql/mutation/update-organizer";
@@ -90,9 +128,11 @@ import { createConfirmDialog } from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
 import { DELETE_ORGANIZER } from "@/modules/organizer/graphql/mutation/delete-organizer";
 import { useCore } from "@/core/store/core";
+import { Modal } from "bootstrap";
 
 const coreStore = useCore();
 const currentOrganizerSessionId = computed(() => coreStore?.user?.id);
+const isSuperAdmin = computed(() => coreStore?.user?.superAdmin === true);
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -126,6 +166,16 @@ const headers = [
 ];
 
 const organizers = ref([]);
+const organizersCopy = ref(null);
+const searchFilter = ref("");
+const organizersWithEvents = ref([]);
+const selectedOrganizer = ref(null);
+const showModal = ref(false);
+
+const organizersFiltered = computed(() =>
+  organizersCopy.value ? organizersCopy.value : organizers.value
+);
+
 const { onResult, refetch } = useQuery(ORGANIZERS, null, {
   fetchPolicy: "no-cache",
 });
@@ -133,7 +183,136 @@ onResult(({ data }) => {
   organizers.value = (data?.organizers ?? []).sort((a, b) => {
     return new Date(b.createDatetime) - new Date(a.createDatetime);
   });
+  
+  // Check which organizers have events
+  checkOrganizersWithEvents();
 });
+
+// Function to check which organizers have events
+async function checkOrganizersWithEvents() {
+  // Wenn Superadmin, verwenden wir die allEvents-Abfrage, um auch original_organizer zu berücksichtigen
+  if (isSuperAdmin.value) {
+    const { load, onResult } = useLazyQuery(
+      ALL_EVENTS_WITH_ORIGINAL_OWNER,
+      null,
+      { fetchPolicy: "network-only" }
+    );
+    
+    load();
+    
+    onResult(({ data }) => {
+      if (data) {
+        const allEvents = [
+          ...(data.allUpcomingEvents || []),
+          ...(data.allPastEvents || [])
+        ];
+        
+        // Für jeden Organizer prüfen, ob er Veranstaltungen besitzt oder der original_organizer ist
+        for (const organizer of organizers.value) {
+          const hasDirectEvents = allEvents.some(event => 
+            event.organizer?.id === organizer.id
+          );
+          
+          const hasOriginalEvents = allEvents.some(event => 
+            event.originalOrganizer?.id === organizer.id && 
+            event.organizer?.id !== organizer.id
+          );
+          
+          if (hasDirectEvents || hasOriginalEvents) {
+            if (!organizersWithEvents.value.includes(organizer.id)) {
+              organizersWithEvents.value.push(organizer.id);
+            }
+          }
+        }
+      }
+    });
+  } 
+  // Für normale Admins prüfen wir trotzdem auf original_organizer
+  else {
+    // Load all events to check for both direct ownership and original ownership
+    const { load: loadAllEvents, onResult: onAllEventsResult } = useLazyQuery(
+      ALL_EVENTS_WITH_ORIGINAL_OWNER,
+      null,
+      { fetchPolicy: "network-only" }
+    );
+    
+    loadAllEvents();
+    
+    onAllEventsResult(({ data }) => {
+      if (data) {
+        const allEvents = [
+          ...(data.allUpcomingEvents || []),
+          ...(data.allPastEvents || [])
+        ];
+        
+        for (const organizer of organizers.value) {
+          // Check for direct ownership
+          const hasDirectEvents = allEvents.some(event => 
+            event.organizer?.id === organizer.id
+          );
+          
+          // Check for original ownership
+          const hasOriginalEvents = allEvents.some(event => 
+            event.originalOrganizer?.id === organizer.id && 
+            event.organizer?.id !== organizer.id
+          );
+          
+          if (hasDirectEvents || hasOriginalEvents) {
+            if (!organizersWithEvents.value.includes(organizer.id)) {
+              organizersWithEvents.value.push(organizer.id);
+            }
+          }
+        }
+      }
+    });
+  }
+}
+
+// Function to show the events modal
+function showEventsModal(organizer) {
+  selectedOrganizer.value = organizer;
+  showModal.value = true;
+  
+  // Use Bootstrap modal API to show the modal
+  // Short timeout to ensure the DOM is ready
+  setTimeout(() => {
+    const modalElement = document.getElementById('organizerEventsModal');
+    if (modalElement) {
+      const modal = new Modal(modalElement);
+      modal.show();
+      
+      // Reset showModal when modal is hidden
+      modalElement.addEventListener('hidden.bs.modal', () => {
+        showModal.value = false;
+      });
+    } else {
+      console.error('Modal element not found');
+    }
+  }, 100);
+}
+
+function onFilter() {
+  const searchTerm = searchFilter.value ? searchFilter.value.toLowerCase() : '';
+  
+  organizersCopy.value = organizers.value.filter(
+    (organizer) => {
+      if (!organizer) return false;
+      
+      const username = organizer.username ? organizer.username.toLowerCase() : '';
+      const email = organizer.email ? organizer.email.toLowerCase() : '';
+      const publicOrg = organizer.publicOrganisation ? organizer.publicOrganisation.toLowerCase() : '';
+      
+      return username.includes(searchTerm) || 
+             email.includes(searchTerm) || 
+             publicOrg.includes(searchTerm);
+    }
+  );
+}
+
+function onResetFilter() {
+  searchFilter.value = "";
+  organizersCopy.value = null;
+}
 
 function onVerify({ id }, verified) {
   const { mutate: updateOrganizer } = useMutation(UPDATE_ORGANIZER, {
