@@ -6,7 +6,9 @@
       "abstention": "Enthaltung",
       "member": "Teilnehmer",
       "confirm": "Bestätigen",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "close": "Schließen",
+      "loading": "Wird geladen..."
     },
     "view": {
       "login": {
@@ -372,7 +374,46 @@
         "deny": "deaktivieren",
         "edit": "bearbeiten",
         "delete": "löschen",
-        "confirmDelete": "Möchten Sie den Organisator wirklich löschen?"
+        "confirmDelete": "Möchten Sie den Organisator wirklich löschen?",
+        "filter": {
+          "label": "Filter für Organisatoren",
+          "placeholder": "Suche nach Benutzername, E-Mail oder Organisation",
+          "reset": "Filter zurücksetzen"
+        },
+        "events": {
+          "title": "Veranstaltungen",
+          "show": "Veranstaltungen anzeigen",
+          "upcoming": "Bevorstehende Veranstaltungen",
+          "past": "Vergangene Veranstaltungen",
+          "noEvents": "Keine Veranstaltungen gefunden",
+          "active": "Aktiv",
+          "inactive": "Inaktiv",
+          "open": "Geöffnet",
+          "closed": "Geschlossen",
+          "async": "Asynchron",
+          "expired": "Abgelaufen",
+          "finished": "Beendet",
+          "transferred": "Übertragen",
+          "transferred-to": "Empfangen von",
+          "transferred-from": "Übertragen an",
+          "transferredEvents": "Übertragene Veranstaltungen",
+          "transferredTo": "Übertragen an",
+          "currentOwner": "Aktueller Besitzer",
+          "originalOwner": "Ursprünglicher Besitzer",
+          "transfer": {
+            "title": "Veranstaltung übertragen",
+            "eventInfo": "Veranstaltungsinformationen",
+            "selectTarget": "Ziel-Organisator auswählen",
+            "selectPlaceholder": "Bitte wählen Sie einen Organisator",
+            "noTargets": "Keine anderen Organisatoren verfügbar",
+            "submit": "Übertragen",
+            "success": "Veranstaltung wurde erfolgreich übertragen"
+          },
+          "reset": {
+            "title": "Auf ursprünglichen Organisator zurücksetzen",
+            "success": "Veranstaltung wurde erfolgreich zurückgesetzt"
+          }
+        }
       },
       "changeOrganizerPassword": {
         "title": "Passwort vergessen",
