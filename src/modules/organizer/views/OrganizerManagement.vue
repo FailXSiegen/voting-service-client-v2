@@ -7,90 +7,121 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      <div v-if="organizers?.length > 0" class="mb-3">
-        <label for="organizer-filter">
-          {{ $t("view.organizers.filter.label") }}
-        </label>
-        <div class="input-group">
-          <input
-            id="organizer-filter"
-            v-model="searchFilter"
-            class="form-control"
-            :placeholder="$t('view.organizers.filter.placeholder')"
-            @input="onFilter"
-          />
-          <div class="input-group-text p-0">
-            <button class="btn btn-transparent" @click.prevent="onResetFilter">
-              {{ $t("view.organizers.filter.reset") }}
-            </button>
-          </div>
-        </div>
-      </div>
-      <EasyDataTable
-        v-if="organizers?.length > 0"
-        :headers="headers"
-        :items="organizersFiltered"
-        table-class-name="data-table"
-        theme-color="#007bff"
-      >
-        <template #item-createDatetime="item">
-          {{ createFormattedDateFromTimeStamp(item.createDatetime) }}
-        </template>
-        <template #item-confirmedEmail="item">
-          <span v-if="item.confirmedEmail" class="text-success text-uppercase">
-            <i class="bi-envelope-open bi--xl" />
-          </span>
-          <span v-else class="text-danger text-uppercase">
-            <i class="bi-envelope-fill bi--xl" />
-          </span>
-        </template>
-        <template #item-verified="item">
-          <span v-if="item.verified" class="text-success text-uppercase">
-            {{ $t("view.organizers.verified") }}
-          </span>
-          <span v-else class="text-danger text-uppercase">
-            <strong>{{ $t("view.organizers.denied") }}</strong>
-          </span>
-        </template>
-        <template #item-id="item">
-          <div>
-            <div class="float-end">
-              <button
-                class="btn btn-info d-inline-block mx-1 mb-3"
-                :title="$t('view.organizers.events.show')"
-                @click.prevent="showEventsModal(item)"
-              >
-                <i class="bi-calendar-event bi--xl" />
+      <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+          <a 
+            class="nav-link" 
+            :class="{ active: activeTab === 'organizers' }"
+            href="#" 
+            @click.prevent="activeTab = 'organizers'"
+          >
+            Veranstalter verwalten
+          </a>
+        </li>
+        <li class="nav-item">
+          <a 
+            class="nav-link" 
+            :class="{ active: activeTab === 'content' }"
+            href="#" 
+            @click.prevent="activeTab = 'content'"
+          >
+            Statische Inhalte bearbeiten
+          </a>
+        </li>
+      </ul>
+      
+      <!-- Organizers Tab -->
+      <div v-if="activeTab === 'organizers'">
+        <div v-if="organizers?.length > 0" class="mb-3">
+          <label for="organizer-filter">
+            {{ $t("view.organizers.filter.label") }}
+          </label>
+          <div class="input-group">
+            <input
+              id="organizer-filter"
+              v-model="searchFilter"
+              class="form-control"
+              :placeholder="$t('view.organizers.filter.placeholder')"
+              @input="onFilter"
+            />
+            <div class="input-group-text p-0">
+              <button class="btn btn-transparent" @click.prevent="onResetFilter">
+                {{ $t("view.organizers.filter.reset") }}
               </button>
-              <template v-if="currentOrganizerSessionId != item.id">
-                <button
-                  v-if="item.verified"
-                  class="btn btn-danger d-inline-block mx-1 mb-3"
-                  :title="$t('view.organizers.deny')"
-                  @click.prevent="onVerify(item, false)"
-                >
-                  <i class="bi-dash-square bi--xl" />
-                </button>
-                <button
-                  v-else
-                  class="btn btn-success d-inline-block mx-1 mb-3"
-                  :title="$t('view.organizers.verify')"
-                  @click.prevent="onVerify(item, true)"
-                >
-                  <i class="bi-check2-square bi--xl" />
-                </button>
-                <button
-                  class="btn btn-danger d-inline-block mx-1 mb-3"
-                  :title="$t('view.organizers.delete')"
-                  @click.prevent="onDelete(item)"
-                >
-                  <i class="bi-trash bi--xl" />
-                </button>
-              </template>
             </div>
           </div>
-        </template>
-      </EasyDataTable>
+        </div>
+        <EasyDataTable
+          v-if="organizers?.length > 0"
+          :headers="headers"
+          :items="organizersFiltered"
+          table-class-name="data-table"
+          theme-color="#007bff"
+        >
+          <template #item-createDatetime="item">
+            {{ createFormattedDateFromTimeStamp(item.createDatetime) }}
+          </template>
+          <template #item-confirmedEmail="item">
+            <span v-if="item.confirmedEmail" class="text-success text-uppercase">
+              <i class="bi-envelope-open bi--xl" />
+            </span>
+            <span v-else class="text-danger text-uppercase">
+              <i class="bi-envelope-fill bi--xl" />
+            </span>
+          </template>
+          <template #item-verified="item">
+            <span v-if="item.verified" class="text-success text-uppercase">
+              {{ $t("view.organizers.verified") }}
+            </span>
+            <span v-else class="text-danger text-uppercase">
+              <strong>{{ $t("view.organizers.denied") }}</strong>
+            </span>
+          </template>
+          <template #item-id="item">
+            <div>
+              <div class="float-end">
+                <button
+                  class="btn btn-info d-inline-block mx-1 mb-3"
+                  :title="$t('view.organizers.events.show')"
+                  @click.prevent="showEventsModal(item)"
+                >
+                  <i class="bi-calendar-event bi--xl" />
+                </button>
+                <template v-if="currentOrganizerSessionId != item.id">
+                  <button
+                    v-if="item.verified"
+                    class="btn btn-danger d-inline-block mx-1 mb-3"
+                    :title="$t('view.organizers.deny')"
+                    @click.prevent="onVerify(item, false)"
+                  >
+                    <i class="bi-dash-square bi--xl" />
+                  </button>
+                  <button
+                    v-else
+                    class="btn btn-success d-inline-block mx-1 mb-3"
+                    :title="$t('view.organizers.verify')"
+                    @click.prevent="onVerify(item, true)"
+                  >
+                    <i class="bi-check2-square bi--xl" />
+                  </button>
+                  <button
+                    class="btn btn-danger d-inline-block mx-1 mb-3"
+                    :title="$t('view.organizers.delete')"
+                    @click.prevent="onDelete(item)"
+                  >
+                    <i class="bi-trash bi--xl" />
+                  </button>
+                </template>
+              </div>
+            </div>
+          </template>
+        </EasyDataTable>
+      </div>
+      
+      <!-- Content Editor Tab -->
+      <div v-if="activeTab === 'content'">
+        <StaticContentManager />
+      </div>
     </template>
   </PageLayout>
   
@@ -105,6 +136,7 @@
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import OrganizerEventsModal from "@/modules/organizer/components/OrganizerEventsModal.vue";
+import StaticContentManager from "@/modules/organizer/components/StaticContentManager.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -171,6 +203,8 @@ const searchFilter = ref("");
 const organizersWithEvents = ref([]);
 const selectedOrganizer = ref(null);
 const showModal = ref(false);
+
+const activeTab = ref('organizers');
 
 const organizersFiltered = computed(() =>
   organizersCopy.value ? organizersCopy.value : organizers.value

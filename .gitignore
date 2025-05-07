@@ -33,6 +33,7 @@ coverage
 
 # public
 public/lib
+public/uploads
 playwright-report
 test-results/
 voting-results/

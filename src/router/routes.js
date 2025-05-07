@@ -15,6 +15,7 @@ export const RouteStaticFunctions = "functions";
 export const RouteStaticImprint = "imprint";
 export const RouteStaticManual = "manual";
 export const RouteStaticUserAgreement = "userAgreement";
+export const RouteStaticGeneric = "staticPage";
 
 // Module organizer routes.
 export const RouteOrganizerDashboard = "organizerDashboard";

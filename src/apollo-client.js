@@ -122,9 +122,14 @@ wsLink.client.on("connected", () => {
   console.info("[Websocket] Erfolgreich verbunden");
   
   // Mark current event user as online.
-  const coreStore = useCore();
-  if (coreStore.isActiveEventUserSession) {
-    coreStore.setEventUserOnlineState(true);
+  try {
+    // Vorsichtshalber prüfen, ob der Store verfügbar ist
+    const coreStore = useCore();
+    if (coreStore && coreStore.isActiveEventUserSession) {
+      coreStore.setEventUserOnlineState(true);
+    }
+  } catch (err) {
+    console.warn("[Websocket] Store noch nicht initialisiert:", err.message);
   }
   
   // Start eines Ping-Intervalls zum Halten der Verbindung
@@ -140,8 +145,15 @@ wsLink.client.on("error", (error) => {
     console.info(`[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
     setTimeout(() => {
       try {
-        // Manueller Reconnect-Versuch
-        wsLink.client.restart();
+        // Manueller Reconnect-Versuch - wsLink.client.restart() existiert nicht
+        // Stattdessen verwenden wir die connect()-Methode, falls vorhanden, oder initialisieren neu
+        if (typeof wsLink.client.connect === 'function') {
+          wsLink.client.connect();
+        } else {
+          // Wenn keine connect-Methode vorhanden ist, machen wir nichts - 
+          // die Bibliothek versucht automatisch neu zu verbinden
+          console.info("[Websocket] Keine manuelle Reconnect-Methode verfügbar, warte auf Auto-Reconnect");
+        }
       } catch (e) {
         console.error("[Websocket] Fehler beim Neustart der Verbindung:", e);
       }
@@ -153,9 +165,14 @@ wsLink.client.on("closed", (event) => {
   console.info(`[Websocket] Verbindung geschlossen mit Code ${event?.code || 'unbekannt'}, Grund: ${event?.reason || 'keiner'}`);
   
   // Mark current event user as offline.
-  const coreStore = useCore();
-  if (coreStore.isActiveEventUserSession) {
-    coreStore.setEventUserOnlineState(false);
+  try {
+    // Vorsichtshalber prüfen, ob der Store verfügbar ist
+    const coreStore = useCore();
+    if (coreStore && coreStore.isActiveEventUserSession) {
+      coreStore.setEventUserOnlineState(false);
+    }
+  } catch (err) {
+    console.warn("[Websocket] Store noch nicht initialisiert:", err.message);
   }
   
   // Stoppe das Ping-Intervall, wenn die Verbindung geschlossen wird
