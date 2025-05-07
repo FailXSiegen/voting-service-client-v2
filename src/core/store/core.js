@@ -100,7 +100,7 @@ export const useCore = defineStore("core", {
       if (typeof window.localStorage === "undefined") {
         throw new Error("Missing LocalStorage object, but it is required.");
       }
-      
+
       // Lade die globalen Systemeinstellungen
       await this.loadSystemSettings();
 
@@ -314,7 +314,7 @@ export const useCore = defineStore("core", {
       }
       this.eventUser.value.online = isOnline;
     },
-    
+
     /**
      * Lädt die globalen Systemeinstellungen vom Server
      */
@@ -334,16 +334,15 @@ export const useCore = defineStore("core", {
           `,
           fetchPolicy: 'network-only' // Immer vom Server laden
         });
-        
+
         if (result.data?.systemSettings) {
           this.systemSettings = result.data.systemSettings;
-          console.log('Loaded system settings:', this.systemSettings);
         }
       } catch (error) {
         console.error('Failed to load system settings:', error);
       }
     },
-    
+
     /**
      * Aktualisiert die globalen Systemeinstellungen (nur für Super-Admin)
      * @param {Object} settings Einstellungen zum Aktualisieren
@@ -354,7 +353,7 @@ export const useCore = defineStore("core", {
         if (!this.isSuperOrganizer) {
           throw new Error('Super-Admin-Rechte erforderlich, um Systemeinstellungen zu ändern');
         }
-        
+
         const client = apolloClient;
         const result = await client.mutate({
           mutation: gql`
@@ -371,10 +370,9 @@ export const useCore = defineStore("core", {
             input: settings
           }
         });
-        
+
         if (result.data?.updateSystemSettings) {
           this.systemSettings = result.data.updateSystemSettings;
-          console.log('Updated system settings:', this.systemSettings);
           return this.systemSettings;
         }
       } catch (error) {

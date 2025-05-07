@@ -354,8 +354,6 @@ onRegularResult(({ data }) => {
       }
     });
     
-    // Expired kategorisieren
-    console.log("Prüfe expiredEvents:", data.expiredEvents);
     (data.expiredEvents || []).forEach(event => {         
       if (event.originalOrganizer && event.originalOrganizer.id === props.organizer.id && event.organizer.id !== props.organizer.id) {
         transferredExpiredEvents.push(event);
@@ -553,15 +551,6 @@ function initializeTooltips() {
   });
 }
 
-// Log when modal is shown
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      console.log("Modal is shown with organizer:", props.organizer);
-    }
-  }
-);
 </script>
 
 <style lang="scss" scoped>

@@ -90,7 +90,7 @@ const routes = [
       return true;
     }
   }),
-  
+
   // 404 Route für den expliziten Pfad
   new Route("/404", RouteNotFound, NotFound),
 
@@ -148,17 +148,17 @@ const routes = [
     (to) => {
       // Debugging für static-page Route
       console.log('static-page route triggered with:', to.params.pageKey);
-      
+
       // WICHTIG: Wenn wir eine bekannte statische Seite aufrufen, 
       // müssen wir sicherstellen, dass wir nicht zur 404-Seite weitergeleitet werden
       if (to.params.pageKey) {
         console.log(`Navigating to static page: ${to.params.pageKey}`);
       }
-      
+
       return true;
     }
   ),
-  
+
   // Explizite Route für die imprint Seite, um sicherzustellen, dass sie funktioniert
   new Route(
     "/static-page/imprint",
@@ -175,7 +175,7 @@ const routes = [
       return true;
     }
   ),
-  
+
   // Alternative direkte Pfade für statische Seiten (ohne /static-page/ Prefix)
   // Diese Route wird vor der Catch-All 404 Route platziert
   new Route(
@@ -192,40 +192,40 @@ const routes = [
       // Diese Guard prüft, ob der Pfad eine direkte statische Seite ist
       // Wenn nicht, geben wir undefined zurück, damit die Route-Auflösung fortgesetzt wird
       const directPageKey = to.params?.directPageKey ?? "";
-      
+
       // Liste der reservierten Pfade, die keine statischen Seiten sein dürfen
       const reservedPaths = [
-        'admin', 'event', 'passwort-aendern', 'register', 'impressum', 
-        'datenschutz', 'haeufige-fragen', 'nutzervereinbarung', 'anleitung', 
+        'admin', 'event', 'passwort-aendern', 'register', 'impressum',
+        'datenschutz', 'haeufige-fragen', 'nutzervereinbarung', 'anleitung',
         'funktionen-planung', 'activate-user', 'static-page', '404'
       ];
-      
+
       // Zusätzliche Überprüfung für Pfade, die mit "static-page/" beginnen
       if (directPageKey.startsWith('static-page/')) {
         console.log('Path starts with static-page/, skipping direct path handling');
         return true;
       }
-      
+
       // Wenn der Pfad reserviert ist, setzen wir die Route-Auflösung fort
       if (reservedPaths.includes(directPageKey)) {
         return true; // Route-Auflösung fortsetzen
       }
-      
+
       // Debug-Log für direkten Pfad-Zugriff
       console.log(`Direct path access attempted: /${directPageKey}`);
-      
+
       try {
         // Zugriff auf Store
         const coreStore = useCore();
         console.log("Direct paths enabled:", coreStore.getUseDirectStaticPaths);
-        
+
         // Wenn direkte Pfade aktiviert sind, Parameter direkt setzen statt umzuleiten
         if (coreStore.getUseDirectStaticPaths) {
           console.log(`Setting pageKey for static page: ${directPageKey}`);
           // Parameter direkt setzen, um Vue Router Warnings zu vermeiden
-          to.params = { 
-            ...to.params, 
-            pageKey: directPageKey 
+          to.params = {
+            ...to.params,
+            pageKey: directPageKey
           };
           return true;
         } else {
@@ -238,7 +238,7 @@ const routes = [
       } catch (error) {
         console.error("Error in direct path resolution:", error);
       }
-      
+
       // Wenn keine Umleitung erfolgt, fortfahren
       return true;
     },
@@ -458,26 +458,26 @@ const routes = [
     RouteActivateAuthToken,
     ActivateAuthToken,
   ),
-  
+
   // Catch-All Route für 404 (muss immer ganz am Ende stehen)
   new Route("/:pathMatch(.*)*", RouteNotFound, NotFound, null, null, false, null, (to) => {
     // Logging für die Catch-All Route
     console.log('404 Catch-All route triggered for:', to.fullPath);
-    
+
     // Spezielle Prüfung für static-page Routen
     if (to.fullPath.startsWith('/static-page/')) {
       const pageKey = to.fullPath.replace('/static-page/', '');
       console.log(`Detected static page path in 404 handler: ${pageKey}`);
-      
+
       // Direktes Setzen des Parameters für die statische Seite
       if (pageKey) {
         // Statt einer Umleitung, aktivieren wir direkt die Route mit dem entsprechenden Parameter
         to.params = { ...to.params, pageKey };
-        
+
         // Eine statische Seite wird aufgerufen
         const coreStore = useCore();
         console.log(`StaticContent existence will be checked for: ${pageKey}`);
-        
+
         // Zur GenericStaticPage-Komponente navigieren
         return {
           path: `/static-page/${pageKey}`,
@@ -485,7 +485,7 @@ const routes = [
         };
       }
     }
-    
+
     // Normale 404-Weiterleitung
     return true;
   }),
@@ -498,15 +498,6 @@ export const router = createRouter({
     // We want to start at the top, if we switch the view.
     return { top: 0 };
   },
-});
-
-// Debug für alle Route-Transitionen
-router.beforeEach((to, from) => {
-  console.log(`Route transition from "${from.fullPath}" to "${to.fullPath}"`, {
-    name: to.name,
-    params: to.params,
-    matched: to.matched.map(r => r.path)
-  });
 });
 
 // eslint-disable-next-line no-unused-vars
