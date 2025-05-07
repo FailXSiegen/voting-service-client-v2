@@ -20,6 +20,7 @@ import { reactive, ref } from "vue";
 import { getCookie } from "../util/cookie";
 import { handleError } from "../error/error-handler";
 import { EventUserNotFoundError } from "@/core/error/EventUserNotFoundError";
+import gql from 'graphql-tag';
 
 class StyleManager {
   static setDynamicVariable(name, value) {
@@ -66,6 +67,11 @@ export const useCore = defineStore("core", {
     eventUser: ref({}),
     eventUserAuthorizedViaToken: false,
     eventStyles: {},
+    // Konfigurationsoptionen für statische Seiten (werden vom Server geladen)
+    systemSettings: {
+      useDirectStaticPaths: false,
+      useDbFooterNavigation: false
+    },
   }),
   getters: {
     isActiveOrganizerSession: (state) =>
@@ -84,6 +90,9 @@ export const useCore = defineStore("core", {
       state.eventUserAuthorizedViaToken === true,
     getAuthToken: () => localStorage.getItem(AUTH_TOKEN),
     getCurrentEventStyles: (state) => state.eventStyles,
+    // Getter für die globalen Systemeinstellungen
+    getUseDirectStaticPaths: (state) => state.systemSettings?.useDirectStaticPaths || false,
+    getUseDbFooterNavigation: (state) => state.systemSettings?.useDbFooterNavigation || false,
   },
   actions: {
     async init() {
@@ -91,6 +100,9 @@ export const useCore = defineStore("core", {
       if (typeof window.localStorage === "undefined") {
         throw new Error("Missing LocalStorage object, but it is required.");
       }
+      
+      // Lade die globalen Systemeinstellungen
+      await this.loadSystemSettings();
 
       // Check if the user have an auth token cookie.
       if (getCookie(EVENT_USER_AUTH_TOKEN)) {
@@ -301,6 +313,74 @@ export const useCore = defineStore("core", {
         return;
       }
       this.eventUser.value.online = isOnline;
+    },
+    
+    /**
+     * Lädt die globalen Systemeinstellungen vom Server
+     */
+    async loadSystemSettings() {
+      try {
+        const client = apolloClient;
+        const result = await client.query({
+          query: gql`
+            query GetSystemSettings {
+              systemSettings {
+                id
+                useDirectStaticPaths
+                useDbFooterNavigation
+                updatedAt
+              }
+            }
+          `,
+          fetchPolicy: 'network-only' // Immer vom Server laden
+        });
+        
+        if (result.data?.systemSettings) {
+          this.systemSettings = result.data.systemSettings;
+          console.log('Loaded system settings:', this.systemSettings);
+        }
+      } catch (error) {
+        console.error('Failed to load system settings:', error);
+      }
+    },
+    
+    /**
+     * Aktualisiert die globalen Systemeinstellungen (nur für Super-Admin)
+     * @param {Object} settings Einstellungen zum Aktualisieren
+     */
+    async updateSystemSettings(settings) {
+      try {
+        // Nur erlauben, wenn Benutzer ein Super-Admin ist
+        if (!this.isSuperOrganizer) {
+          throw new Error('Super-Admin-Rechte erforderlich, um Systemeinstellungen zu ändern');
+        }
+        
+        const client = apolloClient;
+        const result = await client.mutate({
+          mutation: gql`
+            mutation UpdateSystemSettings($input: SystemSettingsInput!) {
+              updateSystemSettings(input: $input) {
+                id
+                useDirectStaticPaths
+                useDbFooterNavigation
+                updatedAt
+              }
+            }
+          `,
+          variables: {
+            input: settings
+          }
+        });
+        
+        if (result.data?.updateSystemSettings) {
+          this.systemSettings = result.data.updateSystemSettings;
+          console.log('Updated system settings:', this.systemSettings);
+          return this.systemSettings;
+        }
+      } catch (error) {
+        console.error('Failed to update system settings:', error);
+        throw error;
+      }
     },
   },
 });

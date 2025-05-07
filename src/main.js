@@ -38,6 +38,7 @@ app.use(i18n);
 app.use(apolloProvider);
 app.use(head);
 app.use(ConfirmDialog);
+
 app.provide("appVersion", version);
 app.component("EasyDataTable", Vue3EasyDataTable);
 app.component("VueDatePicker", VueDatePicker);
