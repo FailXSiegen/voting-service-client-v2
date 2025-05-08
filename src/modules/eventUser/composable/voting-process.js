@@ -599,7 +599,7 @@ export function useVotingProcess(eventUser, event) {
     // Für useAllVotes: Wir senden die Anzahl der verbleibenden Stimmen statt des Zyklus
     // Sonst senden wir 1 für einzelne Stimmen
     const votesToSubmit = useAllVotes ? remainingVotes : 1;
-
+    const isLastAnswerInBallot = (votesToSubmit === 1 && pollFormData.multipleAnswers?.length === 0);
     const baseInput = {
       eventUserId: eventUser.value.id,
       pollId: poll.value?.id ?? 0,
@@ -607,7 +607,8 @@ export function useVotingProcess(eventUser, event) {
       voteCycle: votesToSubmit, // Anzahl der abzugebenden Stimmen für diesen Request
       answerItemLength: 1,
       answerItemCount: 1,
-      multivote: useAllVotes
+      multivote: useAllVotes,
+      isLastAnswerInBallot: isLastAnswerInBallot,
     };
 
     try {
@@ -668,6 +669,7 @@ export function useVotingProcess(eventUser, event) {
             possibleAnswerId: answer.id,
             answerItemLength: pollFormData.multipleAnswers.length,
             answerItemCount: answerCounter,
+            isLastAnswerInBallot: (answerCounter === pollFormData.multipleAnswers.length),
           };
           await mutateAnswer(input);
           answerCounter++;

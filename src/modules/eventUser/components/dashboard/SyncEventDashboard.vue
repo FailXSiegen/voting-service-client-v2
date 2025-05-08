@@ -22,9 +22,10 @@
       :event-user="eventUser"
     />
     <PollStatus :exist-active-poll="existActivePoll" :poll-state="pollState" />
-    <VotingDetails
+    <VotingDetailsWithSubscription
       v-if="poll?.type === 'PUBLIC' && existActivePoll && event.publicVoteVisible"
       :active-poll-event-user="activePollEventUser"
+      :event-id="event.id"
     />
     <ResultListing
       v-if="event && pollResults?.length > 0"
@@ -69,7 +70,7 @@ import DashboardStats from "@/modules/eventUser/components/dashboard/DashboardSt
 import JoinMeetingControl from "@/modules/eventUser/components/dashboard/meeting/JoinMeetingControl.vue";
 import MeetingContainer from "@/modules/eventUser/components/dashboard/meeting/MeetingContainer.vue";
 import PollStatus from "@/modules/eventUser/components/dashboard/poll/PollStatus.vue";
-import VotingDetails from "@/modules/eventUser/components/dashboard/poll/VotingDetails.vue";
+import VotingDetailsWithSubscription from "@/modules/eventUser/components/dashboard/poll/VotingDetailsWithSubscription.vue";
 import ResultListing from "@/modules/organizer/components/events/poll/ResultListing.vue";
 import AlertBox from "@/core/components/AlertBox.vue";
 import PollModal from "@/modules/eventUser/components/dashboard/poll/modal/PollModal.vue";
@@ -373,8 +374,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
   // indem jeder Browser nur seine eigenen Events verarbeitet
   // Das vereinfacht die Logik erheblich
   
-  // Normale Verarbeitung für inaktive Browser
-  await activePollEventUserQuery.refetch();
   if (!data?.pollLifeCycle) {
     return;
   }
@@ -416,6 +415,7 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
 
     if (!poll.value) {
       console.warn("Missing current poll. Try to refetch.");
+      // WICHTIG: Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
       await activePollEventUserQuery.refetch();
     }
     
@@ -553,7 +553,8 @@ pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
   }
   
   // Aktualisiere die Abstimmungsdaten, um VotingDetails zu aktualisieren
-  await activePollEventUserQuery.refetch();
+  // WICHTIG: Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
+  // await activePollEventUserQuery.refetch();
   
   // ABSOLUT STRIKTE BROWSER-ISOLATION MIT VERBESSERTER SESSION-VERWALTUNG
   
@@ -646,6 +647,7 @@ pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
   // BATCH KOMPLETT: Alle erwarteten Events wurden empfangen!
   
   // Aktualisiere den Zustand
+  // WICHTIG: Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
   await activePollEventUserQuery.refetch();
   
   // WICHTIG: usedVotesCount wird jetzt direkt in handleFormSubmit gesetzt

@@ -332,6 +332,7 @@ pollAnswerLifeCycleSubscription.onResult(({ data }) => {
   activePollMaxAnswer.value = data?.pollAnswerLifeCycle?.maxVotes;
   pollUserCount.value = data?.pollAnswerLifeCycle?.pollUserCount;
   pollUserVotedCount.value = data?.pollAnswerLifeCycle?.pollUserVotedCount;
+  // Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
   activePollEventUserQuery.refetch();
 });
 
@@ -339,6 +340,7 @@ const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE);
 pollLifeCycleSubscription.onResult(({ data }) => {
   if (data?.pollLifeCycle?.poll && data?.pollLifeCycle?.state !== "closed") {
     activePoll.value = data.pollLifeCycle.poll;
+    // WICHTIG: Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
     activePollEventUserQuery.refetch();
   }
   if (data?.pollLifeCycle?.state === "closed") {
