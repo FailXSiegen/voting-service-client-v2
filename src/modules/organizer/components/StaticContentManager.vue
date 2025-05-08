@@ -771,12 +771,12 @@ const config = computed(() => {
 				{
 					name: 'CTA Link Primary',
 					element: 'a',
-					classes: ['button', 'button--green']
+					classes: ['btn', 'btn-primary']
 				},
 				{
 					name: 'CTA Link Secondary',
 					element: 'a',
-					classes: ['button', 'button--black']
+					classes: ['btn', 'btn-primary']
 				},
 				{
 					name: 'Marker',

@@ -51,27 +51,34 @@ const refreshTokenLink = setContext(async () => {
   const accessToken = getAccessToken();
   if (accessToken === null) {
     // No access token found, so we just forward.
-    // @todo why did we redirect in the old application?
     return;
   }
 
   // Compare access token expiry date time with the current date time.
   try {
     const { payload } = decodeJsonWebToken(accessToken);
-    if (payload?.exp > getCurrentUnixTimeStamp()) {
+    const currentTime = getCurrentUnixTimeStamp();
+    if (payload?.exp > currentTime) {
       // The access token is still valid, so we just forward.
       return;
     }
-  } catch (_) {
+  } catch (error) {
     // We do not have to catch the error here because if we have an error, the access token is invalid any ways.
+    console.error("RefreshTokenLink - Error decoding token:", error);
   }
 
-  // The token is invalid, so we request a new one.
-  const { token } = await refreshLogin();
+  try {
+    // The token is invalid, so we request a new one.
+    const { token } = await refreshLogin();
 
-  // Login the user width the new token.
-  const coreStore = useCore();
-  await coreStore.loginUser(token);
+    // Login the user width the new token.
+    const coreStore = useCore();
+    await coreStore.loginUser(token);
+  } catch (error) {
+    console.error("RefreshTokenLink - Failed to refresh token:", error);
+    // If refresh fails, remove the token
+    localStorage.removeItem(AUTH_TOKEN);
+  }
 });
 
 // Create the http link.
@@ -90,7 +97,7 @@ const wsLink = new GraphQLWsLink(
     url: URLS.SUBSCRIPTION_URL,
     reconnect: true,
     // VERBESSERT: Lazy-Loading deaktiviert, um Verbindung sofort herzustellen und zu halten
-    lazy: false, 
+    lazy: false,
     // VERBESSERT: Längere Timeouts für die Stabilität
     timeout: 60000, // 60 Sekunden statt 30 Sekunden
     inactivityTimeout: 120000, // 2 Minuten statt 30 Sekunden
@@ -120,7 +127,7 @@ wsLink.client.on("connected", () => {
   // Zurücksetzen des Reconnect-Zählers bei erfolgreicher Verbindung
   wsReconnectCount = 0;
   console.info("[Websocket] Erfolgreich verbunden");
-  
+
   // Mark current event user as online.
   try {
     // Vorsichtshalber prüfen, ob der Store verfügbar ist
@@ -131,7 +138,7 @@ wsLink.client.on("connected", () => {
   } catch (err) {
     console.warn("[Websocket] Store noch nicht initialisiert:", err.message);
   }
-  
+
   // Start eines Ping-Intervalls zum Halten der Verbindung
   startWebSocketKeepAlive();
 });
@@ -139,7 +146,7 @@ wsLink.client.on("connected", () => {
 // VERBESSERT: Zusätzliche Ereignisbehandlung für Fehler
 wsLink.client.on("error", (error) => {
   console.error("[Websocket] Fehler bei der Verbindung:", error);
-  
+
   // Bei Verbindungsfehlern automatisch versuchen, wieder zu verbinden
   if (wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
     console.info(`[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
@@ -163,7 +170,7 @@ wsLink.client.on("error", (error) => {
 
 wsLink.client.on("closed", (event) => {
   console.info(`[Websocket] Verbindung geschlossen mit Code ${event?.code || 'unbekannt'}, Grund: ${event?.reason || 'keiner'}`);
-  
+
   // Mark current event user as offline.
   try {
     // Vorsichtshalber prüfen, ob der Store verfügbar ist
@@ -174,10 +181,10 @@ wsLink.client.on("closed", (event) => {
   } catch (err) {
     console.warn("[Websocket] Store noch nicht initialisiert:", err.message);
   }
-  
+
   // Stoppe das Ping-Intervall, wenn die Verbindung geschlossen wird
   stopWebSocketKeepAlive();
-  
+
   // Bei normaler Schließung nicht neu verbinden, bei abnormaler Schließung versuchen, neu zu verbinden
   const isAbnormalClosure = !event || event.code !== 1000;
   if (isAbnormalClosure && wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
@@ -199,7 +206,7 @@ let wsKeepAliveInterval = null;
 function startWebSocketKeepAlive() {
   // Stoppe zuerst eventuell laufende Intervalle
   stopWebSocketKeepAlive();
-  
+
   // Starte ein neues Intervall, das regelmäßig eine No-Op-Anfrage sendet, um die Verbindung am Leben zu halten
   wsKeepAliveInterval = setInterval(() => {
     try {
@@ -217,7 +224,7 @@ function startWebSocketKeepAlive() {
       }).catch((error) => {
         console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
       });
-      
+
     } catch (e) {
       console.error("[Websocket] Fehler beim Senden des Keep-alive:", e);
     }
@@ -310,16 +317,16 @@ export async function terminateWebsocketClient() {
   try {
     // Stoppe zuerst das Keep-Alive-Intervall
     stopWebSocketKeepAlive();
-    
+
     // Versuche, die Verbindung ordnungsgemäß zu schließen
     console.info("[Websocket] Beende WebSocket-Verbindung...");
-    
+
     // Setze den Reconnect-Zähler zurück, um weitere automatische Reconnects zu verhindern
     wsReconnectCount = MAX_WS_RECONNECT_ATTEMPTS;
-    
+
     // Ordnungsgemäßes Beenden mit Code 1000 (Normal Closure)
     await wsLink.client.terminate();
-    
+
     console.info("[Websocket] WebSocket-Verbindung erfolgreich beendet");
   } catch (error) {
     // eslint-disable-next-line no-console

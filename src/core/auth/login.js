@@ -111,10 +111,13 @@ export function refreshLogin() {
 
   return fetch(endpoint, requestOptions)
     .then((response) => {
+
       if (response?.status >= 500) {
+        console.error("Refresh token server error:", response.status);
         throw new NetworkError(t("error.network.internalServerError"));
       }
       if (response?.status >= 400) {
+        console.error("Refresh token client error:", response.status);
         throw new NetworkError(t("error.network.consumerError"));
       }
       if (
@@ -122,15 +125,23 @@ export function refreshLogin() {
         response?.status < 300 &&
         response?.status !== 201
       ) {
+        console.error("Refresh token invalid refresh token error");
         throw new ExpiredSessionError(t("view.login.invalidRefreshToken"));
       }
       if (response?.status === 201) {
         return response;
       }
+      console.error("Refresh token undefined error");
       throw new NetworkError(t("error.network.undefinedError"));
     })
     .then((response) => response.json())
-    .then((data) => data);
+    .then((data) => {
+      return data;
+    })
+    .catch(error => {
+      console.error("Error during refreshLogin:", error);
+      throw error;
+    });
 }
 
 /**
@@ -184,11 +195,13 @@ export function logout() {
     credentials: "include",
     mode: "cors",
   };
+
   return fetch(endpoint, requestOptions)
-    .then(() => {
+    .then((response) => {
       return useCore().logoutUser();
     })
     .catch((error) => {
+      console.error("Error during logout:", error);
       handleError(error);
     });
 }

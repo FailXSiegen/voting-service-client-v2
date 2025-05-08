@@ -7,8 +7,10 @@ import {
   terminateClient,
 } from "@/apollo-client";
 import { decodeJsonWebToken } from "@/core/auth/jwt-util";
+import { getCurrentUnixTimeStamp } from "@/core/util/time-stamp";
 import {
   loginByEventUserAuthToken,
+  refreshLogin,
   logout,
   USER_TYPE_EVENT_USER,
   USER_TYPE_ORGANIZER,
@@ -67,6 +69,9 @@ export const useCore = defineStore("core", {
     eventUser: ref({}),
     eventUserAuthorizedViaToken: false,
     eventStyles: {},
+    // Authentication state tracking
+    isInitialized: false,
+    authInitPromise: null,
     // Konfigurationsoptionen für statische Seiten (werden vom Server geladen)
     systemSettings: {
       useDirectStaticPaths: false,
@@ -74,30 +79,65 @@ export const useCore = defineStore("core", {
     },
   }),
   getters: {
-    isActiveOrganizerSession: (state) =>
-      state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER,
-    isActiveEventUserSession: (state) =>
-      state.user?.id > 0 && state.user?.type === USER_TYPE_EVENT_USER,
-    getActiveUserRole: (state) => state.user?.role,
+    isActiveOrganizerSession: (state) => {
+      const isActive = state.user?.id > 0 && state.user?.type === USER_TYPE_ORGANIZER;
+      return isActive;
+    },
+    isActiveEventUserSession: (state) => {
+      const isActive = state.user?.id > 0 && state.user?.type === USER_TYPE_EVENT_USER;
+      return isActive;
+    },
+    getActiveUserRole: (state) => {
+      return state.user?.role;
+    },
     getActiveUserName: (state) => state.user,
     getOrganizer: (state) => state.organizer.value,
     getEventUser: (state) => state.eventUser.value,
     getEvent: (state) => state.event,
-    isSuperOrganizer: (state) =>
-      state.user?.type === USER_TYPE_ORGANIZER &&
-      state.organizer.value?.superAdmin === true,
+    isSuperOrganizer: (state) => {
+      const isSuper = state.user?.type === USER_TYPE_ORGANIZER &&
+        state.organizer.value?.superAdmin === true;
+      return isSuper;
+    },
     isEventUserAuthorizedViaToken: (state) =>
       state.eventUserAuthorizedViaToken === true,
-    getAuthToken: () => localStorage.getItem(AUTH_TOKEN),
+    getAuthToken: () => {
+      const token = localStorage.getItem(AUTH_TOKEN);
+      return token;
+    },
     getCurrentEventStyles: (state) => state.eventStyles,
     // Getter für die globalen Systemeinstellungen
     getUseDirectStaticPaths: (state) => state.systemSettings?.useDirectStaticPaths || false,
     getUseDbFooterNavigation: (state) => state.systemSettings?.useDbFooterNavigation || false,
   },
   actions: {
+    /**
+     * Waits for authentication to be initialized before proceeding
+     * This is crucial for router guards to ensure auth state is ready
+     * @returns {Promise<boolean>} Promise that resolves when auth is initialized
+     */
+    async waitForAuth() {
+      // If already initialized, return immediately
+      if (this.isInitialized) {
+        return true;
+      }
+
+      // If initialization is in progress, wait for it
+      if (this.authInitPromise) {
+        await this.authInitPromise;
+        return true;
+      }
+
+      // If not initialized and not in progress, initialize auth
+      this.authInitPromise = this.init();
+      await this.authInitPromise;
+      return true;
+    },
+
     async init() {
       // Check if window.localStorage is available.
       if (typeof window.localStorage === "undefined") {
+        console.error("Missing LocalStorage object, but it is required.");
         throw new Error("Missing LocalStorage object, but it is required.");
       }
 
@@ -118,23 +158,55 @@ export const useCore = defineStore("core", {
         // Check if we have a token, but no active user session.
         const token = localStorage.getItem(AUTH_TOKEN);
         if (token && !this.user?.id) {
-          // Create a user session
-          await this.loginUser(token);
-          return;
+          // Validate token expiration before creating a session
+          try {
+            const { payload } = decodeJsonWebToken(token);
+            const currentTime = getCurrentUnixTimeStamp();
+            if (payload?.exp > currentTime) {
+              // Token is valid, create a user session
+              await this.loginUser(token);
+              return;
+            } else {
+              // Token is expired, try to refresh it
+              try {
+                const { token: newToken } = await refreshLogin();
+                if (newToken) {
+                  // Login with the new token
+                  await this.loginUser(newToken);
+                  return;
+                }
+              } catch (refreshError) {
+                console.error("Failed to refresh token:", refreshError);
+                // Clear invalid token
+                localStorage.removeItem(AUTH_TOKEN);
+              }
+            }
+          } catch (tokenError) {
+            console.error("Invalid token format:", tokenError);
+            // Clear invalid token
+            localStorage.removeItem(AUTH_TOKEN);
+          }
         }
 
         // Try to login the user by "event user auth token", if the related cookie is present.
         if (getCookie(EVENT_USER_AUTH_TOKEN)) {
-          // The token is invalid, so we request a new one.
-          const { token } = await loginByEventUserAuthToken();
-          if (token) {
-            // Login the user width the new token.
-            await this.loginUser(token);
+          try {
+            // Request a new token using the auth cookie
+            const { token } = await loginByEventUserAuthToken();
+            if (token) {
+              // Login the user with the new token.
+              await this.loginUser(token);
+            }
+          } catch (authTokenError) {
+            console.error("Failed to login with event user auth token:", authTokenError);
           }
         }
       } catch (error) {
         console.error(error);
         handleError(error);
+      } finally {
+        // Mark initialization as complete regardless of success or failure
+        this.isInitialized = true;
       }
     },
 
@@ -156,7 +228,7 @@ export const useCore = defineStore("core", {
         const { payload } = decodeJsonWebToken(token);
         // Update user data.
         // todo: Add a validation of the response, so we can be sure to fetch real and good user data.
-        this.user = {
+        const userData = {
           type: payload?.user?.type,
           id: payload?.user?.id,
           verified: payload?.user?.verified,
@@ -164,14 +236,26 @@ export const useCore = defineStore("core", {
           expiresAt: payload?.exp,
         };
 
+        this.user = userData;
+
         // Query organizer record, if this is an organizer session.
         if (this.user?.type === USER_TYPE_ORGANIZER) {
-          await this.queryOrganizer();
+          try {
+            await this.queryOrganizer();
+          } catch (error) {
+            console.error("Failed to fetch organizer data:", error);
+            // Don't clear user session here, better to have partial data than none
+          }
         }
 
         // Query event user record, if this is an event user session.
         if (this.user?.type === USER_TYPE_EVENT_USER) {
-          await this.queryEventUser();
+          try {
+            await this.queryEventUser();
+          } catch (error) {
+            console.error("Failed to fetch event user data:", error);
+            // Don't clear user session here, better to have partial data than none
+          }
         }
 
         // Reset apollo client.
@@ -213,25 +297,37 @@ export const useCore = defineStore("core", {
      */
     queryOrganizer() {
       return new Promise((resolve, reject) => {
+        // Make sure we provide the Apollo client properly here
         provideApolloClient(apolloClient);
-        const organizerQuery = useQuery(
-          ORGANIZER,
-          { organizerId: this.user?.id },
-          { fetchPolicy: "no-cache" },
-        );
-        organizerQuery.onResult((result) => {
-          const organizer = result?.data?.organizer || null;
-          if (organizer) {
-            this.organizer.value = organizer;
-            resolve(organizer);
-            return;
-          }
-          reject(
-            new EventUserNotFoundError(
-              `Organizer with id "${this.user?.id}" not found`,
-            ),
-          );
-        });
+
+        try {
+          // Use the direct Apollo client query to avoid Vue composition API issues
+          apolloClient.query({
+            query: ORGANIZER,
+            variables: { organizerId: this.user?.id },
+            fetchPolicy: "no-cache"
+          })
+            .then(result => {
+              const organizer = result?.data?.organizer || null;
+              if (organizer) {
+                this.organizer.value = organizer;
+                resolve(organizer);
+                return;
+              }
+              reject(
+                new EventUserNotFoundError(
+                  `Organizer with id "${this.user?.id}" not found`,
+                ),
+              );
+            })
+            .catch(error => {
+              console.error("Error fetching organizer data:", error);
+              reject(error);
+            });
+        } catch (error) {
+          console.error("Error in queryOrganizer:", error);
+          reject(error);
+        }
       });
     },
     /**
@@ -249,25 +345,37 @@ export const useCore = defineStore("core", {
      */
     queryEventUser() {
       return new Promise((resolve, reject) => {
+        // Make sure we provide the Apollo client properly here
         provideApolloClient(apolloClient);
-        const eventUserQuery = useQuery(
-          EVENT_USER,
-          { id: this.user?.id },
-          { fetchPolicy: "no-cache" },
-        );
-        eventUserQuery.onResult((result) => {
-          const eventUser = result?.data?.eventUser || null;
-          if (eventUser) {
-            this.eventUser.value = eventUser;
-            resolve(eventUser);
-            return;
-          }
-          reject(
-            new EventUserNotFoundError(
-              `Event user with id "${this.user?.id}" not found`,
-            ),
-          );
-        });
+
+        try {
+          // Use the direct Apollo client query to avoid Vue composition API issues
+          apolloClient.query({
+            query: EVENT_USER,
+            variables: { id: this.user?.id },
+            fetchPolicy: "no-cache"
+          })
+            .then(result => {
+              const eventUser = result?.data?.eventUser || null;
+              if (eventUser) {
+                this.eventUser.value = eventUser;
+                resolve(eventUser);
+                return;
+              }
+              reject(
+                new EventUserNotFoundError(
+                  `Event user with id "${this.user?.id}" not found`,
+                ),
+              );
+            })
+            .catch(error => {
+              console.error("Error fetching event user data:", error);
+              reject(error);
+            });
+        } catch (error) {
+          console.error("Error in queryEventUser:", error);
+          reject(error);
+        }
       });
     },
 
