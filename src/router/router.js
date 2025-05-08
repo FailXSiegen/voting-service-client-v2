@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { Route } from "@/core/model/Route";
 import { toast } from "vue3-toastify";
 import t from "@/core/util/l18n";
+import { AUTH_TOKEN } from "@/apollo-client";
 import {
   RouteMainLogin,
   RouteOrganizerDashboard,
@@ -289,6 +290,21 @@ const routes = [
     },
     null,
     true,
+    null,
+    async (to) => {
+      const coreStore = useCore();
+
+      // Wait for authentication to be initialized
+      await coreStore.waitForAuth();
+
+      console.log("Member room - User auth status after init:", {
+        isActiveOrganizer: coreStore.isActiveOrganizerSession,
+        userRole: coreStore.getActiveUserRole,
+        userId: coreStore.user?.id,
+        token: !!localStorage.getItem(AUTH_TOKEN)
+      });
+      return true; // Always proceed with the navigation
+    }
   ),
   new Route(
     "/admin/event/member-room/:id/event-user/new",
@@ -501,8 +517,11 @@ export const router = createRouter({
 });
 
 // eslint-disable-next-line no-unused-vars
-router.beforeEach((to, from) => {
+router.beforeEach(async (to, from) => {
   const coreStore = useCore();
+
+  // Wait for authentication to be initialized before proceeding
+  await coreStore.waitForAuth();
 
   // Redirect logged in organizer to dashboard, if they visit a route with "meta.redirectOrganizer".
   if (to.meta.redirectOrganizer && coreStore.isActiveOrganizerSession) {
@@ -511,6 +530,7 @@ router.beforeEach((to, from) => {
       name: RouteOrganizerDashboard,
     };
   }
+
   // Do not allow access to routes which require super organizer role.
   if (to.meta.requireSuperOrganizerRole && !coreStore.isSuperOrganizer) {
     return {

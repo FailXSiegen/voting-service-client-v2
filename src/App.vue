@@ -15,7 +15,11 @@ const loaded = ref(false);
 
 // Initialise the core store.
 (async () => {
-  await useCore().init();
-  loaded.value = true;
+ try {
+    await useCore().init();
+    loaded.value = true;
+  } catch (error) {
+    console.error("App.vue initialization failed:", error);
+  }
 })();
 </script>
