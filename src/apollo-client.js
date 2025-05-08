@@ -120,13 +120,15 @@ let wsReconnectCount = 0;
 const MAX_WS_RECONNECT_ATTEMPTS = 10;
 
 wsLink.client.on("connecting", () => {
-  console.info(`[Websocket] Connecting... (Versuch ${++wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})`);
+  // Sicherstellen, dass der Zähler die Grenze nicht überschreitet
+  if (wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
+    wsReconnectCount++;
+  }
 });
 
 wsLink.client.on("connected", () => {
   // Zurücksetzen des Reconnect-Zählers bei erfolgreicher Verbindung
   wsReconnectCount = 0;
-  console.info("[Websocket] Erfolgreich verbunden");
 
   // Mark current event user as online.
   try {
@@ -152,14 +154,10 @@ wsLink.client.on("error", (error) => {
     console.info(`[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
     setTimeout(() => {
       try {
-        // Manueller Reconnect-Versuch - wsLink.client.restart() existiert nicht
-        // Stattdessen verwenden wir die connect()-Methode, falls vorhanden, oder initialisieren neu
+        // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
         if (typeof wsLink.client.connect === 'function') {
+          // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
           wsLink.client.connect();
-        } else {
-          // Wenn keine connect-Methode vorhanden ist, machen wir nichts - 
-          // die Bibliothek versucht automatisch neu zu verbinden
-          console.info("[Websocket] Keine manuelle Reconnect-Methode verfügbar, warte auf Auto-Reconnect");
         }
       } catch (e) {
         console.error("[Websocket] Fehler beim Neustart der Verbindung:", e);
@@ -169,8 +167,6 @@ wsLink.client.on("error", (error) => {
 });
 
 wsLink.client.on("closed", (event) => {
-  console.info(`[Websocket] Verbindung geschlossen mit Code ${event?.code || 'unbekannt'}, Grund: ${event?.reason || 'keiner'}`);
-
   // Mark current event user as offline.
   try {
     // Vorsichtshalber prüfen, ob der Store verfügbar ist
@@ -188,11 +184,13 @@ wsLink.client.on("closed", (event) => {
   // Bei normaler Schließung nicht neu verbinden, bei abnormaler Schließung versuchen, neu zu verbinden
   const isAbnormalClosure = !event || event.code !== 1000;
   if (isAbnormalClosure && wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
-    console.info(`[Websocket] Abnormale Schließung, versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
     setTimeout(() => {
       try {
-        // Manueller Reconnect-Versuch
-        wsLink.client.restart();
+        // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
+        if (typeof wsLink.client.connect === 'function') {
+          // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
+          wsLink.client.connect();
+        }
       } catch (e) {
         console.error("[Websocket] Fehler beim Neustart der Verbindung nach Schließung:", e);
       }
@@ -220,7 +218,7 @@ function startWebSocketKeepAlive() {
         `,
         fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
       }).then(() => {
-        console.debug("[Websocket] Keep-alive Anfrage erfolgreich");
+
       }).catch((error) => {
         console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
       });
@@ -318,16 +316,14 @@ export async function terminateWebsocketClient() {
     // Stoppe zuerst das Keep-Alive-Intervall
     stopWebSocketKeepAlive();
 
-    // Versuche, die Verbindung ordnungsgemäß zu schließen
-    console.info("[Websocket] Beende WebSocket-Verbindung...");
-
-    // Setze den Reconnect-Zähler zurück, um weitere automatische Reconnects zu verhindern
+    // Verhindere weitere Reconnect-Versuche durch Maximierung des Zählers
     wsReconnectCount = MAX_WS_RECONNECT_ATTEMPTS;
 
-    // Ordnungsgemäßes Beenden mit Code 1000 (Normal Closure)
-    await wsLink.client.terminate();
+    // Der graphql-ws Client hat keine direkte Methode zum Entfernen von Listenern
+    // Stattdessen setzen wir den Zähler hoch und prüfen ihn in den Listener-Callbacks
 
-    console.info("[Websocket] WebSocket-Verbindung erfolgreich beendet");
+    // Ordnungsgemäßes Beenden mit speziellem Code (4499 für kontrollierte Terminierung)
+    await wsLink.client.terminate();
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("[Websocket] Fehler beim Beenden der WebSocket-Verbindung:", error);

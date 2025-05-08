@@ -77,8 +77,9 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
             />
             <div v-if="poll.type === 'PUBLIC' && activePollEventUser && event.publicVoteVisible" class="d-inline-block w-100">
               <hr />
-              <VotingDetails
+              <VotingDetailsWithSubscription
                 :active-poll-event-user="activePollEventUser"
+                :event-id="event.id"
               />
             </div>
             
@@ -93,7 +94,7 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
 import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { Modal } from "bootstrap";
 import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
-import VotingDetails from "@/modules/eventUser/components/dashboard/poll/VotingDetails.vue";
+import VotingDetailsWithSubscription from "@/modules/eventUser/components/dashboard/poll/VotingDetailsWithSubscription.vue";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 
 const emit = defineEmits(["submit"]);
