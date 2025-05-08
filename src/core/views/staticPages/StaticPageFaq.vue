@@ -51,7 +51,7 @@ import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
 
 // Konfiguration für DB-basierten Inhalt
-const useDbContent = ref(true);
+const useDbContent = ref(false); // Legacy-Modus verwenden, da keine DB-Inhalte aktiv sind
 const contentSections = ref([]);
 const loading = ref(false);
 
@@ -86,7 +86,7 @@ const fetchContentFromDb = async () => {
     });
     
     // Sortieren nach Reihenfolge
-    contentSections.value = result.data.staticContentsByPage || [];
+    contentSections.value = [...(result.data.staticContentsByPage || [])];
     contentSections.value.sort((a, b) => a.ordering - b.ordering);
     
     // Wenn keine Inhalte vorhanden sind, auf Komponenten-Modus zurückfallen
