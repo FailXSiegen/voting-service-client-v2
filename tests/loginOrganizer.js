@@ -198,6 +198,23 @@ async function createAndStartPoll(page) {
         const votingTitle = `Lasttest Abstimmung ${new Date().toISOString()}`;
         console.log(`Organizer: Erstelle Abstimmung mit Titel "${votingTitle}"`);
 
+        // Speichere den Titel in einer JSON-Datei für andere Tests
+        try {
+            const fs = require('fs');
+            const resultsDir = path.join(process.cwd(), 'voting-results');
+            if (!fs.existsSync(resultsDir)) {
+                fs.mkdirSync(resultsDir, { recursive: true });
+            }
+            const titleFile = path.join(resultsDir, 'poll-title.json');
+            fs.writeFileSync(titleFile, JSON.stringify({
+                pollTitle: votingTitle,
+                timestamp: new Date().toISOString()
+            }, null, 2));
+            console.log(`Organizer: Abstimmungstitel "${votingTitle}" für Tests gespeichert`);
+        } catch (error) {
+            console.error('Fehler beim Speichern des Abstimmungstitels:', error.message);
+        }
+
         // Versuche das Titelfeld zu finden
         const titleSelectors = [
             'input[placeholder="Was soll abgestimmt werden?"]',

@@ -214,20 +214,93 @@ async function checkVotingSuccess(page, userIndex) {
             // Ignoriere Screenshot-Fehler
         }
 
-        // Check 1: If we can see poll results, consider it a success
+        // VERBESSERT: Prüfen ob ein Modal sichtbar ist und "Ergebnisse" enthält
+        // Check 1: Wenn wir Ergebnisse in einem Modal sehen, gilt dies als Erfolg
+        try {
+            // Prüfe zunächst, ob ein Modal sichtbar ist
+            // Direkte Selektoren aus ResultModal.vue
+            const modalSelectors = [
+                '#resultModal',
+                '#resultModal.modal.fade.show',
+                '#resultModal .modal-content',
+                '#resultModal .modal-body',
+                '.modal-title:has-text("Ergebnis")',
+            ];
+
+            let modalVisible = false;
+            let visibleModalSelector = null;
+
+            for (const selector of modalSelectors) {
+                try {
+                    const isVisible = await page.locator(selector).isVisible({ timeout: 1000 });
+                    if (isVisible) {
+                        modalVisible = true;
+                        visibleModalSelector = selector;
+                        break;
+                    }
+                } catch (e) {
+                    // Dieser Selektor hat nicht funktioniert, probiere den nächsten
+                }
+            }
+
+            // Wenn ein Modal sichtbar ist, prüfe ob es Ergebnisse enthält
+            if (modalVisible && visibleModalSelector) {
+                console.log(`User ${userIndex}: Modal gefunden mit Selektor: ${visibleModalSelector}`);
+
+                // Prüfe, ob das Modal Text mit "Ergebnis" enthält
+                const modalText = await page.locator(`${visibleModalSelector}`).innerText().catch(() => "");
+                const resultIndicators = [
+                    'Ergebnis',
+                    'Abstimmungsergebnis',
+                    'Resultate',
+                    'Auswertung',
+                    'Poll results'
+                ];
+
+                for (const indicator of resultIndicators) {
+                    if (modalText.includes(indicator)) {
+                        console.log(`User ${userIndex}: Ergebnisanzeige erkannt im Modal mit Text: "${indicator}"`);
+                        return true;
+                    }
+                }
+
+                // Falls kein direkter Ergebnisindikator gefunden wurde, prüfe weitere Elemente im Modal
+                const resultsElementSelectors = [
+                    `${visibleModalSelector} .results-view`,
+                    `${visibleModalSelector} .poll-results`,
+                    `${visibleModalSelector} .results-container`,
+                    `${visibleModalSelector} .poll-result-box`,
+                    `${visibleModalSelector} .chart-container`,
+                    `${visibleModalSelector} .result-chart`
+                ];
+
+                for (const selector of resultsElementSelectors) {
+                    try {
+                        const isVisible = await page.locator(selector).isVisible({ timeout: 500 });
+                        if (isVisible) {
+                            console.log(`User ${userIndex}: Ergebniselement gefunden im Modal mit Selektor: ${selector}`);
+                            return true;
+                        }
+                    } catch (e) {
+                        // Dieser Selektor hat nicht funktioniert, probiere den nächsten
+                    }
+                }
+            }
+        } catch (e) {
+            console.log(`User ${userIndex}: Fehler bei der Modal-Ergebnisprüfung: ${e.message}`);
+        }
+
+        // Check 2: If we can see poll results elsewhere on the page, consider it a success
+        // Hinzufügen von spezifischen Selektoren aus ResultItem.vue
         const resultsSelectors = [
+            // Direkte CSS-Selektoren aus ResultModal.vue und ResultItem.vue
+            '.modal-title:has-text("Ergebnis")',
+            '.result-list',
+            '#poll-*-ResultVoters',
+            '#poll-*-ResultDetails',
+            // Generische Ergebnisse-Selektoren
             '.modal-content:has-text("Ergebnis")',
-            '.modal:has-text("Abstimmungsergebnis")',
             '.modal-body:has-text("Ergebnis")',
-            '.poll-results',
-            '.results-container',
-            'div:has-text("Ergebnis der Abstimmung")',
-            '.results-view',
-            '.poll-result-box',
-            '.poll-completed',
-            '.poll-closed',
-            '.vergangene-abstimmung',
-            '.past-poll'
         ];
 
         for (const selector of resultsSelectors) {
@@ -242,7 +315,7 @@ async function checkVotingSuccess(page, userIndex) {
             }
         }
 
-        // Check 2: Success message
+        // Check 3: Success message
         const successSelectors = [
             'div:has-text("Erfolgreich abgestimmt")',
             '.alert-success',
@@ -263,7 +336,7 @@ async function checkVotingSuccess(page, userIndex) {
             }
         }
 
-        // Check 3: Look for poll results or success in the page content
+        // Check 4: Look for poll results or success in the page content
         try {
             const pageContent = await page.content();
             const successIndicators = [
@@ -287,7 +360,7 @@ async function checkVotingSuccess(page, userIndex) {
             // Ignore content check errors
         }
 
-        // Check 4: Is the modal gone? (Might indicate success)
+        // Check 5: Is the modal gone? (Might indicate success)
         const modalStillVisible = await isModalVisible(page).catch(() => false);
         if (!modalStillVisible && canActuallyVote) {
             console.log(`User ${userIndex}: Vote likely successful - poll modal disappeared`);
