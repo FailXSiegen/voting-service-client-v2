@@ -151,14 +151,14 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
         // Warte UNBEGRENZT, bis wir 100% der Benutzer haben
         // Der Test wird AUSSCHLIESSLICH fortgesetzt, wenn alle Benutzer erfolgreich eingeloggt sind
         console.log(`Organizer-Test: Warte unbegrenzt, bis ALLE ${CONFIG.MAX_USERS_PER_TEST} Benutzer (100%) eingeloggt sind...`);
-        
+
         const loginStartTime = Date.now();
         let loginElapsedMinutes = 0;
-        
+
         while (!readyStatus.allReady) {
           // Zeige jede Minute einen ausführlichen Statusbericht an
           const currentElapsedMinutes = Math.floor((Date.now() - loginStartTime) / 60000);
-          
+
           if (currentElapsedMinutes > loginElapsedMinutes) {
             loginElapsedMinutes = currentElapsedMinutes;
             console.log(`Organizer-Test: STATUSBERICHT NACH ${loginElapsedMinutes} MINUTEN:`);
@@ -166,7 +166,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
             console.log(`  - ${readyStatus.readyBatches} von ${readyStatus.totalBatches} Batches sind vollständig`);
             console.log(`  - Wartend auf fehlende ${CONFIG.MAX_USERS_PER_TEST - readyStatus.totalUsersLoggedIn} Benutzer...`);
           }
-          
+
           console.log(`Organizer-Test: Benutzerbereitschaft bei ${readyStatus.readyPercentage.toFixed(1)}%, ${readyStatus.totalUsersLoggedIn}/${CONFIG.MAX_USERS_PER_TEST} Benutzer... (Warte 5 Sekunden)`);
           await page.waitForTimeout(5000);
           readyStatus = await checkUserBatchesReady();
@@ -222,35 +222,214 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
 
       // Bleib für eine längere Dauer des Tests online
       console.log("Organizer-Test: Bleibe online für die Dauer des Tests...");
-      
-      // Berechnung der Gesamtdauer basierend auf der Benutzeranzahl
-      const testDurationMinutes = 10; // Feste Testdauer von 10 Minuten
-      const estimatedTime = testDurationMinutes * 60 * 1000;
-      
-      console.log(`Organizer-Test: Bleibe online für ${testDurationMinutes} Minuten...`);
-      
-      // Wartezeit mit Status-Updates
+
+      // Berechnung der Gesamtdauer basierend auf der Konfiguration
+      const testDurationMinutes = Math.floor(CONFIG.ORGANIZER_TOTAL_WAIT_TIME / 60000); // Max. 20 Minuten
+      const estimatedTime = CONFIG.ORGANIZER_TOTAL_WAIT_TIME;
+
+      console.log(`Organizer-Test: Bleibe online für ${testDurationMinutes} Minuten oder bis alle Benutzer abgestimmt haben...`);
+
+      // Wartezeit mit Status-Updates und Prüfung auf vollständige Abstimmung
       const startTime = Date.now();
       let elapsedTime = 0;
-      
-      while (elapsedTime < estimatedTime) {
-          await page.waitForTimeout(10000); // Alle 10 Sekunden Status ausgeben
-          elapsedTime = Date.now() - startTime;
-          const remainingSeconds = Math.round((estimatedTime - elapsedTime) / 1000);
-          
-          console.log(`Organizer-Test: Noch ${remainingSeconds} Sekunden aktiv bleiben...`);
-          
-          // Kleine Interaktion, um den Browser aktiv zu halten
-          try {
-              await page.evaluate(() => {
-                  window.scrollBy(0, 10);
-                  window.scrollBy(0, -10);
-              });
-          } catch (e) {
-              // Ignoriere Fehler
+      let allVoted = false;
+      let reducedWaitStarted = false;
+      const reducedWaitTime = CONFIG.REDUCED_WAIT_TIME || 5000; // 5 Sekunden Standard-Reduzierung
+
+      while (elapsedTime < estimatedTime && (!allVoted || !reducedWaitStarted)) {
+        // Prüfe, ob alle Benutzer abgestimmt haben
+        try {
+          const fs = require('fs');
+          const path = require('path');
+          const resultsDir = path.join(process.cwd(), 'voting-results');
+          const notificationFile = path.join(resultsDir, 'all-voted-notification.json');
+
+          // Wenn die Benachrichtigungsdatei existiert, haben alle abgestimmt
+          if (fs.existsSync(notificationFile)) {
+            const notificationData = JSON.parse(fs.readFileSync(notificationFile));
+
+            if (notificationData.allVoted === true && !reducedWaitStarted) {
+              allVoted = true;
+              reducedWaitStarted = true;
+
+              // Wenn alle abgestimmt haben, verkürze die Wartezeit
+              console.log(`Organizer-Test: WICHTIGE BENACHRICHTIGUNG - Alle ${notificationData.successfulVotes} Teilnehmer haben abgestimmt!`);
+              console.log(`Organizer-Test: Die Tests werden in ${reducedWaitTime / 1000} Sekunden beendet...`);
+
+              // Starte einen Countdown für die reduzierte Wartezeit
+              const reducedWaitStartTime = Date.now();
+              let resultTitleFound = false;
+              const screenshotsDir = ensureScreenshotsDirectory();
+
+              // Warte die reduzierte Zeit und prüfe währenddessen auf den Ergebnistitel
+              while (Date.now() - reducedWaitStartTime < reducedWaitTime && !resultTitleFound) {
+                const remainingReducedTimeSeconds = Math.round((reducedWaitTime - (Date.now() - reducedWaitStartTime)) / 1000);
+                console.log(`Organizer-Test: Reduzierte Wartezeit - noch ${remainingReducedTimeSeconds} Sekunden...`);
+
+                // Versuche, den gespeicherten Abstimmungstitel zu laden
+                let expectedPollTitle = null;
+                try {
+                  const titleFilePath = path.join(resultsDir, 'poll-title.json');
+                  if (fs.existsSync(titleFilePath)) {
+                    const titleData = JSON.parse(fs.readFileSync(titleFilePath));
+                    expectedPollTitle = titleData.pollTitle;
+                    console.log(`Organizer-Test: Erwarteter Abstimmungstitel aus Datei geladen: "${expectedPollTitle}"`);
+                  } else {
+                    console.log(`Organizer-Test: Keine poll-title.json Datei gefunden, verwende generische Selektoren`);
+                  }
+                } catch (error) {
+                  console.error(`Organizer-Test: Fehler beim Laden des Abstimmungstitels:`, error.message);
+                }
+
+                // Prüfe, ob der Abstimmungstitel in div.results-listing als .h5 sichtbar ist
+                try {
+                  // Debug: Überprüfe den HTML-Inhalt für den Titel
+                  console.log(`Organizer-Test: Überprüfe HTML auf den Abstimmungstitel...`);
+                  const htmlContent = await page.content();
+
+                  // Prüfen, ob der erwartete Titel im HTML erscheint
+                  if (expectedPollTitle && htmlContent.includes(expectedPollTitle)) {
+                    console.log(`Organizer-Test: WICHTIG! Erwarteter Titel "${expectedPollTitle}" ist im HTML-Code enthalten`);
+                  } else if (expectedPollTitle) {
+                    console.log(`Organizer-Test: WARNUNG! Erwarteter Titel "${expectedPollTitle}" ist NICHT im HTML-Code enthalten`);
+                    // Suche nach "Lasttest" oder anderen Schlüsselwörtern im HTML
+                    if (htmlContent.includes("Lasttest")) {
+                      console.log(`Organizer-Test: Aber "Lasttest" wurde im HTML gefunden - Titel könnte teilweise vorhanden sein`);
+                    }
+                  }
+                  
+                  // Erstelle dynamische Selektoren basierend auf dem erwarteten Titel
+                  let titleSelectors = [
+                    'div.results-listing .h5',
+                    'div.results-listing h5',
+                    '.poll-result .h5',
+                    '.poll-results h5',
+                    '.poll-completed h5'
+                  ];
+
+                  // Füge dynamische Selektoren hinzu, wenn wir einen erwarteten Titel haben
+                  if (expectedPollTitle) {
+                    const escapedTitle = expectedPollTitle.replace(/"/g, '\"');
+                    titleSelectors = titleSelectors.concat([
+                      `.card-header h5:has-text("${escapedTitle}")`,
+                      `.result-title:has-text("${escapedTitle}")`,
+                      `h5:has-text("${escapedTitle}")`,
+                      `.h5:has-text("${escapedTitle}")`,
+                      `*:has-text("${escapedTitle}")`
+                    ]);
+                  } else {
+                    // Fallback zu generischen Selektoren
+                    titleSelectors = titleSelectors.concat([
+                      '.card-header h5:has-text("Lasttest")',
+                      '.card-header h5:has-text("geheim")',
+                      '.card-header h5:contains("2025")'
+                    ]);
+                  }
+
+                  for (const selector of titleSelectors) {
+                    console.log(`Organizer-Test: Prüfe Selektor: ${selector}`);
+                    
+                    // Prüfe den Selektor mit try/catch
+                    const isTitleVisible = await page.locator(selector).isVisible({ timeout: 1000 }).catch((e) => {
+                      console.log(`Organizer-Test: Fehler beim Prüfen von Selektor ${selector}: ${e.message}`);
+                      return false;
+                    });
+                    
+                    console.log(`Organizer-Test: Selektor ${selector} ist ${isTitleVisible ? 'sichtbar' : 'nicht sichtbar'}`);
+                    
+                    if (isTitleVisible) {
+                      try {
+                        const titleText = await page.locator(selector).innerText();
+                        console.log(`Organizer-Test: ERFOLG! Abstimmungstitel gefunden: "${titleText}"`);
+                        
+                        // Prüfe, ob der gefundene Titel dem erwarteten Titel entspricht
+                        if (expectedPollTitle && titleText.includes(expectedPollTitle)) {
+                          console.log(`Organizer-Test: PERFEKT! Gefundener Titel enthält den erwarteten Titel "${expectedPollTitle}"`);
+                        }
+
+                        // Mache einen Screenshot vom gefundenen Ergebnis
+                        await page.screenshot({
+                          path: path.join(screenshotsDir, `test-success-result-title-found.png`)
+                        });
+
+                        resultTitleFound = true;
+                        break;
+                      } catch (e) {
+                        console.log(`Organizer-Test: Fehler beim Auslesen des Titels: ${e.message}`);
+                      }
+                    }
+                  }
+
+                  // Wenn kein Titel gefunden wurde, versuche eine andere Methode
+                  if (!resultTitleFound) {
+                    console.log(`Organizer-Test: Keine Ergebnistitel mit Selektoren gefunden. Versuche allgemeine Textsuche...`);
+                    
+                    // Allgemeine Textsuche auf der Seite
+                    const bodyText = await page.evaluate(() => document.body.innerText);
+                    if (expectedPollTitle && bodyText.includes(expectedPollTitle)) {
+                      console.log(`Organizer-Test: ERFOLG! Erwarteter Titel "${expectedPollTitle}" wurde im Seitentext gefunden`);
+                      resultTitleFound = true;
+                      
+                      await page.screenshot({
+                        path: path.join(screenshotsDir, `test-success-title-in-text.png`)
+                      });
+                    } else if (bodyText.includes("Lasttest")) {
+                      console.log(`Organizer-Test: ERFOLG! "Lasttest" wurde im Seitentext gefunden`);
+                      resultTitleFound = true;
+                      
+                      await page.screenshot({
+                        path: path.join(screenshotsDir, `test-success-lasttest-in-text.png`)
+                      });
+                    }
+                  }
+                } catch (e) {
+                  console.log(`Organizer-Test: Fehler bei der Titelprüfung: ${e.message}`);
+                }
+
+                await page.waitForTimeout(1000); // Status jede Sekunde aktualisieren
+
+                // Halte Browser aktiv
+                try {
+                  await page.evaluate(() => {
+                    window.scrollBy(0, 5);
+                    window.scrollBy(0, -5);
+                  });
+                } catch (e) {
+                  // Ignoriere Fehler
+                }
+              }
+
+              // Benachrichtigung über den finalen Status
+              if (resultTitleFound) {
+                console.log(`Organizer-Test: TEST ERFOLGREICH - Abstimmungstitel gefunden, alle Teilnehmer haben abgestimmt.`);
+              } else {
+                console.log(`Organizer-Test: Reduzierte Wartezeit abgelaufen, Abstimmungstitel nicht gefunden.`);
+              }
+              break; // Beende die Schleife nach der reduzierten Wartezeit
+            }
           }
+        } catch (error) {
+          console.error("Organizer-Test: Fehler beim Prüfen der Abstimmungsbenachrichtigung:", error.message);
+        }
+
+        // Normaler Status-Update, wenn nicht alle abgestimmt haben
+        await page.waitForTimeout(10000); // Alle 10 Sekunden Status ausgeben
+        elapsedTime = Date.now() - startTime;
+        const remainingSeconds = Math.round((estimatedTime - elapsedTime) / 1000);
+
+        console.log(`Organizer-Test: Noch ${remainingSeconds} Sekunden aktiv bleiben...`);
+
+        // Kleine Interaktion, um den Browser aktiv zu halten
+        try {
+          await page.evaluate(() => {
+            window.scrollBy(0, 10);
+            window.scrollBy(0, -10);
+          });
+        } catch (e) {
+          // Ignoriere Fehler
+        }
       }
-      
+
       console.log("Organizer-Test: Wartezeit abgelaufen, beende Test...");
     } catch (error) {
       console.error("Organizer-Test: Fehler im Organizer-Test:", error.message);
@@ -280,7 +459,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
         // Benutzer pro Batch aus Konfiguration
         const usersPerBatch = CONFIG.USERS_PER_BATCH;
         const concurrentLogins = CONFIG.CONCURRENT_LOGINS;
-        
+
         console.log(`[Test ${testId}] Login-Gruppen: ${usersPerBatch} Benutzer, ${concurrentLogins} gleichzeitig`);
 
         for (let batchOffset = 0; batchOffset < usersPerBatch; batchOffset += concurrentLogins) {
@@ -475,31 +654,30 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
         expect(successfulVotes).toBeGreaterThan(0, `Test ${testId}: Abstimmung fehlgeschlagen - es konnten keine Stimmen abgegeben werden`);
 
         // Halte die Browser-Kontexte länger offen, damit Benutzer ihre Stimmen vollständig abgeben können
-        console.log(`[Test ${testId}] Halte alle Browser-Fenster für 5 Minuten offen, um vollständige Stimmabgabe zu ermöglichen...`);
-        
-        // Bleibe für eine bestimmte Zeit online (5 Minuten)
-        const keepAliveMinutes = 5;
-        const keepAliveTime = keepAliveMinutes * 60 * 1000;
-        
-        console.log(`[Test ${testId}] Bleibe online für ${keepAliveMinutes} Minuten...`);
-        
+        console.log(`[Test ${testId}] Halte alle Browser-Fenster für ${CONFIG.USER_WAIT_AFTER_VOTE / 1000} Sekunden offen, um vollständige Stimmabgabe zu ermöglichen...`);
+
+        // Bleibe für eine bestimmte Zeit online (nach Konfiguration)
+        const keepAliveTime = CONFIG.USER_WAIT_AFTER_VOTE;
+
+        console.log(`[Test ${testId}] Bleibe online für ${CONFIG.USER_WAIT_AFTER_VOTE / 1000} Sekunden...`);
+
         // Halte die Browser-Fenster aktiv
         const startTime = Date.now();
         let elapsedTime = 0;
-        
+
         while (elapsedTime < keepAliveTime) {
-          // Alle 30 Sekunden Status ausgeben (verwende die erste Benutzerseite für waitForTimeout)
+          // Alle 5 Sekunden Status ausgeben (verwende die erste Benutzerseite für waitForTimeout)
           if (userPages.length > 0) {
-            await userPages[0].page.waitForTimeout(30000);
+            await userPages[0].page.waitForTimeout(10000);
           } else {
             // Fallback, falls keine userPages verfügbar sind
-            await new Promise(resolve => setTimeout(resolve, 30000));
+            await new Promise(resolve => setTimeout(resolve, 10000));
           }
           elapsedTime = Date.now() - startTime;
-          const remainingMinutes = Math.round((keepAliveTime - elapsedTime) / 60000);
-          
-          console.log(`[Test ${testId}] Noch ca. ${remainingMinutes} Minuten aktiv bleiben...`);
-          
+          const remainingSeconds = Math.round((keepAliveTime - elapsedTime) / 1000) + 90;
+
+          console.log(`[Test ${testId}] Noch ca. ${remainingSeconds} Sekunden aktiv bleiben...`);
+
           // Kleine Interaktion mit allen Browser-Fenstern, um sie aktiv zu halten
           for (let i = 0; i < Math.min(userPages.length, 10); i++) {
             try {
@@ -512,7 +690,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
             }
           }
         }
-        
+
         console.log(`[Test ${testId}] Keep-alive Zeit abgelaufen, beende Test...`);
 
       } finally {

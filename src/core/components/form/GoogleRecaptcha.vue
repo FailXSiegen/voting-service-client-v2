@@ -1,9 +1,13 @@
 <template>
   <div
+    v-if="!isDev"
     id="recaptcha-container"
     class="g-recaptcha"
     :data-sitekey="recaptchaSiteKey"
   ></div>
+  <div v-else class="dev-mode-recaptcha">
+    <small class="text-muted">reCAPTCHA auto-verified in dev mode</small>
+  </div>
 </template>
 
 <script setup>
@@ -14,6 +18,7 @@ const env = import.meta.env;
 const recaptchaResponse = ref(null);
 const recaptchaVerified = ref(false);
 const recaptchaSiteKey = env.VITE_RECAPTCHA_SITE_KEY;
+const isDev = env.MODE === 'development';
 
 function onCaptchaVerified(response) {
   recaptchaResponse.value = response;
@@ -28,6 +33,13 @@ function onCaptchaExpired() {
 }
 
 onMounted(() => {
+  // Auto-verify in development mode
+  if (isDev) {
+    console.log('Development mode detected - reCAPTCHA automatically verified');
+    onCaptchaVerified('dev-mode-auto-verified');
+    return;
+  }
+
   const script = document.createElement("script");
   script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
   script.async = true;

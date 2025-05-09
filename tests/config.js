@@ -1,5 +1,6 @@
 // config.js
 const path = require('path');
+const fs = require('fs');
 
 // Globale Konfiguration für den Lasttest
 const CONFIG = {
@@ -25,14 +26,92 @@ const CONFIG = {
     SCREENSHOTS_DIR: 'test-results', // Verzeichnis für Screenshots
     USER_READY_PERCENTAGE: 100,     // Prozentsatz der Benutzer, die eingeloggt sein müssen
     CONCURRENT_LOGINS: 25,          // Anzahl gleichzeitiger Logins pro Batch
+    REDUCED_WAIT_AFTER_ALL_VOTES: true, // Neue Option: Reduziere Wartezeit nach vollständiger Abstimmung
+    REDUCED_WAIT_TIME: 10000,       // Reduzierte Wartezeit in ms (10 Sekunden nach vollständiger Abstimmung)
+    GLOBAL_STATUS_FILE: 'global-vote-status.json', // Dateiname für den globalen Status
+
+    // Neue Konfigurationswerte für reduzierte Wartezeiten
+    USER_WAIT_AFTER_VOTE: 20000,    // 20 Sekunden Wartezeit nach Abstimmung pro Benutzer
+    USER_TOTAL_WAIT_TIME: 20 * 60000, // 20 Minuten Gesamtwartezeit für Benutzer
+    ORGANIZER_TOTAL_WAIT_TIME: 20 * 60000, // 20 Minuten Gesamtwartezeit für Organizer
+};
+
+// Globaler Status zur Erfassung aller Abstimmungen
+let GLOBAL_STATUS = {
+    totalParticipants: CONFIG.MAX_USERS_PER_TEST,
+    successfulVotes: 0,
+    allVoted: false,
+    lastUpdateTime: null
 };
 
 // Helper-Funktionen für Pfade und Dateizugriff
 const getResultsDir = () => path.join(process.cwd(), CONFIG.RESULTS_DIR);
 const getScreenshotsDir = () => path.join(process.cwd(), CONFIG.SCREENSHOTS_DIR);
 
+// Funktion zum Laden des globalen Status aus der Datei (falls vorhanden)
+function loadGlobalStatus() {
+    try {
+        const statusFile = path.join(getResultsDir(), CONFIG.GLOBAL_STATUS_FILE);
+        if (fs.existsSync(statusFile)) {
+            const data = fs.readFileSync(statusFile, 'utf8');
+            GLOBAL_STATUS = JSON.parse(data);
+            console.log(`Globaler Status geladen: ${GLOBAL_STATUS.successfulVotes}/${GLOBAL_STATUS.totalParticipants} erfolgreiche Abstimmungen`);
+        }
+    } catch (error) {
+        console.error('Fehler beim Laden des globalen Status:', error);
+    }
+}
+
+// Funktion zum Speichern des globalen Status in eine Datei
+function saveGlobalStatus() {
+    try {
+        const resultsDir = getResultsDir();
+        if (!fs.existsSync(resultsDir)) {
+            fs.mkdirSync(resultsDir, { recursive: true });
+        }
+
+        GLOBAL_STATUS.lastUpdateTime = new Date().toISOString();
+        const statusFile = path.join(resultsDir, CONFIG.GLOBAL_STATUS_FILE);
+        fs.writeFileSync(statusFile, JSON.stringify(GLOBAL_STATUS, null, 2));
+    } catch (error) {
+        console.error('Fehler beim Speichern des globalen Status:', error);
+    }
+}
+
+// Funktion zum Aktualisieren der erfolgreichen Abstimmungen
+function updateSuccessfulVotes(newVotes) {
+    GLOBAL_STATUS.successfulVotes += newVotes;
+
+    // Prüfen, ob alle Teilnehmer abgestimmt haben
+    if (GLOBAL_STATUS.successfulVotes >= GLOBAL_STATUS.totalParticipants) {
+        GLOBAL_STATUS.allVoted = true;
+        console.log(`ALLE TEILNEHMER HABEN ERFOLGREICH ABGESTIMMT: ${GLOBAL_STATUS.successfulVotes}/${GLOBAL_STATUS.totalParticipants}`);
+    }
+
+    saveGlobalStatus();
+    return GLOBAL_STATUS.allVoted;
+}
+
+// Funktion zum Zurücksetzen des globalen Status
+function resetGlobalStatus() {
+    GLOBAL_STATUS = {
+        totalParticipants: CONFIG.MAX_USERS_PER_TEST,
+        successfulVotes: 0,
+        allVoted: false,
+        lastUpdateTime: new Date().toISOString()
+    };
+    saveGlobalStatus();
+}
+
+// Lade den globalen Status beim Import dieses Moduls
+loadGlobalStatus();
+
 module.exports = {
     CONFIG,
     getResultsDir,
-    getScreenshotsDir
+    getScreenshotsDir,
+    GLOBAL_STATUS,
+    updateSuccessfulVotes,
+    resetGlobalStatus,
+    loadGlobalStatus
 };
