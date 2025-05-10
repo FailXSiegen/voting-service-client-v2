@@ -334,7 +334,9 @@ const loadMessages = async (locale = currentLocale.value) => {
     messages.value = [];
 
     // Wir müssen das Original-messages.json neu laden, um die unveränderten Werte zu bekommen
-    const response = await fetch('/src/messages.json');
+    // Use a relative path that works in both development and production
+    const messagesPath = import.meta.env.DEV ? '/src/messages.json' : '/src/messages.json';
+    const response = await fetch(messagesPath);
     const originalMessages = (await response.json())[locale] || {};
     // Die benutzerdefinierten Übersetzungen vom Server holen
     let customMessages = {};

@@ -36,6 +36,10 @@ export default defineConfig({
           src: __dirname + "/src/assets/pdf",
           dest: __dirname + "/public/download",
         },
+        {
+          src: __dirname + "/src/messages.json",
+          dest: __dirname + "/dist/src/",
+        },
       ],
     }),
   ],
