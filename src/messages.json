@@ -11,6 +11,21 @@
       "loading": "Wird geladen..."
     },
     "view": {
+      "messageEditor": {
+        "title": "Übersetzungs-Editor",
+        "description": "Hier können Sie Texte und Übersetzungen anpassen, die in der Anwendung angezeigt werden.",
+        "infoText": "Änderungen werden in der Datei messages.local.json gespeichert und überschreiben die Standardwerte aus messages.json. Die Originaldatei bleibt unverändert.",
+        "search": "Texte durchsuchen...",
+        "saveChanges": "Änderungen speichern",
+        "showOnlyModified": "Nur bearbeitete Texte anzeigen",
+        "reset": "Zurücksetzen",
+        "table": {
+          "path": "Pfad",
+          "defaultValue": "Standardwert",
+          "customValue": "Angepasster Wert",
+          "actions": "Aktionen"
+        }
+      },
       "login": {
         "label": {
           "username": "Benutzername, E-Mail oder Mitgliedsnummer *",
@@ -451,6 +466,7 @@
         "organizerVideoConferenceEdit": "Videokonferenzsysteme Bearbeiten",
         "organizerManagement": "Organisatoren",
         "organizerAllEvents": "Alle Veranstaltungen",
+        "organizerMessageEditor": "Übersetzungs-Editor",
         "organizerMemberRoom": "Teilnehmer",
         "organizerLobbyRoom": "Warteraum",
         "organizerPolls": "Abstimmungen",
