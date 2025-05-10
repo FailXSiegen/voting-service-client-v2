@@ -49,6 +49,7 @@ import {
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
   RouteOrganizerEventsNew,
+  RouteOrganizerMessageEditor,
 } from "@/router/routes";
 import { UPCOMING_EVENTS } from "@/modules/organizer/graphql/queries/upcoming-events";
 import { EXPIRED_EVENTS } from "@/modules/organizer/graphql/queries/expired-events";
@@ -67,6 +68,7 @@ const routes = getRoutesByName([
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
+  RouteOrganizerMessageEditor
 ]);
 
 const upcomingEvents = ref([]);

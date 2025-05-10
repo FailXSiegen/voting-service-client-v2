@@ -208,20 +208,24 @@ function startWebSocketKeepAlive() {
   // Starte ein neues Intervall, das regelmäßig eine No-Op-Anfrage sendet, um die Verbindung am Leben zu halten
   wsKeepAliveInterval = setInterval(() => {
     try {
-      // Da wsLink.client.ping() nicht existiert, senden wir eine leere GraphQL-Anfrage
-      // Die GraphQL-Spezifikation erlaubt eine Ping-Operation mit einer introspection query
-      apolloClient.query({
-        query: gql`
-          query KeepAlive {
-            __typename
-          }
-        `,
-        fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
-      }).then(() => {
+      // Prüfen, ob die apolloClient Variable existiert
+      // (sie wird später in der Datei definiert, könnte hier noch nicht verfügbar sein)
+      if (typeof apolloClient !== 'undefined') {
+        // Da wsLink.client.ping() nicht existiert, senden wir eine leere GraphQL-Anfrage
+        // Die GraphQL-Spezifikation erlaubt eine Ping-Operation mit einer introspection query
+        apolloClient.query({
+          query: gql`
+            query KeepAlive {
+              __typename
+            }
+          `,
+          fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+        }).then(() => {
 
-      }).catch((error) => {
-        console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
-      });
+        }).catch((error) => {
+          console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
+        });
+      }
 
     } catch (e) {
       console.error("[Websocket] Fehler beim Senden des Keep-alive:", e);

@@ -22,6 +22,7 @@ import {
   RouteOrganizerProfile,
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
+  RouteOrganizerMessageEditor,
   RouteOrganizerVideoConference,
   RouteOrganizerVideoConferenceNew,
   RouteOrganizerVideoConferenceEdit,
@@ -58,6 +59,7 @@ import EditVideoConference from "@/modules/organizer/views/video-conference/Edit
 import NewVideoConference from "@/modules/organizer/views/video-conference/NewVideoConference.vue";
 import OrganizerManagement from "@/modules/organizer/views/OrganizerManagement.vue";
 import OrganizerAllEvents from "@/modules/organizer/views/OrganizerAllEvents.vue";
+import MessageEditor from "@/modules/organizer/views/MessageEditor.vue";
 import EventNew from "@/modules/organizer/views/event/EventNew.vue";
 import EventEdit from "@/modules/organizer/views/event/EventEdit.vue";
 import MemeberRoom from "@/modules/organizer/views/event/MemeberRoom.vue";
@@ -429,6 +431,11 @@ const routes = [
   ),
   new Route("/admin/all-event", RouteOrganizerAllEvents, OrganizerAllEvents, {
     bootstrapIcon: "bi-calendar2-range",
+    requireOrganizerRole: true,
+    requireSuperOrganizerRole: true,
+  }),
+  new Route("/admin/message-editor", RouteOrganizerMessageEditor, MessageEditor, {
+    bootstrapIcon: "bi-translate",
     requireOrganizerRole: true,
     requireSuperOrganizerRole: true,
   }),

@@ -70,6 +70,7 @@ import {
   RouteOrganizerDashboard,
   RouteOrganizerEvents,
   RouteOrganizerManagement,
+  RouteOrganizerMessageEditor,
   RouteOrganizerVideoConference,
   RouteOrganizerVideoConferenceNew,
   RouteOrganizerVideoConferenceEdit,
@@ -99,6 +100,7 @@ const routes = getRoutesByName([
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
+  RouteOrganizerMessageEditor
 ]);
 
 const zoomvideoConferences = computed(

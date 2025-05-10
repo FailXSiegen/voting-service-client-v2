@@ -31,6 +31,9 @@ coverage
 .env*
 !.env.dist
 
+# Custom message overrides
+src/messages.local.json
+
 # public
 public/lib
 public/uploads

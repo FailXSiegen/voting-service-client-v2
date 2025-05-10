@@ -122,6 +122,33 @@
           </div>
         </div>
       </div>
+
+      <!-- Message Editor for SuperOrganizer -->
+      <div class="row mt-4" v-if="coreStore.isSuperOrganizer">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h3 class="h5 mb-0">
+                <i class="bi bi-translate me-2"></i>
+                {{ $t('navigation.views.organizerMessageEditor') }}
+              </h3>
+            </div>
+            <div class="card-body">
+              <p>
+                Hier können Sie die System-Texte anpassen und überschreiben.
+                Die Änderungen werden in einer separaten Datei gespeichert und überschreiben die Standard-Texte.
+              </p>
+              <router-link
+                :to="{ name: RouteOrganizerMessageEditor }"
+                class="btn btn-primary"
+              >
+                <i class="bi bi-translate me-2"></i>
+                {{ $t('navigation.views.organizerMessageEditor') }} öffnen
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
     </template>
   </PageLayout>
 </template>
@@ -138,7 +165,12 @@ import {
   RouteOrganizerAllEvents,
   RouteOrganizerManagement,
   RouteOrganizerProfile,
+  RouteOrganizerMessageEditor,
 } from "@/router/routes";
+import { useCore } from "@/core/store/core";
+
+const coreStore = useCore();
+const user = coreStore.user;
 
 // Define navigation items.
 const routes = getRoutesByName([
@@ -147,5 +179,6 @@ const routes = getRoutesByName([
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
+  RouteOrganizerMessageEditor,
 ]);
 </script>
