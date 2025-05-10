@@ -138,7 +138,7 @@ const uploadProgress = ref(0);
 const uploadError = ref('');
 
 // API-Endpoints
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 const UPLOAD_URL = `${API_URL}/media/upload`;
 
 // GraphQL Client

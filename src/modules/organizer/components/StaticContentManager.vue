@@ -1276,7 +1276,7 @@ const checkDuplicateSection = () => {
 // Optimierte Methode für direkten GraphQL-API-Zugriff ohne Apollo-Client
 const directApiSaveContent = async (contentData) => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+    const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
     const GRAPHQL_ENDPOINT = `${API_URL}/graphql`;
     
     // JWT-Token aus localStorage holen
