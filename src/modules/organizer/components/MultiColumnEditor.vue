@@ -104,20 +104,6 @@
       </div>
     </div>
 
-    <div class="mb-3">
-      <h6>Vorschau:</h6>
-      <div class="border rounded p-3 bg-light">
-        <div class="row">
-          <div
-            v-for="(column, index) in columns"
-            :key="`preview-${index}`"
-            :class="getColumnClass()"
-          >
-            <div class="border rounded p-2 bg-white h-100" v-html="column.content"></div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -186,10 +172,6 @@ export default {
         
         // Only update if this is the initial value or the array length has changed
         if (oldVal === undefined || newLength !== oldLength) {
-          console.log('MultiColumnEditor: value changed significantly', { 
-            newLength, 
-            oldLength
-          });
           if (newVal && Array.isArray(newVal)) {
             this.initFromValue();
           }
@@ -258,8 +240,6 @@ export default {
      * Initialize the columns from the provided value
      */
     initFromValue() {
-      console.log('MultiColumnEditor: initFromValue called');
-      
       if (this.value && Array.isArray(this.value)) {
         // Make a clean copy of the value without __typename
         this.columns = this.value.map(column => ({
@@ -289,14 +269,9 @@ export default {
      * Update column content from CKEditor
      */
     updateColumnDirectly(index, newContent) {
-      console.log(`CKEditor update for column ${index}: "${newContent?.substring(0, 30)}..."`);
-
       if (this.columns && index >= 0 && index < this.columns.length) {
         // Update content directly
         this.columns[index].content = newContent || '';
-
-        // Log the update
-        console.log(`Column ${index} content updated via CKEditor.`);
 
         // Emit changes immediately
         this.$emit('input', [...this.columns]);
@@ -378,12 +353,8 @@ export default {
   },
   
   mounted() {
-    console.log('MultiColumnEditor: mounted with value:', this.value);
-    
     // Initialize with empty columns if no value provided
     if (!this.value || !this.value.length) {
-      console.log('MultiColumnEditor: no initial value, creating empty columns');
-      
       this.columns = [];
       for (let i = 0; i < this.columnCount; i++) {
         this.columns.push({ content: '' });
@@ -396,8 +367,6 @@ export default {
         columnCount: this.columnCount,
         columns: [...this.columns]
       });
-    } else {
-      console.log('MultiColumnEditor: mounted with existing value, will handle via watcher');
     }
   }
 };

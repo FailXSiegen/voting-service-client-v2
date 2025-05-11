@@ -381,23 +381,6 @@
             </small>
           </div>
         </div>
-
-        <div class="row mb-3">
-          <div class="col-md-12">
-            <label for="slug" class="form-label">Slug (URL-Pfad)</label>
-            <input
-              type="text"
-              class="form-control"
-              id="slug"
-              v-model="formData.slug"
-              placeholder="z.B. ueber-uns oder kontakt"
-            >
-            <small class="form-text text-muted">
-              Der Slug ermöglicht den direkten Zugriff über eine benutzerfreundliche URL: /[slug]<br>
-              Wenn leer, wird automatisch ein Slug aus Seiten- und Abschnittschlüssel generiert.
-            </small>
-          </div>
-        </div>
         
         <div class="row mb-3">
           <div class="col-md-6">
@@ -1234,7 +1217,6 @@ const updateSystemSettings = async () => {
 const formData = ref({
   pageKey: '',
   sectionKey: '',
-  slug: '', // Hinzufügen des Slug-Feldes
   contentType: 'standard', // Add contentType field with default value 'standard'
   title: '',
   headerClass: 'h2', // Default header class for title
@@ -1317,7 +1299,6 @@ const FETCH_STATIC_CONTENTS = gql`
       id
       pageKey
       sectionKey
-      pageSlug
       contentType
       title
       headerClass
@@ -1357,7 +1338,6 @@ const CREATE_STATIC_CONTENT = gql`
       id
       pageKey
       sectionKey
-      pageSlug
       contentType
       title
       headerClass
@@ -1382,7 +1362,6 @@ const UPDATE_STATIC_CONTENT = gql`
       id
       pageKey
       sectionKey
-      pageSlug
       contentType
       title
       headerClass
@@ -1506,7 +1485,6 @@ const fetchStaticContents = async () => {
     pageSlugs.value.forEach(slug => {
       if (slug && slug.pageKey) {
         tempSlugs[slug.pageKey] = slug.slug || '';
-        console.log('Setting slug for', slug.pageKey, 'to', slug.slug);
       }
     });
   } catch (err) {
@@ -1559,8 +1537,6 @@ const savePageSlug = async (pageKey) => {
       toast.info(`Keine Änderung am Slug für "${pageKey}"`);
       return;
     }
-
-    console.log(`Saving slug for ${pageKey}: ${tempSlug} (was: ${currentSlug})`);
 
     loading.value = true;
     const client = resolveClient();
@@ -1663,7 +1639,6 @@ const editContent = async (content) => {
     formData.value = {
       pageKey: content.pageKey,
       sectionKey: content.sectionKey,
-      slug: content.slug || '',
       contentType: content.contentType || 'standard',
       title: content.title || '',
       headerClass: content.headerClass || 'h2', // Lade die headerClass oder nutze 'h2' als Default
@@ -1686,7 +1661,6 @@ const editContent = async (content) => {
                 id
                 pageKey
                 sectionKey
-                pageSlug
                 title
                 content
                 ordering
@@ -1702,7 +1676,6 @@ const editContent = async (content) => {
         
         if (fullContent) {
           formData.value.content = fullContent.content;
-          formData.value.slug = fullContent.slug || '';
         } else {
           // Wenn der API-Aufruf null zurückgibt, zeigen wir einen Fehler an
           console.error('API returned null for content ID:', content.id);
@@ -1824,7 +1797,6 @@ const resetForm = () => {
   formData.value = {
     pageKey: '',
     sectionKey: '',
-    slug: '',
     contentType: 'standard',
     title: '',
     headerClass: 'h2', // Default header class
@@ -2153,7 +2125,6 @@ const saveContentInternal = async (continueEditing) => {
           contentType: formData.value.contentType || 'standard',
           title,
           headerClass: formData.value.headerClass || 'h2',
-          pageSlug: formData.value.pageSlug,
           ordering,
           content: cleanContent,
           isPublished: formData.value.isPublished
@@ -2306,7 +2277,6 @@ const saveContentInternal = async (continueEditing) => {
         const createInput = {
           pageKey,
           sectionKey,
-          pageSlug: formData.value.pageSlug,
           contentType: formData.value.contentType || 'standard',
           title,
           headerClass: formData.value.headerClass || 'h2',

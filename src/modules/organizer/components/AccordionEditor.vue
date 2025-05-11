@@ -110,39 +110,6 @@
       </div>
     </div>
     
-    <div v-if="items.length > 0" class="mb-3">
-      <h6>Vorschau:</h6>
-      <div class="border rounded p-3 bg-light">
-        <div class="accordion" id="accordionPreview">
-          <div 
-            v-for="(item, index) in items" 
-            :key="`preview-${index}`"
-            class="accordion-item"
-          >
-            <h2 class="accordion-header" :id="'heading-preview-' + index">
-              <button 
-                class="accordion-button collapsed" 
-                type="button" 
-                data-bs-toggle="collapse" 
-                :data-bs-target="'#collapse-preview-' + index" 
-                aria-expanded="false" 
-                :aria-controls="'collapse-preview-' + index"
-              >
-                {{ item.title || 'Unbenanntes Element' }}
-              </button>
-            </h2>
-            <div 
-              :id="'collapse-preview-' + index" 
-              class="accordion-collapse collapse" 
-              :aria-labelledby="'heading-preview-' + index" 
-              data-bs-parent="#accordionPreview"
-            >
-              <div class="accordion-body" v-html="item.content"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -255,8 +222,6 @@ export default {
         if (this.items.length === 0) {
           this.items.push({ title: '', content: '' });
         }
-
-        console.log('Accordion items initialized from value:', this.items.length);
       }
     },
     
@@ -274,8 +239,6 @@ export default {
       if (this.items[index]?.content) {
         editor.setData(this.items[index].content);
       }
-
-      console.log(`Accordion editor ${index} initialized`);
     },
     
     /**
@@ -351,8 +314,6 @@ export default {
     emitUpdate() {
       const updatedItems = [...this.items];
 
-      console.log('Emitting accordion update with', updatedItems.length, 'items');
-
       // Emit events for v-model compatibility
       this.$emit('input', updatedItems);
       this.$emit('update:modelValue', updatedItems);
@@ -371,8 +332,6 @@ export default {
         title: '',
         content: ''
       });
-
-      console.log('Initialized with default empty accordion item');
     }
   }
 };
