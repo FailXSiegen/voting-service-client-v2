@@ -82,15 +82,24 @@ const effectivePageKey = computed(() => {
   // Prüfen, welcher Parameter verwendet wird (für beide Route-Typen)
   const pageKey = route.params.pageKey || route.params.directPageKey || props.pageKey;
   console.log('Loading static page with key:', pageKey, 'Route full path:', route.fullPath);
-  
+
+  // Prüfen, ob wir einen direkten pageKey aus dem Parameter haben
+  if (pageKey) {
+    console.log('Using explicit pageKey from route params:', pageKey);
+    return pageKey;
+  }
+
   // Für den Fall, dass wir keinen Parameter haben, versuchen wir ihn aus dem Pfad zu extrahieren
-  if (!pageKey && route.fullPath.startsWith('/static-page/')) {
+  if (route.fullPath.startsWith('/static-page/')) {
     const extractedKey = route.fullPath.replace('/static-page/', '');
     console.log('Extracted key from path:', extractedKey);
     return extractedKey;
   }
-  
-  return pageKey;
+
+  // Als letzten Ausweg den aktuellen Pfad ohne führenden Schrägstrich verwenden
+  const pathAsKey = route.fullPath.replace(/^\//, '');
+  console.log('Using current path as key:', pathAsKey);
+  return pathAsKey;
 });
 
 const contentSections = ref([]);

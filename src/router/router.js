@@ -292,17 +292,15 @@ const routes = [
         if (pageSlug && pageSlug.pageKey) {
           console.log(`Found custom page slug for ${directPageKey}:`, pageSlug);
 
-          // Wenn ein PageSlug gefunden wurde, leiten wir zur generischen Seite mit dem pageKey weiter
-          return {
-            name: RouteStaticGeneric,
-            params: { pageKey: pageSlug.pageKey },
-            replace: true
-          };
+          // Wenn ein PageSlug gefunden wurde, verwenden wir die GenericStaticPage-Komponente,
+          // aber behalten die ursprüngliche URL bei
+          to.matched[0].components.default = GenericStaticPage;
+          to.params.pageKey = pageSlug.pageKey;
+          return true;
         }
 
         // Wenn kein PageSlug gefunden wurde, überprüfen wir die Einstellung für direkte Pfade
         const coreStore = useCore();
-        console.log("Direct paths enabled:", coreStore.getUseDirectStaticPaths);
 
         // Wenn es keinen PageSlug gibt, aber der Pfad reserviert ist, die Route-Auflösung fortsetzen
         if (reservedPaths.includes(directPageKey)) {
