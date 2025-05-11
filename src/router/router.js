@@ -44,6 +44,7 @@ import {
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 import { USER_ROLE_ORGANIZER } from "@/core/auth/login";
+import { getPageSlugBySlug, STATIC_ROUTE_MAPPING } from "@/core/util/page-slug-checker";
 
 import MainLogin from "@/core/views/MainLogin.vue";
 import NotFound from "@/core/views/NotFound.vue";
@@ -127,19 +128,89 @@ const routes = [
   }),
 
   // Static pages.
-  new Route("/impressum", RouteStaticImprint, StaticPageImprint),
+  new Route("/impressum", RouteStaticImprint, StaticPageImprint, null, null, null, null, async (to) => {
+    const pageSlug = await getPageSlugBySlug('impressum');
+    if (pageSlug && pageSlug.pageKey) {
+      console.log('Found custom page slug for impressum:', pageSlug);
+      // GenericStaticPage-Komponente verwenden, aber URL als /impressum beibehalten
+      to.matched[0].components.default = GenericStaticPage;
+      to.params.pageKey = pageSlug.pageKey;
+      console.log('Using GenericStaticPage with pageKey:', pageSlug.pageKey, 'but keeping URL as /impressum');
+      return true;
+    }
+    console.log('Using default imprint page');
+    return true;
+  }),
   new Route(
     "/datenschutz",
     RouteStaticDataProtection,
     StaticPageDataProtection,
+    null,
+    null,
+    null,
+    null,
+    async (to) => {
+      const pageSlug = await getPageSlugBySlug('datenschutz');
+      if (pageSlug && pageSlug.pageKey) {
+        console.log('Found custom page slug for datenschutz:', pageSlug);
+        // GenericStaticPage-Komponente verwenden, aber URL als /datenschutz beibehalten
+        to.matched[0].components.default = GenericStaticPage;
+        to.params.pageKey = pageSlug.pageKey;
+        console.log('Using GenericStaticPage with pageKey:', pageSlug.pageKey, 'but keeping URL as /datenschutz');
+        return true;
+      }
+      console.log('Using default data protection page');
+      return true;
+    }
   ),
-  new Route("/haeufige-fragen", RouteStaticFaq, StaticPageFaq),
+  new Route("/haeufige-fragen", RouteStaticFaq, StaticPageFaq, null, null, null, null, async (to) => {
+    const pageSlug = await getPageSlugBySlug('haeufige-fragen');
+    if (pageSlug && pageSlug.pageKey) {
+      console.log('Found custom page slug for faq:', pageSlug);
+      // GenericStaticPage-Komponente verwenden, aber URL als /haeufige-fragen beibehalten
+      to.matched[0].components.default = GenericStaticPage;
+      to.params.pageKey = pageSlug.pageKey;
+      console.log('Using GenericStaticPage with pageKey:', pageSlug.pageKey, 'but keeping URL as /haeufige-fragen');
+      return true;
+    }
+    console.log('Using default faq page');
+    return true;
+  }),
   new Route(
     "/nutzervereinbarung",
     RouteStaticUserAgreement,
     StaticPageUserAgreement,
+    null,
+    null,
+    null,
+    null,
+    async (to) => {
+      const pageSlug = await getPageSlugBySlug('nutzervereinbarung');
+      if (pageSlug && pageSlug.pageKey) {
+        console.log('Found custom page slug for nutzervereinbarung:', pageSlug);
+        // GenericStaticPage-Komponente verwenden, aber URL als /nutzervereinbarung beibehalten
+        to.matched[0].components.default = GenericStaticPage;
+        to.params.pageKey = pageSlug.pageKey;
+        console.log('Using GenericStaticPage with pageKey:', pageSlug.pageKey, 'but keeping URL as /nutzervereinbarung');
+        return true;
+      }
+      console.log('Using default user agreement page');
+      return true;
+    }
   ),
-  new Route("/anleitung", RouteStaticManual, StaticPageManual),
+  new Route("/anleitung", RouteStaticManual, StaticPageManual, null, null, null, null, async (to) => {
+    const pageSlug = await getPageSlugBySlug('anleitung');
+    if (pageSlug && pageSlug.pageKey) {
+      console.log('Found custom page slug for anleitung:', pageSlug);
+      // GenericStaticPage-Komponente verwenden, aber URL als /anleitung beibehalten
+      to.matched[0].components.default = GenericStaticPage;
+      to.params.pageKey = pageSlug.pageKey;
+      console.log('Using GenericStaticPage with pageKey:', pageSlug.pageKey, 'but keeping URL as /anleitung');
+      return true;
+    }
+    console.log('Using default manual page');
+    return true;
+  }),
   new Route("/funktionen-planung", RouteStaticFunctions, StaticPageFunctions),
   // Dynamische statische Seiten aus der Datenbank
   new Route(
@@ -211,26 +282,42 @@ const routes = [
         return true;
       }
 
-      // Wenn der Pfad reserviert ist, setzen wir die Route-Auflösung fort
-      if (reservedPaths.includes(directPageKey)) {
-        return true; // Route-Auflösung fortsetzen
-      }
-
       // Debug-Log für direkten Pfad-Zugriff
       console.log(`Direct path access attempted: /${directPageKey}`);
 
       try {
-        // Zugriff auf Store
+        // Zuerst prüfen, ob es einen entsprechenden PageSlug gibt, unabhängig von der direkten Pfade Einstellung
+        const pageSlug = await getPageSlugBySlug(directPageKey);
+
+        if (pageSlug && pageSlug.pageKey) {
+          console.log(`Found custom page slug for ${directPageKey}:`, pageSlug);
+
+          // Wenn ein PageSlug gefunden wurde, leiten wir zur generischen Seite mit dem pageKey weiter
+          return {
+            name: RouteStaticGeneric,
+            params: { pageKey: pageSlug.pageKey },
+            replace: true
+          };
+        }
+
+        // Wenn kein PageSlug gefunden wurde, überprüfen wir die Einstellung für direkte Pfade
         const coreStore = useCore();
         console.log("Direct paths enabled:", coreStore.getUseDirectStaticPaths);
 
+        // Wenn es keinen PageSlug gibt, aber der Pfad reserviert ist, die Route-Auflösung fortsetzen
+        if (reservedPaths.includes(directPageKey)) {
+          return true; // Route-Auflösung fortsetzen
+        }
+
         // Wenn direkte Pfade aktiviert sind, Parameter direkt setzen statt umzuleiten
         if (coreStore.getUseDirectStaticPaths) {
-          console.log(`Setting pageKey for static page: ${directPageKey}`);
-          // Parameter direkt setzen, um Vue Router Warnings zu vermeiden
+          console.log(`No existing page slug found, treating ${directPageKey} as pageKey`);
+
+          // Wir geben den Parameter als pageKeyOrSlug weiter und lassen die Komponente entscheiden
           to.params = {
             ...to.params,
-            pageKey: directPageKey
+            pageKeyOrSlug: directPageKey,
+            isSlug: true // Hinweis für die Komponente, dass wir zuerst als Slug prüfen sollen
           };
           return true;
         } else {
