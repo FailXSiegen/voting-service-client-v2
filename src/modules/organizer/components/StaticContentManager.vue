@@ -197,7 +197,7 @@
       </div>
 
       <!-- Bestätigungsdialog für Slug-Löschen -->
-      <div v-if="showDeleteSlugDialog" class="modal" tabindex="-1" style="display: block;">
+      <div v-if="showDeleteSlugDialog" class="modal delete-slug-modal" tabindex="-1" style="display: block;">
         <div class="modal-backdrop show"></div>
         <div class="modal-dialog">
           <div class="modal-content">
@@ -2761,9 +2761,9 @@ const moveItemDown = async (content) => {
 .page-slug-manager .input-group {
   margin-bottom: 4px;
 }
-
 .modal-backdrop {
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
 }
 
 /* Globale CKEditor Styles - diese werden nicht von scoped beeinflusst */
