@@ -1,13 +1,38 @@
 <template>
   <CorePageLayout :meta-title="pageTitle">
     <div class="static-page">
-      <h1 v-if="pageTitle">{{ pageTitle }}</h1>
-      
+      <!-- Seiten-Titel wird nicht mehr angezeigt, da jeder Abschnitt seinen Titel mit headerClass hat -->
+
       <!-- DB-basierter Inhalt -->
       <div v-if="contentSections.length > 0">
         <div v-for="section in contentSections" :key="section.sectionKey" class="mb-4">
-          <h2 v-if="section.title">{{ section.title }}</h2>
-          <div v-html="section.content"></div>
+          <!-- Titel mit headerClass Unterstützung -->
+          <template v-if="section.title && section.headerClass !== 'd-none'">
+            <h1 v-if="section.headerClass === 'h1'" class="content-title h1">{{ section.title }}</h1>
+            <h2 v-else-if="section.headerClass === 'h2'" class="content-title h2">{{ section.title }}</h2>
+            <h3 v-else-if="section.headerClass === 'h3'" class="content-title h3">{{ section.title }}</h3>
+            <h4 v-else-if="section.headerClass === 'h4'" class="content-title h4">{{ section.title }}</h4>
+            <h5 v-else-if="section.headerClass === 'h5'" class="content-title h5">{{ section.title }}</h5>
+            <h2 v-else class="content-title">{{ section.title }}</h2> <!-- Default ist h2 -->
+          </template>
+
+          <!-- Content-Typ-spezifischer Inhalt -->
+          <template v-if="section.contentType === 'multi-column' && section.columnCount && section.columnsContent">
+            <multi-column-content
+              :column-count="section.columnCount"
+              :columns-content="section.columnsContent"
+            />
+          </template>
+
+          <template v-else-if="section.contentType === 'accordion' && section.accordionItems">
+            <accordion-content
+              :accordion-items="section.accordionItems"
+            />
+          </template>
+
+          <template v-else>
+            <div v-html="section.content"></div>
+          </template>
         </div>
       </div>
       
@@ -30,6 +55,8 @@
 
 <script setup>
 import CorePageLayout from "@/core/components/CorePageLayout.vue";
+import MultiColumnContent from '@/core/components/MultiColumnContent.vue';
+import AccordionContent from '@/core/components/AccordionContent.vue';
 import { ref, onMounted, defineProps, computed, watch } from 'vue';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
@@ -44,6 +71,9 @@ const props = defineProps({
     default: ''
   }
 });
+
+// Bei <script setup> werden die Komponenten automatisch registriert
+// Wir brauchen kein defineExpose oder components-Registrierung
 
 // Wenn pageKey über Route-Parameter empfangen wird
 import { useRoute } from 'vue-router';
@@ -119,10 +149,20 @@ const fetchContentFromDb = async () => {
           staticContentsByPage(pageKey: $pageKey) {
             id
             sectionKey
+            contentType
             title
+            headerClass
             content
             ordering
             isPublished
+            columnCount
+            columnsContent {
+              content
+            }
+            accordionItems {
+              title
+              content
+            }
           }
         }
       `,
