@@ -223,6 +223,7 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
 
@@ -234,6 +235,7 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 ]);
 
 const loading = ref(true);

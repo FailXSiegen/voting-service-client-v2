@@ -57,6 +57,7 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
 import { useMutation, useQuery } from "@vue/apollo-composable";
@@ -80,6 +81,7 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 ]);
 
 const page = ref(0);
