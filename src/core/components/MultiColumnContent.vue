@@ -24,7 +24,7 @@ export default {
     columnCount: {
       type: Number,
       required: true,
-      validator: val => [2, 3].includes(val)
+      validator: val => [2, 3, 4].includes(val)
     },
     
     /**
@@ -65,6 +65,8 @@ export default {
      */
     getColumnClass() {
       switch (this.columnCount) {
+        case 4:
+          return 'col-md-3';
         case 3:
           return 'col-md-4';
         case 2:
