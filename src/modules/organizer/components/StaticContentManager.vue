@@ -645,7 +645,6 @@ import ContentTypeSelector from './ContentTypeSelector.vue';
 import MultiColumnEditor from './MultiColumnEditor.vue';
 import AccordionEditor from './AccordionEditor.vue';
 import { useCore } from '@/core/store/core';
-// Drag & Drop-Funktionalität wurde entfernt
 
  import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 
@@ -1170,7 +1169,6 @@ const filteredSections = computed(() => {
   ).sort((a, b) => a.ordering - b.ordering);
 });
 
-// Drag & Drop-Funktionalität wurde entfernt
 
 // Zählt die Anzahl der Abschnitte für eine bestimmte Seite
 const countSections = (pageKey) => {
@@ -1402,7 +1400,6 @@ const editContent = async (content) => {
     
     // Wenn das Content-Feld fehlt, laden wir es nach
     if (!content.content) {
-      console.log('Content field missing, fetching from API');
       const client = resolveClient();
       try {
         const result = await client.query({
@@ -1432,8 +1429,6 @@ const editContent = async (content) => {
           console.error('API returned null for content ID:', content.id);
           toast.error('Fehler: Der Server hat keine Daten für diesen Inhalt zurückgegeben. Prüfe deine Berechtigungen.');
           
-          // Für Debugging: Sende Informationen, die helfen könnten, das Problem zu diagnostizieren
-          console.log('User context:', await getUserContext());
           return; // Abbrechen
         }
       } catch (err) {
@@ -1466,7 +1461,6 @@ const editContent = async (content) => {
       }, 100);
     }
     
-    console.log('Content geladen, Editor wird ihn beim nächsten Rendern anzeigen');
   } catch (err) {
     console.error('Failed to load content for editing:', err);
     toast.error('Fehler beim Laden des Inhalts zum Bearbeiten: ' + err.message);
@@ -1487,14 +1481,12 @@ const getUserContext = async () => {
     
     // Zunächst prüfen wir die JWT-Token im localStorage
     const authToken = localStorage.getItem('apollo-token');
-    console.log('JWT Token vorhanden:', !!authToken);
     if (authToken) {
       try {
         // Token decodieren (ohne Signaturprüfung)
         const parts = authToken.split('.');
         if (parts.length === 3) {
           const payload = JSON.parse(atob(parts[1]));
-          console.log('JWT Payload:', payload);
           
           // Prüfen, ob der Token abgelaufen ist
           const now = Math.floor(Date.now() / 1000);
@@ -1525,18 +1517,9 @@ const getUserContext = async () => {
       fetchPolicy: 'network-only'
     });
     
-    console.log('Aktuelle Benutzerrechte:', result.data.me);
     return result.data.me;
   } catch (err) {
     console.error('Failed to get user context:', err);
-    
-    // Bei Fehlern mehr Diagnose-Infos anzeigen
-    console.log('Error details:', {
-      name: err.name,
-      message: err.message,
-      networkError: err.networkError,
-      graphQLErrors: err.graphQLErrors
-    });
     
     return 'Error fetching user context';
   }
@@ -1572,8 +1555,6 @@ const resetForm = () => {
     columnsContent: [], // Create new array
     accordionItems: []
   };
-
-  console.log('Form reset completed. New formData:', JSON.stringify(formData.value));
 };
 
 // Current editor type to help with cleanup
@@ -1588,7 +1569,6 @@ const safeDestroyEditor = async () => {
         // Backup content before destroying
         if (editorInstance.value && typeof editorInstance.value.getData === 'function') {
           formData.value.content = editorInstance.value.getData();
-          console.log('Backed up standard content:', formData.value.content.substring(0, 50) + '...');
         }
 
         // Set to null to prevent reuse
@@ -1669,18 +1649,12 @@ const forceUpdatePreview = () => {
 
 // NO DEBOUNCE HERE - we need immediate updates
 const handleMultiColumnChange = (data) => {
-  console.log('### MULTI-COLUMN CHANGE EVENT RECEIVED:', data);
 
   if (data && data.columnCount) {
     formData.value.columnCount = data.columnCount;
   }
 
   if (data && data.columns && Array.isArray(data.columns)) {
-    // CRITICAL: Deep debug logging of what we receive
-    data.columns.forEach((col, idx) => {
-      console.log(`### Column ${idx} received: ${col.content ? col.content.substring(0, 30) : '(empty)'}`);
-    });
-
     // Create brand new objects without __typename
     const cleanColumns = [];
     for (const column of data.columns) {
@@ -1688,15 +1662,7 @@ const handleMultiColumnChange = (data) => {
         content: column.content || ''
       });
     }
-
-    // CRITICAL: Assign the clean array
     formData.value.columnsContent = cleanColumns;
-
-    // Debug what we set
-    formData.value.columnsContent.forEach((col, idx) => {
-      console.log(`### formData column ${idx} set to: ${col.content ? col.content.substring(0, 30) : '(empty)'}`);
-    });
-
     // Force update preview immediately
     forceUpdatePreview();
   } else {
@@ -1705,8 +1671,6 @@ const handleMultiColumnChange = (data) => {
 };
 
 const handleAccordionChange = (items) => {
-  console.log('Accordion items updated with new data:', items);
-
   if (items && Array.isArray(items)) {
     // Kopiere die Elemente, aber entferne __typename, um GraphQL-Fehler zu vermeiden
     formData.value.accordionItems = items.map(item => ({
@@ -1718,7 +1682,6 @@ const handleAccordionChange = (items) => {
     formData.value.accordionItems.forEach((item, idx) => {
       const titlePreview = item.title || '(no title)';
       const contentPreview = item.content ? item.content.substring(0, 30) + '...' : '(empty)';
-      console.log(`Accordion item ${idx+1} - Title: ${titlePreview}, Content: ${contentPreview}`);
     });
   } else {
     console.warn('Received invalid accordion items:', items);
@@ -1794,8 +1757,6 @@ const directApiSaveContent = async (contentData) => {
       `;
     }
     
-    console.log(`Sending ${isUpdate ? 'update' : 'create'} mutation with direct API call`);
-    
     // Anfrage an die API senden
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',
@@ -1869,37 +1830,6 @@ const saveContentInternal = async (continueEditing) => {
     const title = formData.value.title.trim();
     const ordering = parseInt(formData.value.ordering, 10) || 0;
 
-
-    // Extra detailed logging of content before saving
-    console.log('Saving content of type:', formData.value.contentType);
-    if (formData.value.contentType === 'multi-column') {
-      console.log('Column count:', formData.value.columnCount);
-
-      if (formData.value.columnsContent && Array.isArray(formData.value.columnsContent)) {
-        // Extensive debugging output
-        console.log(`Found ${formData.value.columnsContent.length} columns to save`);
-        formData.value.columnsContent.forEach((column, idx) => {
-          if (column && typeof column === 'object') {
-            console.log(`Column ${idx}: ${JSON.stringify(column)}`);
-            console.log(`Column ${idx} content: "${column.content}"`);
-          } else {
-            console.log(`Column ${idx} is invalid:`, column);
-          }
-        });
-      } else {
-        console.error('CRITICAL ERROR: columnsContent is not an array or is null:', formData.value.columnsContent);
-      }
-    } else if (formData.value.contentType === 'accordion') {
-      if (formData.value.accordionItems && Array.isArray(formData.value.accordionItems)) {
-        console.log(`Found ${formData.value.accordionItems.length} accordion items to save`);
-        formData.value.accordionItems.forEach((item, idx) => {
-          console.log(`Item ${idx}: ${JSON.stringify(item)}`);
-        });
-      }
-    } else {
-      console.log('Standard content length:', (formData.value.content || '').length);
-    }
-
     if (!pageKey || !sectionKey) {
       toast.error('Bitte füllen Sie mindestens Seitenschlüssel und Abschnittschlüssel aus.');
       return false;
@@ -1929,7 +1859,6 @@ const saveContentInternal = async (continueEditing) => {
     
     // HTML-Inhalt bereinigen und optimieren
     const cleanContent = formData.value.content;
-    console.log('HTML-Inhalt optimiert, Länge:', cleanContent.length);
     
     // 1. Strategien - Vollständige Speicherung versuchen
     // ================================================
@@ -1965,8 +1894,6 @@ const saveContentInternal = async (continueEditing) => {
               });
             }
           }
-
-          console.log('Cleaned columnsContent for API:', JSON.stringify(updateInput.columnsContent));
         }
 
         // Add accordion data if needed
@@ -1987,7 +1914,6 @@ const saveContentInternal = async (continueEditing) => {
         
         // 1. Versuch: Versuch mit Apollo-Client
         const client = resolveClient();
-        console.log('Update mit Apollo-Client');
         
         try {
           const result = await client.mutate({
@@ -2049,8 +1975,6 @@ const saveContentInternal = async (continueEditing) => {
           }
         }
         
-        // 3. Versuch: Nur Titel und Metadaten ohne Inhalt aktualisieren
-        console.log('Fallback: Nur Metadaten ohne Inhalt aktualisieren');
         
         try {
           const metaResult = await client.mutate({
@@ -2125,8 +2049,6 @@ const saveContentInternal = async (continueEditing) => {
               });
             }
           }
-
-          console.log('Cleaned columnsContent for API:', JSON.stringify(createInput.columnsContent));
         }
 
         // Add accordion data if needed
@@ -2147,7 +2069,6 @@ const saveContentInternal = async (continueEditing) => {
         
         // 1. Versuch: Kompletten Inhalt mit Apollo-Client speichern
         const client = resolveClient();
-        console.log('Create mit Apollo-Client');
         
         try {
           const result = await client.mutate({
@@ -2211,7 +2132,6 @@ const saveContentInternal = async (continueEditing) => {
         const maxChunkSize = 1000; // Maximal 1000 Zeichen pro Versuch
         
         if (shortenedContent.length > maxChunkSize) {
-          console.log(`Versuche gekürzten Inhalt (max. ${maxChunkSize} Zeichen)`);
           shortenedContent = shortenedContent.substring(0, maxChunkSize) + '...';
           
           try {
@@ -2248,10 +2168,7 @@ const saveContentInternal = async (continueEditing) => {
             // Letzter Fallback
           }
         }
-        
-        // 4. Letzter Versuch: Minimaler Inhalt
-        console.log('Letzter Fallback: Minimaler Inhalt');
-        
+                
         try {
           const minimalResult = await client.mutate({
             mutation: CREATE_STATIC_CONTENT,
@@ -2550,13 +2467,9 @@ const moveItemDown = async (content) => {
     loading.value = false;
   }
 };
-
-// Handler für das Ende eines Drag-Vorgangs
 </script>
 
 <style scoped>
-/* Drag & Drop-Funktionalität wurde entfernt */
-
 .media-manager-modal {
   position: fixed;
   top: 0;

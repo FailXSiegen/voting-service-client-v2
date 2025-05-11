@@ -455,8 +455,6 @@ const SAVE_TRANSLATIONS_MUTATION = gql`
 const saveChanges = async () => {
   saving.value = true;
   try {
-    console.log("Speichere Änderungen...");
-
     // Liste der zu speichernden Übersetzungen erstellen
     const translationsToSave = [];
 
