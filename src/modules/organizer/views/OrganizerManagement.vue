@@ -7,31 +7,8 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-          <a 
-            class="nav-link" 
-            :class="{ active: activeTab === 'organizers' }"
-            href="#" 
-            @click.prevent="activeTab = 'organizers'"
-          >
-            Veranstalter verwalten
-          </a>
-        </li>
-        <li class="nav-item">
-          <a 
-            class="nav-link" 
-            :class="{ active: activeTab === 'content' }"
-            href="#" 
-            @click.prevent="activeTab = 'content'"
-          >
-            Statische Inhalte bearbeiten
-          </a>
-        </li>
-      </ul>
-      
-      <!-- Organizers Tab -->
-      <div v-if="activeTab === 'organizers'">
+      <!-- Inhaltsbereich -->
+      <div>
         <div v-if="organizers?.length > 0" class="mb-3">
           <label for="organizer-filter">
             {{ $t("view.organizers.filter.label") }}
@@ -117,11 +94,6 @@
           </template>
         </EasyDataTable>
       </div>
-      
-      <!-- Content Editor Tab -->
-      <div v-if="activeTab === 'content'">
-        <StaticContentManager />
-      </div>
     </template>
   </PageLayout>
   
@@ -136,7 +108,6 @@
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import OrganizerEventsModal from "@/modules/organizer/components/OrganizerEventsModal.vue";
-import StaticContentManager from "@/modules/organizer/components/StaticContentManager.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -144,6 +115,7 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
 import { useMutation, useQuery, useLazyQuery } from "@vue/apollo-composable";
@@ -175,6 +147,7 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 ]);
 
 const headers = [
@@ -206,7 +179,6 @@ const organizersWithEvents = ref([]);
 const selectedOrganizer = ref(null);
 const showModal = ref(false);
 
-const activeTab = ref('organizers');
 
 const organizersFiltered = computed(() =>
   organizersCopy.value ? organizersCopy.value : organizers.value

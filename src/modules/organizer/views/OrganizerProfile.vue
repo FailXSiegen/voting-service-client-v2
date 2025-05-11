@@ -115,6 +115,8 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
+  RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 } from "@/router/routes";
 import { computed, watch } from "vue";
 import { useCore } from "@/core/store/core";
@@ -143,6 +145,8 @@ const routes = getRoutesByName([
   RouteOrganizerVideoConference,
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
+  RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 ]);
 
 // Form and validation setup.

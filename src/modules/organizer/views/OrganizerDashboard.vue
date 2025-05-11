@@ -166,6 +166,7 @@ import {
   RouteOrganizerManagement,
   RouteOrganizerProfile,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 
@@ -180,5 +181,6 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
+  RouteOrganizerStaticContentEditor,
 ]);
 </script>
