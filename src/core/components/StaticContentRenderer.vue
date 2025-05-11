@@ -11,22 +11,32 @@
     </div>
     
     <template v-else-if="content">
+      <!-- Section Title (if not hidden) -->
+      <div v-if="title && headerClass !== 'd-none'" class="mb-3">
+        <h1 v-if="headerClass === 'h1'" class="content-title h1">{{ title }}</h1>
+        <h2 v-else-if="headerClass === 'h2'" class="content-title h2">{{ title }}</h2>
+        <h3 v-else-if="headerClass === 'h3'" class="content-title h3">{{ title }}</h3>
+        <h4 v-else-if="headerClass === 'h4'" class="content-title h4">{{ title }}</h4>
+        <h5 v-else-if="headerClass === 'h5'" class="content-title h5">{{ title }}</h5>
+        <h2 v-else class="content-title">{{ title }}</h2> <!-- Default is h2 -->
+      </div>
+
       <!-- Standard content -->
       <div v-if="contentType === 'standard'" v-html="content"></div>
-      
+
       <!-- Multi-column content -->
-      <multi-column-content 
-        v-else-if="contentType === 'multi-column' && columnCount && columnsContent" 
-        :column-count="columnCount" 
+      <multi-column-content
+        v-else-if="contentType === 'multi-column' && columnCount && columnsContent"
+        :column-count="columnCount"
         :columns-content="columnsContent"
       />
-      
+
       <!-- Accordion content -->
-      <accordion-content 
-        v-else-if="contentType === 'accordion' && accordionItems" 
+      <accordion-content
+        v-else-if="contentType === 'accordion' && accordionItems"
         :accordion-items="accordionItems"
       />
-      
+
       <!-- Default fallback if content type not recognized -->
       <div v-else v-html="content"></div>
     </template>
@@ -69,6 +79,8 @@ export default {
     return {
       content: '',
       contentType: 'standard',
+      title: '',
+      headerClass: 'h2',
       columnCount: null,
       columnsContent: null,
       accordionItems: null,
@@ -104,6 +116,7 @@ export default {
                 contentType
                 content
                 title
+                headerClass
                 columnCount
                 columnsContent {
                   content
@@ -127,7 +140,9 @@ export default {
         if (contentData) {
           this.content = contentData.content || '';
           this.contentType = contentData.contentType || 'standard';
-          
+          this.title = contentData.title || '';
+          this.headerClass = contentData.headerClass || 'h2';
+
           // Handle multi-column content
           if (contentData.contentType === 'multi-column' && contentData.columnCount) {
             this.columnCount = contentData.columnCount;
@@ -136,7 +151,7 @@ export default {
             this.columnCount = null;
             this.columnsContent = null;
           }
-          
+
           // Handle accordion content
           if (contentData.contentType === 'accordion' && contentData.accordionItems) {
             this.accordionItems = contentData.accordionItems || [];
@@ -146,6 +161,8 @@ export default {
         } else {
           this.content = '';
           this.contentType = 'standard';
+          this.title = '';
+          this.headerClass = 'h2';
           this.columnCount = null;
           this.columnsContent = null;
           this.accordionItems = null;
@@ -155,6 +172,8 @@ export default {
         this.$emit('loaded', {
           content: this.content,
           contentType: this.contentType,
+          title: this.title,
+          headerClass: this.headerClass,
           columnCount: this.columnCount,
           columnsContent: this.columnsContent,
           accordionItems: this.accordionItems
@@ -167,6 +186,8 @@ export default {
         }
         this.content = '';
         this.contentType = 'standard';
+        this.title = '';
+        this.headerClass = 'h2';
         this.columnCount = null;
         this.columnsContent = null;
         this.accordionItems = null;

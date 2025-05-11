@@ -216,6 +216,7 @@
                 <th>Titel</th>
                 <th>Reihenfolge</th>
                 <th>Status</th>
+                <th>Sortierung</th>
                 <th>Aktionen</th>
               </tr>
             </thead>
@@ -235,12 +236,32 @@
                 </td>
                 <td>
                   <div class="btn-group">
+                    <button
+                      @click="moveItemUp(content)"
+                      class="btn btn-sm btn-outline-secondary"
+                      :disabled="!canMoveUp(content)"
+                      title="Nach oben verschieben"
+                    >
+                      <i class="bi bi-arrow-up"></i>
+                    </button>
+                    <button
+                      @click="moveItemDown(content)"
+                      class="btn btn-sm btn-outline-secondary"
+                      :disabled="!canMoveDown(content)"
+                      title="Nach unten verschieben"
+                    >
+                      <i class="bi bi-arrow-down"></i>
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  <div class="btn-group">
                     <button @click="editContent(content)" class="btn btn-sm btn-outline-primary">
                       <i class="bi bi-pencil-square"></i> Bearbeiten
                     </button>
-                    <button 
-                      @click="togglePublishStatus(content)" 
-                      class="btn btn-sm" 
+                    <button
+                      @click="togglePublishStatus(content)"
+                      class="btn btn-sm"
                       :class="content.isPublished ? 'btn-outline-warning' : 'btn-outline-success'"
                     >
                       <i :class="['bi', content.isPublished ? 'bi-eye-slash' : 'bi-eye']"></i>
@@ -306,7 +327,7 @@
         </div>
         
         <div class="row mb-3">
-          <div class="col-md-8">
+          <div class="col-md-6">
             <label for="title" class="form-label">Titel</label>
             <input
               type="text"
@@ -317,7 +338,23 @@
             >
           </div>
 
-          <div class="col-md-4">
+          <div class="col-md-3">
+            <label for="headerClass" class="form-label">Titel-Stil</label>
+            <select
+              class="form-select"
+              id="headerClass"
+              v-model="formData.headerClass"
+            >
+              <option value="h1">H1 - Sehr groß</option>
+              <option value="h2">H2 - Groß</option>
+              <option value="h3">H3 - Mittel</option>
+              <option value="h4">H4 - Klein</option>
+              <option value="h5">H5 - Sehr klein</option>
+              <option value="d-none">Versteckt</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
             <label for="ordering" class="form-label">Reihenfolge</label>
             <input
               type="number"
@@ -423,11 +460,21 @@
             <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
             {{ editMode ? 'Aktualisieren' : 'Erstellen' }}
           </button>
-          
-          <button 
-            v-if="editMode" 
-            @click="cancelEdit" 
-            type="button" 
+
+          <button
+            type="button"
+            class="btn btn-success me-2"
+            :disabled="saving"
+            @click="saveAndContinue"
+          >
+            <span v-if="savingAndContinue" class="spinner-border spinner-border-sm me-1"></span>
+            Speichern und weiter bearbeiten
+          </button>
+
+          <button
+            v-if="editMode"
+            @click="cancelEdit"
+            type="button"
             class="btn btn-outline-secondary"
           >
             Abbrechen
@@ -598,10 +645,13 @@ import ContentTypeSelector from './ContentTypeSelector.vue';
 import MultiColumnEditor from './MultiColumnEditor.vue';
 import AccordionEditor from './AccordionEditor.vue';
 import { useCore } from '@/core/store/core';
+// Drag & Drop-Funktionalität wurde entfernt
 
  import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 
- import {
+// In Vue 3 <script setup> werden Komponenten automatisch registriert
+
+import {
 	ClassicEditor,
 	Alignment,
 	Autoformat,
@@ -1029,6 +1079,7 @@ const onEditorReady = (editor) => {
 const staticContents = ref([]);
 const loading = ref(false);
 const saving = ref(false);
+const savingAndContinue = ref(false);
 const editMode = ref(false);
 const currentContentId = ref(null);
 const activeTab = ref('pages'); // Startseite ist "Seiten"
@@ -1090,6 +1141,7 @@ const formData = ref({
   sectionKey: '',
   contentType: 'standard', // Add contentType field with default value 'standard'
   title: '',
+  headerClass: 'h2', // Default header class for title
   content: '',
   ordering: 0,
   isPublished: true,
@@ -1112,11 +1164,13 @@ const filteredSections = computed(() => {
   if (!selectedPage.value) {
     return staticContents.value;
   }
-  
-  return staticContents.value.filter(content => 
+
+  return staticContents.value.filter(content =>
     content.pageKey === selectedPage.value
   ).sort((a, b) => a.ordering - b.ordering);
 });
+
+// Drag & Drop-Funktionalität wurde entfernt
 
 // Zählt die Anzahl der Abschnitte für eine bestimmte Seite
 const countSections = (pageKey) => {
@@ -1170,6 +1224,7 @@ const FETCH_STATIC_CONTENTS = gql`
       sectionKey
       contentType
       title
+      headerClass
       content
       ordering
       isPublished
@@ -1195,6 +1250,7 @@ const CREATE_STATIC_CONTENT = gql`
       sectionKey
       contentType
       title
+      headerClass
       content
       ordering
       isPublished
@@ -1218,6 +1274,7 @@ const UPDATE_STATIC_CONTENT = gql`
       sectionKey
       contentType
       title
+      headerClass
       content
       ordering
       isPublished
@@ -1334,6 +1391,7 @@ const editContent = async (content) => {
       sectionKey: content.sectionKey,
       contentType: content.contentType || 'standard',
       title: content.title || '',
+      headerClass: content.headerClass || 'h2', // Lade die headerClass oder nutze 'h2' als Default
       content: content.content || '', // Falls content.content fehlt, laden wir es
       ordering: content.ordering || 0,
       isPublished: content.isPublished,
@@ -1506,6 +1564,7 @@ const resetForm = () => {
     sectionKey: '',
     contentType: 'standard',
     title: '',
+    headerClass: 'h2', // Default header class
     content: '',
     ordering: 0,
     isPublished: true,
@@ -1776,9 +1835,32 @@ const directApiSaveContent = async (contentData) => {
 };
 
 
+// Speichern und weiter bearbeiten
+const saveAndContinue = async () => {
+  savingAndContinue.value = true;
+
+  try {
+    return await saveContentInternal(true);
+  } finally {
+    savingAndContinue.value = false;
+  }
+};
+
 // Verbesserte Methode zum Speichern des Inhalts mit mehreren Fallback-Strategien
 const saveContent = async () => {
   saving.value = true;
+
+  try {
+    return await saveContentInternal(false);
+  } finally {
+    saving.value = false;
+  }
+};
+
+// Gemeinsame Speicherfunktion für beide Buttons
+const saveContentInternal = async (continueEditing) => {
+  // Rückgabewert für Erfolg/Misserfolg
+  let saveSuccess = false;
 
   try {
     // Grundlegende Validierung
@@ -1786,6 +1868,7 @@ const saveContent = async () => {
     const sectionKey = formData.value.sectionKey.trim();
     const title = formData.value.title.trim();
     const ordering = parseInt(formData.value.ordering, 10) || 0;
+
 
     // Extra detailed logging of content before saving
     console.log('Saving content of type:', formData.value.contentType);
@@ -1819,8 +1902,7 @@ const saveContent = async () => {
 
     if (!pageKey || !sectionKey) {
       toast.error('Bitte füllen Sie mindestens Seitenschlüssel und Abschnittschlüssel aus.');
-      saving.value = false;
-      return;
+      return false;
     }
     
     // Prüfe auf Duplikate, wenn wir einen neuen Eintrag erstellen
@@ -1840,9 +1922,8 @@ const saveContent = async () => {
             sectionKeyInput.classList.add('is-invalid');
           }
         }, 100);
-        
-        saving.value = false;
-        return;
+
+        return false;
       }
     }
     
@@ -1862,6 +1943,7 @@ const saveContent = async () => {
           id: currentContentId.value,
           contentType: formData.value.contentType || 'standard',
           title,
+          headerClass: formData.value.headerClass || 'h2',
           ordering,
           content: cleanContent,
           isPublished: formData.value.isPublished
@@ -1916,14 +1998,23 @@ const saveContent = async () => {
           });
           
           if (result.data?.updateStaticContent) {
-            toast.success('Inhalt erfolgreich aktualisiert');
-            editMode.value = false;
-            currentContentId.value = null;
-            selectedPage.value = pageKey;
-            activeTab.value = 'sections';
-            
-            await fetchStaticContents();
-            resetForm();
+            if (continueEditing) {
+              toast.success('Inhalt erfolgreich aktualisiert und bleibt im Bearbeitungsmodus');
+              // Daten neu laden, aber im Editor bleiben
+              await fetchStaticContents();
+              // Falls ID sich geändert hat, aktualisieren
+              currentContentId.value = result.data.updateStaticContent.id;
+            } else {
+              toast.success('Inhalt erfolgreich aktualisiert');
+              editMode.value = false;
+              currentContentId.value = null;
+              selectedPage.value = pageKey;
+              activeTab.value = 'sections';
+
+              await fetchStaticContents();
+              resetForm();
+            }
+            saveSuccess = true;
             return;
           }
         } catch (apolloError) {
@@ -1934,14 +2025,22 @@ const saveContent = async () => {
             const apiResult = await directApiSaveContent(updateInput);
             
             if (apiResult?.updateStaticContent) {
-              toast.success('Inhalt erfolgreich aktualisiert (direkter API-Zugriff)');
-              editMode.value = false;
-              currentContentId.value = null;
-              selectedPage.value = pageKey;
-              activeTab.value = 'sections';
-              
-              await fetchStaticContents();
-              resetForm();
+              if (continueEditing) {
+                toast.success('Inhalt erfolgreich aktualisiert (direkter API-Zugriff) und bleibt im Bearbeitungsmodus');
+                // Daten neu laden, aber im Editor bleiben
+                await fetchStaticContents();
+                // Falls ID sich geändert hat, aktualisieren
+                currentContentId.value = apiResult.updateStaticContent.id;
+              } else {
+                toast.success('Inhalt erfolgreich aktualisiert (direkter API-Zugriff)');
+                editMode.value = false;
+                currentContentId.value = null;
+                selectedPage.value = pageKey;
+                activeTab.value = 'sections';
+
+                await fetchStaticContents();
+                resetForm();
+              }
               return;
             }
           } catch (directApiError) {
@@ -1960,6 +2059,7 @@ const saveContent = async () => {
               input: {
                 id: currentContentId.value,
                 title,
+                headerClass: formData.value.headerClass || 'h2',
                 ordering,
                 isPublished: formData.value.isPublished
                 // Kein content-Feld
@@ -1968,14 +2068,22 @@ const saveContent = async () => {
           });
           
           if (metaResult.data?.updateStaticContent) {
-            toast.warning('Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden.');
-            editMode.value = false;
-            currentContentId.value = null;
-            selectedPage.value = pageKey;
-            activeTab.value = 'sections';
-            
-            await fetchStaticContents();
-            resetForm();
+            if (continueEditing) {
+              toast.warning('Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden. Sie bleiben im Bearbeitungsmodus.');
+              // Daten neu laden, aber im Editor bleiben
+              await fetchStaticContents();
+              // Falls ID sich geändert hat, aktualisieren
+              currentContentId.value = metaResult.data.updateStaticContent.id;
+            } else {
+              toast.warning('Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden.');
+              editMode.value = false;
+              currentContentId.value = null;
+              selectedPage.value = pageKey;
+              activeTab.value = 'sections';
+
+              await fetchStaticContents();
+              resetForm();
+            }
             return;
           }
         } catch (metaError) {
@@ -1995,6 +2103,7 @@ const saveContent = async () => {
           sectionKey,
           contentType: formData.value.contentType || 'standard',
           title,
+          headerClass: formData.value.headerClass || 'h2',
           content: cleanContent,
           ordering,
           isPublished: formData.value.isPublished
@@ -2049,12 +2158,21 @@ const saveContent = async () => {
           });
           
           if (result.data?.createStaticContent) {
-            toast.success('Neuer Inhalt erfolgreich erstellt');
-            selectedPage.value = pageKey;
-            activeTab.value = 'sections';
-            
-            await fetchStaticContents();
-            resetForm();
+            if (continueEditing) {
+              toast.success('Neuer Inhalt erfolgreich erstellt und bleibt im Bearbeitungsmodus');
+              // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
+              await fetchStaticContents();
+              // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
+              currentContentId.value = result.data.createStaticContent.id;
+              editMode.value = true;
+            } else {
+              toast.success('Neuer Inhalt erfolgreich erstellt');
+              selectedPage.value = pageKey;
+              activeTab.value = 'sections';
+
+              await fetchStaticContents();
+              resetForm();
+            }
             return;
           }
         } catch (apolloError) {
@@ -2065,12 +2183,21 @@ const saveContent = async () => {
             const apiResult = await directApiSaveContent(createInput);
             
             if (apiResult?.createStaticContent) {
-              toast.success('Neuer Inhalt erfolgreich erstellt (direkter API-Zugriff)');
-              selectedPage.value = pageKey;
-              activeTab.value = 'sections';
-              
-              await fetchStaticContents();
-              resetForm();
+              if (continueEditing) {
+                toast.success('Neuer Inhalt erfolgreich erstellt (direkter API-Zugriff) und bleibt im Bearbeitungsmodus');
+                // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
+                await fetchStaticContents();
+                // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
+                currentContentId.value = apiResult.createStaticContent.id;
+                editMode.value = true;
+              } else {
+                toast.success('Neuer Inhalt erfolgreich erstellt (direkter API-Zugriff)');
+                selectedPage.value = pageKey;
+                activeTab.value = 'sections';
+
+                await fetchStaticContents();
+                resetForm();
+              }
               return;
             }
           } catch (directApiError) {
@@ -2099,12 +2226,21 @@ const saveContent = async () => {
             });
             
             if (chunkResult.data?.createStaticContent) {
-              toast.warning('Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server.');
-              selectedPage.value = pageKey;
-              activeTab.value = 'sections';
-              
-              await fetchStaticContents();
-              resetForm();
+              if (continueEditing) {
+                toast.warning('Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server. Sie bleiben im Bearbeitungsmodus.');
+                // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
+                await fetchStaticContents();
+                // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
+                currentContentId.value = chunkResult.data.createStaticContent.id;
+                editMode.value = true;
+              } else {
+                toast.warning('Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server.');
+                selectedPage.value = pageKey;
+                activeTab.value = 'sections';
+
+                await fetchStaticContents();
+                resetForm();
+              }
               return;
             }
           } catch (chunkError) {
@@ -2126,6 +2262,7 @@ const saveContent = async () => {
                 contentType: formData.value.contentType || 'standard',
                 content: '<p>...</p>', // Minimaler Inhalt
                 title,
+                headerClass: formData.value.headerClass || 'h2',
                 ordering,
                 isPublished: false // Als Entwurf speichern
               }
@@ -2134,12 +2271,22 @@ const saveContent = async () => {
           
           if (minimalResult.data?.createStaticContent) {
             const createdId = minimalResult.data.createStaticContent.id;
-            toast.warning('Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte bearbeiten Sie ihn später erneut.');
-            selectedPage.value = pageKey;
-            activeTab.value = 'sections';
-            
-            await fetchStaticContents();
-            resetForm();
+
+            if (continueEditing) {
+              toast.warning('Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte fügen Sie jetzt Inhalt hinzu.');
+              // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
+              await fetchStaticContents();
+              // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
+              currentContentId.value = createdId;
+              editMode.value = true;
+            } else {
+              toast.warning('Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte bearbeiten Sie ihn später erneut.');
+              selectedPage.value = pageKey;
+              activeTab.value = 'sections';
+
+              await fetchStaticContents();
+              resetForm();
+            }
             return;
           }
         } catch (minimalError) {
@@ -2153,18 +2300,18 @@ const saveContent = async () => {
     }
   } catch (err) {
     console.error('Fehler beim Speichern:', err);
-    
+
     // Verbesserte Fehleranalyse und -behandlung mit spezieller Erkennung von Duplikat-Fehlern
     const errorMessage = err.message || '';
-    
+
     // Spezielle Erkennung des Duplikat-Fehlers
-    if (errorMessage.includes('Failed to insert static content') || 
-        errorMessage.includes('ER_DUP_ENTRY') || 
+    if (errorMessage.includes('Failed to insert static content') ||
+        errorMessage.includes('ER_DUP_ENTRY') ||
         errorMessage.includes('Duplicate entry')) {
-      
+
       console.error('Duplikat-Fehler erkannt:', err);
       toast.error(`Diese Kombination aus Seitenschlüssel "${pageKey}" und Abschnittschlüssel "${sectionKey}" existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`);
-      
+
       // Fokus auf das Feld setzen
       setTimeout(() => {
         const sectionKeyInput = document.getElementById('sectionKey');
@@ -2173,8 +2320,8 @@ const saveContent = async () => {
           sectionKeyInput.classList.add('is-invalid');
         }
       }, 100);
-      
-      return; // Früher beenden, da wir den Fehler bereits spezifisch behandelt haben
+
+      return false; // Früher beenden, da wir den Fehler bereits spezifisch behandelt haben
     }
     
     // Normale GraphQL-Fehlerbehandlung
@@ -2212,7 +2359,7 @@ const saveContent = async () => {
     } else {
       toast.error('Fehler beim Speichern: ' + (errorMessage || 'Unbekannter Fehler'));
     }
-    
+
     // Spezifischere Hilfestellung für den Benutzer
     const isCreation = !editMode.value;
     if (isCreation) {
@@ -2220,15 +2367,17 @@ const saveContent = async () => {
     } else {
       toast.info('Bitte prüfen Sie, ob Ihre Eingaben korrekt sind und versuchen Sie, den Inhalt zu vereinfachen oder in kleinere Abschnitte aufzuteilen.');
     }
-  } finally {
-    saving.value = false;
+
+    return false;
   }
+
+  return saveSuccess;
 };
 
 const togglePublishStatus = async (content) => {
   try {
     loading.value = true;
-    
+
     const client = resolveClient();
     const result = await client.mutate({
       mutation: TOGGLE_STATIC_CONTENT_PUBLISHED,
@@ -2237,11 +2386,11 @@ const togglePublishStatus = async (content) => {
         isPublished: !content.isPublished
       }
     });
-    
+
     if (result.data.toggleStaticContentPublished) {
       toast.success(
-        content.isPublished 
-          ? 'Inhalt wurde verborgen' 
+        content.isPublished
+          ? 'Inhalt wurde verborgen'
           : 'Inhalt wurde veröffentlicht'
       );
       await fetchStaticContents();
@@ -2253,9 +2402,161 @@ const togglePublishStatus = async (content) => {
     loading.value = false;
   }
 };
+
+// Prüft, ob ein Element nach oben verschoben werden kann
+const canMoveUp = (content) => {
+  if (!selectedPage.value) return false;
+
+  // Finde alle Elemente der gleichen Seite
+  const pageSections = staticContents.value.filter(
+    item => item.pageKey === content.pageKey
+  );
+
+  // Sortiere nach Ordering
+  pageSections.sort((a, b) => a.ordering - b.ordering);
+
+  // Prüfe, ob es das erste Element ist
+  const index = pageSections.findIndex(item => item.id === content.id);
+  return index > 0;
+};
+
+// Prüft, ob ein Element nach unten verschoben werden kann
+const canMoveDown = (content) => {
+  if (!selectedPage.value) return false;
+
+  // Finde alle Elemente der gleichen Seite
+  const pageSections = staticContents.value.filter(
+    item => item.pageKey === content.pageKey
+  );
+
+  // Sortiere nach Ordering
+  pageSections.sort((a, b) => a.ordering - b.ordering);
+
+  // Prüfe, ob es das letzte Element ist
+  const index = pageSections.findIndex(item => item.id === content.id);
+  return index < pageSections.length - 1;
+};
+
+// Verschiebe ein Element nach oben (Ordering-Wert verringern)
+const moveItemUp = async (content) => {
+  if (!canMoveUp(content)) return;
+
+  try {
+    loading.value = true;
+
+    // Finde alle Elemente der gleichen Seite
+    const pageSections = staticContents.value.filter(
+      item => item.pageKey === content.pageKey
+    );
+
+    // Sortiere nach Ordering
+    pageSections.sort((a, b) => a.ordering - b.ordering);
+
+    // Finde das aktuelle Element und das darüber liegende
+    const index = pageSections.findIndex(item => item.id === content.id);
+    const currentItem = pageSections[index];
+    const previousItem = pageSections[index - 1];
+
+    // Tausche die Ordering-Werte
+    const client = resolveClient();
+
+    // Aktualisiere das aktuelle Element
+    await client.mutate({
+      mutation: UPDATE_STATIC_CONTENT,
+      variables: {
+        input: {
+          id: currentItem.id,
+          ordering: previousItem.ordering
+        }
+      }
+    });
+
+    // Aktualisiere das vorherige Element
+    await client.mutate({
+      mutation: UPDATE_STATIC_CONTENT,
+      variables: {
+        input: {
+          id: previousItem.id,
+          ordering: currentItem.ordering
+        }
+      }
+    });
+
+    // Lade die aktualisierten Daten
+    await fetchStaticContents();
+    toast.success('Reihenfolge wurde aktualisiert');
+
+  } catch (err) {
+    console.error('Failed to move item up:', err);
+    toast.error('Fehler beim Verschieben des Elements');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Verschiebe ein Element nach unten (Ordering-Wert erhöhen)
+const moveItemDown = async (content) => {
+  if (!canMoveDown(content)) return;
+
+  try {
+    loading.value = true;
+
+    // Finde alle Elemente der gleichen Seite
+    const pageSections = staticContents.value.filter(
+      item => item.pageKey === content.pageKey
+    );
+
+    // Sortiere nach Ordering
+    pageSections.sort((a, b) => a.ordering - b.ordering);
+
+    // Finde das aktuelle Element und das darunter liegende
+    const index = pageSections.findIndex(item => item.id === content.id);
+    const currentItem = pageSections[index];
+    const nextItem = pageSections[index + 1];
+
+    // Tausche die Ordering-Werte
+    const client = resolveClient();
+
+    // Aktualisiere das aktuelle Element
+    await client.mutate({
+      mutation: UPDATE_STATIC_CONTENT,
+      variables: {
+        input: {
+          id: currentItem.id,
+          ordering: nextItem.ordering
+        }
+      }
+    });
+
+    // Aktualisiere das nächste Element
+    await client.mutate({
+      mutation: UPDATE_STATIC_CONTENT,
+      variables: {
+        input: {
+          id: nextItem.id,
+          ordering: currentItem.ordering
+        }
+      }
+    });
+
+    // Lade die aktualisierten Daten
+    await fetchStaticContents();
+    toast.success('Reihenfolge wurde aktualisiert');
+
+  } catch (err) {
+    console.error('Failed to move item down:', err);
+    toast.error('Fehler beim Verschieben des Elements');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Handler für das Ende eines Drag-Vorgangs
 </script>
 
 <style scoped>
+/* Drag & Drop-Funktionalität wurde entfernt */
+
 .media-manager-modal {
   position: fixed;
   top: 0;
