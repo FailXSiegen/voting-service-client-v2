@@ -77,20 +77,37 @@ const props = defineProps({
 
 // Wenn pageKey über Route-Parameter empfangen wird
 import { useRoute } from 'vue-router';
+import { getPageSlugBySlug } from '@/core/util/page-slug-checker';
+
 const route = useRoute();
 const effectivePageKey = computed(() => {
   // Prüfen, welcher Parameter verwendet wird (für beide Route-Typen)
   const pageKey = route.params.pageKey || route.params.directPageKey || props.pageKey;
   console.log('Loading static page with key:', pageKey, 'Route full path:', route.fullPath);
-  
+
   // Für den Fall, dass wir keinen Parameter haben, versuchen wir ihn aus dem Pfad zu extrahieren
   if (!pageKey && route.fullPath.startsWith('/static-page/')) {
     const extractedKey = route.fullPath.replace('/static-page/', '');
     console.log('Extracted key from path:', extractedKey);
     return extractedKey;
   }
-  
+
   return pageKey;
+});
+
+// Prüfen, ob wir einen Slug aus der URL extrahieren können
+const effectivePageSlug = computed(() => {
+  // Wenn wir explicit einen pageKeyOrSlug Parameter haben (von der directStaticPage Route)
+  if (route.params.pageKeyOrSlug && route.params.isSlug) {
+    return route.params.pageKeyOrSlug;
+  }
+
+  // Wenn der Pfad einem Direktpfad entspricht, könnte es ein Slug sein
+  if (route.params.directPageKey) {
+    return route.params.directPageKey;
+  }
+
+  return null;
 });
 
 const contentSections = ref([]);
@@ -121,34 +138,92 @@ watch(() => route.params, async (newParams, oldParams) => {
 
 const fetchContentFromDb = async () => {
   loading.value = true;
-  
+
   try {
     // Detailliertes Logging zur Fehlerdiagnose
     console.log('Fetching content for static page:', {
       pageKey: effectivePageKey.value,
+      pageSlug: effectivePageSlug.value,
       route: route.fullPath,
       params: route.params
     });
-    
+
     const client = resolveClient();
-    
+
     // Wenn wir eine der Standard statischen Seiten wie "imprint" aufrufen,
     // ist es möglich, dass wir tatsächlich eine eigene Vue-Komponente haben
     // In diesem Fall müssten wir weniger auf DB-Content setzen
     const isPredefinedStaticPage = [
       'imprint', 'dataProtection', 'faq', 'userAgreement', 'manual', 'functions'
     ].includes(effectivePageKey.value);
-    
+
     if (isPredefinedStaticPage) {
       console.log(`Note: ${effectivePageKey.value} is a predefined static page with its own component`);
     }
-    
-    const result = await client.query({
+
+    let result;
+
+    // Zuerst versuchen, Inhalte per Page-Slug zu laden (wenn vorhanden)
+    if (effectivePageSlug.value) {
+      try {
+        result = await client.query({
+          query: gql`
+            query GetStaticContentByPageSlug($pageSlug: String!) {
+              staticContentByPageSlug(pageSlug: $pageSlug) {
+                id
+                pageKey
+                sectionKey
+                pageSlug
+                contentType
+                title
+                headerClass
+                content
+                ordering
+                isPublished
+                columnCount
+                columnsContent {
+                  content
+                }
+                accordionItems {
+                  title
+                  content
+                }
+              }
+            }
+          `,
+          variables: {
+            pageSlug: effectivePageSlug.value
+          },
+          fetchPolicy: 'network-only' // Immer frisch vom Server laden
+        });
+
+        // Wenn wir Inhalte gefunden haben, verwenden wir diese
+        if (result.data.staticContentByPageSlug && result.data.staticContentByPageSlug.length > 0) {
+          console.log(`Content found by page slug '${effectivePageSlug.value}':`, result.data.staticContentByPageSlug);
+
+          // Wir bekommen eine Liste von Abschnitten zurück, nach Reihenfolge sortieren
+          contentSections.value = result.data.staticContentByPageSlug
+            .filter(section => section.isPublished)
+            .sort((a, b) => a.ordering - b.ordering);
+
+          // Erfolgreiche Verarbeitung, wir sind fertig
+          return;
+        }
+      } catch (slugError) {
+        console.warn(`Error fetching by page slug '${effectivePageSlug.value}':`, slugError);
+        // Wenn die Slug-Abfrage fehlschlägt, versuchen wir es mit pageKey
+      }
+    }
+
+    // Fallback: Wenn kein Slug vorhanden oder die Slug-Abfrage fehlgeschlagen ist,
+    // versuchen wir es mit der normalen pageKey-Abfrage
+    result = await client.query({
       query: gql`
         query GetStaticContent($pageKey: String!) {
           staticContentsByPage(pageKey: $pageKey) {
             id
             sectionKey
+            slug
             contentType
             title
             headerClass
@@ -171,16 +246,16 @@ const fetchContentFromDb = async () => {
       },
       fetchPolicy: 'network-only' // Immer frisch vom Server laden
     });
-    
+
     console.log(`Content for ${effectivePageKey.value} loaded:`, result.data);
-    
+
     // Nur veröffentlichte Inhalte anzeigen und nach Reihenfolge sortieren
     const publishedSections = (result.data.staticContentsByPage || [])
       .filter(section => section.isPublished)
       .sort((a, b) => a.ordering - b.ordering);
-      
+
     contentSections.value = publishedSections;
-    
+
     if (publishedSections.length === 0) {
       console.warn(`No published content found for page: ${effectivePageKey.value}`);
     }

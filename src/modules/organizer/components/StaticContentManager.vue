@@ -44,58 +44,92 @@
           <i class="bi bi-plus-circle"></i> Neue Seite
         </button>
       </div>
-      
+
       <div v-if="loading" class="text-center py-3">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Wird geladen...</span>
         </div>
       </div>
-      
+
       <div v-else-if="uniquePages.length === 0" class="alert alert-info">
         Noch keine statischen Seiten vorhanden.
       </div>
-      
+
       <div v-else class="row">
         <div class="col-md-8">
           <div class="list-group">
-            <a 
-              v-for="page in uniquePages" 
-              :key="page" 
-              href="#" 
-              class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-              @click.prevent="selectPage(page)"
+            <div
+              v-for="page in uniquePages"
+              :key="page"
+              class="list-group-item"
             >
-              <div>
-                <h5 class="mb-1">{{ page }}</h5>
-                <small>{{ countSections(page) }} Abschnitte</small>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <h5 class="mb-1">{{ page }}</h5>
+                  <small>{{ countSections(page) }} Abschnitte</small>
+                </div>
+                <div>
+                  <a
+                    @click.stop
+                    :href="getPageViewUrl(page)"
+                    target="_blank"
+                    class="btn btn-sm btn-outline-secondary me-2"
+                  >
+                    <i class="bi bi-box-arrow-up-right"></i> Ansehen
+                  </a>
+                  <button @click.stop="selectPage(page)" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-gear"></i> Verwalten
+                  </button>
+                </div>
               </div>
-              <div>
-                <a 
-                  @click.stop
-                  :href="localUseDirectPaths ? `/${page}` : `/static-page/${page}`" 
-                  target="_blank" 
-                  class="btn btn-sm btn-outline-secondary me-2"
-                >
-                  <i class="bi bi-box-arrow-up-right"></i> Ansehen
-                </a>
-                <button @click.stop="selectPage(page)" class="btn btn-sm btn-outline-primary">
-                  <i class="bi bi-gear"></i> Verwalten
-                </button>
+
+              <!-- Page Slug Manager -->
+              <div class="page-slug-manager mt-1 mb-2">
+                <div class="input-group">
+                  <span class="input-group-text">Seiten-URL</span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    :value="tempSlugs[page] || ''"
+                    @input="tempSlugs[page] = $event.target.value"
+                    placeholder="z.B. ueber-uns oder kontakt"
+                    :id="`pageSlugInput-${page}`"
+                  >
+                  <button
+                    class="btn btn-outline-success"
+                    @click="savePageSlug(page)"
+                    :disabled="!isTempSlugValid(page)"
+                  >
+                    <i class="bi bi-check"></i> Speichern
+                  </button>
+                  <button
+                    v-if="getPageSlug(page)"
+                    class="btn btn-outline-danger"
+                    @click="confirmDeletePageSlug(page)"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+                <small class="text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Die URL wird dann: {{ localUseDirectPaths ? `/${tempSlugs[page] || page}` : `/static-page/${tempSlugs[page] || page}` }}
+                </small>
               </div>
-            </a>
+            </div>
           </div>
-          
+
           <div class="alert alert-info mt-3">
             <i class="bi bi-info-circle-fill me-2"></i>
-            Die URL für statische Seiten lautet: 
-            <code v-if="localUseDirectPaths">
-              /[seiten-schlüssel]
-            </code>
-            <code v-else>
-              /static-page/[seiten-schlüssel]
-            </code>
+            Die URL für statische Seiten lautet:
+            <div v-if="localUseDirectPaths" class="mt-2">
+              <div><code>/[seiten-schlüssel]</code> (Standard-Zugriff)</div>
+              <div class="mt-1"><code>/[slug]</code> (wenn ein benutzerdefinierter Slug eingetragen ist)</div>
+            </div>
+            <div v-else>
+              <code>/static-page/[seiten-schlüssel]</code>
+            </div>
           </div>
-          
+
           <!-- Systemeinstellungen (nur für Super-Admin) -->
           <div v-if="coreStore.isSuperOrganizer" class="card mt-3 mb-2">
             <div class="card-header bg-primary text-white">
@@ -104,10 +138,10 @@
             <div class="card-body">
               <form @submit.prevent="updateSystemSettings">
                 <div class="form-check mb-2">
-                  <input 
-                    type="checkbox" 
-                    class="form-check-input" 
-                    id="useDirectPaths" 
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="useDirectPaths"
                     v-model="localUseDirectPaths"
                   >
                   <label class="form-check-label" for="useDirectPaths">
@@ -115,10 +149,10 @@
                   </label>
                 </div>
                 <div class="form-check mb-3">
-                  <input 
-                    type="checkbox" 
-                    class="form-check-input" 
-                    id="useInFooterNavigation" 
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="useInFooterNavigation"
                     v-model="localUseInFooterNavigation"
                   >
                   <label class="form-check-label" for="useInFooterNavigation">
@@ -136,13 +170,13 @@
               </form>
             </div>
           </div>
-          
+
           <div v-else class="alert alert-info mt-3">
             <i class="bi bi-info-circle me-2"></i>
             Die globalen URL-Einstellungen können nur von einem Super-Admin geändert werden.
           </div>
         </div>
-        
+
         <div class="col-md-4">
           <div class="card">
             <div class="card-header bg-primary text-white">
@@ -153,9 +187,31 @@
               <ol>
                 <li>Klicken Sie auf "Neue Seite"</li>
                 <li>Geben Sie einen eindeutigen Seitenschlüssel ein</li>
+                <li>Optional: Geben Sie einen benutzerfreundlichen Slug ein</li>
                 <li>Erstellen Sie mindestens einen Abschnitt für die Seite</li>
-                <li>Die Seite ist dann unter /static-page/[schlüssel] erreichbar</li>
+                <li>Die Seite ist dann unter /static-page/[schlüssel] und optional über /[slug] erreichbar</li>
               </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bestätigungsdialog für Slug-Löschen -->
+      <div v-if="showDeleteSlugDialog" class="modal" tabindex="-1" style="display: block;">
+        <div class="modal-backdrop show"></div>
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Seiten-URL löschen?</h5>
+              <button type="button" class="btn-close" @click="cancelDeletePageSlug"></button>
+            </div>
+            <div class="modal-body">
+              <p>Sind Sie sicher, dass Sie die Seiten-URL für <strong>{{ slugToDelete }}</strong> löschen möchten?</p>
+              <p>Die Seite wird dann nur noch über ihren Schlüssel erreichbar sein.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="cancelDeletePageSlug">Abbrechen</button>
+              <button type="button" class="btn btn-danger" @click="confirmDeleteSlug">Löschen</button>
             </div>
           </div>
         </div>
@@ -288,11 +344,11 @@
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="pageKey" class="form-label">Seitenschlüssel</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="pageKey" 
-              v-model="formData.pageKey" 
+            <input
+              type="text"
+              class="form-control"
+              id="pageKey"
+              v-model="formData.pageKey"
               placeholder="z.B. about-us"
               :disabled="editMode"
               @input="checkDuplicateSection"
@@ -303,14 +359,14 @@
               Der Seitenschlüssel wird in der URL verwendet: /static-page/[seitenschlüssel]
             </small>
           </div>
-          
+
           <div class="col-md-6">
             <label for="sectionKey" class="form-label">Abschnittschlüssel</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="sectionKey" 
-              v-model="formData.sectionKey" 
+            <input
+              type="text"
+              class="form-control"
+              id="sectionKey"
+              v-model="formData.sectionKey"
               placeholder="z.B. main-content"
               :disabled="editMode"
               @input="checkDuplicateSection"
@@ -322,6 +378,23 @@
             </div>
             <small class="form-text text-muted">
               Mehrere Abschnitte auf einer Seite werden nach diesem Schlüssel sortiert
+            </small>
+          </div>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-12">
+            <label for="slug" class="form-label">Slug (URL-Pfad)</label>
+            <input
+              type="text"
+              class="form-control"
+              id="slug"
+              v-model="formData.slug"
+              placeholder="z.B. ueber-uns oder kontakt"
+            >
+            <small class="form-text text-muted">
+              Der Slug ermöglicht den direkten Zugriff über eine benutzerfreundliche URL: /[slug]<br>
+              Wenn leer, wird automatisch ein Slug aus Seiten- und Abschnittschlüssel generiert.
             </small>
           </div>
         </div>
@@ -636,7 +709,8 @@
  * This configuration was generated using the CKEditor 5 Builder. You can modify it anytime using this link:
  * https://ckeditor.com/ckeditor-5/builder/#installation/NoFgNARATAdArDADBSBGA7CKI4E4ToAcAbMSKrounKgMyIF6GHXnnGVS2pwggoQAJgFMUiMMFRgpU8TIC6kXLQDGAM2GoARhHlA=
  */
-import { computed, ref, onMounted, useTemplateRef, watch, nextTick } from 'vue';
+import { computed, ref, onMounted, useTemplateRef, watch, nextTick, reactive } from 'vue';
+import { UPSERT_PAGE_SLUG, DELETE_PAGE_SLUG, FETCH_PAGE_SLUGS } from '@/modules/organizer/graphql/mutation/page-slug-mutations';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
 import { toast } from 'vue3-toastify';
@@ -1076,6 +1150,7 @@ const onEditorReady = (editor) => {
 
 // Zustand
 const staticContents = ref([]);
+const pageSlugs = ref([]);
 const loading = ref(false);
 const saving = ref(false);
 const savingAndContinue = ref(false);
@@ -1085,6 +1160,27 @@ const activeTab = ref('pages'); // Startseite ist "Seiten"
 const selectedPage = ref(''); // Ausgewählte Seite für Filterung
 const showMediaManager = ref(false); // Media Manager Dialog anzeigen/ausblenden
 const previewTab = ref('preview'); // Vorschau-Tab Standardeinstellung
+
+// Page Slug Management
+const tempSlugs = reactive({}); // Temporäre Speicherung für Slug-Änderungen
+
+// Initialisiere tempSlugs mit aktuellen Werten, wenn pageSlugs geladen werden
+// Der Hauptinitialisierungscode ist jetzt in fetchStaticContents
+watch(() => pageSlugs.value, (newSlugs) => {
+  console.log('pageSlugs changed:', newSlugs);
+
+  if (newSlugs && newSlugs.length > 0) {
+    // Aktualisiere slugs, ohne bestehende Seiten zu entfernen
+    newSlugs.forEach(slug => {
+      if (slug && slug.pageKey) {
+        console.log('Updating slug from watcher for', slug.pageKey, 'to', slug.slug);
+        tempSlugs[slug.pageKey] = slug.slug || '';
+      }
+    });
+  }
+});
+const showDeleteSlugDialog = ref(false);
+const slugToDelete = ref(''); // Page key für zu löschenden Slug
 // Store
 const coreStore = useCore();
 
@@ -1138,6 +1234,7 @@ const updateSystemSettings = async () => {
 const formData = ref({
   pageKey: '',
   sectionKey: '',
+  slug: '', // Hinzufügen des Slug-Feldes
   contentType: 'standard', // Add contentType field with default value 'standard'
   title: '',
   headerClass: 'h2', // Default header class for title
@@ -1220,6 +1317,7 @@ const FETCH_STATIC_CONTENTS = gql`
       id
       pageKey
       sectionKey
+      pageSlug
       contentType
       title
       headerClass
@@ -1237,8 +1335,21 @@ const FETCH_STATIC_CONTENTS = gql`
         content
       }
     }
+    # Verwende den importierten FETCH_PAGE_SLUGS für alle Slug-Anfragen
+    # Diese gql-Datei enthält diese Abfrage weiterhin für abwärtskompatible Clients
+    pageSlugs {
+      id
+      pageKey
+      slug
+      createdAt
+      updatedAt
+    }
   }
 `;
+
+// Die konstante UPSERT_PAGE_SLUG ist jetzt aus der separaten Datei importiert
+
+// Die konstante DELETE_PAGE_SLUG ist jetzt aus der separaten Datei importiert
 
 const CREATE_STATIC_CONTENT = gql`
   mutation CreateStaticContent($input: CreateStaticContentInput!) {
@@ -1246,6 +1357,7 @@ const CREATE_STATIC_CONTENT = gql`
       id
       pageKey
       sectionKey
+      pageSlug
       contentType
       title
       headerClass
@@ -1270,6 +1382,7 @@ const UPDATE_STATIC_CONTENT = gql`
       id
       pageKey
       sectionKey
+      pageSlug
       contentType
       title
       headerClass
@@ -1355,14 +1468,14 @@ const getColumnClass = (columnCount) => {
 // Methoden
 const fetchStaticContents = async () => {
   loading.value = true;
-  
+
   try {
     const client = resolveClient();
     const result = await client.query({
       query: FETCH_STATIC_CONTENTS,
       fetchPolicy: 'network-only'
     });
-    
+
     // Erstelle eine Kopie des Arrays und sortiere diese
     staticContents.value = [...(result.data.staticContents || [])].sort((a, b) => {
       if (a.pageKey !== b.pageKey) {
@@ -1370,11 +1483,174 @@ const fetchStaticContents = async () => {
       }
       return a.ordering - b.ordering;
     });
+
+    // Speichere die PageSlugs
+    pageSlugs.value = result.data.pageSlugs || [];
+
+    // Leere und initialisiere tempSlugs komplett neu
+    // Das verhindert, dass alte Daten erhalten bleiben
+    Object.keys(tempSlugs).forEach(key => {
+      delete tempSlugs[key];
+    });
+
+    // Initialisiere tempSlugs mit allen Seiten
+    const pageKeys = staticContents.value.map(content => content.pageKey);
+    const uniquePageKeys = [...new Set(pageKeys)];
+
+    // Setze zuerst alle auf leer
+    uniquePageKeys.forEach(pageKey => {
+      tempSlugs[pageKey] = '';
+    });
+
+    // Dann fülle die mit Slugs
+    pageSlugs.value.forEach(slug => {
+      if (slug && slug.pageKey) {
+        tempSlugs[slug.pageKey] = slug.slug || '';
+        console.log('Setting slug for', slug.pageKey, 'to', slug.slug);
+      }
+    });
   } catch (err) {
     console.error('Failed to load static contents:', err);
     toast.error('Fehler beim Laden der statischen Inhalte');
   } finally {
     loading.value = false;
+  }
+};
+
+// Gibt den Slug für eine Seite zurück
+// Holt den in der Datenbank gespeicherten Slug für eine Seite
+const getPageSlug = (pageKey) => {
+  const pageSlug = pageSlugs.value.find(slug => slug.pageKey === pageKey);
+  return pageSlug ? pageSlug.slug : '';
+};
+
+// Aktualisiert den temporären Slug
+const updateTempPageSlug = (pageKey, value) => {
+  tempSlugs[pageKey] = value;
+};
+
+// Prüft, ob der temporäre Slug gültig ist
+const isTempSlugValid = (pageKey) => {
+  const tempSlug = tempSlugs[pageKey];
+  const currentSlug = getPageSlug(pageKey);
+
+  // Kein Slug oder keine Änderung zum gespeicherten Wert
+  if (tempSlug === undefined || tempSlug === currentSlug) {
+    return false;
+  }
+
+  if (tempSlug === '') {
+    return true; // Leerer Slug ist erlaubt zum Löschen
+  }
+
+  // Prüfe, ob der Slug gültig ist (nur Kleinbuchstaben, Zahlen und Bindestriche)
+  const slugRegex = /^[a-z0-9-]+$/;
+  return slugRegex.test(tempSlug);
+};
+
+// Speichert den Slug
+const savePageSlug = async (pageKey) => {
+  try {
+    const tempSlug = tempSlugs[pageKey];
+    const currentSlug = getPageSlug(pageKey);
+
+    // Wenn der Slug gleich dem aktuellen ist, nichts tun
+    if (tempSlug === currentSlug) {
+      toast.info(`Keine Änderung am Slug für "${pageKey}"`);
+      return;
+    }
+
+    console.log(`Saving slug for ${pageKey}: ${tempSlug} (was: ${currentSlug})`);
+
+    loading.value = true;
+    const client = resolveClient();
+
+    // Falls der Slug leer ist, löschen wir ihn
+    if (tempSlug === '') {
+      await client.mutate({
+        mutation: DELETE_PAGE_SLUG,
+        variables: { pageKey }
+      });
+
+      toast.success(`Slug für "${pageKey}" wurde gelöscht.`);
+    } else {
+      // Sonst speichern oder aktualisieren wir den Slug
+      const result = await client.mutate({
+        mutation: UPSERT_PAGE_SLUG,
+        variables: {
+          pageKey,
+          slug: tempSlug
+        }
+      });
+
+      if (result.data.upsertPageSlug) {
+        toast.success(`Slug für "${pageKey}" wurde aktualisiert.`);
+      }
+    }
+
+    // Aktualisiere die Daten
+    await fetchStaticContents();
+  } catch (err) {
+    console.error('Failed to save page slug:', err);
+
+    // Spezifische Fehlermeldungen für häufige Fehler
+    if (err.message && err.message.includes('already in use')) {
+      toast.error(`Dieser Slug wird bereits für eine andere Seite verwendet.`);
+    } else {
+      toast.error(`Fehler beim Speichern des Slugs: ${err.message}`);
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Dialog zum Löschen eines Slugs anzeigen
+const confirmDeletePageSlug = (pageKey) => {
+  slugToDelete.value = pageKey;
+  showDeleteSlugDialog.value = true;
+};
+
+// Löschen eines Slugs abbrechen
+const cancelDeletePageSlug = () => {
+  slugToDelete.value = '';
+  showDeleteSlugDialog.value = false;
+};
+
+// Löschen eines Slugs bestätigen
+const confirmDeleteSlug = async () => {
+  try {
+    loading.value = true;
+    const pageKey = slugToDelete.value;
+
+    const client = resolveClient();
+    await client.mutate({
+      mutation: DELETE_PAGE_SLUG,
+      variables: { pageKey }
+    });
+
+    toast.success(`Slug für "${pageKey}" wurde gelöscht.`);
+
+    // Dialog schließen
+    cancelDeletePageSlug();
+
+    // Daten aktualisieren
+    await fetchStaticContents();
+  } catch (err) {
+    console.error('Failed to delete page slug:', err);
+    toast.error(`Fehler beim Löschen des Slugs: ${err.message}`);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// URL für die Vorschau einer Seite
+const getPageViewUrl = (pageKey) => {
+  // Verwende tempSlugs für aktuelle Werte (auch Änderungen, die noch nicht gespeichert wurden)
+  const slug = tempSlugs[pageKey] ? tempSlugs[pageKey] : pageKey;
+  if (localUseDirectPaths.value) {
+    return `/${slug}`;
+  } else {
+    return `/static-page/${slug}`;
   }
 };
 
@@ -1387,6 +1663,7 @@ const editContent = async (content) => {
     formData.value = {
       pageKey: content.pageKey,
       sectionKey: content.sectionKey,
+      slug: content.slug || '',
       contentType: content.contentType || 'standard',
       title: content.title || '',
       headerClass: content.headerClass || 'h2', // Lade die headerClass oder nutze 'h2' als Default
@@ -1409,6 +1686,7 @@ const editContent = async (content) => {
                 id
                 pageKey
                 sectionKey
+                pageSlug
                 title
                 content
                 ordering
@@ -1424,6 +1702,7 @@ const editContent = async (content) => {
         
         if (fullContent) {
           formData.value.content = fullContent.content;
+          formData.value.slug = fullContent.slug || '';
         } else {
           // Wenn der API-Aufruf null zurückgibt, zeigen wir einen Fehler an
           console.error('API returned null for content ID:', content.id);
@@ -1545,6 +1824,7 @@ const resetForm = () => {
   formData.value = {
     pageKey: '',
     sectionKey: '',
+    slug: '',
     contentType: 'standard',
     title: '',
     headerClass: 'h2', // Default header class
@@ -1873,6 +2153,7 @@ const saveContentInternal = async (continueEditing) => {
           contentType: formData.value.contentType || 'standard',
           title,
           headerClass: formData.value.headerClass || 'h2',
+          pageSlug: formData.value.pageSlug,
           ordering,
           content: cleanContent,
           isPublished: formData.value.isPublished
@@ -2025,6 +2306,7 @@ const saveContentInternal = async (continueEditing) => {
         const createInput = {
           pageKey,
           sectionKey,
+          pageSlug: formData.value.pageSlug,
           contentType: formData.value.contentType || 'standard',
           title,
           headerClass: formData.value.headerClass || 'h2',
@@ -2492,6 +2774,26 @@ const moveItemDown = async (content) => {
 /* CKEditor Container Styling */
 .editor-container {
   margin-bottom: 1.5rem;
+}
+
+/* Page Slug Manager Styling */
+.page-slug-manager {
+  background-color: rgba(0, 0, 0, 0.02);
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.page-slug-manager:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.page-slug-manager .input-group {
+  margin-bottom: 4px;
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 /* Globale CKEditor Styles - diese werden nicht von scoped beeinflusst */
