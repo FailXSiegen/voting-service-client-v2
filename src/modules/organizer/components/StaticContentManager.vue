@@ -308,66 +308,98 @@
         <div class="row mb-3">
           <div class="col-md-8">
             <label for="title" class="form-label">Titel</label>
-            <input 
-              type="text" 
-              class="form-control" 
-              id="title" 
-              v-model="formData.title" 
+            <input
+              type="text"
+              class="form-control"
+              id="title"
+              v-model="formData.title"
               placeholder="Titel des Abschnitts"
             >
           </div>
-          
+
           <div class="col-md-4">
             <label for="ordering" class="form-label">Reihenfolge</label>
-            <input 
-              type="number" 
-              class="form-control" 
-              id="ordering" 
-              v-model="formData.ordering" 
+            <input
+              type="number"
+              class="form-control"
+              id="ordering"
+              v-model="formData.ordering"
               placeholder="1"
             >
           </div>
         </div>
-        
+
+        <div class="mb-3">
+          <ContentTypeSelector
+            v-model="formData.contentType"
+            @change="handleContentTypeChange"
+          />
+        </div>
+
         <div class="mb-3">
           <label for="content" class="form-label">Inhalt</label>
-          <div class="d-flex justify-content-end gap-2 mb-2">
-            <button 
-              type="button" 
-              class="btn btn-outline-primary btn-sm" 
-              @click="showMediaManager = true"
-            >
-              <i class="bi bi-image"></i> Medienverwaltung
-            </button>
-          </div>
-          
-          <div class="position-relative editor-container">
-            <div
-              class="editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen"
-              ref="editorContainerElement"
-            >
-              <div class="editor-container__editor">
-                <div ref="editorElement">
-                  <ckeditor 
-                    v-if="editor && config" 
-                    :modelValue="config.initialData" 
-                    :editor="editor" 
-                    :config="config"
-                    @ready="onEditorReady"
-                  />
+
+          <!-- Standard content editor -->
+          <template v-if="formData.contentType === 'standard'">
+            <div class="d-flex justify-content-end gap-2 mb-2">
+              <button
+                type="button"
+                class="btn btn-outline-primary btn-sm"
+                @click="showMediaManager = true"
+              >
+                <i class="bi bi-image"></i> Medienverwaltung
+              </button>
+            </div>
+
+            <div class="position-relative editor-container">
+              <div
+                class="editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen"
+                ref="editorContainerElement"
+              >
+                <div class="editor-container__editor">
+                  <div ref="editorElement">
+                    <ckeditor
+                      v-if="editor && config"
+                      :modelValue="config.initialData"
+                      :editor="editor"
+                      :config="config"
+                      @ready="onEditorReady"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          
+          </template>
+
+          <!-- Multi-column content editor -->
+          <template v-else-if="formData.contentType === 'multi-column'">
+            <MultiColumnEditor
+              :value="formData.columnsContent"
+              :initialColumnCount="formData.columnCount"
+              :editorClass="editor"
+              :editorConfig="config"
+              @change="handleMultiColumnChange"
+            />
+          </template>
+
+          <!-- Accordion content editor -->
+          <template v-else-if="formData.contentType === 'accordion'">
+            <AccordionEditor
+              :value="formData.accordionItems"
+              :editorClass="editor"
+              :editorConfig="config"
+              @change="handleAccordionChange"
+            />
+          </template>
+
           <!-- Media Manager Modal -->
           <div v-if="showMediaManager" class="media-manager-modal">
             <div class="modal-backdrop show"></div>
             <div class="modal media-manager-dialog d-block" tabindex="-1">
               <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
-                  <MediaManager 
-                    @select="insertMedia" 
+                  <MediaManager
+                    @select="insertMedia"
                     @close="showMediaManager = false"
                   />
                 </div>
@@ -408,20 +440,20 @@
         <div class="card-header">
           <ul class="nav nav-tabs card-header-tabs">
             <li class="nav-item">
-              <a 
-                class="nav-link" 
+              <a
+                class="nav-link"
                 :class="{ active: previewTab === 'code' }"
-                href="#" 
+                href="#"
                 @click.prevent="previewTab = 'code'"
               >
                 <i class="bi bi-code-square"></i> HTML-Code
               </a>
             </li>
             <li class="nav-item">
-              <a 
-                class="nav-link" 
+              <a
+                class="nav-link"
                 :class="{ active: previewTab === 'preview' }"
-                href="#" 
+                href="#"
                 @click.prevent="previewTab = 'preview'"
               >
                 <i class="bi bi-eye"></i> Vorschau
@@ -431,12 +463,121 @@
         </div>
         <div class="card-body">
           <!-- Code-Ansicht -->
-          <div v-if="previewTab === 'code'" class="p-3 border rounded bg-light">
-            <pre class="mb-0"><code>{{ formData.content }}</code></pre>
+          <div v-if="previewTab === 'code' || previewTab === 'code-forced'" class="p-3 border rounded bg-light">
+            <div class="debug-info mb-3 p-2 bg-dark text-white d-none">
+              <h6 class="mb-2">Debug Info:</h6>
+              <div>Content Type: {{ formData.contentType }}</div>
+              <div v-if="formData.contentType === 'multi-column'">Columns: {{ formData.columnsContent.length }}</div>
+              <div v-if="formData.contentType === 'accordion'">Items: {{ formData.accordionItems.length }}</div>
+              <div>Preview Tab: {{ previewTab }}</div>
+            </div>
+
+            <template v-if="formData.contentType === 'standard'">
+              <pre class="mb-0"><code>{{ formData.content }}</code></pre>
+            </template>
+            <template v-else-if="formData.contentType === 'multi-column'">
+              <h6 class="mb-3">Multi-Column HTML:</h6>
+              <div v-if="formData.columnsContent && formData.columnsContent.length > 0">
+                <div class="row mb-3">
+                  <div v-for="(column, index) in formData.columnsContent" :key="index" class="col-12 mb-3">
+                    <h6>Spalte {{ index + 1 }}:</h6>
+                    <pre class="border p-2 bg-white"><code>{{ column.content }}</code></pre>
+                  </div>
+                </div>
+                <h6 class="mb-2">Zusammengeführter HTML-Code:</h6>
+                <pre class="mb-0"><code>{{ getMultiColumnHtml() }}</code></pre>
+              </div>
+              <div v-else class="alert alert-warning">
+                Keine Spalten definiert oder Daten nicht geladen.
+              </div>
+            </template>
+            <template v-else-if="formData.contentType === 'accordion'">
+              <h6 class="mb-3">Accordion HTML:</h6>
+              <div v-if="formData.accordionItems && formData.accordionItems.length > 0">
+                <div class="mb-3">
+                  <div v-for="(item, index) in formData.accordionItems" :key="index" class="mb-3">
+                    <h6>Element {{ index + 1 }}:</h6>
+                    <div class="mb-1"><strong>Titel:</strong> {{ item.title }}</div>
+                    <pre class="border p-2 bg-white"><code>{{ item.content }}</code></pre>
+                  </div>
+                </div>
+                <h6 class="mb-2">Zusammengeführter HTML-Code:</h6>
+                <pre class="mb-0"><code>{{ getAccordionHtml() }}</code></pre>
+              </div>
+              <div v-else class="alert alert-warning">
+                Keine Accordion-Elemente definiert oder Daten nicht geladen.
+              </div>
+            </template>
           </div>
-          
+
           <!-- Vorschau-Ansicht -->
-          <div v-if="previewTab === 'preview'" v-html="formData.content" class="p-3 border rounded bg-white"></div>
+          <div v-if="previewTab === 'preview' || previewTab === 'preview-forced'" class="p-3 border rounded bg-white">
+            <div class="debug-info mb-3 p-2 bg-dark text-white d-none">
+              <h6 class="mb-2">Preview Debug Info:</h6>
+              <div>Content Type: {{ formData.contentType }}</div>
+              <div v-if="formData.contentType === 'multi-column'">
+                Columns: {{ formData.columnsContent ? formData.columnsContent.length : 0 }}
+              </div>
+              <div v-if="formData.contentType === 'accordion'">
+                Items: {{ formData.accordionItems ? formData.accordionItems.length : 0 }}
+              </div>
+              <div>Preview Tab: {{ previewTab }}</div>
+            </div>
+            <template v-if="formData.contentType === 'standard'">
+              <div v-html="formData.content"></div>
+            </template>
+            <template v-else-if="formData.contentType === 'multi-column'">
+              <div v-if="formData.columnsContent && formData.columnsContent.length > 0">
+                <div class="row">
+                  <div
+                    v-for="(column, index) in formData.columnsContent"
+                    :key="index"
+                    :class="getColumnClass(formData.columnCount)"
+                  >
+                    <div class="border rounded p-2 bg-white h-100" v-html="column.content"></div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="alert alert-warning">
+                Keine Spalten definiert oder Daten nicht geladen.
+              </div>
+            </template>
+            <template v-else-if="formData.contentType === 'accordion'">
+              <div v-if="formData.accordionItems && formData.accordionItems.length > 0">
+                <div class="accordion" id="previewAccordion">
+                  <div
+                    v-for="(item, index) in formData.accordionItems"
+                    :key="index"
+                    class="accordion-item"
+                  >
+                    <h2 class="accordion-header" :id="'preview-heading-' + index">
+                      <button
+                        class="accordion-button collapsed"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        :data-bs-target="'#preview-collapse-' + index"
+                        aria-expanded="false"
+                        :aria-controls="'preview-collapse-' + index"
+                      >
+                        {{ item.title || 'Unbenanntes Element' }}
+                      </button>
+                    </h2>
+                    <div
+                      :id="'preview-collapse-' + index"
+                      class="accordion-collapse collapse"
+                      :aria-labelledby="'preview-heading-' + index"
+                      data-bs-parent="#previewAccordion"
+                    >
+                      <div class="accordion-body" v-html="item.content"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="alert alert-warning">
+                Keine Accordion-Elemente definiert oder Daten nicht geladen.
+              </div>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -448,11 +589,14 @@
  * This configuration was generated using the CKEditor 5 Builder. You can modify it anytime using this link:
  * https://ckeditor.com/ckeditor-5/builder/#installation/NoFgNARATAdArDADBSBGA7CKI4E4ToAcAbMSKrounKgMyIF6GHXnnGVS2pwggoQAJgFMUiMMFRgpU8TIC6kXLQDGAM2GoARhHlA=
  */
-import { computed, ref, onMounted, useTemplateRef, watch } from 'vue';
+import { computed, ref, onMounted, useTemplateRef, watch, nextTick } from 'vue';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
 import { toast } from 'vue3-toastify';
 import MediaManager from './MediaManager.vue';
+import ContentTypeSelector from './ContentTypeSelector.vue';
+import MultiColumnEditor from './MultiColumnEditor.vue';
+import AccordionEditor from './AccordionEditor.vue';
 import { useCore } from '@/core/store/core';
 
  import { Ckeditor } from '@ckeditor/ckeditor5-vue';
@@ -853,17 +997,32 @@ const editorInstance = ref(null);
 
 // Event handler when editor is ready
 const onEditorReady = (editor) => {
-  editorInstance.value = editor;
-  
-  // Set initial data if we have content
-  if (formData.value.content) {
-    editor.setData(formData.value.content);
+  try {
+    // Store the editor instance safely
+    editorInstance.value = editor;
+
+    // Set initial data if we have content and we're in standard mode
+    if (formData.value.content && currentEditorType.value === 'standard') {
+      try {
+        editor.setData(formData.value.content);
+      } catch (error) {
+        console.error('Error setting editor data:', error);
+      }
+    }
+
+    // Update content when editor data changes
+    editor.model.document.on('change:data', () => {
+      try {
+        if (editor && typeof editor.getData === 'function') {
+          formData.value.content = editor.getData();
+        }
+      } catch (error) {
+        console.error('Error getting editor data:', error);
+      }
+    });
+  } catch (error) {
+    console.error('Error in onEditorReady:', error);
   }
-  
-  // Update content when editor data changes
-  editor.model.document.on('change:data', () => {
-    formData.value.content = editor.getData();
-  });
 };
 
 // Zustand
@@ -929,10 +1088,14 @@ const updateSystemSettings = async () => {
 const formData = ref({
   pageKey: '',
   sectionKey: '',
+  contentType: 'standard', // Add contentType field with default value 'standard'
   title: '',
   content: '',
   ordering: 0,
-  isPublished: true
+  isPublished: true,
+  columnCount: 2, // Add columnCount field for multi-column layout
+  columnsContent: [], // Add columnsContent field for multi-column content
+  accordionItems: [] // Add accordionItems field for accordion content
 });
 
 // Einzigartige Seiten für die Vorschau-Links
@@ -963,32 +1126,34 @@ const countSections = (pageKey) => {
 };
 
 // Wählt eine Seite aus und wechselt zum Abschnitts-Tab
-const selectPage = (pageKey) => {
+const selectPage = async (pageKey) => {
+  // Clean up editors before changing tabs
+  await safeDestroyEditor();
+  editorInstance.value = null;
+
   selectedPage.value = pageKey;
   activeTab.value = 'sections';
 };
 
 // Erstellt eine neue Seite (wechselt zum Editor-Tab)
-const createNewPage = () => {
+const createNewPage = async () => {
+  // Clean up editors before changing tabs
+  await safeDestroyEditor();
+
   resetForm();
+  currentEditorType.value = 'standard';
   activeTab.value = 'editor';
-  
-  // Reset the editor content if it exists
-  if (editorInstance.value) {
-    editorInstance.value.setData('');
-  }
 };
 
 // Bereitet das Formular für einen neuen Abschnitt auf der ausgewählten Seite vor
-const prepareNewSection = () => {
+const prepareNewSection = async () => {
+  // Clean up editors before changing tabs
+  await safeDestroyEditor();
+
   resetForm();
   formData.value.pageKey = selectedPage.value;
   editMode.value = false;
-  
-  // Reset the editor content if it exists
-  if (editorInstance.value) {
-    editorInstance.value.setData('');
-  }
+  currentEditorType.value = 'standard';
 };
 
 // Apollo-Client
@@ -1003,12 +1168,21 @@ const FETCH_STATIC_CONTENTS = gql`
       id
       pageKey
       sectionKey
+      contentType
       title
       content
       ordering
       isPublished
       createdAt
       updatedAt
+      columnCount
+      columnsContent {
+        content
+      }
+      accordionItems {
+        title
+        content
+      }
     }
   }
 `;
@@ -1019,10 +1193,19 @@ const CREATE_STATIC_CONTENT = gql`
       id
       pageKey
       sectionKey
+      contentType
       title
       content
       ordering
       isPublished
+      columnCount
+      columnsContent {
+        content
+      }
+      accordionItems {
+        title
+        content
+      }
     }
   }
 `;
@@ -1033,10 +1216,19 @@ const UPDATE_STATIC_CONTENT = gql`
       id
       pageKey
       sectionKey
+      contentType
       title
       content
       ordering
       isPublished
+      columnCount
+      columnsContent {
+        content
+      }
+      accordionItems {
+        title
+        content
+      }
     }
   }
 `;
@@ -1049,6 +1241,61 @@ const TOGGLE_STATIC_CONTENT_PUBLISHED = gql`
     }
   }
 `;
+
+// Helper-Methoden für die Preview
+const getMultiColumnHtml = () => {
+  if (!formData.value.columnsContent || !formData.value.columnsContent.length) {
+    return '<div class="row"><div class="col">Keine Spalten definiert</div></div>';
+  }
+
+  const columnCount = formData.value.columnCount || 2;
+  const columnClass = getColumnClass(columnCount);
+
+  let html = '<div class="row">\n';
+  formData.value.columnsContent.forEach((column, index) => {
+    html += `  <div class="${columnClass}">\n`;
+    html += `    <div class="h-100">${column.content || ''}</div>\n`;
+    html += '  </div>\n';
+  });
+  html += '</div>';
+
+  return html;
+};
+
+const getAccordionHtml = () => {
+  if (!formData.value.accordionItems || !formData.value.accordionItems.length) {
+    return '<div class="accordion">Keine Accordion-Elemente definiert</div>';
+  }
+
+  let html = '<div class="accordion" id="accordion">\n';
+  formData.value.accordionItems.forEach((item, index) => {
+    html += '  <div class="accordion-item">\n';
+    html += `    <h2 class="accordion-header" id="heading-${index}">\n`;
+    html += `      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-${index}" aria-expanded="false" aria-controls="collapse-${index}">\n`;
+    html += `        ${item.title || 'Unbenanntes Element'}\n`;
+    html += '      </button>\n';
+    html += '    </h2>\n';
+    html += `    <div id="collapse-${index}" class="accordion-collapse collapse" aria-labelledby="heading-${index}" data-bs-parent="#accordion">\n`;
+    html += `      <div class="accordion-body">${item.content || ''}</div>\n`;
+    html += '    </div>\n';
+    html += '  </div>\n';
+  });
+  html += '</div>';
+
+  return html;
+};
+
+const getColumnClass = (columnCount) => {
+  switch (parseInt(columnCount, 10)) {
+    case 4:
+      return 'col-md-3';
+    case 3:
+      return 'col-md-4';
+    case 2:
+    default:
+      return 'col-md-6';
+  }
+};
 
 // Methoden
 const fetchStaticContents = async () => {
@@ -1079,16 +1326,20 @@ const fetchStaticContents = async () => {
 const editContent = async (content) => {
   try {
     loading.value = true;
-    
+
     // Da wir den vollständigen Content bereits im content-Objekt haben,
     // können wir ihn direkt im Formular verwenden
     formData.value = {
       pageKey: content.pageKey,
       sectionKey: content.sectionKey,
+      contentType: content.contentType || 'standard',
       title: content.title || '',
       content: content.content || '', // Falls content.content fehlt, laden wir es
       ordering: content.ordering || 0,
-      isPublished: content.isPublished
+      isPublished: content.isPublished,
+      columnCount: content.columnCount || 2,
+      columnsContent: content.columnsContent || [],
+      accordionItems: content.accordionItems || []
     };
     
     // Wenn das Content-Feld fehlt, laden wir es nach
@@ -1136,15 +1387,24 @@ const editContent = async (content) => {
     
     editMode.value = true;
     currentContentId.value = content.id;
-    
+
+    // Update the current editor type
+    currentEditorType.value = formData.value.contentType || 'standard';
+
     // Wechsle zum Editor-Tab
     activeTab.value = 'editor';
-    
+
     // Set the content in the editor if it exists
-    if (editorInstance.value && formData.value.content) {
-      // Use setTimeout to ensure the editor is fully initialized
+    if (currentEditorType.value === 'standard' && editorInstance.value && formData.value.content) {
+      // Use setTimeout and try-catch to handle potential editor errors
       setTimeout(() => {
-        editorInstance.value.setData(formData.value.content);
+        try {
+          if (editorInstance.value && typeof editorInstance.value.setData === 'function') {
+            editorInstance.value.setData(formData.value.content);
+          }
+        } catch (error) {
+          console.error('Error setting editor data:', error);
+        }
       }, 100);
     }
     
@@ -1224,29 +1484,189 @@ const getUserContext = async () => {
   }
 };
 
-const cancelEdit = () => {
+const cancelEdit = async () => {
   editMode.value = false;
   currentContentId.value = null;
+
+  // Safely destroy any editors before resetting the form
+  await safeDestroyEditor();
+
+  // Reset form and editor type
   resetForm();
-  
-  // Reset the editor if it exists
-  if (editorInstance.value) {
-    editorInstance.value.setData('');
-  }
-  
+  currentEditorType.value = 'standard';
+
   // Zurück zur Abschnittsübersicht
   activeTab.value = 'sections';
 };
 
 const resetForm = () => {
+  // EMERGENCY FIX: Create completely fresh objects with no references
   formData.value = {
     pageKey: '',
     sectionKey: '',
+    contentType: 'standard',
     title: '',
     content: '',
     ordering: 0,
-    isPublished: true
+    isPublished: true,
+    columnCount: 2,
+    columnsContent: [], // Create new array
+    accordionItems: []
   };
+
+  console.log('Form reset completed. New formData:', JSON.stringify(formData.value));
+};
+
+// Current editor type to help with cleanup
+const currentEditorType = ref('standard');
+
+// Method to safely destroy the current editor instance
+const safeDestroyEditor = async () => {
+  try {
+    // First, handle the standard CKEditor instance
+    if (currentEditorType.value === 'standard' && editorInstance.value) {
+      try {
+        // Backup content before destroying
+        if (editorInstance.value && typeof editorInstance.value.getData === 'function') {
+          formData.value.content = editorInstance.value.getData();
+          console.log('Backed up standard content:', formData.value.content.substring(0, 50) + '...');
+        }
+
+        // Set to null to prevent reuse
+        const tempEditor = editorInstance.value;
+        editorInstance.value = null;
+
+        // Wait for next tick to ensure UI updates before potential errors
+        await nextTick();
+
+        // Try to destroy the editor
+        if (tempEditor && typeof tempEditor.destroy === 'function') {
+          await tempEditor.destroy().catch(error => {
+            console.error('Error destroying standard editor:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Exception when destroying standard editor:', error);
+      }
+    }
+
+    // Force a preview update if we're in preview mode
+    if (previewTab.value === 'preview' || previewTab.value === 'code') {
+      // This forces a redraw of preview content
+      await nextTick();
+      const currentTab = previewTab.value;
+      previewTab.value = currentTab === 'preview' ? 'preview-force-update' : 'code-force-update';
+      setTimeout(() => {
+        previewTab.value = currentTab;
+      }, 50);
+    }
+  } catch (error) {
+    console.error('Error in safeDestroyEditor:', error);
+  }
+};
+
+// Methods for handling content type changes
+const handleContentTypeChange = async (newType) => {
+  // Only proceed if type is actually changing
+  if (newType === currentEditorType.value) return;
+
+  // Save current content and prevent immediate re-rendering
+  await safeDestroyEditor();
+
+  // Update the current type after cleanup
+  currentEditorType.value = newType;
+  formData.value.contentType = newType;
+
+  // Initialize default values for the selected content type
+  if (newType === 'multi-column' && !formData.value.columnsContent.length) {
+    formData.value.columnCount = 2;
+    formData.value.columnsContent = [
+      { content: '' },
+      { content: '' }
+    ];
+  } else if (newType === 'accordion' && !formData.value.accordionItems.length) {
+    formData.value.accordionItems = [
+      { title: '', content: '' }
+    ];
+  }
+
+  // Allow component to rerender
+  await nextTick();
+};
+
+// Helper function to force preview update
+const forceUpdatePreview = () => {
+  nextTick(() => {
+    if (previewTab.value === 'preview' || previewTab.value === 'code') {
+      const current = previewTab.value;
+      // Trigger a watcher to update the preview
+      previewTab.value = current + '-forced';
+      setTimeout(() => {
+        previewTab.value = current;
+      }, 50);
+    }
+  });
+};
+
+// NO DEBOUNCE HERE - we need immediate updates
+const handleMultiColumnChange = (data) => {
+  console.log('### MULTI-COLUMN CHANGE EVENT RECEIVED:', data);
+
+  if (data && data.columnCount) {
+    formData.value.columnCount = data.columnCount;
+  }
+
+  if (data && data.columns && Array.isArray(data.columns)) {
+    // CRITICAL: Deep debug logging of what we receive
+    data.columns.forEach((col, idx) => {
+      console.log(`### Column ${idx} received: ${col.content ? col.content.substring(0, 30) : '(empty)'}`);
+    });
+
+    // Create brand new objects without __typename
+    const cleanColumns = [];
+    for (const column of data.columns) {
+      cleanColumns.push({
+        content: column.content || ''
+      });
+    }
+
+    // CRITICAL: Assign the clean array
+    formData.value.columnsContent = cleanColumns;
+
+    // Debug what we set
+    formData.value.columnsContent.forEach((col, idx) => {
+      console.log(`### formData column ${idx} set to: ${col.content ? col.content.substring(0, 30) : '(empty)'}`);
+    });
+
+    // Force update preview immediately
+    forceUpdatePreview();
+  } else {
+    console.error('Invalid multi-column data received:', data);
+  }
+};
+
+const handleAccordionChange = (items) => {
+  console.log('Accordion items updated with new data:', items);
+
+  if (items && Array.isArray(items)) {
+    // Kopiere die Elemente, aber entferne __typename, um GraphQL-Fehler zu vermeiden
+    formData.value.accordionItems = items.map(item => ({
+      title: item.title || '',
+      content: item.content || ''
+    }));
+
+    // Für Debug-Zwecke, Ausgabe der aktualisierten Inhalte
+    formData.value.accordionItems.forEach((item, idx) => {
+      const titlePreview = item.title || '(no title)';
+      const contentPreview = item.content ? item.content.substring(0, 30) + '...' : '(empty)';
+      console.log(`Accordion item ${idx+1} - Title: ${titlePreview}, Content: ${contentPreview}`);
+    });
+  } else {
+    console.warn('Received invalid accordion items:', items);
+  }
+
+  // Erzwinge ein Aktualisieren der Vorschau
+  forceUpdatePreview();
 };
 
 // Prüft, ob ein Abschnitt für eine Seite bereits existiert
@@ -1359,14 +1779,44 @@ const directApiSaveContent = async (contentData) => {
 // Verbesserte Methode zum Speichern des Inhalts mit mehreren Fallback-Strategien
 const saveContent = async () => {
   saving.value = true;
-  
+
   try {
     // Grundlegende Validierung
     const pageKey = formData.value.pageKey.trim();
     const sectionKey = formData.value.sectionKey.trim();
     const title = formData.value.title.trim();
     const ordering = parseInt(formData.value.ordering, 10) || 0;
-    
+
+    // Extra detailed logging of content before saving
+    console.log('Saving content of type:', formData.value.contentType);
+    if (formData.value.contentType === 'multi-column') {
+      console.log('Column count:', formData.value.columnCount);
+
+      if (formData.value.columnsContent && Array.isArray(formData.value.columnsContent)) {
+        // Extensive debugging output
+        console.log(`Found ${formData.value.columnsContent.length} columns to save`);
+        formData.value.columnsContent.forEach((column, idx) => {
+          if (column && typeof column === 'object') {
+            console.log(`Column ${idx}: ${JSON.stringify(column)}`);
+            console.log(`Column ${idx} content: "${column.content}"`);
+          } else {
+            console.log(`Column ${idx} is invalid:`, column);
+          }
+        });
+      } else {
+        console.error('CRITICAL ERROR: columnsContent is not an array or is null:', formData.value.columnsContent);
+      }
+    } else if (formData.value.contentType === 'accordion') {
+      if (formData.value.accordionItems && Array.isArray(formData.value.accordionItems)) {
+        console.log(`Found ${formData.value.accordionItems.length} accordion items to save`);
+        formData.value.accordionItems.forEach((item, idx) => {
+          console.log(`Item ${idx}: ${JSON.stringify(item)}`);
+        });
+      }
+    } else {
+      console.log('Standard content length:', (formData.value.content || '').length);
+    }
+
     if (!pageKey || !sectionKey) {
       toast.error('Bitte füllen Sie mindestens Seitenschlüssel und Abschnittschlüssel aus.');
       saving.value = false;
@@ -1410,11 +1860,48 @@ const saveContent = async () => {
       try {
         const updateInput = {
           id: currentContentId.value,
+          contentType: formData.value.contentType || 'standard',
           title,
           ordering,
           content: cleanContent,
           isPublished: formData.value.isPublished
         };
+
+        // Add multi-column data if needed
+        if (formData.value.contentType === 'multi-column') {
+          updateInput.columnCount = formData.value.columnCount || 2;
+
+          // Ensure columnsContent is clean without __typename or other unexpected fields
+          // Create completely new objects with only the expected fields
+          // This is a deep cleansing approach to ensure no __typename is present
+          updateInput.columnsContent = [];
+
+          if (Array.isArray(formData.value.columnsContent)) {
+            for (const column of formData.value.columnsContent) {
+              updateInput.columnsContent.push({
+                content: column && column.content ? column.content : ''
+              });
+            }
+          }
+
+          console.log('Cleaned columnsContent for API:', JSON.stringify(updateInput.columnsContent));
+        }
+
+        // Add accordion data if needed
+        if (formData.value.contentType === 'accordion') {
+          // Create completely new objects with only the expected fields
+          // This is a deep cleansing approach to ensure no __typename is present
+          updateInput.accordionItems = [];
+
+          if (Array.isArray(formData.value.accordionItems)) {
+            for (const item of formData.value.accordionItems) {
+              updateInput.accordionItems.push({
+                title: item && item.title ? item.title : '',
+                content: item && item.content ? item.content : ''
+              });
+            }
+          }
+        }
         
         // 1. Versuch: Versuch mit Apollo-Client
         const client = resolveClient();
@@ -1506,11 +1993,48 @@ const saveContent = async () => {
         const createInput = {
           pageKey,
           sectionKey,
+          contentType: formData.value.contentType || 'standard',
           title,
           content: cleanContent,
           ordering,
           isPublished: formData.value.isPublished
         };
+
+        // Add multi-column data if needed
+        if (formData.value.contentType === 'multi-column') {
+          createInput.columnCount = formData.value.columnCount || 2;
+
+          // Ensure columnsContent is clean without __typename or other unexpected fields
+          // Create completely new objects with only the expected fields
+          // This is a deep cleansing approach to ensure no __typename is present
+          createInput.columnsContent = [];
+
+          if (Array.isArray(formData.value.columnsContent)) {
+            for (const column of formData.value.columnsContent) {
+              createInput.columnsContent.push({
+                content: column && column.content ? column.content : ''
+              });
+            }
+          }
+
+          console.log('Cleaned columnsContent for API:', JSON.stringify(createInput.columnsContent));
+        }
+
+        // Add accordion data if needed
+        if (formData.value.contentType === 'accordion') {
+          // Create completely new objects with only the expected fields
+          // This is a deep cleansing approach to ensure no __typename is present
+          createInput.accordionItems = [];
+
+          if (Array.isArray(formData.value.accordionItems)) {
+            for (const item of formData.value.accordionItems) {
+              createInput.accordionItems.push({
+                title: item && item.title ? item.title : '',
+                content: item && item.content ? item.content : ''
+              });
+            }
+          }
+        }
         
         // 1. Versuch: Kompletten Inhalt mit Apollo-Client speichern
         const client = resolveClient();
@@ -1599,6 +2123,7 @@ const saveContent = async () => {
               input: {
                 pageKey,
                 sectionKey,
+                contentType: formData.value.contentType || 'standard',
                 content: '<p>...</p>', // Minimaler Inhalt
                 title,
                 ordering,
