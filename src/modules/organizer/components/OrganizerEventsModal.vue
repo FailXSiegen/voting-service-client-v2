@@ -416,33 +416,6 @@ onAllResult(({ data }) => {
       ...expiredWithOriginalOrganizer
     ];
     
-    console.log(`Gefundene übertragene Events für Organizer ${props.organizer?.id}:`, 
-                transferredEvents.value.length);
-                
-    // Debug-Info
-    console.log("Events struktur:", {
-      upcomingEvents: upcomingEvents.value.map(e => ({
-        id: e.id,
-        title: e.title,
-        isTransferred: !!e.originalOrganizer,
-        organizer: e.organizer?.id,
-        originalOrganizer: e.originalOrganizer?.id
-      })),
-      expiredEvents: expiredEvents.value.map(e => ({
-        id: e.id,
-        title: e.title,
-        isTransferred: !!e.originalOrganizer,
-        organizer: e.organizer?.id,
-        originalOrganizer: e.originalOrganizer?.id
-      })),
-      transferredEvents: transferredEvents.value.map(e => ({
-        id: e.id,
-        title: e.title,
-        organizer: e.organizer?.id,
-        originalOrganizer: e.originalOrganizer?.id
-      }))
-    });
-    
     // Initialize tooltips after data is loaded
     setTimeout(() => {
       initializeTooltips();

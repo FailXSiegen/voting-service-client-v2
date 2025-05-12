@@ -61,7 +61,6 @@
           "
         />
         <CheckboxInput
-          v-if="!hideAbstainInput"
           id="allowAbstain"
           v-model:checked="formData.allowAbstain"
           :label="$t('view.polls.create.labels.abstention')"
@@ -164,7 +163,6 @@ const currentOnlineUserCount = computed(() => {
     return eventUser?.verified && eventUser?.online && eventUser?.allowToVote;
   }).length;
 });
-const hideAbstainInput = computed(() => formData.maxVotes > 1);
 
 // Fetch event users.
 const eventUsersQuery = useQuery(

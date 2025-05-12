@@ -5,41 +5,58 @@
       <div class="mb-3">
         <label class="form-label fw-bold">
           {{ $t('view.polls.modal.voteAllocation', { voteAmount: remainingVotes }) }}
+          <span class="text-muted ms-2 small">
+            ({{ Math.round((remainingVotes / props.eventUser.voteAmount) * 100) }}% {{ $t('view.polls.modal.ofTotalVotes') }})
+          </span>
         </label>
-        
+
+        <!-- Progress bar für Stimmenfortschritt -->
+        <div class="progress mb-2">
+          <div
+            class="progress-bar"
+            :class="{'bg-success': remainingVotesPercentage > 50, 'bg-warning': remainingVotesPercentage <= 50 && remainingVotesPercentage > 25, 'bg-danger': remainingVotesPercentage <= 25}"
+            role="progressbar"
+            :style="{ width: remainingVotesPercentage + '%' }"
+            :aria-valuenow="remainingVotesPercentage"
+            aria-valuemin="0"
+            aria-valuemax="100">
+            {{ remainingVotes }} / {{ props.eventUser.voteAmount }} {{ $t('view.polls.modal.votes') }}
+          </div>
+        </div>
+
         <!-- Quick selection buttons -->
         <div class="btn-group w-100 mb-2">
-          <button 
-            type="button" 
-            class="btn btn-outline-primary" 
+          <button
+            type="button"
+            class="btn btn-outline-primary"
             :disabled="isSubmitting"
             @click="setVotePercentage(25)"
           >
-            25%
+            25% ({{ Math.round(remainingVotes * 0.25) }})
           </button>
-          <button 
-            type="button" 
-            class="btn btn-outline-primary" 
+          <button
+            type="button"
+            class="btn btn-outline-primary"
             :disabled="isSubmitting"
             @click="setVotePercentage(50)"
           >
-            50%
+            50% ({{ Math.round(remainingVotes * 0.5) }})
           </button>
-          <button 
-            type="button" 
-            class="btn btn-outline-primary" 
+          <button
+            type="button"
+            class="btn btn-outline-primary"
             :disabled="isSubmitting"
             @click="setVotePercentage(75)"
           >
-            75%
+            75% ({{ Math.round(remainingVotes * 0.75) }})
           </button>
-          <button 
-            type="button" 
-            class="btn btn-outline-primary" 
+          <button
+            type="button"
+            class="btn btn-outline-primary"
             :disabled="isSubmitting"
             @click="setVotePercentage(100)"
           >
-            100%
+            100% ({{ remainingVotes }})
           </button>
         </div>
         
@@ -58,11 +75,11 @@
           <!-- Numerical input -->
           <div class="col-12 col-lg-4">
             <div class="input-group">
-              <input 
-                v-model.number="formData.votesToUse" 
-                type="number" 
-                class="form-control" 
-                min="1" 
+              <input
+                v-model.number="formData.votesToUse"
+                type="number"
+                class="form-control"
+                min="1"
                 :max="remainingVotes"
                 :disabled="isSubmitting"
               >
@@ -70,11 +87,21 @@
             </div>
           </div>
         </div>
-        
+
         <div class="form-text">
           {{ $t('view.polls.modal.votesToUseHelptext') }}
         </div>
-        
+
+        <!-- Spezielle UI für wenige verbleibende Stimmen -->
+        <div v-if="remainingVotesPercentage <= 15" class="alert alert-warning mt-2 mb-2 p-2">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          {{ $t('view.polls.modal.fewVotesRemaining', {
+            remaining: remainingVotes,
+            total: props.eventUser.voteAmount,
+            percentage: remainingVotesPercentage
+          }) }}
+        </div>
+
         <!-- Checkbox for "Use all available votes" -->
         <div class="mt-2">
           <CheckboxInput
@@ -109,6 +136,7 @@
       <fieldset
         v-else-if="voteType === VOTE_TYPE_MULTIPLE_ALL"
         :disabled="formData.abstain || isSubmitting"
+        :class="{ 'opacity-50': formData.abstain }"
       >
         <CheckboxInputGroup
           :items="possibleAnswers"
@@ -133,7 +161,7 @@
           :label="$t('view.polls.modal.abstain')"
           :help-text="$t('view.polls.modal.abstainHelptext')"
           :checked="formData.abstain"
-          @update:checked="formData.abstain = !formData.abstain"
+          @update:checked="handleAbstainChange"
         />
       </fieldset>
     </template>
@@ -233,8 +261,7 @@ const voteType = computed(() => {
 const showAbstain = computed(
   () =>
     props.poll.allowAbstain &&
-    props.poll.pollAnswer === "custom" &&
-    props.poll.maxVotes <= 1,
+    props.poll.pollAnswer === "custom"
 );
 
 const possibleAnswers = computed(() => {
@@ -257,6 +284,11 @@ const hasMultipleVotes = computed(() => {
   return props.eventUser.voteAmount > 1 && props.event.multivoteType === 1;
 });
 
+// Berechne den Prozentsatz der verbleibenden Stimmen im Verhältnis zur Gesamtstimmzahl
+const remainingVotesPercentage = computed(() => {
+  return Math.round((remainingVotes.value / props.eventUser.voteAmount) * 100);
+});
+
 // Form and validation setup.
 const formData = reactive({
   singleAnswer: null,
@@ -270,29 +302,37 @@ const formData = reactive({
 // wenn zu einer neuen Abstimmung gewechselt wird
 watch(() => props.poll?.id, (newPollId, oldPollId) => {
   if (newPollId && oldPollId && newPollId !== oldPollId) {
-    
+
     // KRITISCH: Alte Poll-Daten aus localStorage löschen
     localStorage.removeItem(`poll_form_data_${oldPollId}`);
-    
+
     // Formular vollständig zurücksetzen
     reset(false);
-    
+
     // Mit maximaler Stimmenzahl neu starten
     formData.useAllAvailableVotes = true;
     formData.votesToUse = remainingVotes.value;
   }
 }, { immediate: true });
 
+// WICHTIG: Beobachte auch remainingVotes, um bei jeder Änderung das Formular auf 100% zu setzen
+watch(() => remainingVotes.value, (newValue) => {
+  // Bei jeder Änderung der verbleibenden Stimmen garantiert 100% setzen
+  formData.useAllAvailableVotes = true;
+  formData.votesToUse = newValue;
+});
+
 onMounted(() => {
   // Immer mit maximaler Stimmenzahl starten
   formData.useAllAvailableVotes = true;
   formData.votesToUse = remainingVotes.value;
-  
+
   // KRITISCH: Beim ersten Laden sicherstellen, dass keine alten Daten vorhanden sind
   if (props.poll && props.poll.id) {
     // Alte Daten löschen
     localStorage.removeItem(`poll_form_data_${props.poll.id}`);
   }
+
 });
 
 function setVotePercentage(percentage) {
@@ -312,15 +352,21 @@ function setVotePercentage(percentage) {
 
 function onCheckboxChange(isChecked) {
   formData.useAllAvailableVotes = isChecked;
-  
+
   if (isChecked) {
     formData.votesToUse = remainingVotes.value;
   }
-  
+
   // Überprüfe, ob wir bei jedem UI-Event den Button-Status aktualisieren sollten
   if (window.pollFormSubmitting !== undefined) {
     isSubmitting.value = window.pollFormSubmitting;
   }
+}
+
+// Handler für Enthaltungs-Checkbox
+function handleAbstainChange(isChecked) {
+  formData.abstain = isChecked;
+  // Keine automatische Änderung der Stimmzahl bei Enthaltung
 }
 
 watch(() => formData.votesToUse, (newValue, oldValue) => {
@@ -329,10 +375,16 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   } else if (newValue > remainingVotes.value) {
     formData.votesToUse = remainingVotes.value;
   }
-  
+
   if (newValue !== oldValue) {
     formData.useAllAvailableVotes = (formData.votesToUse === remainingVotes.value);
   }
+});
+
+// Bei Änderung des abstain-Status nur die Formularvalidierung aktualisieren,
+// aber keine automatische Änderung an der Stimmenzahl vornehmen
+watch(() => formData.abstain, () => {
+  // Nur Validierung neu auslösen, keine automatische Änderung der Stimmzahl
 });
 
 const rules = computed(() => {
@@ -406,13 +458,17 @@ async function onSubmit() {
   
   try {
     // Verbesserte explizite Prüfung auf gültige Auswahl
-    if (!formData.singleAnswer && (!formData.multipleAnswers || formData.multipleAnswers.length === 0) && !formData.abstain) {
+    // Wenn Enthaltung gewählt wurde, dann ist das eine gültige Auswahl
+    if (formData.abstain) {
+      // Bei Enthaltung sind keine weiteren Prüfungen nötig
+    } else if (!formData.singleAnswer && (!formData.multipleAnswers || formData.multipleAnswers.length === 0)) {
       alert('Bitte treffen Sie eine Auswahl');
       return;
     }
     
     
     // Prüfe, ob ein Radio-Button ausgewählt wurde bei Single-Choice-Abstimmungen
+    // Überspringen wenn Enthaltung gewählt ist
     if (voteType.value === VOTE_TYPE_SINGLE && !formData.singleAnswer && !formData.abstain) {
       console.error('Keine Antwort bei Single-Choice ausgewählt');
       alert('Bitte wählen Sie eine Antwort aus.');
@@ -461,18 +517,18 @@ function resetSubmitState() {
 
 function reset(keepSelection = false) {
   isSubmitting.value = false;
-  
+
   if (!keepSelection) {
     // Formularwerte zurücksetzen
     formData.singleAnswer = null;
     formData.multipleAnswers = [];
     formData.abstain = false;
-    
+
     // WICHTIG: Lokalen Formular-Cache löschen
     if (props.poll && props.poll.id) {
       localStorage.removeItem(`poll_form_data_${props.poll.id}`);
     }
-    
+
     // Votenzähler IMMER auf Maximum setzen, unabhängig von der Stimmanzahl
     // Auf 100% setzen (alle verbleibenden Stimmen)
     formData.votesToUse = remainingVotes.value;

@@ -359,7 +359,10 @@
         "maxPerOptionExplanation": "Prozentangaben basieren auf maximalen Stimmen pro Option ({maxVotesPerOption} Stimmen)",
         "relativeMajority": "Relative Mehrheit",
         "absoluteMajority": "Absolute Mehrheit",
-        "maxVotesPerOption": "Maximalstimmen pro Option"
+        "maxVotesPerOption": "Maximalstimmen pro Option",
+        "maxVotesPerOptionNoAbstention": "Maximalstimmen pro Option (ohne Enthaltungen)",
+        "percentageOfMaxPerOptionNoAbstention": "% der maximalen Stimmen pro Option (ohne Enthaltungen)",
+        "maxPerOptionNoAbstentionExplanation": "Prozentangaben basieren auf maximalen Stimmen pro Option (ohne Enthaltungen)"
       },
       "user": {
         "pending": {
