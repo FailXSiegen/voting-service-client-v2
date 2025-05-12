@@ -101,9 +101,6 @@
                   </span>
                   <span v-if="index !== 'Enthaltung'" class="ms-2 small">
                     <span
-                      data-bs-toggle="tooltip"
-                      data-bs-placement="top"
-                      :title="getPercentageTooltip()"
                       class="percentage-info"
                     >
                       ({{ getAnswerPercentage(answer.length) }})
