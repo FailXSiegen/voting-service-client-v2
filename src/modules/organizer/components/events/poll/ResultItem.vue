@@ -23,7 +23,11 @@
         {{ $t("view.results.voters") }} {{ pollResult.maxVotes || 0 }} 
         <template v-if="isCustomPoll">
           | {{ $t("view.results.maxVotesPerOption") }}:
-          {{ maxVotesPerOption }}  
+          {{ maxVotesPerOption }}
+          <template v-if="hasAbstentions">
+            | {{ $t("view.results.maxVotesPerOptionNoAbstention") }}:
+            {{ maxVotesPerOptionNoAbstention }}
+          </template>
         </template>
       </p>
     </div>
@@ -32,23 +36,32 @@
       <div class="row mb-3" v-if="isCustomPoll">
         <div class="col-12">
           <div class="btn-group d-print-none" role="group">
-            <button 
-              type="button" 
-              class="btn" 
+            <button
+              type="button"
+              class="btn"
+              :class="localPercentageType === 'maxPerOptionNoAbstention' ? 'btn-primary' : 'btn-outline-primary'"
+              @click="changePercentageType('maxPerOptionNoAbstention')"
+            >
+              {{ $t("view.results.percentageOfMaxPerOptionNoAbstention") }}
+            </button>
+            <button
+              type="button"
+              class="btn"
+              :class="localPercentageType === 'maxPerOption' ? 'btn-primary' : 'btn-outline-primary'"
+              @click="changePercentageType('maxPerOption')"
+            >
+              {{ $t("view.results.percentageOfMaxPerOption") }}
+            </button>
+            <button
+              type="button"
+              class="btn"
               :class="localPercentageType === 'validVotes' ? 'btn-primary' : 'btn-outline-primary'"
               @click="changePercentageType('validVotes')"
             >
               {{ $t("view.results.percentageOfValidVotes") }}
             </button>
 
-            <button 
-              type="button" 
-              class="btn" 
-              :class="localPercentageType === 'maxPerOption' ? 'btn-primary' : 'btn-outline-primary'"
-              @click="changePercentageType('maxPerOption')"
-            >
-              {{ $t("view.results.percentageOfMaxPerOption") }}
-            </button>
+         
           </div>
         </div>
       </div>
@@ -87,7 +100,14 @@
                     {{ answer.length }}
                   </span>
                   <span v-if="index !== 'Enthaltung'" class="ms-2 small">
-                    ({{ getAnswerPercentage(answer.length) }})
+                    <span
+                      data-bs-toggle="tooltip"
+                      data-bs-placement="top"
+                      :title="getPercentageTooltip()"
+                      class="percentage-info"
+                    >
+                      ({{ getAnswerPercentage(answer.length) }})
+                    </span>
                     <span v-if="isMajority(answer.length)" class="text-success ms-1">
                       <span v-if="isAbsoluteMajority(answer.length)" 
                             class="majority-indicator"
@@ -118,6 +138,11 @@
               </li>
               <li v-if="localPercentageType === 'maxPerOption'">
                 {{ $t("view.results.maxPerOptionExplanation", {
+                  maxVotesPerOption: maxVotesPerOption
+                }) }}
+              </li>
+              <li v-if="localPercentageType === 'maxPerOptionNoAbstention'">
+                {{ $t("view.results.maxPerOptionNoAbstentionExplanation", {
                   maxVotesPerOption: maxVotesPerOption
                 }) }}
               </li>
@@ -242,7 +267,7 @@ const props = defineProps({
   // Neuer Prop für den initialen Prozentanzeigetyp
   initialPercentageType: {
     type: String,
-    default: "validVotes"
+    default: "maxPerOptionNoAbstention"
   }
 });
 
@@ -292,26 +317,45 @@ const maxPotentialVotes = computed(() => {
   return (props.pollResult?.pollUser?.length || 0) * maxSelectPerVoter.value;
 });
 
-// Maximum votes possible per option 
+// Maximum votes possible per option
 const maxVotesPerOption = computed(() => {
   // Wenn poll.maxVotes definiert ist, verwenden Sie es
   if (props.pollResult?.poll?.maxVotes) {
     return (props.pollResult.maxVotes || 0) / props.pollResult.poll.maxVotes;
   }
-  
+
   // Fallback: Berechnung basierend auf Anzahl der Optionen
-  const optionCount = props.pollResult?.poll?.options?.length || 
+  const optionCount = props.pollResult?.poll?.options?.length ||
                      (props.pollResult?.poll?.possibleAnswers?.length || 10);
-  
+
   // Calculate the voting weight per voter per option
   const votingWeightPerVoter = Math.round(
-    (props.pollResult?.maxVotes || 0) / 
-    (props.pollResult?.pollUser?.length || 1) / 
+    (props.pollResult?.maxVotes || 0) /
+    (props.pollResult?.pollUser?.length || 1) /
     optionCount
   );
-  
+
   // The max votes per option is the number of voters × voting weight
   return (props.pollResult?.pollUser?.length || 0) * votingWeightPerVoter;
+});
+
+// Maximum votes possible per option (without abstentions)
+const maxVotesPerOptionNoAbstention = computed(() => {
+  // Basiswert von maxVotesPerOption verwenden
+  const baseValue = maxVotesPerOption.value;
+
+  // Wenn keine Enthaltungen vorhanden sind, ist der Wert gleich
+  if (!hasAbstentions.value) {
+    return baseValue;
+  }
+
+  // Jede Enthaltung einfach direkt abziehen
+  // Beispiel:
+  // Teilnehmer: 2 | Gültige Stimmen: 100 | Enthaltungen: 50 | Gesamt: 150 | Max. pro Option: 600
+  // Enthaltungen abziehen: 600 - 50 = 550
+
+  // Einfache Subtraktion der Enthaltungen vom Maximalwert
+  return Math.max(0, baseValue - abstentionCount.value);
 });
 
 // Check if this is a custom poll (more than Yes/No/Abstain options)
@@ -384,32 +428,39 @@ function getPublicName(pollUserId) {
 function getAnswerPercentage(answerLength) {
   let denominator = 1; // Default to avoid division by zero
   let percentage = 0;
-  
+
   switch (localPercentageType.value) {
     case 'validVotes':
       // Original method: percentage of valid votes (excluding abstentions)
       denominator = totalValidVotes.value > 0 ? totalValidVotes.value : 1;
       percentage = (answerLength / denominator) * 100;
       break;
-    
+
     case 'maxPerOption':
       // Method: percentage of max votes per option
       denominator = maxVotesPerOption.value > 0 ? maxVotesPerOption.value : 1;
       percentage = (answerLength / denominator) * 100;
       break;
-      
+
+    case 'maxPerOptionNoAbstention':
+      // Method: percentage of max votes per option without including abstentions
+      // Direkt den bereits berechneten Wert verwenden
+      denominator = maxVotesPerOptionNoAbstention.value > 0 ? maxVotesPerOptionNoAbstention.value : 1;
+      percentage = (answerLength / denominator) * 100;
+      break;
+
     default:
-      // Default to valid votes method
-      denominator = totalValidVotes.value > 0 ? totalValidVotes.value : 1;
+      // Default to max per option without abstentions method
+      denominator = maxVotesPerOptionNoAbstention.value > 0 ? maxVotesPerOptionNoAbstention.value : 1;
       percentage = (answerLength / denominator) * 100;
       break;
   }
-  
+
   // Format percentages - if over 100%, cap display at 100% and show actual in parentheses
   if (percentage > 100) {
     return "100.00% (" + percentage.toFixed(2) + "%)";
   }
-  
+
   return percentage.toFixed(2) + "%";
 }
 
@@ -434,17 +485,20 @@ function isMajority(answerLength) {
 // Determine if an answer has an absolute majority based on the current percentage type
 function isAbsoluteMajority(answerLength) {
   if (totalValidVotes.value === 0) return false;
-  
+
   if (localPercentageType.value === 'validVotes') {
     // For valid votes, absolute majority is more than 50% of valid votes
     return (answerLength / totalValidVotes.value) > 0.5;
   } else if (localPercentageType.value === 'maxPerOption') {
     // For max per option, absolute majority is more than 50% of max votes per option
     return (answerLength / maxVotesPerOption.value) > 0.5;
+  } else if (localPercentageType.value === 'maxPerOptionNoAbstention') {
+    // For max per option without abstentions, direkt den berechneten Wert verwenden
+    return (answerLength / maxVotesPerOptionNoAbstention.value) > 0.5;
   }
-  
-  // Default fallback to valid votes calculation
-  return (answerLength / totalValidVotes.value) > 0.5;
+
+  // Default fallback zum neuen Standard - Maximalstimmen pro Option (ohne Enthaltungen)
+  return (answerLength / maxVotesPerOptionNoAbstention.value) > 0.5;
 }
 </script>
 

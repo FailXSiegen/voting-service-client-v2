@@ -842,7 +842,7 @@ async function onSubmitPoll(pollFormData) {
         // Wenn der Vorgang nicht erfolgreich war, SOFORT zurücksetzen und Session deaktivieren
         resetUIAfterSubmission();
         votingProcess.deactivateVotingSession();
-        toast(l18n.global.tc("view.polls.error.submission"), { type: "warning" });
+        toast("Fehler bei der Stimmabgabe", { type: "warning" });
       }
       
       // SOFORTIGE UI-FREIGABE nach Formular-Übermittlung
@@ -887,11 +887,11 @@ async function onSubmitPoll(pollFormData) {
       
       // UI sofort zurücksetzen und Fehler anzeigen
       resetUIAfterSubmission();
-      toast(l18n.global.tc("view.polls.error.submission"), { type: "error" });
+      toast("Fehler bei der Stimmverarbeitung", { type: "error" });
     }
   } catch (error) {
     console.error('Fehler bei der Stimmabgabe:', error);
-    toast(l18n.global.tc("view.polls.error.submission"), { type: "error" });
+    toast("Fehler bei der Stimmabgabe", { type: "error" });
     
     // Aktive Session als fehlgeschlagen markieren
     votingProcess.deactivateVotingSession();
