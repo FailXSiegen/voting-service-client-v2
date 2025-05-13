@@ -333,3 +333,59 @@ export async function terminateWebsocketClient() {
     console.error("[Websocket] Fehler beim Beenden der WebSocket-Verbindung:", error);
   }
 }
+
+export async function reconnectWebsocketClient() {
+  try {
+    console.info("[Websocket] Starte vollständige WebSocket-Neuverbindung");
+    
+    // 1. Setze den Reconnect-Zähler zurück, damit neue Verbindungsversuche möglich sind
+    wsReconnectCount = 0;
+    
+    // 2. Vollständiger Neuaufbau der WebSocket-Verbindung durch schließen und neu öffnen
+    try {
+      // Zuerst bestehende Verbindung vollständig beenden (WICHTIG!)
+      if (wsLink && wsLink.client) {
+        await wsLink.client.terminate();
+        console.info("[Websocket] Bestehende Verbindung beendet");
+      }
+            
+      // 3. Verbindung explizit neu aufbauen (das Wichtigste für die Wiederherstellung des Online-Status)
+      if (wsLink && wsLink.client && typeof wsLink.client.connect === 'function') {
+        await wsLink.client.connect();
+        console.info("[Websocket] Neue Verbindung explizit gestartet");
+      }
+      
+      // 4. Warte kurz, damit die WebSocket-Verbindung vollständig aufgebaut werden kann
+      await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (wsError) {
+      console.error("[Websocket] Fehler beim Neuaufbau der WebSocket-Verbindung:", wsError);
+    }
+    
+    // 5. Sende sofort ein Keep-Alive-Signal, um den Online-Status zu aktualisieren
+    try {
+      await apolloClient.query({
+        query: gql`
+          query KeepAlive {
+            __typename
+          }
+        `,
+        fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+      });
+      console.info("[Websocket] Sofortiges Keep-Alive nach Verbindungsaufbau gesendet");
+    } catch (keepAliveError) {
+      console.error("[Websocket] Fehler beim Senden des sofortigen Keep-Alive:", keepAliveError);
+    }
+    
+    // 6. Starte ein neues Keep-Alive-Intervall für zukünftige Pings
+    startWebSocketKeepAlive();
+    
+    // 7. Aktualisiere den Apollo-Store, um sicherzustellen, dass alle Abonnements wieder aktiv sind
+    await apolloClient.resetStore();
+    
+    return true;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("[Websocket] Allgemeiner Fehler bei der Verbindungswiederherstellung:", error);
+    throw error;
+  }
+}
