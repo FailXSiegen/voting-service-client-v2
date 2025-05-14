@@ -210,30 +210,22 @@ activePollEventUserQuery.onResult(({ data }) => {
           const serverVoteCycle = data.userVoteCycle.voteCycle || 0;
           const maxVotes = data.userVoteCycle.maxVotes || eventUser.value.voteAmount;
           
-          console.log(`[DEBUG:SERVER] Daten vom Server: voteCycle=${serverVoteCycle}, maxVotes=${maxVotes}, voteAmount=${eventUser.value.voteAmount}`);
-          
-          // VOR DEM SETZEN: Aktuelle Werte anzeigen
-          console.log(`[DEBUG:COUNTER] Vor Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
-          
+                    
           // Die verwendeten Stimmen direkt übernehmen
           votingProcess.usedVotesCount.value = serverVoteCycle;
           
           // Stelle sicher, dass der Zähler korrekt initialisiert wird
           voteCounter.value = serverVoteCycle + 1;
           
-          // NACH DEM SETZEN: Neue Werte anzeigen
-          console.log(`[DEBUG:COUNTER] Nach Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
           
           // Vergleichen mit dem Wert aus dem localStorage
           const storedCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
-          console.log(`[DEBUG:COUNTER] Wert aus localStorage: ${storedCounter}`);
           
           // Persistieren, damit future Loads konsistent sind
           pollStatePersistence.upsertPollState(poll.value.id, voteCounter.value, serverVoteCycle, props.event.id);
           
           // Nach dem Speichern: Nochmals den gespeicherten Wert prüfen
           const newStoredCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
-          console.log(`[DEBUG:COUNTER] Neuer Wert in localStorage: ${newStoredCounter}`);
           
           // Prüfen, ob der Wert korrekt gespeichert wurde
           if (newStoredCounter !== voteCounter.value) {
@@ -267,17 +259,10 @@ activePollEventUserQuery.onResult(({ data }) => {
             pollState.value = "voted";
           }
         } else {
-          // Fallback zum lokalen Storage, wenn der Server keine Daten zurückgibt
-          console.log(`[DEBUG:FALLBACK] Server hat keine Daten zurückgegeben, verwende lokalen Storage`);
           
           // Lese vorhandene Werte aus dem lokalen Storage
           const storedCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
           const storedUsedVotes = pollStatePersistence.getUsedVotes(poll.value.id, props.event.id);
-          
-          console.log(`[DEBUG:FALLBACK] Werte aus localStorage: counter=${storedCounter}, usedVotes=${storedUsedVotes}`);
-          
-          // VOR DEM SETZEN: Aktuelle Werte anzeigen
-          console.log(`[DEBUG:COUNTER] Vor Fallback-Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
           
           // Stelle sicher, dass der Zähler korrekt initialisiert wird
           voteCounter.value = storedCounter;
@@ -286,8 +271,6 @@ activePollEventUserQuery.onResult(({ data }) => {
           // Dies ist wichtig, um nach einem Reload den korrekten Stimmenzähler wiederherzustellen
           votingProcess.usedVotesCount.value = storedUsedVotes;
           
-          // NACH DEM SETZEN: Neue Werte anzeigen
-          console.log(`[DEBUG:COUNTER] Nach Fallback-Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
           
           // Prüfen, ob die Werte plausibel sind
           if (voteCounter.value > 99000) {
