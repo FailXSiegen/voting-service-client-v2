@@ -430,11 +430,23 @@ export function useVotingProcess(eventUser, event) {
         for (let batchStart = 0; batchStart < remainingVotesToProcess; batchStart += BATCH_SIZE) {
           // SICHERHEITSCHECK: Prüfe VOR JEDEM BATCH, ob der Poll noch offen ist
           if (poll.value && poll.value.closed) {
-            console.warn("[DEBUG:VOTING] Poll wurde während der Batch-Verarbeitung geschlossen. Verarbeitung wird abgebrochen.");
-            // UI-Sperren zurücksetzen
-            releaseUILocks();
-            currentlyProcessingBatch.value = false;
+            console.warn("[DEBUG:VOTING] Poll wurde während der Batch-Verarbeitung geschlossen. Verarbeitung wird SOFORT abgebrochen.");
+            
+            // KRITISCHE REIHENFOLGE: Erst die Browser-Session deaktivieren, um Callbacks zu verhindern
             deactivateVotingSession();
+            
+            // Dann currentlyProcessingBatch zurücksetzen, um weitere Event-Verarbeitung zu blockieren
+            currentlyProcessingBatch.value = false;
+            
+            // Dann erst die UI-Sperren aufheben
+            releaseUILocks();
+            
+            // Explizit auf false setzen, um zu erzwingen, dass keine weiteren Verarbeitungen stattfinden
+            isProcessingVotes.value = false;
+            pollFormSubmitting.value = false;
+            votingFullyCompleted.value = false;
+            
+            // WICHTIG: Wir kehren sofort zurück, ohne weitere Operationen auszuführen
             return false;
           }
 
@@ -696,10 +708,23 @@ export function useVotingProcess(eventUser, event) {
     // Diese Prüfung ist besonders wichtig, wenn der Poll während der Abstimmung geschlossen wird
     if (poll.value && poll.value.closed) {
       console.warn("[DEBUG:VOTING] Poll ist geschlossen. Stimmabgabe wird abgebrochen.");
-      // UI-Sperren zurücksetzen, falls verfügbar
+      
+      // KRITISCH: Wir müssen die Browser-Session SOFORT deaktivieren
+      // um zu verhindern, dass weitere Events verarbeitet werden
+      deactivateVotingSession();
+      
+      // KRITISCH: Zuerst currentlyProcessingBatch zurücksetzen, um weitere Events zu blockieren
+      currentlyProcessingBatch.value = false;
+      
+      // Alle UI-Sperren direkt zurücksetzen
+      isProcessingVotes.value = false;
+      pollFormSubmitting.value = false;
+      
+      // Danach nur zur Sicherheit die explizite Methode aufrufen, falls vorhanden
       if (typeof releaseUILocks === 'function') {
         releaseUILocks();
       }
+      
       return false;
     }
 

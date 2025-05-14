@@ -87,6 +87,7 @@ import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/sub
 import { POLL_LIFE_CYCLE_SUBSCRIPTION } from "@/modules/eventUser/graphql/subscription/poll-life-cycle";
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
+import { apolloClient } from "@/apollo-client";
 import { POLL_ANSWER_LIVE_CYCLE } from "@/modules/organizer/graphql/subscription/poll-answer-life-cycle";
 import { useI18n } from "vue-i18n";
 
@@ -425,35 +426,146 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
       onOpen: () => (highlightStatusChange.value = true),
       onClose: () => (highlightStatusChange.value = false),
     });
-    
-    // Zusätzlich ein Konsoleneintrag für Debugging
-    console.log("[DEBUG:VOTING] Benutzerrechte aktualisiert:", {
-      previousVoteAmount,
-      newVoteAmount: voteAmount,
-      previousAllowToVote,
-      newAllowToVote: allowToVote
-    });
   }
 });
+
+// Zustandsvariable für Cycle-Events, um überflüssige Verarbeitung zu vermeiden
+const isProcessingLifeCycleEvent = ref(false);
+
+// Globale Zustandsvariable, die anzeigt, dass der Poll geschlossen wurde und keine weiteren Events verarbeitet werden sollen
+const pollClosedEventReceived = ref(false);
 
 const pollLifeCycleSubscription = useSubscription(
   POLL_LIFE_CYCLE_SUBSCRIPTION,
   { eventId: props.event.id },
 );
 pollLifeCycleSubscription.onResult(async ({ data }) => {
-  // Kein komplizierter UI-Status mehr nötig - wir isolieren jetzt auf Event-Ebene, 
-  // indem jeder Browser nur seine eigenen Events verarbeitet
-  // Das vereinfacht die Logik erheblich
-  
+  // Basis-Prüfung: Sind überhaupt Daten vorhanden?
   if (!data?.pollLifeCycle) {
     return;
   }
   
+  // Bei neuer Abstimmung sofort alle Flags zurücksetzen
+  if (data.pollLifeCycle.state === "new") {
+    console.warn("[DEBUG:VOTING] Life-Cycle-Event mit status='new' erhalten");
+    
+    // Alle Status-Flags zurücksetzen
+    pollClosedEventReceived.value = false;
+    window._newPollActive = true;
+    
+    // Globale Closure-Flags zurücksetzen
+    if (window._isHandlingPollClosure) {
+      window._isHandlingPollClosure = false;
+      delete window._currentClosureId;
+    }
+  }
+  
+  // KRITISCH: Wenn der Poll bereits als geschlossen markiert wurde, ignorieren wir alle weiteren Events AUSSER "new"
+  // Das "new" Event wurde bereits oben verarbeitet, deshalb ist diese Prüfung jetzt sicher
+  if (pollClosedEventReceived.value) {
+    console.warn("[DEBUG:VOTING] Poll ist bereits als geschlossen markiert, ignoriere weiteres Life-Cycle-Event");
+    return;
+  }
+  
+  // Wenn Poll-Closed-Event empfangen wird
+  if (data.pollLifeCycle.state === "closed") {
+    console.warn("[DEBUG:VOTING] Life-Cycle-Event mit status='closed' erhalten");
+    pollClosedEventReceived.value = true;
+    
+    // PollModal sofort schließen
+    if (pollModal.value) {
+      try {
+        pollModal.value.hideModal();
+        
+        // UI-Locks freigeben
+        votingProcess.releaseUILocks();
+        votingProcess.isProcessingVotes.value = false;
+        votingProcess.pollFormSubmitting.value = false;
+        votingProcess.currentlyProcessingBatch.value = false;
+        
+        // Poll-Status auf "closed" setzen
+        pollState.value = "closed";
+      } catch(e) {
+        console.error('[DEBUG:VOTING] Fehler beim Schließen des PollModals:', e);
+      }
+    }
+    
+    // SOFORT mit dem Laden der Ergebnisse beginnen, um Zeit zu sparen
+    // Diese Sofortaktion initiiert das Laden parallel zu allem anderen
+    try {
+      // Sofort die Ergebnisse neu laden, ohne auf die weitere Event-Verarbeitung zu warten      
+      apolloClient.query({
+        query: POLLS_RESULTS,
+        variables: { eventId: props.event.id, page: 0, pageSize: pageSize.value },
+        fetchPolicy: 'network-only',
+        errorPolicy: 'all'
+      }).then(result => {
+        if (result.data?.pollResult && result.data.pollResult.length > 0) {
+          // Ergebnisse direkt ins pollResults setzen
+          pollResults.value = [...result.data.pollResult];
+          
+          // Speziell das letzte/neueste Ergebnis als lastPollResult setzen
+          const sortedResults = [...result.data.pollResult].sort(
+            (a, b) => b.createDatetime - a.createDatetime
+          );
+          lastPollResult.value = sortedResults[0];
+          
+          // DIREKT HIER das Ergebnis-Modal anzeigen, sobald wir Ergebnisse haben
+          // Dies ist der schnellste Weg, Ergebnisse anzuzeigen
+          try {
+            if (resultModal.value && !resultModal.value.isVisible?.value) {
+              // Warte kurz, um sicherzustellen, dass das PollModal geschlossen ist
+              setTimeout(() => {
+                resultModal.value.showModal();
+              }, 300);
+            }
+          } catch (modalError) {
+            console.error('[DEBUG:VOTING] Fehler beim direkten Anzeigen des ResultModals:', modalError);
+          }
+        }
+      }).catch(e => {
+        console.error('[DEBUG:VOTING] SOFORTAKTION: Fehler beim sofortigen Laden der Ergebnisse:', e);
+      });
+    } catch (e) {
+      console.error('[DEBUG:VOTING] SOFORTAKTION: Fehler bei sofortiger Ergebnisabfrage:', e);
+    }
+  }
+  
+  // KRITISCHE SCHUTZMAßNAHME: Vermeide parallele Verarbeitung desselben Events
+  // Falls wir bereits ein Event verarbeiten, warten wir kurz
+  if (isProcessingLifeCycleEvent.value) {
+    console.warn("[DEBUG:VOTING] Es wird bereits ein Life-Cycle-Event verarbeitet, warte kurz...");
+    
+    // Warte eine kurze Zeit und prüfe dann erneut
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Wenn immer noch verarbeitet wird, ignoriere dieses Event
+    if (isProcessingLifeCycleEvent.value) {
+      console.warn("[DEBUG:VOTING] Life-Cycle-Event wird immer noch verarbeitet, ignoriere dieses Event");
+      return;
+    }
+  }
+  
+  // Markiere, dass wir jetzt ein Event verarbeiten
+  isProcessingLifeCycleEvent.value = true;
+  
+  try {
+  
   // OLD POLL: Speichere alte Poll-ID für Lösch-Operationen
   const oldPollId = poll.value?.id;
   
+  // KRITISCHE INFORMATION: Ist dies ein "new" Event?
+  const isNewPoll = data.pollLifeCycle.state === "new";
+  
+  // Wende die Daten an
   poll.value = data.pollLifeCycle.poll;
   pollState.value = data.pollLifeCycle.state;
+  
+  // Wenn dies ein neuer Poll ist, das _newPollReceived Flag setzen
+  // KRITISCH: Dies muss direkt nach dem Setzen des Zustands erfolgen
+  if (isNewPoll) {
+    window._newPollReceived = true;
+  }
   
   // KRITISCH: Wenn wir ein pollLifeCycle-Event erhalten und die Poll-ID hat sich geändert,
   // müssen wir alle alten Formular-Daten löschen
@@ -469,10 +581,68 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
   }
 
   if (pollState.value === "new") {
+
+    
+    // Prüfe modal-Referenz und bootstrap-Modal-Status
+    if (resultModal.value) {
+      console.log('ResultModal.isVisible:', resultModal.value.isVisible?.value);
+      
+      // Prüfe DOM-Status des Modals direkt
+      if (resultModal.value.modal && resultModal.value.modal.value) {
+        const modalElement = resultModal.value.modal.value
+      }
+      
+      // Prüfe Bootstrap-Modal-Backdrops
+      const backdrops = document.getElementsByClassName('modal-backdrop');
+    }
+        
+    // SOFORTAKTION: ResultModal definitiv schließen, bevor alles andere getan wird
+    if (resultModal.value) {
+      try {        
+        // Globales Flag setzen und ResultModal schließen
+        window._newPollActive = true;
+        resultModal.value.hideModal();
+        
+        // Alle Status-Flags zurücksetzen
+        pollClosedEventReceived.value = false;
+        
+        // Globale Closure-Flags zurücksetzen
+        if (window._isHandlingPollClosure) {
+          window._isHandlingPollClosure = false;
+          delete window._currentClosureId;
+        }
+        
+        // Nach einer Sekunde nochmal prüfen, ob das Modal wirklich geschlossen ist
+        setTimeout(() => {
+          if (resultModal.value && resultModal.value.isVisible && resultModal.value.isVisible.value) {
+            resultModal.value.hideModal();
+            
+            // Native Bootstrap Modal API verwenden
+            try {
+              const modalElement = resultModal.value.modal.value;
+              const instance = Modal.getInstance(modalElement);
+              if (instance) {
+                instance.hide();
+              }
+            } catch (domError) {
+              console.error('[DEBUG:VOTING] Fehler beim Schließen des Modals:', domError);
+            }
+          }
+        }, 1000);
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Schließen des ResultModals:', e);
+      }
+    }
+    
     // Vollständiges Zurücksetzen aller Zähler und Status-Werte
     votingProcess.resetVoteCounts();
     // Auch die aktuelle Abstimmungs-ID zurücksetzen
     currentPollSubmissionId.value = null;
+    
+    // Flag nach angemessener Zeit zurücksetzen
+    setTimeout(() => {
+      window._newPollActive = false;
+    }, 2000); // 2 Sekunden sind ausreichend
     
     // Setze den Zähler auf 1 für einen frischen Start
     voteCounter.value = 1;
@@ -481,8 +651,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
     if (poll.value && poll.value.id && props.event && props.event.id) {
       pollStatePersistence.resetVoteState(poll.value.id, props.event.id);
     }
-    
-    resultModal.value?.hideModal();
 
     if (!poll.value) {
       console.warn("Missing current poll. Try to refetch.");
@@ -562,9 +730,32 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
             setTimeout(() => {
               // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
               if (maxVotes > 0 && serverVoteCycle < maxVotes) {
-                // Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
+                // VERSTÄRKTE AKTIONEN: Vor dem Öffnen des PollModals
+                // 1. Stelle absolut sicher, dass ResultModal geschlossen ist
+                if (resultModal.value) {
+                  try {
+                    resultModal.value.hideModal();
+                  } catch (modalError) {
+                    console.error('[DEBUG:VOTING] Fehler beim Schließen des ResultModals:', modalError);
+                  }
+                }
+                
+                // 2. Poll-closed-Flag explizit zurücksetzen
+                pollClosedEventReceived.value = false;
+                
+                // 3. Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
                 pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
-                pollModal.value?.showModal();
+                
+                // 4. Eine Verzögerung einbauen um sicherzustellen dass ResultModal wirklich geschlossen ist
+                setTimeout(() => {
+                  
+                  // Nach erfolgreichem Öffnen des PollModals ist der Poll nicht mehr "neu"
+                  if (window._newPollActive) {
+                    window._newPollActive = false;
+                  }
+                  
+                  pollModal.value?.showModal();
+                }, 250);
               } else {
                 pollState.value = "voted";
               }
@@ -577,9 +768,31 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
               
               // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
               if (eventUser.value?.voteAmount > 0 && votingProcess.usedVotesCount.value < eventUser.value.voteAmount) {
-                // Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
+                // VERSTÄRKTE AKTIONEN: Vor dem Öffnen des PollModals
+                // 1. Stelle absolut sicher, dass ResultModal geschlossen ist
+                if (resultModal.value) {
+                  try {
+                    resultModal.value.hideModal();
+                  } catch (modalError) {
+                    console.error('[DEBUG:VOTING] Fehler beim Schließen des ResultModals:', modalError);
+                  }
+                }
+                
+                // 2. Poll-closed-Flag explizit zurücksetzen
+                pollClosedEventReceived.value = false;
+                
+                // 3. Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
                 pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
-                pollModal.value?.showModal();
+                
+                // 4. Eine Verzögerung einbauen um sicherzustellen dass ResultModal wirklich geschlossen ist
+                setTimeout(() => {                  
+                  // Nach erfolgreichem Öffnen des PollModals ist der Poll nicht mehr "neu"
+                  if (window._newPollActive) {
+                    window._newPollActive = false;
+                  }
+                  
+                  pollModal.value?.showModal();
+                }, 250);
               } else {
                 pollState.value = "voted";
               }
@@ -594,9 +807,31 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
           
           // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
           if (eventUser.value?.voteAmount > 0 && votingProcess.usedVotesCount.value < eventUser.value.voteAmount) {
-            // Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
+            // VERSTÄRKTE AKTIONEN: Vor dem Öffnen des PollModals
+            // 1. Stelle absolut sicher, dass ResultModal geschlossen ist
+            if (resultModal.value) {
+              try {
+                resultModal.value.hideModal();
+              } catch (modalError) {
+                console.error('[DEBUG:VOTING] Fehler beim Schließen des ResultModals:', modalError);
+              }
+            }
+            
+            // 2. Poll-closed-Flag explizit zurücksetzen
+            pollClosedEventReceived.value = false;
+            
+            // 3. Vor dem Öffnen des Modals sicherstellen, dass die Form korrekt zurückgesetzt wird
             pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
-            pollModal.value?.showModal();
+            
+            // 4. Eine Verzögerung einbauen um sicherzustellen dass ResultModal wirklich geschlossen ist
+            setTimeout(() => {              
+              // Nach erfolgreichem Öffnen des PollModals ist der Poll nicht mehr "neu"
+              if (window._newPollActive) {
+                window._newPollActive = false;
+              }
+              
+              pollModal.value?.showModal();
+            }, 250);
           } else {
             pollState.value = "voted";
           }
@@ -604,43 +839,398 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       }
     }
   } else if (pollState.value === "closed") {
-    // Sofort alle laufenden Abstimmungsvorgänge abbrechen
-    if (votingProcess.isActiveVotingSession() || 
-        votingProcess.isProcessingVotes.value || 
-        votingProcess.pollFormSubmitting.value || 
-        votingProcess.currentlyProcessingBatch.value) {
-      
-      // Markiere aktive Voting-Sessions als beendet
-      votingProcess.deactivateVotingSession();
-      
-      // Setze alle UI-Sperren zurück
-      votingProcess.releaseUILocks();
-      votingProcess.currentlyProcessingBatch.value = false;
-      
-      // Log-Ausgabe
-      console.warn("[DEBUG:VOTING] Voting-Prozess wegen Poll-Schließung abgebrochen");
-      
-      // Toast-Nachricht für den Benutzer
-      toast(t("view.polls.info.pollClosed"), { type: "info" });
+    // KRITISCH: Wenn wir bereits markiert haben, dass der Poll geschlossen ist, nichts weiter tun
+    if (pollClosedEventReceived.value) {
+      console.warn("[DEBUG:VOTING] Poll wurde bereits als geschlossen markiert, ignoriere weiteres Event");
+      return;
     }
     
-    // Modal schließen und Ergebnisse anzeigen
-    pollModal.value?.hideModal();
-    resultModal.value?.showModal();
-    showMoreEnabled.value = true;
-    page.value = 0;
-    pollResults.value = [];
-    pollResultsQuery.refetch();
+    // Markiere global, dass der Poll geschlossen wurde, um weitere Event-Verarbeitung zu blockieren
+    pollClosedEventReceived.value = true;
+    
+    // Globale statische Flag für diesen Prozess, um parallele Closure-Behandlungen zu verhindern
+    // Dies ist wichtig, weil ref() hier bei mehrfachen Aufrufen immer neue Instances erstellt
+    // VERBESSERT: Wir setzen die Flag, lassen aber dennoch die kritischen Reset-Operationen durchlaufen
+    const isAlreadyHandlingClosure = !!window._isHandlingPollClosure;
+    
+    // Die Flag immer setzen, damit keine neuen Instanzen starten
+    window._isHandlingPollClosure = true;
+    
+    // Neuer Ansatz: Wir führen IMMER kritische Sicherheitsmaßnahmen durch,
+    // unabhängig davon, ob bereits eine Instanz läuft. Nur komplexe Operationen werden
+    // nur einmal ausgeführt.
+    
+    // KRITISCHE SOFORTAKTIONEN - IMMER AUSFÜHREN!
+    
+    // 1. Alle UI-Sperren sofort freigeben
+    votingProcess.releaseUILocks();
+    votingProcess.isProcessingVotes.value = false;
+    votingProcess.pollFormSubmitting.value = false;
+    votingProcess.currentlyProcessingBatch.value = false;
+    votingProcess.deactivateVotingSession();
+    
+    // 2. Poll-Modal GARANTIERT sofort schließen
+    if (pollModal.value) {
+      pollModal.value.hideModal();
+      
+      // Sicherheitsabfrage: Bootstrap-Modal direkt ansprechen falls vorhanden
+      try {
+        if (pollModal.value.modal && pollModal.value.modal.value) {
+          const modalElement = pollModal.value.modal.value;
+          
+          // Versuche über die native Bootstrap-Funktion
+          if (typeof Modal !== 'undefined' && Modal.getInstance) {
+            const instance = Modal.getInstance(modalElement);
+            if (instance) {
+              instance.hide();
+            }
+          }
+          
+          // Native Bootstrap 5 API verwenden
+          
+          // Direkter Zugriff auf die Bootstrap Modal-Instanz
+          const instance = Modal.getInstance(modalElement);
+          if (instance) {
+            instance.hide();
+          }
+        }
+      } catch (e) {
+        console.error("[DEBUG:VOTING] Fehler beim direkten Modal-Zugriff:", e);
+      }
+    }
+    
+    // 3. Status als geschlossen markieren
+    pollState.value = "closed";
+    
+    // Wenn bereits eine vollständige Verarbeitung läuft, hier zurückkehren
+    if (isAlreadyHandlingClosure) {
+      console.warn("[DEBUG:VOTING] Poll-Schließung wird bereits vollständig verarbeitet");
+      return;
+    }
+    
+    try {
+      // Alle laufenden Abstimmungsvorgänge sofort abbrechen, unabhängig vom Modalzustand
+      console.warn("[DEBUG:VOTING] Poll geschlossen, breche alle laufenden Prozesse ab");
+      
+      // HARTE RESET-SEQUENZ: Alle Flags und Zustände in einer festgelegten Reihenfolge zurücksetzen
+      
+      // 1. Zuerst alle aktiven Sessions deaktivieren
+      votingProcess.deactivateVotingSession();
+      
+      // 2. Dann die Batch-Verarbeitung stoppen, damit keine weiteren Events mehr verarbeitet werden
+      votingProcess.currentlyProcessingBatch.value = false;
+      
+      // 3. Dann Zähler zurücksetzen, um wiederholte Event-Verarbeitung zu verhindern
+      pollUserVotedCount.value = 0;
+      currentPollSubmissionId.value = null;
+      
+      // 4. Dann UI-Sperren freigeben
+      votingProcess.releaseUILocks();
+      votingProcess.isProcessingVotes.value = false;
+      votingProcess.pollFormSubmitting.value = false;
+      
+      // 5. Explizit das Poll-Modal schließen
+      if (pollModal.value) {
+        // Zuerst alle Flags zurücksetzen
+        pollModal.value.isSubmitting = false;
+        
+        if (pollModal.value.pollForm) {
+          pollModal.value.pollForm.isSubmitting = false;
+        }
+        
+        // Dann das Modal schließen
+        pollModal.value.hideModal();
+      }
+      
+      // Benachrichtigung nur anzeigen, wenn tatsächlich eine Abstimmung im Gange war
+      if (votingProcess.isActiveVotingSession() || votingProcess.isProcessingVotes.value || 
+          votingProcess.pollFormSubmitting.value || votingProcess.currentlyProcessingBatch.value) {
+        toast(t("view.polls.info.pollClosed"), { type: "info" });
+      }
+      
+      // 6. Ergebnisanzeige vorbereiten
+      showMoreEnabled.value = true;
+      page.value = 0;
+      pollResults.value = [];
+      
+      // Status sofort als geschlossen markieren, um weitere Verarbeitung zu verhindern
+      pollState.value = "closed";
+      
+      // 7. Wir laden die Ergebnisse mit einer kontrollierten Verzögerung, 
+      // um sicherzustellen, dass die UI-Updates abgeschlossen sind
+      
+      // Wartezeit bevor wir Ergebnisse laden - längere Zeit für stabilere UI
+      const RESULTS_DELAY = 500;
+      
+      // WICHTIG: Wir verwenden eine eindeutige ID für diesen Vorgang
+      // um sicherzustellen, dass nur ein einziger Prozess die Ergebnisse anzeigt
+      const closureId = Date.now();
+      window._currentClosureId = closureId;
+      
+      setTimeout(async () => {
+        try {
+          // Prüfe, ob wir noch der aktuelle Closure-Prozess sind
+          if (window._currentClosureId !== closureId) {
+            console.warn("[DEBUG:VOTING] Ein neuerer Closure-Prozess wurde gestartet, breche ab");
+            window._isHandlingPollClosure = false;
+            return;
+          }
+                    
+          // SOFORT beim Poll-Schließen nochmals alle PollModals schließen
+          // Diese Sicherheitsmaßnahme wird IMMER ausgeführt
+          if (pollModal.value) {
+            try {
+              // Nochmal alle UI-Locks aufheben
+              votingProcess.releaseUILocks();
+              votingProcess.isProcessingVotes.value = false;
+              votingProcess.pollFormSubmitting.value = false;
+              
+              // Dann das Modal definitiv schließen
+              pollModal.value.hideModal();
+              console.warn("[DEBUG:VOTING] PollModal vor Ergebnisanzeige geschlossen");
+            } catch (e) {
+              console.error('[DEBUG:VOTING] Fehler beim erneuten Schließen des PollModals:', e);
+            }
+          }
+          
+          // Ergebnisse aggressiv und mit hoher Priorität neu laden
+          try {            
+            // Zurücksetzen des Zustands für eine frische Abfrage
+            pollResults.value = [];
+            page.value = 0;
+            
+            // Zuerst ein hartes Refetch durchführen, das den Apollo-Cache umgeht
+            const networkOnlyFetch = await apolloClient.query({
+              query: POLLS_RESULTS,
+              variables: { eventId: props.event.id, page: 0, pageSize: pageSize.value },
+              fetchPolicy: 'network-only', // Immer vom Server laden
+              errorPolicy: 'all'
+            });
+            
+            if (networkOnlyFetch.data?.pollResult) {
+              // Daten direkt ins pollResults setzen
+              pollResults.value = [...networkOnlyFetch.data.pollResult];
+              
+              // Speziell das letzte/neueste Ergebnis als lastPollResult setzen
+              if (networkOnlyFetch.data.pollResult.length > 0) {
+                const sortedResults = [...networkOnlyFetch.data.pollResult].sort(
+                  (a, b) => b.createDatetime - a.createDatetime
+                );
+                lastPollResult.value = sortedResults[0];
+              }
+            } else {
+              console.warn('[DEBUG:VOTING] Direkte Abfrage lieferte keine Ergebnisse');
+            }
+            
+            // Zusätzlich den normalen Refetch durchführen, um Apollo upzudaten
+            await pollResultsQuery.refetch();
+          } catch (loadError) {
+            console.error('[DEBUG:VOTING] Fehler beim Laden der Ergebnisse:', loadError);
+            
+            // Fallback: Versuche nochmal den normalen Refetch
+            try {
+              await pollResultsQuery.refetch();
+            } catch (e) {
+              console.error('[DEBUG:VOTING] Auch Fallback-Refetch fehlgeschlagen:', e);
+            }
+          }
+          
+          // Kurze Verzögerung, um sicherzustellen, dass alle UI-Updates abgeschlossen sind
+          setTimeout(() => {
+            try {
+              // Prüfe erneut, ob wir noch der aktuelle Closure-Prozess sind
+              if (window._currentClosureId !== closureId) {
+                console.warn("[DEBUG:VOTING] Ein neuerer Closure-Prozess wurde gestartet, breche Modal-Anzeige ab");
+                window._isHandlingPollClosure = false;
+                return;
+              }
+              
+              // Poll ist garantiert geschlossen
+              pollState.value = "closed";
+              
+              // GARANTIERTE SOFORTAKTION: Poll immer direkt im Objekt als geschlossen markieren,
+              // damit reactive Watches ausgelöst werden
+              if (poll.value) {
+                poll.value.closed = true;
+              }
+              
+              // SICHERHEIT: Zuerst aktives PollModal schließen, falls es noch offen ist
+              if (pollModal.value) {
+                try {
+                  console.warn('[DEBUG:VOTING] Schließe PollModal definitiv vor Ergebnisanzeige');
+                  pollModal.value.hideModal();
+                } catch (e) {
+                  console.error('[DEBUG:VOTING] Fehler beim Schließen des PollModals vor Ergebnisanzeige:', e);
+                }
+              }
+              
+              // Verzögerung für UI-Synchronisation
+              setTimeout(() => {
+                try {
+                  // WICHTIG: Prüfen, ob lastPollResult tatsächlich gesetzt wurde
+                  if (!lastPollResult.value && pollResults.value.length > 0) {
+                    // Sicherheitscode: Wenn lastPollResult noch nicht gesetzt wurde, aber Ergebnisse vorhanden sind
+                    const sortedResults = [...pollResults.value].sort(
+                      (a, b) => b.createDatetime - a.createDatetime
+                    );
+                    lastPollResult.value = sortedResults[0];
+                  }
+                
+                  // Nochmals explizit prüfen, ob wir ein Ergebnis zum Anzeigen haben
+                  if (lastPollResult.value) {
+                    
+                    // VEREINFACHT: Direkter Zugriff auf ResultModal ohne komplexe Prüfungen
+                    if (resultModal.value) {                      
+                      // Besser: Prüfen, ob wir eine normale update-Methode haben
+                      if (typeof resultModal.value.updatePollResult === 'function') {
+                        resultModal.value.updatePollResult(lastPollResult.value);
+                      }                       
+                      // Dann das Modal anzeigen
+                      resultModal.value.showModal();
+                    } else {
+                      console.warn('[DEBUG:VOTING] ResultModal ist nicht verfügbar');
+                    }
+                  } else {
+                    console.warn('[DEBUG:VOTING] Kein Ergebnis zum Anzeigen verfügbar!');
+                  }
+                } catch (e) {
+                  console.error('[DEBUG:VOTING] Fehler beim Anzeigen des ResultModals:', e);
+                } finally {
+                  // Closure-Handling als abgeschlossen markieren
+                  window._isHandlingPollClosure = false;
+                }
+              }, 200); // Ausreichende Verzögerung für UI-Updates
+            } catch (e) {
+              console.error('[DEBUG:VOTING] Fehler bei ResultModal-Anzeige:', e);
+              window._isHandlingPollClosure = false;
+            }
+          }, 300); // Kurze Verzögerung für stabile UI-Aktualisierung
+        } catch (error) {
+          console.error("Fehler beim Laden der Ergebnisse:", error);
+          window._isHandlingPollClosure = false;
+        }
+      }, RESULTS_DELAY); // Längere Verzögerung für stabile UI-Aktualisierung
+    } catch (error) {
+      console.error("Fehler bei der Verarbeitung der Poll-Schließung:", error);
+      window._isHandlingPollClosure = false;
+    }
+  }
+  } finally {
+    // Stelle sicher, dass isProcessingLifeCycleEvent immer zurückgesetzt wird
+    isProcessingLifeCycleEvent.value = false;
+    
+    // Stelle sicher, dass Flags zurückgesetzt werden
+    setTimeout(() => {
+      window._newPollActive = false;
+    }, 5000);
   }
 });
+
+// Die Zustandsvariable ist bereits oben definiert
 
 const pollAnswerLifeCycleSubscription = useSubscription(
   POLL_ANSWER_LIVE_CYCLE,
   { eventId: props.event.id }
 );
 pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
-  // Prüfe, ob das Event für unser Event ist
+  // Sofortige Checks zur Verhinderung unnötiger Verarbeitung
+  // 1. Prüfe, ob das Event gültige Daten enthält
   if (!data?.pollAnswerLifeCycle) {
+    return;
+  }
+  
+  // Prüfe, ob ein neuer Poll aktiv ist
+  if (window._newPollActive) {
+    console.warn("[DEBUG:VOTING] Neuer Poll aktiv, ignoriere alte Answer-Events");
+    
+    // Flags zurücksetzen
+    pollClosedEventReceived.value = false;
+    
+    // Freigabe ALLER UI-Sperren als Schutzmaßnahme
+    votingProcess.releaseUILocks();
+    votingProcess.currentlyProcessingBatch.value = false;
+    votingProcess.isProcessingVotes.value = false;
+    votingProcess.pollFormSubmitting.value = false;
+    
+    // Deaktiviere ALLE aktiven Voting-Sessions
+    votingProcess.deactivateVotingSession();
+    
+    // Globale Flags auch zurücksetzen
+    currentPollSubmissionId.value = null;
+    pollUserVotedCount.value = 0;
+    
+    // NEUHEIT: Poll-State explizit auf "new" setzen
+    if (poll.value && poll.value.id) {
+      pollState.value = "new";
+    }
+    
+    // Beende die Verarbeitung sofort, um für den neuen Poll bereit zu sein
+    return;
+  }
+  
+  // 2. KRITISCHE FLAG-PRÜFUNG:
+  // Wenn wir bereits ein closed-Event erhalten haben, ignorieren wir alle weiteren Events für diesen Poll
+  if (pollClosedEventReceived.value || pollState.value === "closed") {
+    console.warn("[DEBUG:VOTING] Poll wurde bereits geschlossen, ignoriere weiteres Answer-Event");
+    
+    // Freigabe ALLER UI-Sperren als Schutzmaßnahme
+    votingProcess.releaseUILocks();
+    votingProcess.currentlyProcessingBatch.value = false;
+    votingProcess.isProcessingVotes.value = false;
+    votingProcess.pollFormSubmitting.value = false;
+    
+    // Deaktiviere ALLE aktiven Voting-Sessions
+    votingProcess.deactivateVotingSession();
+    
+    // WICHTIG: Auch die globalen Flags zurücksetzen
+    currentPollSubmissionId.value = null;
+    pollUserVotedCount.value = 0;
+    
+    // Setze das Poll-Modal zurück und schließe es definitiv
+    if (pollModal.value) {
+      pollModal.value.isSubmitting = false;
+      if (pollModal.value.pollForm) {
+        pollModal.value.pollForm.isSubmitting = false;
+      }
+      pollModal.value.hideModal();
+    }
+        
+    // Beende die Verarbeitung sofort ohne weitere Aktionen
+    return;
+  }
+  
+  // 3. KRITISCHE POLL-ZUSTANDS-PRÜFUNG: 
+  // Prüfe explizit, ob der Poll bereits geschlossen ist
+  if (poll.value && poll.value.closed) {
+    console.warn("[DEBUG:VOTING] Poll ist geschlossen, aber Subscription-Event empfangen. Setze closed-Flag und ignoriere Event.");
+    
+    // Markiere explizit, dass wir ein closed-Event erhalten haben, um weitere Verarbeitung zu blockieren
+    pollClosedEventReceived.value = true;
+    pollState.value = "closed";
+    
+    // SOFORT ALLE UI-SPERREN AUFHEBEN, um UI-Blockaden zu vermeiden
+    votingProcess.releaseUILocks();
+    votingProcess.currentlyProcessingBatch.value = false;
+    votingProcess.isProcessingVotes.value = false;
+    votingProcess.pollFormSubmitting.value = false;
+    
+    // WICHTIG: Auch die globalen Flags zurücksetzen
+    currentPollSubmissionId.value = null;
+    pollUserVotedCount.value = 0;
+    
+    // Deaktiviere ALLE aktiven Voting-Sessions
+    votingProcess.deactivateVotingSession();
+    
+    // Poll-Modal zurücksetzen und definitiv schließen
+    if (pollModal.value) {
+      pollModal.value.isSubmitting = false;
+      if (pollModal.value.pollForm) {
+        pollModal.value.pollForm.isSubmitting = false;
+      }
+      pollModal.value.hideModal();
+    }
+    
+    // Beende die Verarbeitung sofort
     return;
   }
   

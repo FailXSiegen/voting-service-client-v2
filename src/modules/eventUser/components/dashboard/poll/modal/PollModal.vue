@@ -108,6 +108,14 @@ const votingProcess = useVotingProcess(ref(), ref());
 // Einfacher lokaler State
 const isSubmitting = ref(false);
 
+// Flag, das anzeigt, ob das Modal sichtbar ist
+let isVisible = false;
+
+// Getter-Funktion, um den sichtbaren Zustand des Modals abzufragen
+function getIsVisible() {
+  return isVisible;
+}
+
 const props = defineProps({
   poll: {
     type: Object,
@@ -144,10 +152,53 @@ const modalState = computed(() => {
 onMounted(() => {
   bootstrapModal = new Modal(modal.value);
   
+  // Event-Listener hinzufügen, um den sichtbaren Zustand des Modals zu verfolgen
+  if (modal.value) {
+    // Event-Listener, der erkennt, wenn das Modal angezeigt wird
+    modal.value.addEventListener('shown.bs.modal', () => {
+      isVisible = true;
+    });
+    
+    // Event-Listener, der erkennt, wenn das Modal geschlossen wird
+    modal.value.addEventListener('hidden.bs.modal', () => {
+      isVisible = false;
+    });
+  }
+  
   // Setup completion handler to show appropriate UI state when voting is complete
   votingProcess.setVotingCompletedCallback(() => {
     // Force UI update to show completion state
     votingProcess.votingFullyCompleted.value = true;
+  });
+  
+  // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
+  const pollClosedWatcher = watch(
+    () => props.poll?.closed,
+    (isClosed) => {
+      if (isClosed) {
+        console.warn("[DEBUG:VOTING] Poll wurde geschlossen (reactive watch), schließe Modal");
+        hideModal();
+      }
+    },
+    { immediate: true } // Sofort beim Mounting prüfen
+  );
+  
+  // KRITISCH: Überwache auch den Poll-State vom Parent-Component
+  const pollStateWatcher = watch(
+    () => props.activePollEventUser?.state,
+    (state) => {
+      if (state === 'closed') {
+        console.warn("[DEBUG:VOTING] Poll-State wurde auf 'closed' gesetzt (reactive watch), schließe Modal");
+        hideModal();
+      }
+    },
+    { immediate: true } // Sofort beim Mounting prüfen
+  );
+  
+  // Watcher beim Unmounting entfernen
+  onBeforeUnmount(() => {
+    pollClosedWatcher();
+    pollStateWatcher();
   });
 });
 
@@ -165,6 +216,33 @@ function onSubmit(data) {
 }
 
 function showModal() {
+  // KRITISCHE SICHERHEITSPRÜFUNG: Wenn der Poll geschlossen ist, das Modal NICHT öffnen
+  // und stattdessen SOFORT schließen, falls es geöffnet ist
+  if (props.poll && props.poll.closed) {
+    console.warn("[DEBUG:VOTING] Poll ist geschlossen, Modal wird geschlossen");
+    
+    // Sofort schließen falls offen
+    if (bootstrapModal) {
+      try {
+        bootstrapModal.hide();
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Schließen des geschlossenen Poll-Modals:', e);
+      }
+    }
+    
+    return; // Sofort zurückkehren ohne das Modal zu öffnen
+  }
+  
+  // EXTRA-PRÜFUNG: Prüfe auch beim Parents-Component, ob der Poll closed ist
+  try {
+    if (props.activePollEventUser?.state === "closed") {
+      console.warn("[DEBUG:VOTING] Poll-State ist 'closed' laut activePollEventUser, Modal wird nicht geöffnet");
+      return;
+    }
+  } catch (e) {
+    console.error('[DEBUG:VOTING] Fehler bei extra Poll-State-Prüfung:', e);
+  }
+  
   // Vor dem Öffnen des Modals müssen wir sicherstellen, dass alle Status zurückgesetzt sind
   isSubmitting.value = false;
   
@@ -185,11 +263,25 @@ function showModal() {
   // Um das "Wird abgestimmt" bei jedem Öffnen korrekt anzuzeigen, 
   // stellen wir sicher, dass die Komponente in einem frischen Zustand ist
   
+  // KRITISCH: Vor dem Öffnen NOCHMAL prüfen, ob der Poll geschlossen ist
+  if (props.poll && props.poll.closed) {
+    console.warn("[DEBUG:VOTING] Poll wurde während der Vorbereitung geschlossen, Modal wird nicht geöffnet");
+    return;
+  }
+  
   // Dann das Modal zeigen
-  bootstrapModal?.show();
+  if (bootstrapModal) {
+    bootstrapModal.show();
+  } else if (modal.value) {
+    console.warn("[DEBUG:VOTING] bootstrapModal nicht initialisiert, erstelle neu");
+    bootstrapModal = new Modal(modal.value);
+    bootstrapModal.show();
+  } else {
+    console.error("[DEBUG:VOTING] Kann Modal nicht öffnen: DOM-Element nicht verfügbar");
+  }
 }
 
-function hideModal() {
+function hideModal() {  
   // WICHTIG: Stelle vor dem Schließen sicher, dass das Modal gesperrt ist,
   // damit keine weiteren Klicks möglich sind
   isSubmitting.value = true;
@@ -206,17 +298,41 @@ function hideModal() {
     votingProcess.isProcessingVotes.value = true;
   }
   
-  // KRITISCH: Erst kurze Verzögerung, damit die reaktiven Updates durch Vue erfolgen können
-  // Dadurch wird sichergestellt, dass die UI gesperrt bleibt
+  // WICHTIG: Wenn das Bootstrap-Modal nicht existiert, neu initialisieren
+  if (!bootstrapModal && modal.value) {
+    try {
+      bootstrapModal = new Modal(modal.value);
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler bei Bootstrap-Modal-Initialisierung:', e);
+    }
+  }
+  
+  // Sofortiger Schließversuch ohne Verzögerung
+  if (bootstrapModal) {
+    try {
+      bootstrapModal.hide();
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim Schließen des Modals:', e);
+    }
+  }
+  
+  // KRITISCH: Zusätzlich mit kurzer Verzögerung, damit die reaktiven Updates durch Vue erfolgen können
+  // Dadurch wird sichergestellt, dass die UI gesperrt bleibt und das Modal wirklich geschlossen wird
   setTimeout(() => {
-    // Modal jetzt schließen
-    bootstrapModal?.hide();
-    
-    // LOKAL states danach zurücksetzen (nicht vorher!)
-    reset(false); // Immer vollständiges Zurücksetzen erzwingen
-    
-    // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
-    pollFormKey.value += 1;
+    try {
+      // Erneuter Schließversuch
+      if (bootstrapModal) {
+        bootstrapModal.hide();
+      }
+      
+      // LOKAL states danach zurücksetzen (nicht vorher!)
+      reset(false); // Immer vollständiges Zurücksetzen erzwingen
+      
+      // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
+      pollFormKey.value += 1;
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim verzögerten Schließen des Modals:', e);
+    }
 
     // IMMER alle States zurücksetzen, sobald das Modal geschlossen ist
     // Aber mit einer Verzögerung, damit das Modal wirklich sauber entfernt ist
