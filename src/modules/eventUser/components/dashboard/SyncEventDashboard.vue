@@ -88,8 +88,10 @@ import { POLL_LIFE_CYCLE_SUBSCRIPTION } from "@/modules/eventUser/graphql/subscr
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 import { POLL_ANSWER_LIVE_CYCLE } from "@/modules/organizer/graphql/subscription/poll-answer-life-cycle";
+import { useI18n } from "vue-i18n";
 
 const coreStore = useCore();
+const { t } = useI18n();
 const props = defineProps({
   event: {
     type: Object,
@@ -208,14 +210,35 @@ activePollEventUserQuery.onResult(({ data }) => {
           const serverVoteCycle = data.userVoteCycle.voteCycle || 0;
           const maxVotes = data.userVoteCycle.maxVotes || eventUser.value.voteAmount;
           
+          console.log(`[DEBUG:SERVER] Daten vom Server: voteCycle=${serverVoteCycle}, maxVotes=${maxVotes}, voteAmount=${eventUser.value.voteAmount}`);
+          
+          // VOR DEM SETZEN: Aktuelle Werte anzeigen
+          console.log(`[DEBUG:COUNTER] Vor Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
+          
           // Die verwendeten Stimmen direkt übernehmen
           votingProcess.usedVotesCount.value = serverVoteCycle;
           
           // Stelle sicher, dass der Zähler korrekt initialisiert wird
           voteCounter.value = serverVoteCycle + 1;
           
+          // NACH DEM SETZEN: Neue Werte anzeigen
+          console.log(`[DEBUG:COUNTER] Nach Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
+          
+          // Vergleichen mit dem Wert aus dem localStorage
+          const storedCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
+          console.log(`[DEBUG:COUNTER] Wert aus localStorage: ${storedCounter}`);
+          
           // Persistieren, damit future Loads konsistent sind
           pollStatePersistence.upsertPollState(poll.value.id, voteCounter.value, serverVoteCycle, props.event.id);
+          
+          // Nach dem Speichern: Nochmals den gespeicherten Wert prüfen
+          const newStoredCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
+          console.log(`[DEBUG:COUNTER] Neuer Wert in localStorage: ${newStoredCounter}`);
+          
+          // Prüfen, ob der Wert korrekt gespeichert wurde
+          if (newStoredCounter !== voteCounter.value) {
+            console.warn(`[DEBUG:COUNTER] Problem beim Speichern! Expected=${voteCounter.value}, Got=${newStoredCounter}`);
+          }
           
           // Prüfen, ob bereits alle Stimmen abgegeben wurden
           if (serverVoteCycle >= maxVotes) {
@@ -245,12 +268,32 @@ activePollEventUserQuery.onResult(({ data }) => {
           }
         } else {
           // Fallback zum lokalen Storage, wenn der Server keine Daten zurückgibt
+          console.log(`[DEBUG:FALLBACK] Server hat keine Daten zurückgegeben, verwende lokalen Storage`);
+          
+          // Lese vorhandene Werte aus dem lokalen Storage
+          const storedCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
+          const storedUsedVotes = pollStatePersistence.getUsedVotes(poll.value.id, props.event.id);
+          
+          console.log(`[DEBUG:FALLBACK] Werte aus localStorage: counter=${storedCounter}, usedVotes=${storedUsedVotes}`);
+          
+          // VOR DEM SETZEN: Aktuelle Werte anzeigen
+          console.log(`[DEBUG:COUNTER] Vor Fallback-Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
+          
           // Stelle sicher, dass der Zähler korrekt initialisiert wird
-          voteCounter.value = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
+          voteCounter.value = storedCounter;
           
           // Synchronisiere den verwendeten Stimmen-Zähler mit dem gespeicherten Zustand
           // Dies ist wichtig, um nach einem Reload den korrekten Stimmenzähler wiederherzustellen
-          votingProcess.usedVotesCount.value = pollStatePersistence.getUsedVotes(poll.value.id, props.event.id);
+          votingProcess.usedVotesCount.value = storedUsedVotes;
+          
+          // NACH DEM SETZEN: Neue Werte anzeigen
+          console.log(`[DEBUG:COUNTER] Nach Fallback-Update: usedVotesCount=${votingProcess.usedVotesCount.value}, voteCounter=${voteCounter.value}`);
+          
+          // Prüfen, ob die Werte plausibel sind
+          if (voteCounter.value > 99000) {
+            console.warn(`[DEBUG:COUNTER] Unplausibel hoher voteCounter (${voteCounter.value})! Setze auf ${storedUsedVotes + 1}`);
+            voteCounter.value = storedUsedVotes + 1;
+          }
           
           // Zurücksetzen aller Verarbeitungszustände vor dem Öffnen des Modals
           votingProcess.pollFormSubmitting.value = false;
@@ -355,12 +398,57 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
     const { verified, voteAmount, allowToVote } =
       data.updateEventUserAccessRights;
+    
+    // Vorherige Werte speichern, um Änderungen erkennen zu können
+    const previousVoteAmount = eventUser.value?.voteAmount || 0;
+    const previousAllowToVote = eventUser.value?.allowToVote || false;
+    
+    // Update der Benutzerrechte im Core-Store
     coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote);
-    toast(l18n.global.tc("view.polls.userUpdate"), {
+    
+    // Spezifischere Nachricht je nach Art der Änderung
+    let updateMessage;
+    
+    if (previousVoteAmount !== voteAmount) {
+      if (voteAmount > previousVoteAmount) {
+        updateMessage = t("view.polls.voteIncrease", {
+          voteAmount: voteAmount,
+          previousVoteAmount: previousVoteAmount,
+          difference: voteAmount - previousVoteAmount
+        });
+      } else {
+        updateMessage = t("view.polls.voteDecrease", {
+          voteAmount: voteAmount,
+          previousVoteAmount: previousVoteAmount,
+          difference: previousVoteAmount - voteAmount
+        });
+      }
+    } else if (previousAllowToVote !== allowToVote) {
+      if (allowToVote) {
+        updateMessage = t("view.polls.voteEnabled");
+      } else {
+        updateMessage = t("view.polls.voteDisabled");
+      }
+    } else {
+      // Fallback für andere Änderungen
+      updateMessage = t("view.polls.userUpdate");
+    }
+    
+    // Toast-Nachricht mit deutlich hervorgehobener Warnung anzeigen
+    toast(updateMessage, {
       type: "info",
       autoClose: false,
+      className: "vote-rights-update-toast",
       onOpen: () => (highlightStatusChange.value = true),
       onClose: () => (highlightStatusChange.value = false),
+    });
+    
+    // Zusätzlich ein Konsoleneintrag für Debugging
+    console.log("[DEBUG:VOTING] Benutzerrechte aktualisiert:", {
+      previousVoteAmount,
+      newVoteAmount: voteAmount,
+      previousAllowToVote,
+      newAllowToVote: allowToVote
     });
   }
 });
@@ -533,6 +621,27 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       }
     }
   } else if (pollState.value === "closed") {
+    // Sofort alle laufenden Abstimmungsvorgänge abbrechen
+    if (votingProcess.isActiveVotingSession() || 
+        votingProcess.isProcessingVotes.value || 
+        votingProcess.pollFormSubmitting.value || 
+        votingProcess.currentlyProcessingBatch.value) {
+      
+      // Markiere aktive Voting-Sessions als beendet
+      votingProcess.deactivateVotingSession();
+      
+      // Setze alle UI-Sperren zurück
+      votingProcess.releaseUILocks();
+      votingProcess.currentlyProcessingBatch.value = false;
+      
+      // Log-Ausgabe
+      console.warn("[DEBUG:VOTING] Voting-Prozess wegen Poll-Schließung abgebrochen");
+      
+      // Toast-Nachricht für den Benutzer
+      toast(t("view.polls.info.pollClosed"), { type: "info" });
+    }
+    
+    // Modal schließen und Ergebnisse anzeigen
     pollModal.value?.hideModal();
     resultModal.value?.showModal();
     showMoreEnabled.value = true;
@@ -732,7 +841,7 @@ function onShowMorePollResults() {
         fetchMoreResult.pollResult.length < pageSize.value
       ) {
         showMoreEnabled.value = false;
-        toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
+        toast(t("view.results.noMoreResults"), { type: "info" });
         return previousResult;
       }
 
@@ -753,7 +862,7 @@ async function onSubmitPoll(pollFormData) {
     // SICHERHEITSPRÜFUNG: Ist noch eine aktive Abstimmung im Gange?
     if (votingProcess.isActiveVotingSession()) {
       // Toast-Nachricht für den Benutzer
-      toast(l18n.global.tc("view.polls.info.stillProcessing"), { type: "info" });
+      toast(t("view.polls.info.stillProcessing"), { type: "info" });
       return;
     }
     
@@ -910,6 +1019,12 @@ function resetUIAfterSubmission() {
     // Prüfen, ob wir alle Stimmen verwendet haben
     const allVotesUsed = (totalAllowedVotes > 0 && usedVotes >= totalAllowedVotes) || votingProcess.votingFullyCompleted.value;
     const partialVotesUsed = (usedVotes > 0 && usedVotes < totalAllowedVotes && !votingProcess.votingFullyCompleted.value);
+    
+    // Stimmzähler korrigieren, falls durch Reload mehr Stimmen gezählt wurden als maximal erlaubt
+    if (usedVotes > totalAllowedVotes) {
+      console.warn(`[DEBUG:VOTING] UI-Reset: Stimmenzähler korrigiert: ${usedVotes} auf ${totalAllowedVotes}`);
+      votingProcess.usedVotesCount.value = totalAllowedVotes;
+    }
     
     // Bei komplett abgeschlossener Abstimmung (alle Stimmen genutzt) Modal schließen
     if (allVotesUsed) {
