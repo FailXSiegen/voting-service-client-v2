@@ -36,6 +36,18 @@
 @import "event/zoom/overwrite";
 @import "organizer/organizers";
 
+/* Hervorgehobene Benachrichtigungen für Stimmrechtsänderungen */
+.vote-rights-update-toast {
+  border-left: 5px solid #007bff !important;
+  font-weight: bold !important;
+  background-color: rgba(0, 123, 255, 0.15) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.Toastify__toast-body {
+  white-space: pre-line;
+}
+
 // Bootstrap Icons Font
 $bootstrap-icons-font-src: url("../assets/fonts/bootstrap-icons.woff2?30af91bf14e37666a085fb8a161ff36d") format("woff2"),
   url("../assets/fonts/bootstrap-icons.woff?30af91bf14e37666a085fb8a161ff36d") format("woff");

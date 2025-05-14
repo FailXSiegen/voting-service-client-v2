@@ -308,7 +308,9 @@
           "voteAllocation": "Stimmenverteilung ({voteAmount} Stimmzettel verfügbar)",
           "votes": "Stimmzettel",
           "useAllVotes": "100 % der Stimmzettel verwenden",
-          "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmzettel Sie für diese Umfrage verwenden möchten."
+          "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmzettel Sie für diese Umfrage verwenden möchten.",
+          "ofTotalVotes": "von Stimmzetteln",
+          "fewVotesRemaining": "Nur noch wenige Stimmzettel übrig"
         },
         "active": {
           "title": "Aktuelle Abstimmung",
@@ -319,6 +321,11 @@
           "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}"
         },
         "userUpdate": "Ihr Status wurde aktualisiert.",
+        "voteIncrease": "Ihre Stimmenanzahl wurde von {previousVoteAmount} auf {voteAmount} erhöht (+ {difference} Stimmen).",
+        "voteDecrease": "Ihre Stimmenanzahl wurde von {previousVoteAmount} auf {voteAmount} reduziert (- {difference} Stimmen).",
+        "voteEnabled": "Ihr Abstimmrecht wurde aktiviert.",
+        "voteDisabled": "Ihr Abstimmrecht wurde deaktiviert.",
+        "info.pollClosed": "Die aktuelle Abstimmung wurde geschlossen. Der Abstimmungsvorgang wurde abgebrochen.",
         "eventIsNotRunning": "Die Veranstaltung startet am {date} um {time} Uhr.",
         "eventIsFinish": "Die Veranstaltung wurde beendet.",
         "error": {
