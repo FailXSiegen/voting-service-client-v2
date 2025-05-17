@@ -37,6 +37,7 @@
         <div class="col-12">
           <div class="btn-group d-print-none" role="group">
             <button
+              v-if="hasAbstentions"
               type="button"
               class="btn"
               :class="localPercentageType === 'maxPerOptionNoAbstention' ? 'btn-primary' : 'btn-outline-primary'"
@@ -139,7 +140,7 @@ v-else
                   maxVotesPerOption: maxVotesPerOption
                 }) }}
               </li>
-              <li v-if="localPercentageType === 'maxPerOptionNoAbstention'">
+              <li v-if="localPercentageType === 'maxPerOptionNoAbstention' && hasAbstentions">
                 {{ $t("view.results.maxPerOptionNoAbstentionExplanation", {
                   maxVotesPerOption: maxVotesPerOption
                 }) }}
@@ -273,15 +274,19 @@ const props = defineProps({
 const emit = defineEmits(['percentage-type-change']);
 
 // Lokaler State für den Prozenttyp
-const localPercentageType = ref(''); // Wird später initialisiert
+const localPercentageType = ref('maxPerOption'); // Standard: "% der maximalen Stimmen pro Option"
 
-// Setze den Anfangswert basierend auf Enthaltungen
+// Setze den Anfangswert wenn Enthaltungen vorhanden sind
 watch(() => hasAbstentions.value, (newHasAbstentions) => {
-  // Initialisiere nur, wenn noch kein Wert gesetzt wurde
-  if (localPercentageType.value === '') {
-    localPercentageType.value = newHasAbstentions 
-      ? 'maxPerOptionNoAbstention' // Wenn Enthaltungen vorhanden sind
-      : 'maxPerOption'; // Wenn keine Enthaltungen vorhanden sind
+  // Initialisiere nur, wenn noch kein Wert gesetzt wurde oder der Wert automatisch geändert werden kann
+  if (localPercentageType.value === '' || 
+      (newHasAbstentions && localPercentageType.value === 'maxPerOptionNoAbstention') ||
+      (!newHasAbstentions && localPercentageType.value === 'maxPerOption')) {
+    // Wenn Enthaltungen vorhanden und wir zeigen "ohne Enthaltungen" an, behalten wir das bei
+    // Andernfalls, zeigen wir "% der maximalen Stimmen pro Option"
+    localPercentageType.value = newHasAbstentions && localPercentageType.value === 'maxPerOptionNoAbstention'
+      ? 'maxPerOptionNoAbstention'
+      : 'maxPerOption';
   }
 }, { immediate: true });
 
