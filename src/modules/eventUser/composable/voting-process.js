@@ -633,8 +633,27 @@ export function useVotingProcess(eventUser, event) {
               // KRITISCH: Prüfe NOCHMAL nach dem Promise.all, ob der Poll zwischenzeitlich geschlossen wurde
               if ((poll.value && poll.value.closed) ||
                 (typeof window !== 'undefined' && window.pollClosedEventReceived === true)) {
-                console.warn("[DEBUG:VOTING] Poll wurde während Promise.all geschlossen. Ergebnisse werden verworfen.");
-                return false;
+                console.warn("[DEBUG:VOTING] Poll wurde während Promise.all geschlossen. Speichere erfolgreiche Stimmen.");
+                
+                // Statt die Stimmen zu verwerfen, zählen wir die erfolgreichen Stimmen
+                const batchSuccessCount = batchResults.filter(result => result === true).length;
+                
+                if (batchSuccessCount > 0) {
+                  // Wenn Stimmen erfolgreich waren, diese zum Gesamtergebnis hinzufügen
+                  localSuccessCount += batchSuccessCount;
+                  // UI-Update für Transparenz
+                  currentlySubmittedInBatch.value = localSuccessCount + 1; // +1 für die erste bereits gezählte Stimme
+                  console.warn(`[DEBUG:VOTING] ${batchSuccessCount} erfolgreiche Stimmen trotz Poll-Schließung gezählt.`);
+                  
+                  // Window-Flag setzen für spezifische Benachrichtigung
+                  if (typeof window !== 'undefined') {
+                    window._pollClosedDuringVoting = true;
+                    window._successfulVotesBeforeClose = localSuccessCount + 1; // +1 für erste Stimme
+                  }
+                }
+                
+                // Trotzdem abbrechen, aber mit den gezählten Stimmen
+                return true; // Wir geben true zurück, damit die Stimmen gezählt werden
               }
 
               const batchSuccessCount = batchResults.filter(result => result === true).length;
@@ -648,14 +667,34 @@ export function useVotingProcess(eventUser, event) {
             } catch (error) {
               // KRITISCH: Auch bei Fehlern prüfen, ob der Poll inzwischen geschlossen wurde
               if (poll.value && poll.value.closed) {
-                console.warn("[DEBUG:VOTING] Poll wurde während eines Fehlers geschlossen. Verarbeitung wird abgebrochen.");
-                return false;
+                console.warn("[DEBUG:VOTING] Poll wurde während eines Fehlers geschlossen. Speichere bisherige erfolgreiche Stimmen.");
+                
+                // Auch bei Fehler die bisher erfolgreichen Stimmen behalten
+                if (localSuccessCount > 0) {
+                  // Window-Flag setzen für spezifische Benachrichtigung
+                  if (typeof window !== 'undefined') {
+                    window._pollClosedDuringVoting = true;
+                    window._successfulVotesBeforeClose = localSuccessCount + 1; // +1 für erste Stimme
+                  }
+                }
+                
+                return true; // Wir geben true zurück, damit die erfolgreichen Stimmen gezählt werden
               }
 
               // KRITISCH: Prüfe, ob Poll global als geschlossen markiert wurde
               if (typeof window !== 'undefined' && window.pollClosedEventReceived === true) {
-                console.warn("[DEBUG:VOTING] Poll global als geschlossen markiert während eines Fehlers. Abbruch!");
-                return false;
+                console.warn("[DEBUG:VOTING] Poll global als geschlossen markiert während eines Fehlers. Speichere bisherige Stimmen.");
+                
+                // Auch bei globaler Poll-Schließung die bisher erfolgreichen Stimmen behalten
+                if (localSuccessCount > 0) {
+                  // Window-Flag setzen für spezifische Benachrichtigung
+                  if (typeof window !== 'undefined') {
+                    window._pollClosedDuringVoting = true;
+                    window._successfulVotesBeforeClose = localSuccessCount + 1; // +1 für erste Stimme
+                  }
+                }
+                
+                return true; // Wir geben true zurück, damit die erfolgreichen Stimmen gezählt werden
               }
 
               attempts++;
