@@ -1709,7 +1709,19 @@ async function onSubmitPoll(pollFormData) {
         // Wenn der Vorgang nicht erfolgreich war, SOFORT zurücksetzen und Session deaktivieren
         resetUIAfterSubmission();
         votingProcess.deactivateVotingSession();
-        toast("Fehler bei der Stimmabgabe", { type: "warning" });
+        
+        // Spezifische Nachricht anzeigen, falls Poll während der Abstimmung geschlossen wurde
+        if (typeof window !== 'undefined' && window._pollClosedDuringVoting === true) {
+          const successfulVotes = window._successfulVotesBeforeClose || 0;
+          // Spezifische Benachrichtigung für geschlossene Poll
+          toast(`Poll wurde während der Abstimmung geschlossen. ${successfulVotes} Stimme(n) wurden gezählt.`, { type: "info" });
+          // Flags zurücksetzen
+          window._pollClosedDuringVoting = false;
+          window._successfulVotesBeforeClose = 0;
+        } else {
+          // Standard-Fehlerbenachrichtigung
+          toast("Fehler bei der Stimmabgabe", { type: "warning" });
+        }
       }
       
       // SOFORTIGE UI-FREIGABE nach Formular-Übermittlung
