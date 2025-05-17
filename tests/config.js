@@ -8,7 +8,7 @@ const CONFIG = {
     USERS_PER_BATCH: 50,            // Anzahl der Benutzer pro Test-Batch (3 Batches zu je 50)
     ORGANIZER: 1,                   // Anzahl der Organisatoren
     VOTE_BATCH_SIZE: 50,            // Erhöht: Anzahl der gleichzeitigen Abstimmungen pro Batch
-    BATCH_VOTE_DELAY: 1000,         // Stark reduziert: Verzögerung zwischen Abstimmungsbatches (1 Sekunde)
+    BATCH_VOTE_DELAY: 500,          // Stark reduziert: Verzögerung zwischen Abstimmungsbatches (500ms)
     API_URL: 'http://localhost:4000',
     CLIENT_URL: 'http://localhost:5173',
     EVENT_SLUG: 'loadtest-event',
@@ -30,10 +30,17 @@ const CONFIG = {
     REDUCED_WAIT_TIME: 10000,       // Reduzierte Wartezeit in ms (10 Sekunden nach vollständiger Abstimmung)
     GLOBAL_STATUS_FILE: 'global-vote-status.json', // Dateiname für den globalen Status
 
-    // Neue Konfigurationswerte für reduzierte Wartezeiten
-    USER_WAIT_AFTER_VOTE: 20000,    // 20 Sekunden Wartezeit nach Abstimmung pro Benutzer
-    USER_TOTAL_WAIT_TIME: 20 * 60000, // 20 Minuten Gesamtwartezeit für Benutzer
-    ORGANIZER_TOTAL_WAIT_TIME: 20 * 60000, // 20 Minuten Gesamtwartezeit für Organizer
+    // Verbesserte Konfigurationswerte für längere Wartezeiten und Browser-Stabilität
+    USER_WAIT_AFTER_VOTE: 300000,    // 5 Minuten Wartezeit nach Abstimmung pro Benutzer
+    USER_TOTAL_WAIT_TIME: 45 * 60000, // 45 Minuten Gesamtwartezeit für Benutzer
+    ORGANIZER_TOTAL_WAIT_TIME: 45 * 60000, // 45 Minuten Gesamtwartezeit für Organizer
+    
+    // Verbesserte Konfiguration für Keep-Alive Mechanismus
+    KEEP_ALIVE_INTERVAL: 2000,       // 2 Sekunden Intervall für Keep-Alive Aktionen (schnellere Aktualisierung)
+    CONNECTION_POLLING_INTERVAL: 3000, // 3 Sekunden Intervall zur Überprüfung des Verbindungsstatus
+    VOTE_TRACKING_ENABLED: true,     // Aktiviert das Tracking von Stimmen auch nach Browser-Schließung
+    LOGIN_KEEP_ALIVE_ENABLED: true,  // Aktiviert den Keep-Alive-Mechanismus bereits während des Logins
+    WAIT_FOR_POLL_START_TIME: 600000, // 10 Minuten maximale Wartezeit auf den Abstimmungsstart
 };
 
 // Globaler Status zur Erfassung aller Abstimmungen

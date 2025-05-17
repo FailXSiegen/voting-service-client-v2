@@ -584,6 +584,9 @@ async function executeVotingInBatches(userPages, votingTimings) {
     const batchSize = CONFIG.VOTE_BATCH_SIZE;
     const totalUsers = userPages.length;
 
+    // Importiere Vote-Tracking-Funktionen
+    const { trackVoteCompletion, markBatchCompleted } = require('./voteNotifier');
+
     // Berechne die Anzahl der Batches
     const numBatches = Math.ceil(totalUsers / batchSize);
 
@@ -593,6 +596,9 @@ async function executeVotingInBatches(userPages, votingTimings) {
     console.log(`Prüfe, ob der Organizer die Abstimmung bereits gestartet hat...`);
 
     let pollStarted = false;
+    let pollId = null;
+    let eventId = null;
+    
     try {
         const fs = require('fs');
         const path = require('path');
@@ -602,6 +608,15 @@ async function executeVotingInBatches(userPages, votingTimings) {
         if (fs.existsSync(organizerResultFile)) {
             const organizerData = JSON.parse(fs.readFileSync(organizerResultFile));
             pollStarted = organizerData.pollStarted === true;
+            
+            // Versuche, die Poll-ID und Event-ID zu extrahieren, falls vorhanden
+            if (organizerData.pollId) {
+                pollId = organizerData.pollId;
+            }
+            
+            if (organizerData.eventId) {
+                eventId = organizerData.eventId;
+            }
 
             if (pollStarted) {
                 console.log(`Die Abstimmung wurde vom Organizer gestartet um: ${organizerData.timestamp}`);
@@ -635,6 +650,15 @@ async function executeVotingInBatches(userPages, votingTimings) {
                 if (fs.existsSync(organizerResultFile)) {
                     const organizerData = JSON.parse(fs.readFileSync(organizerResultFile));
                     pollStarted = organizerData.pollStarted === true;
+                    
+                    // Versuche, die Poll-ID und Event-ID zu extrahieren, falls vorhanden
+                    if (organizerData.pollId) {
+                        pollId = organizerData.pollId;
+                    }
+                    
+                    if (organizerData.eventId) {
+                        eventId = organizerData.eventId;
+                    }
 
                     if (pollStarted) {
                         console.log(`Die Abstimmung wurde vom Organizer gestartet um: ${organizerData.timestamp}`);
@@ -664,12 +688,26 @@ async function executeVotingInBatches(userPages, votingTimings) {
     for (let batch = 0; batch < numBatches; batch++) {
         const endIdx = Math.min(startIdx + batchSize, totalUsers);
         const currentBatchSize = endIdx - startIdx;
+        const batchId = batch + 1;
 
-        console.log(`Starte Batch ${batch + 1}/${numBatches} mit ${currentBatchSize} Benutzern (${startIdx} bis ${endIdx - 1})...`);
+        console.log(`Starte Batch ${batchId}/${numBatches} mit ${currentBatchSize} Benutzern (${startIdx} bis ${endIdx - 1})...`);
 
         // Keine Pause vor Batches, um maximale Geschwindigkeit zu erreichen
         if (batch > 0) {
-            console.log(`Batch ${batch + 1} startet sofort...`);
+            console.log(`Batch ${batchId} startet sofort...`);
+        }
+
+        // Tracking-Informationen vor dem Start speichern
+        if (CONFIG.VOTE_TRACKING_ENABLED) {
+            trackVoteCompletion({
+                batchId: batchId,
+                eventId: eventId || CONFIG.EVENT_ID, // Fallback zur konfigurierten Event-ID
+                pollId: pollId || 0,
+                totalVotes: currentBatchSize,
+                userCount: currentBatchSize,
+                started: true,
+                startTimestamp: new Date().toISOString()
+            });
         }
 
         // Führe die Abstimmungen für den aktuellen Batch parallel aus
@@ -681,7 +719,12 @@ async function executeVotingInBatches(userPages, votingTimings) {
         const batchSuccessfulVotes = batchResults.filter(result => result).length;
 
         successfulVotes += batchSuccessfulVotes;
-        console.log(`Batch ${batch + 1} abgeschlossen: ${batchSuccessfulVotes}/${currentBatchSize} erfolgreiche Abstimmungen`);
+        console.log(`Batch ${batchId} abgeschlossen: ${batchSuccessfulVotes}/${currentBatchSize} erfolgreiche Abstimmungen`);
+
+        // Aktualisiere den Tracking-Status nach Abschluss des Batches
+        if (CONFIG.VOTE_TRACKING_ENABLED) {
+            markBatchCompleted(batchId, batchSuccessfulVotes);
+        }
 
         // Aktualisiere den globalen Status mit den erfolgreichen Abstimmungen
         try {
@@ -713,7 +756,7 @@ async function executeVotingInBatches(userPages, votingTimings) {
                         timestamp: new Date().toISOString(),
                         reducedWaitTime: CONFIG.REDUCED_WAIT_TIME,
                         source: "threshold_reached",
-                        batchProgress: `${batch + 1}/${numBatches}`,
+                        batchProgress: `${batchId}/${numBatches}`,
                         note: "Created based on 85% threshold of votes"
                     }, null, 2));
 
@@ -822,7 +865,137 @@ async function executeVotingInBatches(userPages, votingTimings) {
         }
     }
 
+    // Implementierung des Keep-Alive-Mechanismus, um die Verbindung aktiv zu halten
+    // und das Browser-Timeout zu verhindern
+    await keepConnectionAlive(userPages, successfulVotes, totalUsers);
+
     return successfulVotes;
+}
+
+/**
+ * Hält die Browser-Verbindung aktiv, um Timeouts zu verhindern
+ * 
+ * @param {Array} userPages - Array der Benutzer-Pages
+ * @param {number} successfulVotes - Anzahl der erfolgreich abgegebenen Stimmen
+ * @param {number} totalUsers - Gesamtanzahl der Benutzer
+ * @returns {Promise<void>}
+ */
+async function keepConnectionAlive(userPages, successfulVotes, totalUsers) {
+    console.log(`[Keep-Alive] Starte Keep-Alive-Mechanismus für ${userPages.length} Browser-Fenster...`);
+    
+    // Berechne Wartezeit basierend auf der Konfiguration
+    let keepAliveTime = CONFIG.USER_WAIT_AFTER_VOTE || 180000; // Standard: 3 Minuten
+    
+    // Bei einer sehr hohen Erfolgsquote können wir die Wartezeit reduzieren
+    const successRate = successfulVotes / totalUsers;
+    if (successRate >= 0.95) {
+        keepAliveTime = Math.max(60000, keepAliveTime / 2); // Mindestens 1 Minute, ansonsten halbieren
+        console.log(`[Keep-Alive] Hohe Erfolgsquote (${(successRate * 100).toFixed(1)}%), reduziere Wartezeit auf ${keepAliveTime / 1000} Sekunden`);
+    }
+    
+    const startTime = Date.now();
+    let elapsedTime = 0;
+    let lastLogTime = 0;
+    const logInterval = 10000; // Status alle 10 Sekunden ausgeben
+    
+    // Aktive Pages zählen
+    let activePagesCount = 0;
+    
+    // Keep-Alive Schleife
+    while (elapsedTime < keepAliveTime) {
+        try {
+            // Aktualisiere verstrichene Zeit
+            elapsedTime = Date.now() - startTime;
+            
+            // Prüfe, ob es Zeit für ein Status-Update ist
+            const currentTime = Date.now();
+            if (currentTime - lastLogTime >= logInterval) {
+                lastLogTime = currentTime;
+                const remainingSeconds = Math.round((keepAliveTime - elapsedTime) / 1000);
+                console.log(`[Keep-Alive] Halte ${activePagesCount} Browser-Fenster aktiv. Noch ${remainingSeconds} Sekunden verbleibend.`);
+            }
+            
+            // Zähler zurücksetzen
+            activePagesCount = 0;
+            
+            // Für jede Page eine kleine Aktion durchführen
+            for (let i = 0; i < userPages.length; i++) {
+                try {
+                    // Prüfe, ob die Page noch geöffnet ist
+                    const page = userPages[i].page;
+                    
+                    // Überspringe geschlossene Pages
+                    if (!page || page.isClosed()) {
+                        continue;
+                    }
+                    
+                    // Führe kleine Scrollaktion durch, um Aktivität zu simulieren
+                    await page.evaluate(() => {
+                        try {
+                            // Kleine Scroll-Bewegung
+                            window.scrollBy(0, 1);
+                            window.scrollBy(0, -1);
+                            
+                            // Aktiviere ggf. Socket-Verbindungen
+                            if (window.socket && typeof window.socket.send === 'function') {
+                                try {
+                                    window.socket.send(JSON.stringify({type: 'ping'}));
+                                } catch (e) {
+                                    // Ignoriere Socket-Fehler
+                                }
+                            }
+                            
+                            // Eventuelle GraphQL-Verbindungen aktiv halten
+                            if (window.apolloClient && typeof window.apolloClient.query === 'function') {
+                                try {
+                                    // Vermeide tatsächliche Abfragen, setze nur einen Timeout
+                                    setTimeout(() => {}, 100);
+                                } catch (e) {
+                                    // Ignoriere Apollo-Fehler
+                                }
+                            }
+                            
+                            // Prüfe auch auf modale Dialoge und halte sie aktiv
+                            const modalElement = document.querySelector('.modal.show');
+                            if (modalElement) {
+                                // Simuliere einen Mausbewegung innerhalb des Modals
+                                const event = new MouseEvent('mousemove', {
+                                    bubbles: true,
+                                    cancelable: true,
+                                    clientX: Math.random() * 50,
+                                    clientY: Math.random() * 50
+                                });
+                                modalElement.dispatchEvent(event);
+                            }
+                            
+                            return true; // Signal, dass die Page aktiv ist
+                        } catch (e) {
+                            return false;
+                        }
+                    }).then(isActive => {
+                        if (isActive) {
+                            activePagesCount++;
+                        }
+                    }).catch(() => {
+                        // Ignoriere Fehler bei geschlossenen Pages
+                    });
+                    
+                } catch (pageError) {
+                    // Ignoriere Fehler bei einzelnen Pages
+                }
+            }
+            
+            // Warte das konfigurierte Intervall bis zur nächsten Aktion
+            await new Promise(resolve => setTimeout(resolve, CONFIG.KEEP_ALIVE_INTERVAL || 5000));
+            
+        } catch (error) {
+            console.error(`[Keep-Alive] Fehler im Keep-Alive-Loop:`, error);
+            // Kurze Pause und dann weiter
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+    
+    console.log(`[Keep-Alive] Keep-Alive-Mechanismus beendet nach ${Math.round(elapsedTime / 1000)} Sekunden`);
 }
 
 // Beim Import dieses Moduls: Prüfe, ob all-voted-notification.json existiert, und erstelle es ggf.
