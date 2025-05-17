@@ -40,7 +40,7 @@
     <div v-if="activeTab === 'pages'" class="mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>Verfügbare Seiten</h3>
-        <button @click="createNewPage" class="btn btn-success">
+        <button class="btn btn-success" @click="createNewPage">
           <i class="bi bi-plus-circle"></i> Neue Seite
         </button>
       </div>
@@ -70,14 +70,14 @@
                 </div>
                 <div>
                   <a
-                    @click.stop
                     :href="getPageViewUrl(page)"
                     target="_blank"
                     class="btn btn-sm btn-outline-secondary me-2"
+                    @click.stop
                   >
                     <i class="bi bi-box-arrow-up-right"></i> Ansehen
                   </a>
-                  <button @click.stop="selectPage(page)" class="btn btn-sm btn-outline-primary">
+                  <button class="btn btn-sm btn-outline-primary" @click.stop="selectPage(page)">
                     <i class="bi bi-gear"></i> Verwalten
                   </button>
                 </div>
@@ -88,17 +88,17 @@
                 <div class="input-group">
                   <span class="input-group-text">Seiten-URL</span>
                   <input
+                    :id="`pageSlugInput-${page}`"
                     type="text"
                     class="form-control"
                     :value="tempSlugs[page] || ''"
-                    @input="tempSlugs[page] = $event.target.value"
                     placeholder="z.B. ueber-uns oder kontakt"
-                    :id="`pageSlugInput-${page}`"
+                    @input="tempSlugs[page] = $event.target.value"
                   >
                   <button
                     class="btn btn-outline-success"
-                    @click="savePageSlug(page)"
                     :disabled="!isTempSlugValid(page)"
+                    @click="savePageSlug(page)"
                   >
                     <i class="bi bi-check"></i> Speichern
                   </button>
@@ -139,10 +139,10 @@
               <form @submit.prevent="updateSystemSettings">
                 <div class="form-check mb-2">
                   <input
-                    type="checkbox"
-                    class="form-check-input"
                     id="useDirectPaths"
                     v-model="localUseDirectPaths"
+                    type="checkbox"
+                    class="form-check-input"
                   >
                   <label class="form-check-label" for="useDirectPaths">
                     Direkte Pfade aktivieren (ohne /static-page/ Prefix)
@@ -150,10 +150,10 @@
                 </div>
                 <div class="form-check mb-3">
                   <input
-                    type="checkbox"
-                    class="form-check-input"
                     id="useInFooterNavigation"
                     v-model="localUseInFooterNavigation"
+                    type="checkbox"
+                    class="form-check-input"
                   >
                   <label class="form-check-label" for="useInFooterNavigation">
                     Dynamische Seiten in der Footer-Navigation anzeigen
@@ -238,9 +238,9 @@
               </option>
             </select>
             <button 
-              @click="activeTab = 'editor'; prepareNewSection()" 
-              class="btn btn-success"
+              class="btn btn-success" 
               :disabled="!selectedPage"
+              @click="activeTab = 'editor'; prepareNewSection()"
             >
               <i class="bi bi-plus-circle"></i> Abschnitt hinzufügen
             </button>
@@ -283,7 +283,8 @@
                 <td>{{ content.title || '-' }}</td>
                 <td>{{ content.ordering }}</td>
                 <td>
-                  <span :class="[
+                  <span
+:class="[
                     'badge',
                     content.isPublished ? 'bg-success' : 'bg-warning'
                   ]">
@@ -293,18 +294,18 @@
                 <td>
                   <div class="btn-group">
                     <button
-                      @click="moveItemUp(content)"
                       class="btn btn-sm btn-outline-secondary"
                       :disabled="!canMoveUp(content)"
                       title="Nach oben verschieben"
+                      @click="moveItemUp(content)"
                     >
                       <i class="bi bi-arrow-up"></i>
                     </button>
                     <button
-                      @click="moveItemDown(content)"
                       class="btn btn-sm btn-outline-secondary"
                       :disabled="!canMoveDown(content)"
                       title="Nach unten verschieben"
+                      @click="moveItemDown(content)"
                     >
                       <i class="bi bi-arrow-down"></i>
                     </button>
@@ -312,13 +313,13 @@
                 </td>
                 <td>
                   <div class="btn-group">
-                    <button @click="editContent(content)" class="btn btn-sm btn-outline-primary">
+                    <button class="btn btn-sm btn-outline-primary" @click="editContent(content)">
                       <i class="bi bi-pencil-square"></i> Bearbeiten
                     </button>
                     <button
-                      @click="togglePublishStatus(content)"
                       class="btn btn-sm"
                       :class="content.isPublished ? 'btn-outline-warning' : 'btn-outline-success'"
+                      @click="togglePublishStatus(content)"
                     >
                       <i :class="['bi', content.isPublished ? 'bi-eye-slash' : 'bi-eye']"></i>
                     </button>
@@ -335,25 +336,25 @@
     <div v-if="activeTab === 'editor'" class="mt-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h3>{{ editMode ? 'Inhalt bearbeiten' : 'Neuen Inhalt erstellen' }}</h3>
-        <button @click="activeTab = 'sections'" class="btn btn-outline-secondary">
+        <button class="btn btn-outline-secondary" @click="activeTab = 'sections'">
           <i class="bi bi-arrow-left"></i> Zurück
         </button>
       </div>
       
-      <form @submit.prevent="saveContent" class="border rounded p-4 bg-light">
+      <form class="border rounded p-4 bg-light" @submit.prevent="saveContent">
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="pageKey" class="form-label">Seitenschlüssel</label>
             <input
-              type="text"
-              class="form-control"
               id="pageKey"
               v-model="formData.pageKey"
+              type="text"
+              class="form-control"
               placeholder="z.B. about-us"
               :disabled="editMode"
+              required
               @input="checkDuplicateSection"
               @blur="checkDuplicateSection"
-              required
             >
             <small class="form-text text-muted">
               Der Seitenschlüssel wird in der URL verwendet: /static-page/[seitenschlüssel]
@@ -363,15 +364,15 @@
           <div class="col-md-6">
             <label for="sectionKey" class="form-label">Abschnittschlüssel</label>
             <input
-              type="text"
-              class="form-control"
               id="sectionKey"
               v-model="formData.sectionKey"
+              type="text"
+              class="form-control"
               placeholder="z.B. main-content"
               :disabled="editMode"
+              required
               @input="checkDuplicateSection"
               @blur="checkDuplicateSection"
-              required
             >
             <div class="invalid-feedback">
               Dieser Abschnittschlüssel existiert bereits für diese Seite. Bitte wählen Sie einen anderen Schlüssel.
@@ -386,10 +387,10 @@
           <div class="col-md-6">
             <label for="title" class="form-label">Titel</label>
             <input
-              type="text"
-              class="form-control"
               id="title"
               v-model="formData.title"
+              type="text"
+              class="form-control"
               placeholder="Titel des Abschnitts"
             >
           </div>
@@ -397,9 +398,9 @@
           <div class="col-md-3">
             <label for="headerClass" class="form-label">Titel-Stil</label>
             <select
-              class="form-select"
               id="headerClass"
               v-model="formData.headerClass"
+              class="form-select"
             >
               <option value="h1">H1 - Sehr groß</option>
               <option value="h2">H2 - Groß</option>
@@ -413,10 +414,10 @@
           <div class="col-md-3">
             <label for="ordering" class="form-label">Reihenfolge</label>
             <input
-              type="number"
-              class="form-control"
               id="ordering"
               v-model="formData.ordering"
+              type="number"
+              class="form-control"
               placeholder="1"
             >
           </div>
@@ -446,14 +447,14 @@
 
             <div class="position-relative editor-container">
               <div
-                class="editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen"
                 ref="editorContainerElement"
+                class="editor-container editor-container_classic-editor editor-container_include-style editor-container_include-block-toolbar editor-container_include-fullscreen"
               >
                 <div class="editor-container__editor">
                   <div ref="editorElement">
                     <ckeditor
                       v-if="editor && config"
-                      :modelValue="config.initialData"
+                      :model-value="config.initialData"
                       :editor="editor"
                       :config="config"
                       @ready="onEditorReady"
@@ -468,9 +469,9 @@
           <template v-else-if="formData.contentType === 'multi-column'">
             <MultiColumnEditor
               :value="formData.columnsContent"
-              :initialColumnCount="formData.columnCount"
-              :editorClass="editor"
-              :editorConfig="config"
+              :initial-column-count="formData.columnCount"
+              :editor-class="editor"
+              :editor-config="config"
               @change="handleMultiColumnChange"
             />
           </template>
@@ -479,8 +480,8 @@
           <template v-else-if="formData.contentType === 'accordion'">
             <AccordionEditor
               :value="formData.accordionItems"
-              :editorClass="editor"
-              :editorConfig="config"
+              :editor-class="editor"
+              :editor-config="config"
               @change="handleAccordionChange"
             />
           </template>
@@ -503,10 +504,10 @@
         
         <div class="mb-3 form-check">
           <input 
-            type="checkbox" 
-            class="form-check-input" 
             id="isPublished" 
-            v-model="formData.isPublished"
+            v-model="formData.isPublished" 
+            type="checkbox" 
+            class="form-check-input"
           >
           <label class="form-check-label" for="isPublished">Veröffentlichen</label>
         </div>
@@ -529,9 +530,9 @@
 
           <button
             v-if="editMode"
-            @click="cancelEdit"
             type="button"
             class="btn btn-outline-secondary"
+            @click="cancelEdit"
           >
             Abbrechen
           </button>
@@ -647,13 +648,13 @@
             </template>
             <template v-else-if="formData.contentType === 'accordion'">
               <div v-if="formData.accordionItems && formData.accordionItems.length > 0">
-                <div class="accordion" id="previewAccordion">
+                <div id="previewAccordion" class="accordion">
                   <div
                     v-for="(item, index) in formData.accordionItems"
                     :key="index"
                     class="accordion-item"
                   >
-                    <h2 class="accordion-header" :id="'preview-heading-' + index">
+                    <h2 :id="'preview-heading-' + index" class="accordion-header">
                       <button
                         class="accordion-button collapsed"
                         type="button"
@@ -703,73 +704,72 @@ import MultiColumnEditor from './MultiColumnEditor.vue';
 import AccordionEditor from './AccordionEditor.vue';
 import { useCore } from '@/core/store/core';
 
- import { Ckeditor } from '@ckeditor/ckeditor5-vue';
+import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 
 // In Vue 3 <script setup> werden Komponenten automatisch registriert
 
 import {
-	ClassicEditor,
-	Alignment,
-	Autoformat,
-	AutoImage,
-	AutoLink,
-	Autosave,
-	BalloonToolbar,
-	BlockQuote,
-	BlockToolbar,
-	Bold,
-	Bookmark,
-	CloudServices,
-	Code,
-	CodeBlock,
-	Essentials,
-	FindAndReplace,
-	FullPage,
-	Fullscreen,
-	GeneralHtmlSupport,
-	Heading,
-	HorizontalLine,
-	ImageBlock,
-	ImageCaption,
-	ImageInline,
-	ImageInsertViaUrl,
-	ImageResize,
-	ImageStyle,
-	ImageTextAlternative,
-	ImageToolbar,
-	ImageUpload,
-	Indent,
-	IndentBlock,
-	Italic,
-	Link,
-	LinkImage,
-	List,
-	ListProperties,
-	// Markdown plugin removed to fix HTML output
-	MediaEmbed,
-	Paragraph,
-	// PasteFromMarkdownExperimental plugin removed to fix HTML output
-	PasteFromOffice,
-	ShowBlocks,
-	SourceEditing,
-	SpecialCharacters,
-	SpecialCharactersArrows,
-	SpecialCharactersCurrency,
-	SpecialCharactersEssentials,
-	SpecialCharactersLatin,
-	SpecialCharactersMathematical,
-	SpecialCharactersText,
-	Style,
-	Table,
-	TableCaption,
-	TableCellProperties,
-	TableColumnResize,
-	TableProperties,
-	TableToolbar,
-	TextTransformation,
-	TodoList
+  ClassicEditor,
+  Alignment,
+  Autoformat,
+  AutoImage,
+  AutoLink,
+  Autosave,
+  BalloonToolbar,
+  BlockQuote,
+  BlockToolbar,
+  Bold,
+  Bookmark,
+  CloudServices,
+  Code,
+  CodeBlock,
+  Essentials,
+  FindAndReplace,
+  FullPage,
+  Fullscreen,
+  GeneralHtmlSupport,
+  Heading,
+  HorizontalLine,
+  ImageBlock,
+  ImageCaption,
+  ImageInline,
+  ImageInsertViaUrl,
+  ImageResize,
+  ImageStyle,
+  ImageTextAlternative,
+  ImageToolbar,
+  ImageUpload,
+  Indent,
+  IndentBlock,
+  Italic,
+  Link,
+  LinkImage,
+  List,
+  ListProperties,
+  // Markdown plugin removed to fix HTML output
+  MediaEmbed,
+  Paragraph,
+  // PasteFromMarkdownExperimental plugin removed to fix HTML output
+  PasteFromOffice,
+  ShowBlocks,
+  SourceEditing,
+  SpecialCharacters,
+  SpecialCharactersArrows,
+  SpecialCharactersCurrency,
+  SpecialCharactersEssentials,
+  SpecialCharactersLatin,
+  SpecialCharactersMathematical,
+  SpecialCharactersText,
+  Style,
+  Table,
+  TableCaption,
+  TableCellProperties,
+  TableColumnResize,
+  TableProperties,
+  TableToolbar,
+  TextTransformation,
+  TodoList
 } from 'ckeditor5';
-
 
 import translations from 'ckeditor5/translations/de.js';
 
@@ -790,261 +790,261 @@ const editor = ClassicEditor;
 
 // Editor-Konfiguration aus dem Builder
 const config = computed(() => {
-	if (!isLayoutReady.value) {
-		return null;
-	}
+  if (!isLayoutReady.value) {
+    return null;
+  }
 
-	return {
-		toolbar: {
-			items: [
-				'sourceEditing',
-				'showBlocks',
-				'findAndReplace',
-				'fullscreen',
-				'|',
-				'heading',
-				'style',
-				'|',
-				'bold',
-				'italic',
-				'code',
-				'|',
-				'specialCharacters',
-				'horizontalLine',
-				'link',
-				'bookmark',
-				'insertImageViaUrl',
-				'mediaEmbed',
-				'insertTable',
-				'blockQuote',
-				'codeBlock',
-				'|',
-				'alignment',
-				'|',
-				'bulletedList',
-				'numberedList',
-				'todoList',
-				'outdent',
-				'indent'
-			],
-			shouldNotGroupWhenFull: true
-		},
-		plugins: [
-			Alignment,
-			Autoformat,
-			AutoImage,
-			AutoLink,
-			Autosave,
-			BalloonToolbar,
-			BlockQuote,
-			BlockToolbar,
-			Bold,
-			Bookmark,
-			CloudServices,
-			Code,
-			CodeBlock,
-			Essentials,
-			FindAndReplace,
-			FullPage,
-			Fullscreen,
-			GeneralHtmlSupport,
-			Heading,
-			HorizontalLine,
-			ImageBlock,
-			ImageCaption,
-			ImageInline,
-			ImageInsertViaUrl,
-			ImageResize,
-			ImageStyle,
-			ImageTextAlternative,
-			ImageToolbar,
-			ImageUpload,
-			Indent,
-			IndentBlock,
-			Italic,
-			Link,
-			LinkImage,
-			List,
-			ListProperties,
-			// Markdown plugin removed
-			MediaEmbed,
-			Paragraph,
-			// PasteFromMarkdownExperimental plugin removed
-			PasteFromOffice,
-			ShowBlocks,
-			SourceEditing,
-			SpecialCharacters,
-			SpecialCharactersArrows,
-			SpecialCharactersCurrency,
-			SpecialCharactersEssentials,
-			SpecialCharactersLatin,
-			SpecialCharactersMathematical,
-			SpecialCharactersText,
-			Style,
-			Table,
-			TableCaption,
-			TableCellProperties,
-			TableColumnResize,
-			TableProperties,
-			TableToolbar,
-			TextTransformation,
-			TodoList
-		],
-		balloonToolbar: ['bold', 'italic', '|', 'link', '|', 'bulletedList', 'numberedList'],
-		blockToolbar: ['bold', 'italic', '|', 'link', 'insertTable', '|', 'bulletedList', 'numberedList', 'outdent', 'indent'],
-		fullscreen: {
-			onEnterCallback: container =>
-				container.classList.add(
-					'editor-container',
-					'editor-container_classic-editor',
-					'editor-container_include-style',
-					'editor-container_include-block-toolbar',
-					'editor-container_include-fullscreen',
-					'main-container'
-				)
-		},
-		heading: {
-			options: [
-				{
-					model: 'paragraph',
-					title: 'Paragraph',
-					class: 'ck-heading_paragraph'
-				},
-				{
-					model: 'heading1',
-					view: 'h1',
-					title: 'Heading 1',
-					class: 'ck-heading_heading1'
-				},
-				{
-					model: 'heading2',
-					view: 'h2',
-					title: 'Heading 2',
-					class: 'ck-heading_heading2'
-				},
-				{
-					model: 'heading3',
-					view: 'h3',
-					title: 'Heading 3',
-					class: 'ck-heading_heading3'
-				},
-				{
-					model: 'heading4',
-					view: 'h4',
-					title: 'Heading 4',
-					class: 'ck-heading_heading4'
-				},
-				{
-					model: 'heading5',
-					view: 'h5',
-					title: 'Heading 5',
-					class: 'ck-heading_heading5'
-				},
-				{
-					model: 'heading6',
-					view: 'h6',
-					title: 'Heading 6',
-					class: 'ck-heading_heading6'
-				}
-			]
-		},
-		htmlSupport: {
-			allow: [
-				{
-					name: /^.*$/,
-					styles: true,
-					attributes: true,
-					classes: true
-				}
-			]
-		},
-		image: {
-			toolbar: [
-				'toggleImageCaption',
-				'imageTextAlternative',
-				'|',
-				'imageStyle:inline',
-				'imageStyle:wrapText',
-				'imageStyle:breakText',
-				'|',
-				'resizeImage'
-			]
-		},
-		language: 'de',
-		licenseKey: LICENSE_KEY,
-		link: {
-			addTargetToExternalLinks: true,
-			defaultProtocol: 'https://',
-			decorators: {
-				toggleDownloadable: {
-					mode: 'manual',
-					label: 'Downloadable',
-					attributes: {
-						download: 'file'
-					}
-				}
-			}
-		},
-		list: {
-			properties: {
-				styles: true,
-				startIndex: true,
-				reversed: true
-			}
-		},
-		menuBar: {
-			isVisible: true
-		},
-		placeholder: 'Type or paste your content here!',
-		style: {
-			definitions: [
-				{
-					name: 'Article category',
-					element: 'h3',
-					classes: ['category']
-				},
-				{
-					name: 'Title',
-					element: 'h2',
-					classes: ['document-title']
-				},
-				{
-					name: 'Subtitle',
-					element: 'h3',
-					classes: ['document-subtitle']
-				},
-				{
-					name: 'Info box',
-					element: 'p',
-					classes: ['info-box']
-				},
-				{
-					name: 'CTA Link Primary',
-					element: 'a',
-					classes: ['btn', 'btn-primary']
-				},
-				{
-					name: 'CTA Link Secondary',
-					element: 'a',
-					classes: ['btn', 'btn-primary']
-				},
-				{
-					name: 'Marker',
-					element: 'span',
-					classes: ['marker']
-				},
-				{
-					name: 'Spoiler',
-					element: 'span',
-					classes: ['spoiler']
-				}
-			]
-		},
-		table: {
-			contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
-		},
-		translations: [translations]
-	};
+  return {
+    toolbar: {
+      items: [
+        'sourceEditing',
+        'showBlocks',
+        'findAndReplace',
+        'fullscreen',
+        '|',
+        'heading',
+        'style',
+        '|',
+        'bold',
+        'italic',
+        'code',
+        '|',
+        'specialCharacters',
+        'horizontalLine',
+        'link',
+        'bookmark',
+        'insertImageViaUrl',
+        'mediaEmbed',
+        'insertTable',
+        'blockQuote',
+        'codeBlock',
+        '|',
+        'alignment',
+        '|',
+        'bulletedList',
+        'numberedList',
+        'todoList',
+        'outdent',
+        'indent'
+      ],
+      shouldNotGroupWhenFull: true
+    },
+    plugins: [
+      Alignment,
+      Autoformat,
+      AutoImage,
+      AutoLink,
+      Autosave,
+      BalloonToolbar,
+      BlockQuote,
+      BlockToolbar,
+      Bold,
+      Bookmark,
+      CloudServices,
+      Code,
+      CodeBlock,
+      Essentials,
+      FindAndReplace,
+      FullPage,
+      Fullscreen,
+      GeneralHtmlSupport,
+      Heading,
+      HorizontalLine,
+      ImageBlock,
+      ImageCaption,
+      ImageInline,
+      ImageInsertViaUrl,
+      ImageResize,
+      ImageStyle,
+      ImageTextAlternative,
+      ImageToolbar,
+      ImageUpload,
+      Indent,
+      IndentBlock,
+      Italic,
+      Link,
+      LinkImage,
+      List,
+      ListProperties,
+      // Markdown plugin removed
+      MediaEmbed,
+      Paragraph,
+      // PasteFromMarkdownExperimental plugin removed
+      PasteFromOffice,
+      ShowBlocks,
+      SourceEditing,
+      SpecialCharacters,
+      SpecialCharactersArrows,
+      SpecialCharactersCurrency,
+      SpecialCharactersEssentials,
+      SpecialCharactersLatin,
+      SpecialCharactersMathematical,
+      SpecialCharactersText,
+      Style,
+      Table,
+      TableCaption,
+      TableCellProperties,
+      TableColumnResize,
+      TableProperties,
+      TableToolbar,
+      TextTransformation,
+      TodoList
+    ],
+    balloonToolbar: ['bold', 'italic', '|', 'link', '|', 'bulletedList', 'numberedList'],
+    blockToolbar: ['bold', 'italic', '|', 'link', 'insertTable', '|', 'bulletedList', 'numberedList', 'outdent', 'indent'],
+    fullscreen: {
+      onEnterCallback: container =>
+        container.classList.add(
+          'editor-container',
+          'editor-container_classic-editor',
+          'editor-container_include-style',
+          'editor-container_include-block-toolbar',
+          'editor-container_include-fullscreen',
+          'main-container'
+        )
+    },
+    heading: {
+      options: [
+        {
+          model: 'paragraph',
+          title: 'Paragraph',
+          class: 'ck-heading_paragraph'
+        },
+        {
+          model: 'heading1',
+          view: 'h1',
+          title: 'Heading 1',
+          class: 'ck-heading_heading1'
+        },
+        {
+          model: 'heading2',
+          view: 'h2',
+          title: 'Heading 2',
+          class: 'ck-heading_heading2'
+        },
+        {
+          model: 'heading3',
+          view: 'h3',
+          title: 'Heading 3',
+          class: 'ck-heading_heading3'
+        },
+        {
+          model: 'heading4',
+          view: 'h4',
+          title: 'Heading 4',
+          class: 'ck-heading_heading4'
+        },
+        {
+          model: 'heading5',
+          view: 'h5',
+          title: 'Heading 5',
+          class: 'ck-heading_heading5'
+        },
+        {
+          model: 'heading6',
+          view: 'h6',
+          title: 'Heading 6',
+          class: 'ck-heading_heading6'
+        }
+      ]
+    },
+    htmlSupport: {
+      allow: [
+        {
+          name: /^.*$/,
+          styles: true,
+          attributes: true,
+          classes: true
+        }
+      ]
+    },
+    image: {
+      toolbar: [
+        'toggleImageCaption',
+        'imageTextAlternative',
+        '|',
+        'imageStyle:inline',
+        'imageStyle:wrapText',
+        'imageStyle:breakText',
+        '|',
+        'resizeImage'
+      ]
+    },
+    language: 'de',
+    licenseKey: LICENSE_KEY,
+    link: {
+      addTargetToExternalLinks: true,
+      defaultProtocol: 'https://',
+      decorators: {
+        toggleDownloadable: {
+          mode: 'manual',
+          label: 'Downloadable',
+          attributes: {
+            download: 'file'
+          }
+        }
+      }
+    },
+    list: {
+      properties: {
+        styles: true,
+        startIndex: true,
+        reversed: true
+      }
+    },
+    menuBar: {
+      isVisible: true
+    },
+    placeholder: 'Type or paste your content here!',
+    style: {
+      definitions: [
+        {
+          name: 'Article category',
+          element: 'h3',
+          classes: ['category']
+        },
+        {
+          name: 'Title',
+          element: 'h2',
+          classes: ['document-title']
+        },
+        {
+          name: 'Subtitle',
+          element: 'h3',
+          classes: ['document-subtitle']
+        },
+        {
+          name: 'Info box',
+          element: 'p',
+          classes: ['info-box']
+        },
+        {
+          name: 'CTA Link Primary',
+          element: 'a',
+          classes: ['btn', 'btn-primary']
+        },
+        {
+          name: 'CTA Link Secondary',
+          element: 'a',
+          classes: ['btn', 'btn-primary']
+        },
+        {
+          name: 'Marker',
+          element: 'span',
+          classes: ['marker']
+        },
+        {
+          name: 'Spoiler',
+          element: 'span',
+          classes: ['spoiler']
+        }
+      ]
+    },
+    table: {
+      contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+    },
+    translations: [translations]
+  };
 });
 
 // Inhalte laden
@@ -1248,7 +1248,6 @@ const filteredSections = computed(() => {
   ).sort((a, b) => a.ordering - b.ordering);
 });
 
-
 // Zählt die Anzahl der Abschnitte für eine bestimmte Seite
 const countSections = (pageKey) => {
   return staticContents.value.filter(content => 
@@ -1289,8 +1288,6 @@ const prepareNewSection = async () => {
 
 // Apollo-Client
 const { resolveClient } = useApolloClient();
-
-
 
 // GraphQL-Queries und Mutations
 const FETCH_STATIC_CONTENTS = gql`
@@ -1721,10 +1718,8 @@ const editContent = async (content) => {
   }
 };
 
-
 const editorContainerElement = ref(null);
 const editorElement = ref(null);
-
 
 // Hilfsfunktion, um Kontext des aktuellen Benutzers zu erhalten (für Debugging)
 const getUserContext = async () => {
@@ -2047,7 +2042,6 @@ const directApiSaveContent = async (contentData) => {
   }
 };
 
-
 // Speichern und weiter bearbeiten
 const saveAndContinue = async () => {
   savingAndContinue.value = true;
@@ -2226,7 +2220,6 @@ const saveContentInternal = async (continueEditing) => {
             // Weiter mit Fallback-Strategien
           }
         }
-        
         
         try {
           const metaResult = await client.mutate({

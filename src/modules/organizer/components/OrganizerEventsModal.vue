@@ -1,7 +1,7 @@
 <template>
   <div
-    class="modal fade"
     id="organizerEventsModal"
+    class="modal fade"
     tabindex="-1"
     data-bs-backdrop="static"
     aria-labelledby="organizerEventsModalLabel"
@@ -10,7 +10,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="organizerEventsModalLabel">
+          <h5 id="organizerEventsModalLabel" class="modal-title">
             {{ $t("view.organizers.events.title") }} - {{ organizer?.username }}
           </h5>
           <button
@@ -84,16 +84,16 @@
                       <div class="d-flex">
                         <button 
                           class="btn btn-sm btn-primary me-2"
-                          @click.prevent="openTransferModal(event)"
                           :title="$t('view.organizers.events.transfer.title')"
+                          @click.prevent="openTransferModal(event)"
                         >
                           <i class="bi-arrow-right"></i>
                         </button>
                         <button 
                           v-if="event.originalOrganizer"
                           class="btn btn-sm btn-warning"
-                          @click.prevent="resetEventOrganizer(event)"
                           :title="$t('view.organizers.events.reset.title')"
+                          @click.prevent="resetEventOrganizer(event)"
                         >
                           <i class="bi-arrow-counterclockwise"></i>
                         </button>
@@ -147,16 +147,16 @@
                       <div class="d-flex">
                         <button 
                           class="btn btn-sm btn-primary me-2"
-                          @click.prevent="openTransferModal(event)"
                           :title="$t('view.organizers.events.transfer.title')"
+                          @click.prevent="openTransferModal(event)"
                         >
                           <i class="bi-arrow-right"></i>
                         </button>
                         <button 
                           v-if="event.originalOrganizer"
                           class="btn btn-sm btn-warning"
-                          @click.prevent="resetEventOrganizer(event)"
                           :title="$t('view.organizers.events.reset.title')"
+                          @click.prevent="resetEventOrganizer(event)"
                         >
                           <i class="bi-arrow-counterclockwise"></i>
                         </button>
@@ -186,15 +186,15 @@
                       <div class="d-flex flex-wrap mb-2">
                         <div class="me-2">
                           <span 
-                            class="badge text-bg-secondary"
                             v-if="createFormattedDateFromTimeStamp(event.scheduledDatetime) < getCurrentFormattedDate()"
+                            class="badge text-bg-secondary"
                           >
                             {{ $t("view.organizers.events.expired") }}
                           </span>
                           <span 
+                            v-else
                             class="badge"
                             :class="event.active ? 'text-bg-success' : 'text-bg-secondary'"
-                            v-else
                           >
                             {{ event.active ? $t("view.organizers.events.active") : $t("view.organizers.events.inactive") }}
                           </span>
@@ -221,8 +221,8 @@
                       <div class="d-flex">
                         <button 
                           class="btn btn-sm btn-warning"
-                          @click.prevent="resetEventOrganizer(event)"
                           :title="$t('view.organizers.events.reset.title')"
+                          @click.prevent="resetEventOrganizer(event)"
                         >
                           <i class="bi-arrow-counterclockwise"></i>
                         </button>

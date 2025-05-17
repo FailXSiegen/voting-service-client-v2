@@ -78,6 +78,12 @@ const isVisible = ref(false);
 const recentlyShown = ref(false);
 let recentlyShownTimeout = null;
 
+// Konsistente Initialisierung der isVisible-Referenz
+window.setTimeout(() => {
+  // Anfangsstatus für isVisible setzen, falls onMounted-Hooks noch nicht ausgeführt wurden
+  isVisible.value = false;
+}, 0);
+
 // Globaler Flag-Speicher, um den Status von poll.state zu verfolgen
 // Diese Variable erlaubt es uns, auf pollState Änderungen zu reagieren
 window._resultModalTracking = window._resultModalTracking || {};
@@ -130,7 +136,6 @@ function showModal() {
   
   // KRITISCHE SICHERHEITSPRÜFUNG: Wenn ein neuer Poll aktiv ist, das Modal NICHT öffnen
   if (window._newPollActive) {
-    console.warn("[DEBUG:VOTING] Ein neuer Poll ist aktiv, Ergebnis-Modal wird nicht geöffnet");
     return;
   }
   
@@ -146,7 +151,6 @@ function showModal() {
   
   // Zusätzliche Sicherheit: Bootstrap-Modal-Checks hinzufügen
   if (!modal.value || !bootstrapModal) {
-    console.error('[DEBUG:VOTING] Bootstrap-Modal nicht initialisiert');
     bootstrapModal = modal.value ? new Modal(modal.value) : null;
   }
   
@@ -160,7 +164,6 @@ function showModal() {
   if (bootstrapModal) {
     bootstrapModal.show();
   } else {
-    console.error('[DEBUG:VOTING] Konnte Modal nicht öffnen: bootstrapModal ist nicht definiert');
     // Setze Status zurück, wenn wir das Modal nicht öffnen konnten
     isVisible.value = false;
   }
@@ -225,11 +228,12 @@ function hideModal() {
       // Backdrop entfernen
       const backdrops = document.getElementsByClassName('modal-backdrop');
       if (backdrops.length > 0) {
-        for (let i = 0; i < backdrops.length; i++) {
-          if (backdrops[i] && backdrops[i].parentNode) {
-            backdrops[i].parentNode.removeChild(backdrops[i]);
+        // Array.from um eine echte Array-Kopie zu erstellen, da die HTMLCollection sich verändert wenn Elemente entfernt werden
+        Array.from(backdrops).forEach(backdrop => {
+          if (backdrop && backdrop.parentNode) {
+            backdrop.parentNode.removeChild(backdrop);
           }
-        }
+        });
       }
       
       // Modal-Open-Klasse vom Body entfernen
@@ -238,7 +242,21 @@ function hideModal() {
       // Zusätzlich overflow: hidden vom Body entfernen
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
+      
+      // Absolut sicherstellen, dass keine anderen Styles die Interaktion blockieren
+      document.body.style.pointerEvents = '';
+      
+      // Eventuelle fixierte Position zurücksetzen
+      document.body.style.position = '';
     }
+    
+    // Zusätzlich alle Overlays entfernen, die möglicherweise übriggeblieben sind
+    const overlays = document.querySelectorAll('.modal-backdrop, [data-bs-backdrop="static"]');
+    overlays.forEach(overlay => {
+      if (overlay && overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    });
   } catch (domError) {
     console.error('[DEBUG:VOTING] Fehler bei DOM-Manipulation:', domError);
   }

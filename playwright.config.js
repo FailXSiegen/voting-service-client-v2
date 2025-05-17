@@ -10,7 +10,7 @@ module.exports = defineConfig({
   timeout: 300000, // 5 minutes timeout for load tests
 
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://192.168.178.142:5173',
     trace: 'on-first-retry',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',

@@ -16,26 +16,26 @@
             <button 
               type="button" 
               class="btn btn-sm btn-outline-secondary me-1"
-              @click="moveItem(index, 'up')"
               :disabled="index === 0"
               title="Nach oben verschieben"
+              @click="moveItem(index, 'up')"
             >
               <i class="bi bi-arrow-up"></i>
             </button>
             <button 
               type="button" 
               class="btn btn-sm btn-outline-secondary me-1"
-              @click="moveItem(index, 'down')"
               :disabled="index === items.length - 1"
               title="Nach unten verschieben"
+              @click="moveItem(index, 'down')"
             >
               <i class="bi bi-arrow-down"></i>
             </button>
             <button 
               type="button" 
               class="btn btn-sm btn-outline-danger"
-              @click="removeItem(index)"
               title="Element entfernen"
+              @click="removeItem(index)"
             >
               <i class="bi bi-trash"></i>
             </button>
@@ -45,12 +45,12 @@
           <div class="mb-3">
             <label :for="'item-title-' + index" class="form-label">Titel</label>
             <input 
-              type="text" 
-              class="form-control"
-              :id="'item-title-' + index"
+              :id="'item-title-' + index" 
               v-model="item.title"
-              @input="updateItem(index)"
+              type="text"
+              class="form-control"
               placeholder="Titel des Akkordeon-Elements"
+              @input="updateItem(index)"
             >
           </div>
           <div class="mb-2">
@@ -71,10 +71,10 @@
               <div class="editor-container_classic-editor editor-container_include-style">
                 <div class="editor-container__editor">
                   <ckeditor
-                    :modelValue="item.content"
+                    :model-value="item.content"
                     :editor="editorClass"
                     :config="editorConfig"
-                    @update:modelValue="value => updateItemContent(index, value)"
+                    @update:model-value="value => updateItemContent(index, value)"
                     @ready="onEditorReady($event, index)"
                   />
                 </div>
@@ -167,6 +167,17 @@ export default {
         }
       },
       immediate: true
+    }
+  },
+  
+  mounted() {
+    // Initialize with empty items if no value provided
+    if (!this.value || !this.value.length) {
+      // Add an empty item
+      this.items.push({
+        title: '',
+        content: ''
+      });
     }
   },
   
@@ -321,17 +332,6 @@ export default {
 
       // Force component update to refresh previews
       this.$forceUpdate();
-    }
-  },
-  
-  mounted() {
-    // Initialize with empty items if no value provided
-    if (!this.value || !this.value.length) {
-      // Add an empty item
-      this.items.push({
-        title: '',
-        content: ''
-      });
     }
   }
 };

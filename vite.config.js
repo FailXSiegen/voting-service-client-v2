@@ -9,6 +9,9 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    host: '0.0.0.0', // Listen on all network interfaces
+  },
   plugins: [
     // Currently we only use this for bootstrap 4 modal because this requires jquery to have control over them modal.
     // TODO remove me with bootstrap 5

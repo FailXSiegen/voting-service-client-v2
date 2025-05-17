@@ -297,7 +297,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
                       console.log(`Organizer-Test: Aber "Lasttest" wurde im HTML gefunden - Titel könnte teilweise vorhanden sein`);
                     }
                   }
-                  
+
                   // Erstelle dynamische Selektoren basierend auf dem erwarteten Titel
                   let titleSelectors = [
                     'div.results-listing .h5',
@@ -328,20 +328,20 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
 
                   for (const selector of titleSelectors) {
                     console.log(`Organizer-Test: Prüfe Selektor: ${selector}`);
-                    
+
                     // Prüfe den Selektor mit try/catch
                     const isTitleVisible = await page.locator(selector).isVisible({ timeout: 1000 }).catch((e) => {
                       console.log(`Organizer-Test: Fehler beim Prüfen von Selektor ${selector}: ${e.message}`);
                       return false;
                     });
-                    
+
                     console.log(`Organizer-Test: Selektor ${selector} ist ${isTitleVisible ? 'sichtbar' : 'nicht sichtbar'}`);
-                    
+
                     if (isTitleVisible) {
                       try {
                         const titleText = await page.locator(selector).innerText();
                         console.log(`Organizer-Test: ERFOLG! Abstimmungstitel gefunden: "${titleText}"`);
-                        
+
                         // Prüfe, ob der gefundene Titel dem erwarteten Titel entspricht
                         if (expectedPollTitle && titleText.includes(expectedPollTitle)) {
                           console.log(`Organizer-Test: PERFEKT! Gefundener Titel enthält den erwarteten Titel "${expectedPollTitle}"`);
@@ -363,20 +363,20 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
                   // Wenn kein Titel gefunden wurde, versuche eine andere Methode
                   if (!resultTitleFound) {
                     console.log(`Organizer-Test: Keine Ergebnistitel mit Selektoren gefunden. Versuche allgemeine Textsuche...`);
-                    
+
                     // Allgemeine Textsuche auf der Seite
                     const bodyText = await page.evaluate(() => document.body.innerText);
                     if (expectedPollTitle && bodyText.includes(expectedPollTitle)) {
                       console.log(`Organizer-Test: ERFOLG! Erwarteter Titel "${expectedPollTitle}" wurde im Seitentext gefunden`);
                       resultTitleFound = true;
-                      
+
                       await page.screenshot({
                         path: path.join(screenshotsDir, `test-success-title-in-text.png`)
                       });
                     } else if (bodyText.includes("Lasttest")) {
                       console.log(`Organizer-Test: ERFOLG! "Lasttest" wurde im Seitentext gefunden`);
                       resultTitleFound = true;
-                      
+
                       await page.screenshot({
                         path: path.join(screenshotsDir, `test-success-lasttest-in-text.png`)
                       });
@@ -628,6 +628,10 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
           // Mit diesem Assert wird der Test fehlschlagen, wenn keine Abstimmungen erfolgreich waren
           expect(successfulVotes).toBeGreaterThan(0, `Test ${testId}: Keine erfolgreichen Abstimmungen - Poll wurde möglicherweise nicht korrekt gestartet`);
         }
+
+        // Zusätzliche Wartezeit von 60 Sekunden nach der Abstimmung
+        console.log(`[Test ${testId}] Warte 60 Sekunden nach erfolgreicher Abstimmung...`);
+        await new Promise(resolve => setTimeout(resolve, 60000));
 
         // Prüfe, ob die Abstimmungszeitdaten sinnvoll sind
         if (votingTimings.length > 0) {

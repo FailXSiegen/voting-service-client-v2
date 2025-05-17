@@ -5,8 +5,8 @@
         <h5 class="mb-0">Statische Inhalte verwalten</h5>
         <button 
           class="btn btn-sm btn-primary" 
-          @click="loadPages" 
-          :disabled="loading"
+          :disabled="loading" 
+          @click="loadPages"
         >
           <i class="bi bi-arrow-clockwise me-1"></i> Aktualisieren
         </button>
@@ -29,8 +29,8 @@
             <label for="pageSelector" class="form-label">Seite auswählen:</label>
             <select 
               id="pageSelector" 
-              class="form-select"
               v-model="selectedPageKey"
+              class="form-select"
               @change="onPageChange"
             >
               <option value="">-- Bitte wählen --</option>
@@ -50,12 +50,12 @@
             
             <div class="list-group mb-4">
               <a 
-                href="#" 
-                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                v-for="content in filteredContents"
+                v-for="content in filteredContents" 
                 :key="content.id"
-                @click.prevent="selectContent(content)"
+                href="#"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
                 :class="{ 'active': selectedContent && selectedContent.id === content.id }"
+                @click.prevent="selectContent(content)"
               >
                 <div>
                   <strong>{{ content.title || getSectionDisplayName(content.sectionKey) }}</strong>
@@ -69,8 +69,8 @@
                 <div>
                   <button 
                     class="btn btn-sm btn-outline-light me-1"
-                    @click.stop="togglePublish(content)"
                     :title="content.isPublished ? 'Zurückziehen' : 'Veröffentlichen'"
+                    @click.stop="togglePublish(content)"
                   >
                     <i class="bi" :class="content.isPublished ? 'bi-eye-slash' : 'bi-eye'"></i>
                   </button>
@@ -130,10 +130,10 @@
                   </div>
                   <div v-else class="list-group mb-3">
                     <a 
-                      href="#" 
-                      class="list-group-item list-group-item-action"
-                      v-for="version in contentHistory"
+                      v-for="version in contentHistory" 
                       :key="version.id"
+                      href="#"
+                      class="list-group-item list-group-item-action"
                       @click.prevent="previewVersion(version)"
                     >
                       <div class="d-flex justify-content-between">
@@ -146,15 +146,15 @@
                         <div>
                           <button 
                             class="btn btn-sm btn-outline-primary me-1"
-                            @click.stop="previewVersion(version)"
                             title="Vorschau"
+                            @click.stop="previewVersion(version)"
                           >
                             <i class="bi bi-eye"></i>
                           </button>
                           <button 
                             class="btn btn-sm btn-outline-success"
-                            @click.stop="restoreVersion(version)"
                             title="Wiederherstellen"
+                            @click.stop="restoreVersion(version)"
                           >
                             <i class="bi bi-arrow-counterclockwise"></i>
                           </button>
@@ -184,10 +184,10 @@
                     <div class="mb-3">
                       <label for="contentTitle" class="form-label">Titel</label>
                       <input 
-                        type="text" 
                         id="contentTitle" 
-                        class="form-control"
                         v-model="editForm.title" 
+                        type="text"
+                        class="form-control" 
                         required
                       />
                     </div>
@@ -195,10 +195,10 @@
                     <div class="mb-3">
                       <label for="contentSectionKey" class="form-label">Abschnitts-ID</label>
                       <input 
-                        type="text" 
                         id="contentSectionKey" 
-                        class="form-control"
                         v-model="editForm.sectionKey" 
+                        type="text"
+                        class="form-control" 
                         :disabled="!isNewContent"
                         required
                       />
@@ -210,10 +210,10 @@
                     <div class="mb-3">
                       <label for="contentOrder" class="form-label">Sortierreihenfolge</label>
                       <input 
-                        type="number" 
                         id="contentOrder" 
-                        class="form-control"
                         v-model.number="editForm.ordering" 
+                        type="number"
+                        class="form-control" 
                         min="0"
                       />
                     </div>
@@ -222,8 +222,8 @@
                       <label for="contentHtml" class="form-label">HTML-Inhalt</label>
                       <textarea 
                         id="contentHtml" 
-                        class="form-control" 
-                        v-model="editForm.content"
+                        v-model="editForm.content" 
+                        class="form-control"
                         rows="10"
                         required
                       ></textarea>
@@ -231,10 +231,10 @@
                     
                     <div class="mb-3 form-check">
                       <input 
-                        type="checkbox" 
                         id="contentPublished" 
-                        class="form-check-input"
                         v-model="editForm.isPublished" 
+                        type="checkbox"
+                        class="form-check-input" 
                       />
                       <label for="contentPublished" class="form-check-label">Veröffentlicht</label>
                     </div>
@@ -277,17 +277,17 @@
     
     <!-- Confirmation modal -->
     <div 
-      class="modal fade" 
       id="deleteConfirmModal" 
+      ref="deleteModal" 
+      class="modal fade" 
       tabindex="-1" 
-      aria-labelledby="deleteConfirmModalLabel" 
+      aria-labelledby="deleteConfirmModalLabel"
       aria-hidden="true"
-      ref="deleteModal"
     >
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="deleteConfirmModalLabel">Löschen bestätigen</h5>
+            <h5 id="deleteConfirmModalLabel" class="modal-title">Löschen bestätigen</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
           </div>
           <div class="modal-body">
@@ -298,8 +298,8 @@
             <button 
               type="button" 
               class="btn btn-danger" 
-              @click="deleteContent"
               :disabled="deleting"
+              @click="deleteContent"
             >
               <span v-if="deleting">
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

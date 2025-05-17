@@ -91,7 +91,7 @@ const httpLink = new HttpLink({
 });
 
 // Create the webSocket link with enhanced stability settings.
-// @info The server side authentication is done via refreshToken (cookie).
+// @info Die Server-Authentifizierung wird über den accessToken (JWT) im localStorage gemacht
 const wsLink = new GraphQLWsLink(
   createClient({
     url: URLS.SUBSCRIPTION_URL,
@@ -107,10 +107,30 @@ const wsLink = new GraphQLWsLink(
     keepAlive: 45000, // 45 Sekunden Ping-Intervall
     // VERBESSERT: Verbindung auch bei Inaktivität halten
     shouldRetry: () => true,
-    connectionParams: {
-      // Zusätzliche Parameter für bessere Zuverlässigkeit
-      connectionPresence: true,
-      forceReconnect: true
+    // VERBESSERT: Opera-kompatible Authentifizierung über localStorage statt Cookies
+    isFatalConnectionProblem: () => false,
+    connectionParams: async () => {
+      // Verwende JWT aus localStorage für die Authentifizierung
+      let authParams = {
+        connectionPresence: true,
+        forceReconnect: true
+      };
+      
+      try {
+        // PRIMÄR: Auth Token aus localStorage verwenden (für alle Browser)
+        const accessToken = localStorage.getItem(AUTH_TOKEN);
+        if (accessToken) {
+          // Standard JWT-Authentifizierungs-Header
+          authParams.authorization = `Bearer ${accessToken}`;
+          console.info('[Websocket] Auth-Token für WebSocket-Verbindung bereitgestellt');
+        } else {
+          console.warn('[Websocket] Kein Auth-Token im localStorage gefunden!');
+        }
+      } catch (e) {
+        console.warn('[Websocket] Fehler beim Abrufen des Auth-Tokens:', e);
+      }
+      
+      return authParams;
     }
   }),
 );
@@ -220,8 +240,25 @@ function startWebSocketKeepAlive() {
             }
           `,
           fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+          context: {
+            credentials: 'include', // Cookies auch beim Keep-Alive mitsenden
+          }
         }).then(() => {
-
+          // Erfolgreicher Keep-Alive, Updates für den Online-Status
+          try {
+            const coreStore = useCore();
+            if (coreStore && coreStore.isActiveEventUserSession) {
+              coreStore.setEventUserOnlineState(true);
+              
+              // Nach erfolgreicher Keep-Alive-Anfrage auch die letzte Aktivitätszeit aktualisieren,
+              // um zu verhindern, dass der Inactivity-Cleanup-Service den Benutzer als offline markiert
+              // (Da dieser eine 15-Minuten-Grenze verwendet - siehe inactivity-cleanup.js)
+              const now = Math.floor(Date.now() / 1000); // Unix-Timestamp in Sekunden
+              localStorage.setItem('lastActiveTimestamp', now.toString());
+            }
+          } catch (storeError) {
+            console.warn("[Websocket] Keep-Alive Store-Update fehlgeschlagen:", storeError);
+          }
         }).catch((error) => {
           console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
         });
@@ -370,6 +407,9 @@ export async function reconnectWebsocketClient() {
           }
         `,
         fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+        context: {
+          credentials: 'include', // Sicherstellen, dass Cookies bei der HTTP-Anfrage gesendet werden
+        }
       });
       console.info("[Websocket] Sofortiges Keep-Alive nach Verbindungsaufbau gesendet");
     } catch (keepAliveError) {
@@ -381,6 +421,13 @@ export async function reconnectWebsocketClient() {
     
     // 7. Aktualisiere den Apollo-Store, um sicherzustellen, dass alle Abonnements wieder aktiv sind
     await apolloClient.resetStore();
+    
+    // 8. Logge die Cookie-Verfügbarkeit für Debugging-Zwecke
+    try {
+      console.info("[Websocket] Cookie-Status:", document.cookie ? "Cookies vorhanden" : "Keine Cookies verfügbar");
+    } catch (e) {
+      console.warn("[Websocket] Cookie-Status konnte nicht geprüft werden:", e);
+    }
     
     return true;
   } catch (error) {

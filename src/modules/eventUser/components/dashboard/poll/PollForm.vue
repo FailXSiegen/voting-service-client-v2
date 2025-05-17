@@ -126,7 +126,12 @@
           :has-errors="false"
           @change="
             ({ value }) => {
-              formData.singleAnswer = parseInt(value, 10);
+              // Speichern der Antwort-ID - diese kann als Zahl oder String vorliegen
+              // Daher senden wir den Wert exakt wie er empfangen wurde ohne Typ-Umwandlung
+              // Überprüfe zuerst, ob wir denselben Wert erneut setzen - falls ja, nichts tun
+              if (formData.singleAnswer !== value) {
+                formData.singleAnswer = value;
+              }
             }
           "
         />
@@ -146,7 +151,14 @@
           :selected-values="formData.multipleAnswers"
           @change="
             (value) => {
-              formData.multipleAnswers = value;
+              // Nur aktualisieren, wenn die Arrays unterschiedlich sind
+              // Dies verhindert unnötige reaktive Aktualisierungen
+              if (!Array.isArray(formData.multipleAnswers) || 
+                  !Array.isArray(value) ||
+                  formData.multipleAnswers.length !== value.length ||
+                  formData.multipleAnswers.some((v, i) => v !== value[i])) {
+                formData.multipleAnswers = value;
+              }
             }
           "
         />
@@ -204,6 +216,7 @@ type="submit" class="btn btn-primary mx-auto d-block h1"
 import { handleError } from "@/core/error/error-handler";
 import { InvalidFormError } from "@/core/error/InvalidFormError";
 import { computed, reactive, watch, onMounted, onUnmounted, ref, inject } from "vue";
+import { detectBrowser, isLocalStorageAvailable } from "@/core/utils/browser-compatibility";
 import { and, or, required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import RadioInput from "@/core/components/form/RadioInput.vue";
@@ -247,6 +260,8 @@ const votingProcess = useVotingProcess(props.eventUser, props.event);
 
 // Einfacher lokaler State
 const isSubmitting = ref(false);
+const safariCompatibilityMode = ref(false);
+const storageFunctional = ref(true);
 
 const voteType = computed(() => {
   if (props.poll.maxVotes === 1) {
@@ -280,8 +295,24 @@ const remainingVotes = computed(() => {
   return props.eventUser.voteAmount - props.voteCounter + 1;
 });
 
-const hasMultipleVotes = computed(() => {
+// Ursprüngliche Berechnung, ob mehrere Stimmen vorhanden sind
+const rawHasMultipleVotes = computed(() => {
   return props.eventUser.voteAmount > 1 && props.event.multivoteType === 1;
+});
+
+// Sicherer Berechnungsweg für hasMultipleVotes mit expliziter Typ-Konvertierung
+// und Fallback für Safari und problematische Browser
+const hasMultipleVotes = computed(() => {
+  // Standard-Berechnung
+  const standardCheck = parseInt(props.eventUser.voteAmount || 0, 10) > 1 && 
+                        parseInt(props.event.multivoteType || 0, 10) === 1;
+  
+  // Safari-Kompatibilitätsmodus, falls aktiviert oder Browser-Probleme erkannt wurden
+  if (safariCompatibilityMode.value || !storageFunctional.value) {
+    return standardCheck || (parseInt(props.eventUser.voteAmount || 0, 10) > 1);
+  }
+  
+  return standardCheck;
 });
 
 // Berechne den Prozentsatz der verbleibenden Stimmen im Verhältnis zur Gesamtstimmzahl
@@ -302,25 +333,47 @@ const formData = reactive({
 // wenn zu einer neuen Abstimmung gewechselt wird
 watch(() => props.poll?.id, (newPollId, oldPollId) => {
   if (newPollId && oldPollId && newPollId !== oldPollId) {
+    // Vermeide rekursive Updates, indem wir die Aktualisierung verzögern
+    setTimeout(() => {
+      // KRITISCH: Alte Poll-Daten aus localStorage löschen
+      try {
+        localStorage.removeItem(`poll_form_data_${oldPollId}`);
+      } catch (e) {
+        console.error('Fehler beim Löschen der localStorage-Daten:', e);
+      }
 
-    // KRITISCH: Alte Poll-Daten aus localStorage löschen
-    localStorage.removeItem(`poll_form_data_${oldPollId}`);
+      // Formular vollständig zurücksetzen
+      reset(false);
 
-    // Formular vollständig zurücksetzen
-    reset(false);
-
-    // Mit maximaler Stimmenzahl neu starten
-    formData.useAllAvailableVotes = true;
-    formData.votesToUse = remainingVotes.value;
+      // Mit maximaler Stimmenzahl neu starten
+      // Nur wenn die Werte nicht bereits gesetzt sind
+      if (!formData.useAllAvailableVotes) {
+        formData.useAllAvailableVotes = true;
+      }
+      
+      if (formData.votesToUse !== remainingVotes.value) {
+        formData.votesToUse = remainingVotes.value;
+      }
+    }, 10); // Eine kleine Verzögerung für bessere Event-Verarbeitung
   }
 }, { immediate: true });
 
 // WICHTIG: Beobachte auch remainingVotes, um bei jeder Änderung das Formular auf 100% zu setzen
-watch(() => remainingVotes.value, (newValue) => {
-  // Bei jeder Änderung der verbleibenden Stimmen garantiert 100% setzen
-  formData.useAllAvailableVotes = true;
-  formData.votesToUse = newValue;
-});
+watch(() => remainingVotes.value, (newValue, oldValue) => {
+  // Nur reagieren, wenn sich der Wert tatsächlich geändert hat
+  if (newValue === oldValue) return;
+  
+  // Rekursion-Schutz: Stelle sicher, dass wir nicht in eine Endlosschleife geraten
+  // indem wir prüfen, ob wir bereits auf dem aktuellen Wert sind
+  if (formData.votesToUse !== newValue) {
+    formData.votesToUse = newValue;
+  }
+  
+  // Checkbox nur setzen, wenn der Zustand sich ändert
+  if (!formData.useAllAvailableVotes) {
+    formData.useAllAvailableVotes = true;
+  }
+}, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
 
 onMounted(() => {
   // Immer mit maximaler Stimmenzahl starten
@@ -329,10 +382,45 @@ onMounted(() => {
 
   // KRITISCH: Beim ersten Laden sicherstellen, dass keine alten Daten vorhanden sind
   if (props.poll && props.poll.id) {
-    // Alte Daten löschen
-    localStorage.removeItem(`poll_form_data_${props.poll.id}`);
+    // Alte Daten löschen - mit sicherer Fehlerbehandlung
+    try {
+      localStorage.removeItem(`poll_form_data_${props.poll.id}`);
+    } catch (e) {
+      console.error('Fehler beim Löschen von localStorage-Daten:', e);
+      storageFunctional.value = false;
+    }
   }
-
+  
+  // Browser-Erkennung für Safari und andere problematische Browser
+  const browser = detectBrowser();
+  
+  // Spezieller Safari-Kompatibilitätsmodus
+  if (browser.isSafari) {
+    console.info('Safari erkannt - Prüfe localStorage-Funktionalität');
+    
+    // Prüfe, ob localStorage funktioniert
+    storageFunctional.value = isLocalStorageAvailable();
+    
+    if (!storageFunctional.value) {
+      console.warn('localStorage-Probleme erkannt - aktiviere Safari-Kompatibilitätsmodus');
+      safariCompatibilityMode.value = true;
+    }
+  }
+  
+  // Prüfe explizit, ob voteAmount korrekt funktioniert
+  if (typeof props.eventUser.voteAmount === 'undefined' || props.eventUser.voteAmount === null) {
+    console.warn('voteAmount ist undefiniert oder null - aktiviere Kompatibilitätsmodus');
+    safariCompatibilityMode.value = true;
+  }
+  
+  // Wenn Kompatibilitätsmodus aktiv ist, stelle sicher, dass der Formular-Reset korrekt funktioniert
+  if (safariCompatibilityMode.value) {
+    // Sicherstellen, dass useAllAvailableVotes und votesToUse korrekt gesetzt sind
+    setTimeout(() => {
+      formData.useAllAvailableVotes = true;
+      formData.votesToUse = remainingVotes.value;
+    }, 100);
+  }
 });
 
 function setVotePercentage(percentage) {
@@ -351,9 +439,14 @@ function setVotePercentage(percentage) {
 }
 
 function onCheckboxChange(isChecked) {
+  // Überprüfe, ob sich der Zustand tatsächlich geändert hat
+  if (formData.useAllAvailableVotes === isChecked) return;
+  
   formData.useAllAvailableVotes = isChecked;
 
-  if (isChecked) {
+  // Nur die Stimmenzahl aktualisieren, wenn wir "Alle Stimmen" auswählen
+  // und der aktuelle Wert nicht bereits die maximale Stimmenzahl ist
+  if (isChecked && formData.votesToUse !== remainingVotes.value) {
     formData.votesToUse = remainingVotes.value;
   }
 
@@ -370,16 +463,31 @@ function handleAbstainChange(isChecked) {
 }
 
 watch(() => formData.votesToUse, (newValue, oldValue) => {
+  // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
+  // wenn sich der Wert tatsächlich geändert hat
+  if (newValue === oldValue) return;
+  
+  let correctedValue = newValue;
+  
+  // Korrigiere den Wert, wenn er außerhalb des gültigen Bereichs liegt
   if (newValue < 1) {
-    formData.votesToUse = 1;
+    correctedValue = 1;
   } else if (newValue > remainingVotes.value) {
-    formData.votesToUse = remainingVotes.value;
+    correctedValue = remainingVotes.value;
   }
-
-  if (newValue !== oldValue) {
-    formData.useAllAvailableVotes = (formData.votesToUse === remainingVotes.value);
+  
+  // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
+  if (correctedValue !== newValue) {
+    formData.votesToUse = correctedValue;
   }
-});
+  
+  // Synchronisiere die "Alle Stimmen verwenden" Checkbox 
+  // aber nur wenn sich der Wert tatsächlich geändert hat
+  const shouldUseAllVotes = (correctedValue === remainingVotes.value);
+  if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
+    formData.useAllAvailableVotes = shouldUseAllVotes;
+  }
+}, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
 
 // Bei Änderung des abstain-Status nur die Formularvalidierung aktualisieren,
 // aber keine automatische Änderung an der Stimmenzahl vornehmen
@@ -465,7 +573,6 @@ async function onSubmit() {
       alert('Bitte treffen Sie eine Auswahl');
       return;
     }
-    
     
     // Prüfe, ob ein Radio-Button ausgewählt wurde bei Single-Choice-Abstimmungen
     // Überspringen wenn Enthaltung gewählt ist

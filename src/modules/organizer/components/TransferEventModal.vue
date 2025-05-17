@@ -1,7 +1,7 @@
 <template>
   <div
-    class="modal fade"
     id="transferEventModal"
+    class="modal fade"
     tabindex="-1"
     data-bs-backdrop="static"
     aria-labelledby="transferEventModalLabel"
@@ -10,7 +10,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="transferEventModalLabel">
+          <h5 id="transferEventModalLabel" class="modal-title">
             {{ $t("view.organizers.events.transfer.title") }}
           </h5>
           <button
@@ -71,8 +71,8 @@
           <button
             type="button"
             class="btn btn-primary"
-            @click="transferEvent"
             :disabled="!selectedOrganizerId || transferring"
+            @click="transferEvent"
           >
             <span v-if="transferring" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
             {{ $t("view.organizers.events.transfer.submit") }}

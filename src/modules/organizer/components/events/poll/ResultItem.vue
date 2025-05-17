@@ -33,7 +33,7 @@
     </div>
 
     <div class="card-body">
-      <div class="row mb-3" v-if="isCustomPoll">
+      <div v-if="isCustomPoll" class="row mb-3">
         <div class="col-12">
           <div class="btn-group d-print-none" role="group">
             <button
@@ -60,7 +60,6 @@
             >
               {{ $t("view.results.percentageOfValidVotes") }}
             </button>
-
          
           </div>
         </div>
@@ -106,14 +105,16 @@
                       ({{ getAnswerPercentage(answer.length) }})
                     </span>
                     <span v-if="isMajority(answer.length)" class="text-success ms-1">
-                      <span v-if="isAbsoluteMajority(answer.length)" 
+                      <span
+v-if="isAbsoluteMajority(answer.length)" 
                             class="majority-indicator"
                             data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
                             :title="$t('Absolute Mehrheit: Mehr als 50% der Stimmen je nach ausgewählter Berechnungsmethode')">
                         {{ $t("view.results.absoluteMajority") }}
                       </span>
-                      <span v-else
+                      <span
+v-else
                             class="majority-indicator"
                             data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
@@ -127,7 +128,7 @@
             </ul>
           </div>
 
-          <div class="mt-3" v-if="isCustomPoll">
+          <div v-if="isCustomPoll" class="mt-3">
             <p class="mb-1"><strong>{{ $t("view.results.percentageExplanation") }}</strong></p>
             <ul class="small text-muted">
               <li v-if="localPercentageType === 'validVotes'">

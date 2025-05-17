@@ -18,17 +18,17 @@
           <h6>Neues Bild hochladen</h6>
           <div class="input-group mb-3">
             <input 
+              id="mediaUpload" 
               type="file" 
               class="form-control" 
-              id="mediaUpload" 
               accept="image/*"
               @change="handleFileSelect"
             >
             <button 
               class="btn btn-primary" 
               type="button" 
-              @click="uploadFile"
               :disabled="!selectedFile || uploading"
+              @click="uploadFile"
             >
               <span v-if="uploading" class="spinner-border spinner-border-sm me-1"></span>
               Hochladen

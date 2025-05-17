@@ -1,5 +1,83 @@
 export function usePollStatePersistence() {
-  const persistence = window.localStorage;
+  // Sichere Wrapper-Funktionen für localStorage-Zugriffe
+  let persistence = {
+    getItem: function(key) {
+      try {
+        return window.localStorage.getItem(key);
+      } catch (e) {
+        console.error(`[Storage] Fehler beim Lesen von ${key}:`, e);
+        return null;
+      }
+    },
+    setItem: function(key, value) {
+      try {
+        window.localStorage.setItem(key, value);
+        return true;
+      } catch (e) {
+        console.error(`[Storage] Fehler beim Schreiben von ${key}:`, e);
+        return false;
+      }
+    },
+    removeItem: function(key) {
+      try {
+        window.localStorage.removeItem(key);
+        return true;
+      } catch (e) {
+        console.error(`[Storage] Fehler beim Löschen von ${key}:`, e);
+        return false;
+      }
+    },
+    key: function(index) {
+      try {
+        return window.localStorage.key(index);
+      } catch (e) {
+        console.error(`[Storage] Fehler beim Zugriff auf Index ${index}:`, e);
+        return null;
+      }
+    },
+    get length() {
+      try {
+        return window.localStorage.length;
+      } catch (e) {
+        console.error(`[Storage] Fehler beim Zugriff auf length:`, e);
+        return 0;
+      }
+    }
+  };
+  
+  // Bei Initialisierung prüfen, ob localStorage verfügbar ist
+  let storageAvailable = true;
+  try {
+    window.localStorage.setItem('test-storage', 'test');
+    window.localStorage.removeItem('test-storage');
+  } catch (e) {
+    console.warn('[Storage] localStorage nicht verfügbar, verwende Memory-Fallback:', e);
+    storageAvailable = false;
+  }
+  
+  // Wenn localStorage nicht verfügbar ist, verwende In-Memory-Speicher als Fallback
+  if (!storageAvailable) {
+    const memoryStorage = {};
+    persistence = {
+      getItem: function(key) {
+        return memoryStorage[key] || null;
+      },
+      setItem: function(key, value) {
+        memoryStorage[key] = value;
+        return true;
+      },
+      removeItem: function(key) {
+        delete memoryStorage[key];
+        return true;
+      },
+      key: function(index) {
+        return Object.keys(memoryStorage)[index] || null;
+      },
+      get length() {
+        return Object.keys(memoryStorage).length;
+      }
+    };
+  }
 
   function generateIdentifier(pollId) {
     return `poll-persistence-${pollId}`;
@@ -21,14 +99,43 @@ export function usePollStatePersistence() {
    * @returns {boolean}
    */
   function canVote(pollId, eventUser, event) {
+    // Sicherheitsprüfungen für Parameter
+    if (!pollId || !eventUser || !event) {
+      console.warn('[Storage] canVote: Ungültige Parameter', { pollId, eventUser, event });
+      return true; // Im Zweifelsfall erlauben wir die Abstimmung
+    }
+    
+    // Sichere Extraktion der Event-ID
+    const eventId = event.id || (typeof event === 'object' && event.value ? event.value.id : null);
+    if (!eventId) {
+      console.warn('[Storage] canVote: Keine Event-ID gefunden', { event });
+      return true; // Im Zweifelsfall erlauben wir die Abstimmung
+    }
+    
     // Verwende die Event-ID + Poll-ID als Schlüssel für bessere Isolierung zwischen Abstimmungen
-    const stateKey = generateVoteStateKey(pollId, event.id);
-    const voteState = JSON.parse(persistence.getItem(stateKey) || '{"used": 0}');
-    const usedVotes = voteState.used || 0;
+    const stateKey = generateVoteStateKey(pollId, eventId);
+    
+    // Daten mit sicherer JSON-Parsing-Logik abrufen
+    let voteState = { used: 0 };
+    try {
+      const rawData = persistence.getItem(stateKey);
+      if (rawData) {
+        voteState = JSON.parse(rawData) || { used: 0 };
+      }
+    } catch (e) {
+      console.error(`[Storage] canVote: Fehler beim Parsen von ${stateKey}:`, e);
+      // Bei Fehler trotzdem weitermachen mit Standardwerten
+    }
+    
+    // Sichere Extraktion der voteAmount mit explizitem Fallback auf 1
+    const voteAmount = parseInt(eventUser.voteAmount || 1, 10);
+    const multivoteType = parseInt(event.multivoteType || 0, 10);
+    const usedVotes = parseInt(voteState.used || 0, 10);
 
+    // Logik für die Abstimmungsfähigkeit
     if (
-      usedVotes >= (eventUser.voteAmount || 1) ||
-      (usedVotes > 0 && event.multivoteType === 2)
+      usedVotes >= voteAmount ||
+      (usedVotes > 0 && multivoteType === 2)
     ) {
       return false;
     }
@@ -57,6 +164,17 @@ export function usePollStatePersistence() {
     if (eventId) {
       const stateKey = generateVoteStateKey(pollId, eventId);
 
+      // SICHERHEITSPRÜFUNG: Zuvor gespeicherte Werte abrufen, um maximale Stimmenzahl zu validieren
+      let previousState = {};
+      try {
+        const rawState = persistence.getItem(stateKey);
+        if (rawState) {
+          previousState = JSON.parse(rawState);
+        }
+      } catch (e) {
+        console.error(`[DEBUG:STORAGE] Fehler beim Lesen des vorherigen Zustands:`, e);
+      }
+      
       // Bei votes=99999 ist besondere Vorsicht geboten
       let computedUsedVotes;
       if (votes === 99999) {
@@ -66,12 +184,19 @@ export function usePollStatePersistence() {
         // Standardfall: used = votes - 1 oder expliziter Wert
         computedUsedVotes = usedVotes !== null ? usedVotes : votes - 1;
       }
+      
+      // SICHERHEITSMAßNAHME: Stelle sicher, dass wir niemals mehr als die erlaubten Stimmen zählen
+      if (previousState.voteAmount !== undefined && computedUsedVotes > previousState.voteAmount) {
+        console.warn(`[DEBUG:STORAGE] Begrenze gespeicherte Stimmen auf maximal erlaubte Anzahl: ${previousState.voteAmount}`);
+        computedUsedVotes = previousState.voteAmount;
+      }
 
       const voteState = {
         counter: votes,
         used: computedUsedVotes, // Entweder expliziter Wert oder berechnet
         maxVotesToUse: maxVotesToUse, // Speichere die maximal zu verwendenden Stimmen
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
+        voteAmount: previousState.voteAmount // Behalte die maximale Stimmanzahl bei, falls vorhanden
       };
 
       persistence.setItem(stateKey, JSON.stringify(voteState));
@@ -104,7 +229,6 @@ export function usePollStatePersistence() {
           possibleKeys.push(key);
         }
       }
-
 
       // Wenn wir genau einen Key gefunden haben, extrahieren wir die Event-ID
       if (possibleKeys.length === 1) {
@@ -205,7 +329,6 @@ export function usePollStatePersistence() {
           possibleKeys.push(key);
         }
       }
-
 
       // Wenn wir genau einen Key gefunden haben, extrahieren wir die Event-ID
       if (possibleKeys.length === 1) {

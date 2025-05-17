@@ -206,7 +206,6 @@ const activePollDetailsQuery = useQuery(
 activePollDetailsQuery.onResult(({ data, loading }) => {
   if (loading || !data?.activePollDetails) return;
   
-  
   // Poll-ID für Vergleich mit aktueller Poll
   const newPollId = data.activePollDetails.poll?.id;
   const currentPollId = localActivePollEventUser.value?.poll?.id;
