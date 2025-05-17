@@ -1975,7 +1975,6 @@ function resetUIAfterSubmission() {
             pollModal.value.pollForm.isSubmitting = false;
           }
           
-          
           // Verzögerung einbauen, um sicherzustellen, dass das DOM vollständig aufgebaut ist
           setTimeout(() => {
             try {
@@ -1998,37 +1997,47 @@ function resetUIAfterSubmission() {
                 console.error("[DEBUG:VOTING] Fehler beim Aufräumen vor Notfalleröffnung:", cleanupErr);
               }
               
+              // Einheitliche Methode zur Modal-Verwaltung statt mehrerer Fallback-Mechanismen
               if (pollModal.value) {
-                // Prüfe, ob das Bootstrap Modal-Objekt initialisiert werden muss
-                if (typeof Modal !== 'undefined' && (!pollModal.value.bootstrapModal || !pollModal.value.modal)) {
+                // Zentrale Funktion zur Modell-Initialisierung
+                const initializeAndShowModal = () => {
                   try {
-                    // Prüfen, ob das DOM-Element existiert
                     const modalElement = document.getElementById('pollModal');
                     if (modalElement) {
-                      // Neues Bootstrap Modal erstellen
-                      const newBootstrapModal = new Modal(modalElement);
-                      pollModal.value.bootstrapModal = newBootstrapModal;
+                      // Speichere das Modal-Element als Referenz
                       pollModal.value.modal = ref(modalElement);
+                      
+                      // Erstelle ein neues Bootstrap Modal mit einheitlicher Konfiguration
+                      const bootstrapModal = new Modal(modalElement, {
+                        backdrop: 'static',
+                        keyboard: false,
+                        focus: true
+                      });
+                      
+                      // Bootstrap-Modal konsistent als Property speichern
+                      pollModal.value.bootstrapModal = bootstrapModal;
+                      
+                      // Modal anzeigen
+                      bootstrapModal.show();
+                      
+                      // Zusätzlich Flag setzen
+                      pollModal.value.isVisible = ref(true);
+                      
+                      return true;
                     }
-                  } catch (initErr) {
-                    console.error("[DEBUG:VOTING] NOTFALL: Fehler bei Modal-Neuinitialisierung:", initErr);
+                    return false;
+                  } catch (err) {
+                    console.error("[DEBUG:VOTING] Fehler bei Modal-Initialisierung:", err);
+                    return false;
                   }
-                }
+                };
                 
-                // Direkter nativer Bootstrap-Ansatz als letzter Ausweg
-                try {
-                  const modalElement = document.getElementById('pollModal');
-                  if (modalElement) {
-                    const modal = new Modal(modalElement, {
-                      backdrop: 'static',
-                      keyboard: false
-                    });
-                    modal.show();
-                  }
-                } catch (directErr) {
-                  console.error("[DEBUG:VOTING] NOTFALL: Auch direkter Bootstrap-Ansatz fehlgeschlagen:", directErr);
-                  
-                  // Letzter Versuch: showModal verwenden
+                // Versuche das Modal zu initialisieren und anzuzeigen
+                const success = initializeAndShowModal();
+                
+                // Falls das nicht funktioniert hat, versuche die showModal-Methode als letzten Ausweg
+                if (!success && typeof pollModal.value.showModal === 'function') {
+                  console.warn("[DEBUG:VOTING] Fallback auf showModal-Methode");
                   pollModal.value.showModal();
                 }
               } else {

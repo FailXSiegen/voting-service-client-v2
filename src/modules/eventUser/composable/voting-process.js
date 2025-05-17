@@ -273,8 +273,10 @@ export function useVotingProcess(eventUser, event) {
       const maxAllowedVotes = eventUser.value.voteAmount;
       const remainingVotes = maxAllowedVotes - usedVotesCount.value;
 
-      // Speichere den aktuellen Server-Zyklus für korrekte Berechnung nach Reload
-      const serverVoteCycle = usedVotesCount.value;
+      // Hole den Server-Zyklus - dies ist die primäre Wahrheitsquelle für abgegebene Stimmen
+      // Bei Reload oder Seitenwechsel enthält dies den aktuellen Stand auf dem Server
+      // Beim ersten Aufruf enthält dies 0, da noch keine Stimmen abgegeben wurden
+      const serverVoteCycle = eventUser.value?.userVoteCycle?.voteCycle || 0;
 
       // KRITISCH: Prüfe ob es bereits eine gespeicherte maximale Stimmanzahl gibt
       // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
@@ -368,10 +370,12 @@ export function useVotingProcess(eventUser, event) {
       // LÖSUNG FÜR DAS RELOAD-PROBLEM: Explizite Prüfung für Reload-Zustand
       // Wir sind in einem Reload-Zustand, wenn eine der folgenden Bedingungen zutrifft:
       // 1. Die Poll-ID ist bekannt und gleich der aktuellen Poll-ID
-      // 2. Laut Server haben wir bereits Stimmen abgegeben (serverVoteCycle > 0)
+      // 2. Laut Server haben wir bereits Stimmen abgegeben (serverVoteCycle > 0) - PRIMÄRE QUELLE
       // 3. Oder wir haben bereits im lokalen Zustand Stimmen abgegeben (usedVotesCount.value > 0)
-      const isReload = (currentPollId.value === pollId && usedVotesCount.value > 0) ||
-        serverVoteCycle > 0 ||
+      
+      // Priorität: Server-Zyklus ist die primäre Quelle der Wahrheit, dann lokale Zähler
+      const isReload = serverVoteCycle > 0 || 
+        (currentPollId.value === pollId && usedVotesCount.value > 0) ||
         usedVotesCount.value > 0;
 
       // KRITISCH: Wir müssen hier auch die gewünschte Stimmenanzahl bei Reload erhalten
@@ -432,7 +436,7 @@ export function useVotingProcess(eventUser, event) {
       if (votesStillToProcess > 0) {
         // OPTIMIERUNG FÜR LAST-TESTS:
         // Kleinere Batch-Größe und adaptive Pausen
-        const BATCH_SIZE = 50; // Reduziert für bessere Skalierbarkeit bei hoher Last
+        const BATCH_SIZE = 500; // Erhöht für bessere Performance gemäß LOAD_TEST_PERFORMANCE_OPTIMIZATIONS.md
 
         // SICHERHEITSCHECK: Prüfe vor dem Start der Batch-Verarbeitung, ob der Poll noch offen ist
         if (poll.value && poll.value.closed) {
@@ -666,20 +670,36 @@ export function useVotingProcess(eventUser, event) {
             }
           }
 
-          // Adaptive Pause zwischen den Batches - längere Pausen bei höherer Last
-          // Die Pause verlängert sich, je mehr Stimmen bereits abgegeben wurden
+          // Dynamische Pause zwischen den Batches - basierend auf mehreren Faktoren
+          // Pause wird dynamisch an Last, Fortschritt und Systemkapazität angepasst
           if (batchStart + BATCH_SIZE < remainingVotesToProcess) {
-            // Berechne adaptive Pausenzeit basierend auf der Position im Gesamtprozess
-            // und der Anzahl der verbleibenden Stimmen
-            const processPercentage = batchStart / remainingVotesToProcess;
-            const baseDelay = 50; // Basis-Verzögerung von 100ms
-            const adaptiveDelay = baseDelay + Math.min(processPercentage * 400, 200); // Max +400ms zusätzlich
+            // 1. Faktor: Fortschritt der Abstimmung (progressiver Faktor)
+            const progressFactor = batchStart / remainingVotesToProcess;
+            
+            // 2. Faktor: Größe des verbleibenden Batches (lastsensitiver Faktor)
+            // Bei vielen verbleibenden Stimmen längere Pausen für bessere Verteilung
+            const remainingFactor = Math.min(1, (remainingVotesToProcess - batchStart) / 1000);
+            
+            // 3. Faktor: Systemlast abschätzen (basierend auf Erfolg des letzten Batches)
+            // Wenn der letzte Batch schnell durchlief, können wir kürzere Pausen einlegen
+            const systemLoadFactor = retryCount > 0 ? 1.5 : 1;
+            
+            // Niedrigere Basis-Verzögerung für allgemein bessere Performance
+            const baseDelay = 30; 
+            
+            // Kombinierte adaptive Verzögerung (alle Faktoren multipliziert)
+            const adaptiveComponent = Math.min(progressFactor * remainingFactor * 250, 120);
+            const adaptiveDelay = baseDelay + (adaptiveComponent * systemLoadFactor);
 
-            // Implementiere eine zufällige Schwankung, um Request-Clustering zu vermeiden
-            // Dies ist besonders wichtig bei vielen parallelen Clients
-            const jitter = Math.random() * 50 - 25; // +/- 25ms zufällige Schwankung
+            // Stochastische Komponente zur Vermeidung von Request-Clustering
+            // Dies verteilt die Anfragen zufällig im Zeitfenster
+            const jitterPercentage = 0.3; // 30% Schwankung
+            const jitterRange = adaptiveDelay * jitterPercentage;
+            const jitter = (Math.random() * jitterRange) - (jitterRange / 2);
 
-            const pauseTime = Math.round(adaptiveDelay + jitter);
+            // Endgültige Pause-Zeit berechnen und anwenden
+            const pauseTime = Math.max(10, Math.round(adaptiveDelay + jitter));
+            console.warn(`[DEBUG:VOTING] Adaptive Pause zwischen Batches: ${pauseTime}ms (Basis=${baseDelay}, Adaptiv=${adaptiveComponent}, Last=${systemLoadFactor})`);
             await new Promise(resolve => setTimeout(resolve, pauseTime));
           }
         }
@@ -689,51 +709,53 @@ export function useVotingProcess(eventUser, event) {
       currentlySubmittedInBatch.value = localSuccessCount;
 
       // Nach einem Reload muss der Zähler korrekt addiert werden
-      // Wir haben bereits bei der Initialisierung den Server-Wert übernommen
-      if (isReload) {
-        // Im Reload-Fall haben wir bereits zu Beginn den korrekten serverVoteCycle-Wert gesetzt
-        console.warn(`[DEBUG:VOTING] Bei Reload: usedVotesCount war vor Abstimmung ${usedVotesCount.value}`);
+      // VEREINFACHTE UND VERBESSERTE COUNTER-LOGIK: Gemeinsame Verarbeitung für normale und Reload-Fälle
+      if (localSuccessCount > 0) {
+        // Log für Diagnose
+        if (isReload) {
+          console.warn(`[DEBUG:VOTING] Bei Reload: usedVotesCount war vor Abstimmung ${usedVotesCount.value}`);
+          console.warn(`[DEBUG:VOTING] Bei Reload: Verarbeite ${localSuccessCount} neue Stimmen für diesen Batch`);
+        }
 
-        // KRITISCH: Bei einem Split-Vote-Cycle zählen wir auch bei Reload die tatsächlich abgegebenen Stimmen
-        if (localSuccessCount > 0) {
-          console.warn(`[DEBUG:VOTING] Bei Reload: Füge ${localSuccessCount} neue Stimmen für diesen Batch hinzu`);
-
-          // SICHERHEITSPRÜFUNG: Stellen sicher, dass wir nicht über das Maximum hinausgehen
-          const totalAllowedVotes = eventUser.value.voteAmount;
+        // SICHERHEITSPRÜFUNG: Bei Reload nur tatsächlich abgegebene Stimmen zum Zähler hinzufügen
+        const totalAllowedVotes = eventUser.value.voteAmount;
+        
+        // Bei Reload ist serverVoteCycle die primäre Wahrheitsquelle
+        if (isReload && serverVoteCycle > 0) {
+          // Statt einfach zu addieren, nehmen wir das Maximum aus serverVoteCycle und usedVotesCount
+          // Dadurch stellen wir sicher, dass wir bei Reloads keinen Zählerstand verlieren
+          const newCount = Math.max(serverVoteCycle, usedVotesCount.value);
+          
+          // Dann fügen wir die neuen erfolgreichen Stimmen hinzu
+          const potentialNewTotal = newCount + localSuccessCount;
+          
+          // Prüfen, ob wir das Maximum überschreiten würden
+          if (potentialNewTotal > totalAllowedVotes) {
+            const allowedAddition = Math.max(0, totalAllowedVotes - newCount);
+            console.warn(`[DEBUG:VOTING] Reload-Fall: Begrenze Stimmenaddition auf ${allowedAddition} (statt ${localSuccessCount})`);
+            usedVotesCount.value = newCount + allowedAddition;
+          } else {
+            usedVotesCount.value = potentialNewTotal;
+          }
+        } else {
+          // Standard-Fall (keine Reload-Situation)
           const potentialNewTotal = usedVotesCount.value + localSuccessCount;
-
-          // Prüfen, ob wir mehr hinzufügen als wir dürfen (sollte jetzt nicht mehr passieren dank Batch-Begrenzung)
+          
+          // Prüfen, ob wir mehr hinzufügen als wir dürfen
           if (potentialNewTotal > totalAllowedVotes) {
             // Wenn wir über das Maximum gehen würden, nur die wirklich verbleibenden Stimmen hinzufügen
             const allowedAddition = Math.max(0, totalAllowedVotes - usedVotesCount.value);
-            console.warn(`[DEBUG:VOTING] Bei Reload: Begrenze Stimmenaddition auf ${allowedAddition} (statt ${localSuccessCount})`);
+            console.warn(`[DEBUG:VOTING] Begrenze Stimmenaddition auf ${allowedAddition} (statt ${localSuccessCount})`);
             usedVotesCount.value += allowedAddition;
-
-            // Protokolliere eine detaillierte Warnung, wenn wir trotz Batch-Begrenzung hier ankommen
-            console.warn(`[DEBUG:VOTING] Warnung: Trotz Batch-Begrenzung wurde versucht, zu viele Stimmen zu zählen (${localSuccessCount} wäre hinzugefügt worden)`);
           } else {
             // Sonst normal addieren
             usedVotesCount.value += localSuccessCount;
           }
         }
 
-        console.warn(`[DEBUG:VOTING] Bei Reload: usedVotesCount nach Aktualisierung: ${usedVotesCount.value}`);
+        console.warn(`[DEBUG:VOTING] usedVotesCount nach Aktualisierung: ${usedVotesCount.value}/${totalAllowedVotes}`);
       } else {
-        // Im normalen Fall (keine Reload) Gesamtzähler addieren, aber mit Sicherheitscheck
-        const totalAllowedVotes = eventUser.value.voteAmount;
-        const potentialNewTotal = usedVotesCount.value + localSuccessCount;
-
-        if (potentialNewTotal > totalAllowedVotes) {
-          // Wenn wir über das Maximum gehen würden, nur die wirklich verbleibenden Stimmen hinzufügen
-          const allowedAddition = Math.max(0, totalAllowedVotes - usedVotesCount.value);
-          console.warn(`[DEBUG:VOTING] Begrenze Stimmenaddition auf ${allowedAddition} (statt ${localSuccessCount})`);
-          // Protokolliere eine detaillierte Warnung, wenn wir trotz Batch-Begrenzung hier ankommen
-          console.warn(`[DEBUG:VOTING] Warnung: Trotz Batch-Begrenzung wurde versucht, zu viele Stimmen zu zählen`);
-          usedVotesCount.value += allowedAddition;
-        } else {
-          // Sonst normal addieren
-          usedVotesCount.value += localSuccessCount;
-        }
+        console.warn(`[DEBUG:VOTING] Keine neuen Stimmen in diesem Batch (localSuccessCount = 0)`);
       }
 
       // Nachdem die Schleife beendet ist, betrachten wir den Batch als abgeschlossen

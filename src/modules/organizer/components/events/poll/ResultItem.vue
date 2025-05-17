@@ -110,7 +110,7 @@ v-if="isAbsoluteMajority(answer.length)"
                             class="majority-indicator"
                             data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
-                            :title="$t('Absolute Mehrheit: Mehr als 50% der Stimmen je nach ausgewählter Berechnungsmethode')">
+                            :title="$t('view.results.absoluteMajorityTooltip')">
                         {{ $t("view.results.absoluteMajority") }}
                       </span>
                       <span
@@ -118,7 +118,7 @@ v-else
                             class="majority-indicator"
                             data-bs-toggle="tooltip" 
                             data-bs-placement="top" 
-                            :title="$t('Relative Mehrheit: Die meisten Stimmen von allen Optionen, aber nicht über 50%')">
+                            :title="$t('view.results.relativeMajorityTooltip')">
                         {{ $t("view.results.relativeMajority") }}
                       </span>
                     </span>

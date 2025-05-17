@@ -553,6 +553,79 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
           // Nur als vollständig melden, wenn wir GENAU die erwartete Anzahl haben
           batchComplete: batchIsComplete
         });
+        
+        // Aktiviere aktives Verbindungshalten für alle eingeloggten Benutzer 
+        // WÄHREND wir auf den Organizer und die Abstimmung warten
+        console.log(`[Test ${testId}] Starte aktiven Keep-Alive-Mechanismus für alle ${userPages.length} eingeloggten Benutzer...`);
+        
+        // Starte den Keep-Alive-Mechanismus in einem separaten asynchronen Prozess
+        // Führe regelmäßige Aktivitäten im Browser durch, um die Verbindung aktiv zu halten
+        const keepAliveInterval = setInterval(async () => {
+          let activePagesCount = 0;
+          
+          // Führe für jede Page eine kleine Aktivität durch
+          for (let i = 0; i < userPages.length; i++) {
+            try {
+              const page = userPages[i].page;
+              
+              // Überspringe geschlossene Pages
+              if (!page || page.isClosed()) {
+                continue;
+              }
+              
+              // Führe verschiedene Aktivitäten durch, um die Verbindung aktiv zu halten
+              await page.evaluate(() => {
+                try {
+                  // Scroll-Aktivität
+                  window.scrollBy(0, 1);
+                  window.scrollBy(0, -1);
+                  
+                  // Mausbewegung
+                  const event = new MouseEvent('mousemove', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: Math.random() * 50,
+                    clientY: Math.random() * 50
+                  });
+                  document.body.dispatchEvent(event);
+                  
+                  // Aktiviere WebSocket-Verbindungen
+                  if (window.socket && typeof window.socket.send === 'function') {
+                    try {
+                      window.socket.send(JSON.stringify({type: 'ping'}));
+                    } catch (e) {}
+                  }
+                  
+                  return true;
+                } catch (e) {
+                  return false;
+                }
+              }).then(isActive => {
+                if (isActive) {
+                  activePagesCount++;
+                }
+              }).catch(() => {});
+            } catch (e) {
+              // Ignoriere Fehler
+            }
+          }
+          
+          // Alle 10 Sekunden ein Status-Update ausgeben
+          const now = new Date();
+          if (now.getSeconds() % 10 === 0) {
+            console.log(`[Test ${testId}] Keep-Alive aktiv: ${activePagesCount} Browser verbunden (${new Date().toLocaleTimeString()})`);
+          }
+        }, CONFIG.KEEP_ALIVE_INTERVAL || 2000);
+        
+        // Bereinigungsfunktion für den Keep-Alive-Prozess
+        const cleanupKeepAlive = () => {
+          if (keepAliveInterval) {
+            clearInterval(keepAliveInterval);
+            console.log(`[Test ${testId}] Keep-Alive-Mechanismus gestoppt`);
+          }
+        };
+
+        // Diese Funktion wird später aufgerufen, um den Keep-Alive zu stoppen
 
         // Prüfe, ob der Organizer bereits bereit ist
         let organizerReady = false;
@@ -571,15 +644,74 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
           console.log(`[Test ${testId}] Warte auf Organizer-Bereitschaft...`);
         }
 
-        // Warten, bis der Poll gestartet wurde
-        console.log(`[Test ${testId}] Warte auf Abstimmungsstart...`);
+        // Warten, bis der Poll gestartet wurde, mit aktiven Keep-Alive-Mechanismus
+        console.log(`[Test ${testId}] Aktives Warten auf Abstimmungsstart mit Keep-Alive...`);
 
-        // Warte und prüfe, ob der Poll wirklich gestartet wurde
-        console.log(`[Test ${testId}] Warte auf Abstimmungsstart und prüfe, ob Poll verfügbar ist...`);
+        // Implementiere eine aktive Wartefunktion mit regelmäßigen Prüfungen
+        const pollWaitStartTime = Date.now();
+        const maxPollWaitTime = CONFIG.WAIT_FOR_POLL_START_TIME || 600000; // Maximal 10 Minuten auf den Poll warten
+        
+        // Diese Funktion überprüft aktiv den Status des Polls während wir warten
+        let pollStarted = false;
+        
+        console.log(`[Test ${testId}] Warte aktiv auf Abstimmungsstart (maximal ${maxPollWaitTime/60000} Minuten)...`);
+        
+        // Aktive Warteschleife mit regelmäßiger Überprüfung
+        while ((Date.now() - pollWaitStartTime) < maxPollWaitTime && !pollStarted) {
+          // Prüfe, ob der Poll bereits gestartet wurde
+          try {
+            const resultsDir = path.join(process.cwd(), 'voting-results');
+            const organizerResultFile = path.join(resultsDir, 'organizer.json');
+            
+            if (fs.existsSync(organizerResultFile)) {
+              try {
+                const organizerData = JSON.parse(fs.readFileSync(organizerResultFile));
+                
+                if (organizerData && organizerData.pollStarted === true) {
+                  console.log(`[Test ${testId}] ERFOLG: Abstimmung wurde vom Organizer gestartet um: ${organizerData.timestamp}`);
+                  pollStarted = true;
+                  break; // Verlasse die Warteschleife
+                }
+              } catch (parseError) {
+                console.error(`[Test ${testId}] Fehler beim Parsen der Organizer-Datei:`, parseError);
+              }
+            }
+          } catch (fileError) {
+            console.error(`[Test ${testId}] Fehler beim Überprüfen der Organizer-Datei:`, fileError);
+          }
+          
+          // Alle 10 Sekunden ein Status-Update ausgeben
+          const waitedSeconds = Math.floor((Date.now() - pollWaitStartTime) / 1000);
+          if (waitedSeconds % 10 === 0) {
+            console.log(`[Test ${testId}] Warte seit ${waitedSeconds} Sekunden auf Abstimmungsstart (${userPages.length} Browser verbunden)...`);
 
-        // Kürzere Wartezeit für Poll-Synchronisation
-        console.log(`[Test ${testId}] Warte 5 Sekunden für Poll-Synchronisation...`);
-        await new Promise(r => setTimeout(r, 5000));
+            // Zusätzlich Pagerefresh für jeden 10. Benutzer alle 30 Sekunden,
+            // um eventuelle Verbindungsprobleme zu beheben
+            if (waitedSeconds % 30 === 0) {
+              for (let i = 0; i < userPages.length; i += 10) {
+                try {
+                  if (!userPages[i].page.isClosed()) {
+                    console.log(`[Test ${testId}] Aktualisiere Seite für Benutzer ${userPages[i].userIndex}...`);
+                    await userPages[i].page.reload({ waitUntil: 'networkidle' });
+                  }
+                } catch (e) {
+                  // Ignoriere Fehler beim Reload
+                }
+              }
+            }
+          }
+          
+          // Kurze Pause vor der nächsten Prüfung
+          await new Promise(r => setTimeout(r, 1000));
+        }
+        
+        // Wenn wir hier ankommen, wurde entweder die Abstimmung gestartet oder das Timeout erreicht
+        if (!pollStarted) {
+          console.warn(`[Test ${testId}] WARNUNG: Maximale Wartezeit auf Abstimmungsstart (${maxPollWaitTime/60000} Minuten) überschritten!`);
+          console.log(`[Test ${testId}] Versuche trotzdem mit der Abstimmung fortzufahren...`);
+        }
+        
+        // In beiden Fällen fortfahren - entweder wurde die Abstimmung gestartet oder wir versuchen es trotzdem
 
         // Prüfe in der Ergebnisdatei des Organizers, ob der Poll gestartet wurde
         try {
@@ -601,8 +733,12 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
           console.error(`[Test ${testId}] Fehler beim Lesen der Organizer-Ergebnisse:`, e);
         }
 
-        // WICHTIGE ÄNDERUNG: Abstimmung in Batches mit jeweils 25 Usern
+        // WICHTIGE ÄNDERUNG: Abstimmung in Batches mit jeweils konfigurierten Usern
         console.log(`[Test ${testId}] Starte Abstimmungsprozess in Batches mit je ${CONFIG.VOTE_BATCH_SIZE} Benutzern...`);
+
+        // Stoppe den Keep-Alive-Mechanismus NICHT - wir lassen ihn weiterlaufen, um die Verbindung während
+        // der Abstimmung weiterhin aktiv zu halten
+        console.log(`[Test ${testId}] Keep-Alive-Mechanismus bleibt während der Abstimmung aktiv`);
 
         // Verwende die neue Batch-Funktion für die Abstimmung
         const successfulVotes = await executeVotingInBatches(userPages, votingTimings);
@@ -660,44 +796,151 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
         // Halte die Browser-Kontexte länger offen, damit Benutzer ihre Stimmen vollständig abgeben können
         console.log(`[Test ${testId}] Halte alle Browser-Fenster für ${CONFIG.USER_WAIT_AFTER_VOTE / 1000} Sekunden offen, um vollständige Stimmabgabe zu ermöglichen...`);
 
-        // Bleibe für eine bestimmte Zeit online (nach Konfiguration)
+        // Importiere den Vote-Tracker, wenn Tracking aktiviert ist
+        let getAllTrackingData = null;
+        if (CONFIG.VOTE_TRACKING_ENABLED) {
+          try {
+            const voteNotifier = require('./voteNotifier');
+            getAllTrackingData = voteNotifier.getAllTrackingData;
+          } catch (e) {
+            console.warn(`[Test ${testId}] Vote-Tracking ist aktiviert, aber die Funktionen konnten nicht importiert werden: ${e.message}`);
+          }
+        }
+
+        // Verbesserte keep-alive Implementierung
         const keepAliveTime = CONFIG.USER_WAIT_AFTER_VOTE;
 
-        console.log(`[Test ${testId}] Bleibe online für ${CONFIG.USER_WAIT_AFTER_VOTE / 1000} Sekunden...`);
+        console.log(`[Test ${testId}] Verbesserte Keep-Alive-Strategie für ${CONFIG.USER_WAIT_AFTER_VOTE / 1000} Sekunden aktiviert...`);
 
-        // Halte die Browser-Fenster aktiv
+        // Halte die Browser-Fenster aktiv mit verbesserter Strategie
         const startTime = Date.now();
         let elapsedTime = 0;
+        let lastLogTime = 0;
+        let lastTrackingCheckTime = 0;
+        const logInterval = 10000; // 10 Sekunden zwischen Status-Updates
+        const trackingCheckInterval = 30000; // 30 Sekunden zwischen Tracking-Checks
+        let activePagesCount = 0;
 
+        // Führe regelmäßige Aktivitäten aus, um die Verbindung aktiv zu halten
         while (elapsedTime < keepAliveTime) {
-          // Alle 5 Sekunden Status ausgeben (verwende die erste Benutzerseite für waitForTimeout)
-          if (userPages.length > 0) {
-            await userPages[0].page.waitForTimeout(10000);
-          } else {
-            // Fallback, falls keine userPages verfügbar sind
-            await new Promise(resolve => setTimeout(resolve, 10000));
-          }
-          elapsedTime = Date.now() - startTime;
-          const remainingSeconds = Math.round((keepAliveTime - elapsedTime) / 1000) + 90;
-
-          console.log(`[Test ${testId}] Noch ca. ${remainingSeconds} Sekunden aktiv bleiben...`);
-
-          // Kleine Interaktion mit allen Browser-Fenstern, um sie aktiv zu halten
-          for (let i = 0; i < Math.min(userPages.length, 10); i++) {
-            try {
-              await userPages[i].page.evaluate(() => {
-                window.scrollBy(0, 5);
-                window.scrollBy(0, -5);
-              });
-            } catch (e) {
-              // Ignoriere Fehler bei geschlossenen Browsern
+          try {
+            elapsedTime = Date.now() - startTime;
+            
+            // Regelmäßige Status-Updates
+            const currentTime = Date.now();
+            if (currentTime - lastLogTime >= logInterval) {
+              lastLogTime = currentTime;
+              const remainingSeconds = Math.round((keepAliveTime - elapsedTime) / 1000);
+              console.log(`[Test ${testId}] Keep-Alive: ${activePagesCount} aktive Browser, noch ${remainingSeconds} Sekunden verbleibend...`);
             }
+            
+            // Regelmäßige Tracking-Checks
+            if (CONFIG.VOTE_TRACKING_ENABLED && getAllTrackingData && currentTime - lastTrackingCheckTime >= trackingCheckInterval) {
+              lastTrackingCheckTime = currentTime;
+              try {
+                const trackingData = getAllTrackingData();
+                if (trackingData.length > 0) {
+                  const completedBatches = trackingData.filter(data => data.completed === true).length;
+                  console.log(`[Test ${testId}] Vote-Tracking: ${completedBatches}/${trackingData.length} Batches abgeschlossen`);
+                }
+              } catch (trackingError) {
+                console.error(`[Test ${testId}] Fehler beim Tracking-Check:`, trackingError);
+              }
+            }
+            
+            // Zähler zurücksetzen
+            activePagesCount = 0;
+            
+            // Für jede Page eine kleine Aktion durchführen
+            for (let i = 0; i < userPages.length; i++) {
+              try {
+                // Überspringe geschlossene Pages
+                if (!userPages[i].page || userPages[i].page.isClosed()) {
+                  continue;
+                }
+                
+                // Führe verschiedene Aktionen durch, um die Seite aktiv zu halten
+                await userPages[i].page.evaluate(() => {
+                  try {
+                    // Kleine Scroll-Bewegungen
+                    window.scrollBy(0, 1);
+                    window.scrollBy(0, -1);
+                    
+                    // Simuliere Mausbewegung, um Verbindungen aktiv zu halten
+                    const event = new MouseEvent('mousemove', {
+                      bubbles: true,
+                      cancelable: true,
+                      clientX: Math.random() * 50,
+                      clientY: Math.random() * 50
+                    });
+                    document.body.dispatchEvent(event);
+                    
+                    // Aktiviere WebSocket-Verbindungen, falls vorhanden
+                    if (window.socket && typeof window.socket.send === 'function') {
+                      try {
+                        window.socket.send(JSON.stringify({type: 'ping'}));
+                      } catch (e) {
+                        // Ignoriere Socket-Fehler
+                      }
+                    }
+                    
+                    // Berühre auch modale Dialoge, die möglicherweise offen sind
+                    const modalElement = document.querySelector('.modal.show');
+                    if (modalElement) {
+                      modalElement.dispatchEvent(event);
+                      
+                      // Prüfe auf "Stimme wird abgegeben" Meldung und stelle sicher, dass sie sichtbar bleibt
+                      const loadingIndicator = document.querySelector('.modal .spinner-border');
+                      if (loadingIndicator) {
+                        // Wenn wir einen Loading-Indikator haben, halten wir die Verbindung besonders aktiv
+                        for (let j = 0; j < 3; j++) {
+                          const moveEvent = new MouseEvent('mousemove', {
+                            bubbles: true,
+                            cancelable: true,
+                            clientX: Math.random() * 100,
+                            clientY: Math.random() * 100
+                          });
+                          document.body.dispatchEvent(moveEvent);
+                        }
+                      }
+                    }
+                    
+                    return true; // Signal, dass die Seite aktiv ist
+                  } catch (e) {
+                    return false;
+                  }
+                }).then(isActive => {
+                  if (isActive) {
+                    activePagesCount++;
+                  }
+                }).catch(() => {
+                  // Ignoriere Fehler bei geschlossenen Pages
+                });
+                
+              } catch (pageError) {
+                // Ignoriere Fehler bei einzelnen Pages
+              }
+            }
+            
+            // Warte das konfigurierte Intervall bis zur nächsten Aktion
+            await new Promise(resolve => setTimeout(resolve, CONFIG.KEEP_ALIVE_INTERVAL || 5000));
+            
+          } catch (error) {
+            console.error(`[Test ${testId}] Fehler im Keep-Alive-Loop:`, error);
+            // Kurze Pause und dann weiter
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
         }
 
         console.log(`[Test ${testId}] Keep-alive Zeit abgelaufen, beende Test...`);
 
       } finally {
+        // Stoppe den Keep-Alive-Mechanismus falls er noch läuft
+        if (typeof cleanupKeepAlive === 'function') {
+          console.log(`[Test ${testId}] Stoppe Keep-Alive-Mechanismus...`);
+          cleanupKeepAlive();
+        }
+        
         // Aufräumen - erst nach langer Keep-alive Zeit
         console.log(`[Test ${testId}] Schließe alle Browser-Kontexte...`);
         for (const context of userContexts) {
