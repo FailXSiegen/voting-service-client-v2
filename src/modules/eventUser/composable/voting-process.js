@@ -105,7 +105,6 @@ export function useVotingProcess(eventUser, event) {
           // Vollständiges Zurücksetzen der Stimmen, aber gespeicherte Stimmenzahl beibehalten
           pollStatePersistence.resetVoteStateButKeepMaxVotes(newPollId, eventObj.id, existingMaxVotes);
 
-
           // WICHTIG: Bei einer neuen Abstimmung AUCH lokale Form-Daten zurücksetzen
           // Insbesondere die ausgewählten Antworten (multipleAnswers, singleAnswer)
           // Dies verhindert, dass alte Antwort-IDs von der vorherigen Abstimmung verwendet werden
@@ -124,6 +123,40 @@ export function useVotingProcess(eventUser, event) {
   }
 
   async function handleFormSubmit(pollFormData, poll, votesToUse = null) {
+    // MEGA-KRITISCHE SICHERHEITSPRÜFUNG: Validiere die Eingabedaten
+    // Dies verhindert Race-Conditions bei schnellen Poll-Wechseln
+
+    // 1. Prüfe, ob Formular-Daten existieren
+    if (!pollFormData) {
+      console.error("[ERROR:VOTING] Keine Formular-Daten für Stimmabgabe!");
+      return false;
+    }
+
+    // 2. Prüfe, ob das Poll-Objekt existiert
+    if (!poll || !poll.value) {
+      console.error("[ERROR:VOTING] Kein gültiges Poll-Objekt für Stimmabgabe!");
+      return false;
+    }
+
+    // 3. RACE-CONDITION-FIX: Prüfe auf eventuelle Polling-Konflikte
+    if (window._newPollActive === true) {
+      console.error("[ERROR:VOTING] Neue Poll wurde aktiviert während eine Stimmabgabe im Gange war!");
+
+      // UI entsperren und alle aktiven Sessions deaktivieren
+      releaseUILocks();
+      deactivateVotingSession();
+      currentlyProcessingBatch.value = false;
+
+      return false;
+    }
+
+    // 4. Falls die Poll geschlossen wurde, auch diesen Fall sofort abfangen
+    if (typeof window !== 'undefined' && window.pollClosedEventReceived === true) {
+      console.error("[ERROR:VOTING] Poll wurde bereits geschlossen, blockiere Stimmabgabe!");
+      releaseUILocks();
+      deactivateVotingSession();
+      return false;
+    }
 
     // KRITISCH: Speichere den ursprünglichen Wert, um ihn später wiederherzustellen, falls etwas ihn zurücksetzt
     const originalUsedVotesCount = usedVotesCount.value;
@@ -131,6 +164,7 @@ export function useVotingProcess(eventUser, event) {
 
     // FRÜHZEITIGE SICHERHEITSPRÜFUNG: Blockiere Stimmabgabe bei geschlossener Umfrage oder keinen Stimmen mehr
     if (poll.value && poll.value.closed) {
+      console.warn("[DEBUG:VOTING] Poll ist geschlossen, blockiere Stimmabgabe!");
       return false;
     }
 
@@ -194,11 +228,7 @@ export function useVotingProcess(eventUser, event) {
     // Andernfalls geht der korrekte Zählerstand verloren und wir beginnen immer wieder bei 1
     const isResuming = usedVotesCount.value > 0 && voteCounter.value > 1;
 
-    if (isResuming) {
-      // Bei Fortsetzung einer Abstimmung (nach Reload oder Teilabstimmung) Zähler NICHT zurücksetzen
-      console.info(`[DEBUG:VOTING] Abstimmung wird fortgesetzt mit existierendem Zähler: ${voteCounter.value}`);
-    } else {
-      // Nur bei komplett neuer Abstimmung den Zähler auf 1 setzen
+    if (!isResuming) {
       voteCounter.value = 1;
     }
 
@@ -292,7 +322,6 @@ export function useVotingProcess(eventUser, event) {
       const maxStoredVotes = pollId && eventObj && eventObj.id ?
         pollStatePersistence.getMaxVotesToUse(pollId, eventObj.id) : null;
 
-
       if (pollFormData.useAllAvailableVotes) {
         actualVotesToUse = remainingVotes;
       } else if (maxStoredVotes !== null && maxStoredVotes > 0) {
@@ -340,34 +369,70 @@ export function useVotingProcess(eventUser, event) {
       // Wir sind in einem Reload-Zustand, wenn eine der folgenden Bedingungen zutrifft:
       // 1. Die Poll-ID ist bekannt und gleich der aktuellen Poll-ID
       // 2. Laut Server haben wir bereits Stimmen abgegeben (serverVoteCycle > 0)
-      const isReload = (currentPollId.value === pollId && usedVotesCount.value > 0) || serverVoteCycle > 0;
-      console.warn(`[DEBUG:VOTING] Reload-Status: ${isReload ? 'Reload erkannt' : 'Keine Reload'} (serverVoteCycle=${serverVoteCycle}, usedVotesCount=${usedVotesCount.value})`);
+      // 3. Oder wir haben bereits im lokalen Zustand Stimmen abgegeben (usedVotesCount.value > 0)
+      const isReload = (currentPollId.value === pollId && usedVotesCount.value > 0) ||
+        serverVoteCycle > 0 ||
+        usedVotesCount.value > 0;
 
+      // KRITISCH: Wir müssen hier auch die gewünschte Stimmenanzahl bei Reload erhalten
+      // Wenn der Benutzer nur 1 Stimme abgeben möchte, sollten wir diese Information 
+      // durch den Split-Vote-Prozess beibehalten
+      let userRequestedVotes = 1; // Standardmäßig 1 Stimme
 
-      // Erste Stimme sofort abgeben für schnelles Feedback - aber nur, wenn es KEINE Reload ist!
-      if (!isReload && adjustedVotesToUse > 0) {
-        // Bei erster Abstimmung: erste Stimme sofort abgeben für schnelles Feedback
+      // Bei getAllAvailableVotes wird der Wert vom Server oder adjustedVotesToUse übernommen
+      if (pollFormData.useAllAvailableVotes) {
+        userRequestedVotes = remainingVotes;
+      } else if (votesToUse !== null && votesToUse > 0) {
+        // Die explizit vom Benutzer angeforderte Stimmenzahl
+        userRequestedVotes = votesToUse;
+      }
+
+      // Speichere die vom Benutzer gewünschte Stimmenzahl für diesen Durchgang
+      // KRITISCH: Dieser Wert wird später verwendet, um die Anzahl der zu verarbeitenden Stimmen zu begrenzen
+      if (window) {
+        window._lastRequestedVoteCount = userRequestedVotes;
+        console.warn(`[DEBUG:VOTING] Benutzeranfrage gespeichert: ${userRequestedVotes} Stimmen`);
+      }
+
+      console.warn(`[DEBUG:VOTING] Reload-Status: ${isReload ? 'Reload erkannt' : 'Keine Reload'} (serverVoteCycle=${serverVoteCycle}, usedVotesCount=${usedVotesCount.value}, userRequestedVotes=${userRequestedVotes})`);
+
+      // Erste Stimme sofort abgeben für schnelles Feedback - wir tun dies auch bei Reload,
+      // um sicherzustellen, dass wir immer mindestens eine Stimme zählen
+      if (adjustedVotesToUse > 0) {
+        // Bei jeder Abstimmung: erste Stimme sofort abgeben für schnelles Feedback
         const firstResult = await submitSingleVote(pollFormData, poll, false);
 
         if (firstResult) {
           localSuccessCount++;
           // UI-Update für erste Stimme
           currentlySubmittedInBatch.value = 1;
+          console.warn(`[DEBUG:VOTING] Erste Stimme abgegeben, localSuccessCount=${localSuccessCount}`);
         } else {
-          console.error(`[DEBUG:VOTING] FEHLER bei der ersten Stimme! Restliche Verarbeitung wird abgebrochen.`);
+          // Prüfen, ob dies ein normales Verhalten bei einem Poll-Wechsel ist
+          if (typeof window !== 'undefined' && (window.pollClosedEventReceived === true || window._newPollActive === true)) {
+            console.warn(`[DEBUG:VOTING] Erste Stimme nicht abgegeben - Poll wurde geschlossen oder gewechselt. Normal.`);
+          } else {
+            console.warn(`[DEBUG:VOTING] Erste Stimme konnte nicht abgegeben werden. Verarbeitung wird beendet.`);
+          }
           // Wenn die erste Stimme fehlschlägt, brechen wir ab
           return false;
         }
-      } else if (isReload) {
-        // Aber wir setzen trotzdem ein UI-Update für den Benutzer
+      } else {
+        // Wenn keine Stimmen mehr abzugeben sind
+        console.warn(`[DEBUG:VOTING] Keine Stimmen mehr verfügbar (adjustedVotesToUse=${adjustedVotesToUse})`);
         currentlySubmittedInBatch.value = 0;
       }
 
+      // Verbleibende Stimmen berechnen unter Berücksichtigung der bereits abgegebenen ersten Stimme
+      // Bei Reload und Nicht-Reload müssen wir jeweils eine Stimme abziehen, da wir sie oben bereits verarbeitet haben
+      const votesStillToProcess = adjustedVotesToUse - 1;
+      console.warn(`[DEBUG:VOTING] Verbleibende zu verarbeitende Stimmen: ${votesStillToProcess} (adjustedVotesToUse=${adjustedVotesToUse}, isReload=${isReload})`);
+
       // Restliche Stimmen in Batches verarbeiten
-      if (adjustedVotesToUse > 1) {
+      if (votesStillToProcess > 0) {
         // OPTIMIERUNG FÜR LAST-TESTS:
         // Kleinere Batch-Größe und adaptive Pausen
-        const BATCH_SIZE = 25; // Reduziert für bessere Skalierbarkeit bei hoher Last
+        const BATCH_SIZE = 50; // Reduziert für bessere Skalierbarkeit bei hoher Last
 
         // SICHERHEITSCHECK: Prüfe vor dem Start der Batch-Verarbeitung, ob der Poll noch offen ist
         if (poll.value && poll.value.closed) {
@@ -387,14 +452,33 @@ export function useVotingProcess(eventUser, event) {
 
         let remainingVotesToProcess;
 
-        if (isReload) {
-          // Bei einem Reload KEINE Stimme abziehen, da die erste Stimme bereits in usedVotesCount enthalten ist
-          // und wir die gesamte gewünschte Anzahl neu verarbeiten müssen
-          remainingVotesToProcess = adjustedVotesToUse;
-        } else {
-          // Bei einer normalen ersten Abstimmung die erste Stimme abziehen, da wir sie bereits oben verarbeitet haben
-          remainingVotesToProcess = adjustedVotesToUse - 1;
+        // Die verbleibenden zu verarbeitenden Stimmen wurden bereits oben berechnet
+        // Wir verwenden votesStillToProcess als Basis für beide Fälle (Reload und Normal)
+        remainingVotesToProcess = votesStillToProcess;
+
+        // Prüfen, ob wir tatsächlich noch Stimmen übrig haben
+        if (remainingVotesToProcess <= 0) {
+          console.warn(`[DEBUG:VOTING] Keine verbleibenden Stimmen zum Verarbeiten (remainingVotesToProcess=${remainingVotesToProcess})`);
+          return true;  // Erfolgreich beenden, keine weiteren Stimmen zu verarbeiten
         }
+
+        // Berechne, wie viele Stimmen wirklich noch übrig sind 
+        // (Gesamtzahl - bereits verwendete Stimmen)
+        const trueRemainingVotes = Math.max(0, maxAllowedVotes - usedVotesCount.value);
+
+        // Begrenze die verbleibenden zu verarbeitenden Stimmen auf die tatsächlich vorhandenen
+        remainingVotesToProcess = Math.min(remainingVotesToProcess, trueRemainingVotes);
+
+        // Zuerst die vom Benutzer angeforderte Stimmenzahl ermitteln
+        // Window-Objekt sollte _lastRequestedVoteCount enthalten, wenn wir es gesetzt haben
+        let userRequestedVoteCount = 1; // Default: 1 Stimme
+        if (window && window._lastRequestedVoteCount && window._lastRequestedVoteCount > 0) {
+          userRequestedVoteCount = window._lastRequestedVoteCount;
+          console.warn(`[DEBUG:VOTING] Benutzeranfrage gefunden: ${userRequestedVoteCount} Stimmen`);
+        }
+
+        // Log zur Überprüfung der Zahlen
+        console.warn(`[DEBUG:VOTING] Stimmen-Berechnung: votesStillToProcess=${votesStillToProcess}, max=${maxAllowedVotes}, used=${usedVotesCount.value}, trueRemaining=${trueRemainingVotes}, userRequested=${userRequestedVoteCount}, finalToProcess=${remainingVotesToProcess}`);
 
         // MEGA-WICHTIGE KORREKTURBERECHNUNG: limitiere die Anzahl der zu verarbeitenden Stimmen
         // auf die gespeicherte Stimmenzahl, falls vorhanden
@@ -407,21 +491,51 @@ export function useVotingProcess(eventUser, event) {
 
             // Bei einem Reload bzw. wenn wir einen Seitenwechsel haben, ist die Logik anders!
             if (isReload) {
-              // Bei einem Reload begrenzen wir auf die volle gespeicherte Anzahl
-              if (remainingVotesToProcess > maxStored) {
+              // KRITISCH: Bei einem Reload begrenzen wir auf die vom Benutzer angeforderte Anzahl
+              // Wenn eine Benutzeranfrage existiert, hat diese höchste Priorität!
+              if (window && window._lastRequestedVoteCount && window._lastRequestedVoteCount > 0) {
+                // Benutzeranfrage respektieren, aber auf verfügbare Stimmen begrenzen
+                const requestedVotes = Math.min(window._lastRequestedVoteCount, trueRemainingVotes);
+                console.warn(`[DEBUG:VOTING] RELOAD: Respektiere Benutzeranfrage: ${requestedVotes} Stimmen`);
+                remainingVotesToProcess = requestedVotes;
+              }
+              // Wenn keine explizite Benutzeranfrage, dann auf gespeicherte Anzahl begrenzen
+              else if (remainingVotesToProcess > maxStored) {
                 remainingVotesToProcess = maxStored;
               }
             } else {
               // Bei erster Abstimmung minus 1, weil die erste Stimme bereits oben verarbeitet wurde
-              if (remainingVotesToProcess > (maxStored - 1)) {
+              // KRITISCH: Benutzeranfrage hat höchste Priorität!
+              if (window && window._lastRequestedVoteCount && window._lastRequestedVoteCount > 0) {
+                // Bei Benutzeranfrage muss 1 abgezogen werden, da die erste Stimme bereits verarbeitet wurde
+                const requestedVotes = Math.min(window._lastRequestedVoteCount - 1, trueRemainingVotes);
+                console.warn(`[DEBUG:VOTING] Respektiere Benutzeranfrage: ${requestedVotes + 1} Stimmen (minus 1 bereits verarbeitet)`);
+                remainingVotesToProcess = requestedVotes;
+              }
+              // Sonst auf gespeicherte Anzahl minus 1 begrenzen (erste Stimme bereits verarbeitet)
+              else if (remainingVotesToProcess > (maxStored - 1)) {
                 remainingVotesToProcess = maxStored - 1;
               }
             }
           }
         } else {
           console.warn(`[DEBUG:VOTING] Konnte gespeichertes Limit nicht abrufen: Poll=${pollId}, Event=${JSON.stringify(eventObj)}`);
-        }
 
+          // KRITISCH: Selbst ohne persistenten Speicher die Benutzeranfrage respektieren!
+          if (window && window._lastRequestedVoteCount && window._lastRequestedVoteCount > 0) {
+            if (isReload) {
+              // Bei Reload: volle Anzahl verwenden
+              const requestedVotes = Math.min(window._lastRequestedVoteCount, trueRemainingVotes);
+              console.warn(`[DEBUG:VOTING] FALLBACK+RELOAD: Respektiere Benutzeranfrage: ${requestedVotes} Stimmen`);
+              remainingVotesToProcess = requestedVotes;
+            } else {
+              // Bei Erstabstimmung: -1, da erste Stimme bereits verarbeitet
+              const requestedVotes = Math.min(window._lastRequestedVoteCount - 1, trueRemainingVotes);
+              console.warn(`[DEBUG:VOTING] FALLBACK: Respektiere Benutzeranfrage: ${requestedVotes + 1} Stimmen (minus 1 bereits verarbeitet)`);
+              remainingVotesToProcess = requestedVotes;
+            }
+          }
+        }
 
         // Retry-Zähler für exponentielles Backoff
         let retryCount = 0;
@@ -431,21 +545,43 @@ export function useVotingProcess(eventUser, event) {
           // SICHERHEITSCHECK: Prüfe VOR JEDEM BATCH, ob der Poll noch offen ist
           if (poll.value && poll.value.closed) {
             console.warn("[DEBUG:VOTING] Poll wurde während der Batch-Verarbeitung geschlossen. Verarbeitung wird SOFORT abgebrochen.");
-            
+
             // KRITISCHE REIHENFOLGE: Erst die Browser-Session deaktivieren, um Callbacks zu verhindern
             deactivateVotingSession();
-            
+
             // Dann currentlyProcessingBatch zurücksetzen, um weitere Event-Verarbeitung zu blockieren
             currentlyProcessingBatch.value = false;
-            
+
             // Dann erst die UI-Sperren aufheben
             releaseUILocks();
-            
+
             // Explizit auf false setzen, um zu erzwingen, dass keine weiteren Verarbeitungen stattfinden
             isProcessingVotes.value = false;
             pollFormSubmitting.value = false;
             votingFullyCompleted.value = false;
-            
+
+            // WICHTIG: Wir kehren sofort zurück, ohne weitere Operationen auszuführen
+            return false;
+          }
+
+          // KRITISCH: Prüfe, ob Poll global als geschlossen markiert wurde
+          if (typeof window !== 'undefined' && window.pollClosedEventReceived === true) {
+            console.warn("[DEBUG:VOTING] Poll wurde global als geschlossen markiert während der Batch-Verarbeitung. Abbruch!");
+
+            // KRITISCHE REIHENFOLGE: Erst die Browser-Session deaktivieren, um Callbacks zu verhindern
+            deactivateVotingSession();
+
+            // Dann currentlyProcessingBatch zurücksetzen, um weitere Event-Verarbeitung zu blockieren
+            currentlyProcessingBatch.value = false;
+
+            // Dann erst die UI-Sperren aufheben
+            releaseUILocks();
+
+            // Explizit auf false setzen, um zu erzwingen, dass keine weiteren Verarbeitungen stattfinden
+            isProcessingVotes.value = false;
+            pollFormSubmitting.value = false;
+            votingFullyCompleted.value = false;
+
             // WICHTIG: Wir kehren sofort zurück, ohne weitere Operationen auszuführen
             return false;
           }
@@ -454,7 +590,17 @@ export function useVotingProcess(eventUser, event) {
           const batchPromises = [];
           const currentBatchSize = Math.min(BATCH_SIZE, remainingVotesToProcess - batchStart);
 
-          for (let i = 0; i < currentBatchSize; i++) {
+          // KRITISCH: Stellen sicher, dass die tatsächlich verbleibenden Stimmen nicht überschritten werden
+          // Prüfe, ob die aktuell verarbeiteten + bereits gezählten Stimmen das Limit überschreiten würden
+          const remainingAllowed = Math.max(0, maxAllowedVotes - (usedVotesCount.value + localSuccessCount));
+          const safeCurrentBatchSize = Math.min(currentBatchSize, remainingAllowed);
+
+          // Warnung ausgeben, wenn wir begrenzen mussten
+          if (safeCurrentBatchSize < currentBatchSize) {
+            console.warn(`[DEBUG:VOTING] Begrenze Batch-Größe auf ${safeCurrentBatchSize} (statt ${currentBatchSize}) wegen verbleibender Stimmen`);
+          }
+
+          for (let i = 0; i < safeCurrentBatchSize; i++) {
             batchPromises.push(submitSingleVote(pollFormData, poll, false));
           }
 
@@ -465,7 +611,28 @@ export function useVotingProcess(eventUser, event) {
 
           while (!success && attempts < MAX_ATTEMPTS) {
             try {
+              // KRITISCH: Prüfe nochmal VOR dem Promise.all, ob der Poll geschlossen wurde
+              if (poll.value && poll.value.closed) {
+                console.warn("[DEBUG:VOTING] Poll wurde bei Promise.all geschlossen. Verarbeitung wird abgebrochen.");
+                return false;
+              }
+
+              // KRITISCH: Prüfe, ob Poll global als geschlossen markiert wurde
+              if (typeof window !== 'undefined' && window.pollClosedEventReceived === true) {
+                console.warn("[DEBUG:VOTING] Poll global als geschlossen markiert bei Promise.all. Abbruch!");
+                return false;
+              }
+
+              // Jetzt erst den Batch verarbeiten
               const batchResults = await Promise.all(batchPromises);
+
+              // KRITISCH: Prüfe NOCHMAL nach dem Promise.all, ob der Poll zwischenzeitlich geschlossen wurde
+              if ((poll.value && poll.value.closed) ||
+                (typeof window !== 'undefined' && window.pollClosedEventReceived === true)) {
+                console.warn("[DEBUG:VOTING] Poll wurde während Promise.all geschlossen. Ergebnisse werden verworfen.");
+                return false;
+              }
+
               const batchSuccessCount = batchResults.filter(result => result === true).length;
               localSuccessCount += batchSuccessCount;
 
@@ -475,6 +642,18 @@ export function useVotingProcess(eventUser, event) {
               success = true;
               retryCount = 0; // Reset retry counter on success
             } catch (error) {
+              // KRITISCH: Auch bei Fehlern prüfen, ob der Poll inzwischen geschlossen wurde
+              if (poll.value && poll.value.closed) {
+                console.warn("[DEBUG:VOTING] Poll wurde während eines Fehlers geschlossen. Verarbeitung wird abgebrochen.");
+                return false;
+              }
+
+              // KRITISCH: Prüfe, ob Poll global als geschlossen markiert wurde
+              if (typeof window !== 'undefined' && window.pollClosedEventReceived === true) {
+                console.warn("[DEBUG:VOTING] Poll global als geschlossen markiert während eines Fehlers. Abbruch!");
+                return false;
+              }
+
               attempts++;
               retryCount++;
               console.error(`Fehler bei der Batch-Verarbeitung (Versuch ${attempts}/${MAX_ATTEMPTS}):`, error);
@@ -493,8 +672,8 @@ export function useVotingProcess(eventUser, event) {
             // Berechne adaptive Pausenzeit basierend auf der Position im Gesamtprozess
             // und der Anzahl der verbleibenden Stimmen
             const processPercentage = batchStart / remainingVotesToProcess;
-            const baseDelay = 100; // Basis-Verzögerung von 100ms
-            const adaptiveDelay = baseDelay + Math.min(processPercentage * 400, 400); // Max +400ms zusätzlich
+            const baseDelay = 50; // Basis-Verzögerung von 100ms
+            const adaptiveDelay = baseDelay + Math.min(processPercentage * 400, 200); // Max +400ms zusätzlich
 
             // Implementiere eine zufällige Schwankung, um Request-Clustering zu vermeiden
             // Dies ist besonders wichtig bei vielen parallelen Clients
@@ -513,17 +692,48 @@ export function useVotingProcess(eventUser, event) {
       // Wir haben bereits bei der Initialisierung den Server-Wert übernommen
       if (isReload) {
         // Im Reload-Fall haben wir bereits zu Beginn den korrekten serverVoteCycle-Wert gesetzt
-        // Hier nur die neuen Stimmen hinzufügen
         console.warn(`[DEBUG:VOTING] Bei Reload: usedVotesCount war vor Abstimmung ${usedVotesCount.value}`);
-        console.warn(`[DEBUG:VOTING] Bei Reload: Füge ${localSuccessCount} neue Stimmen für diesen Batch hinzu`);
 
-        // Dennoch müssen die neu abgegebenen Stimmen zum Zähler addiert werden
-        usedVotesCount.value += localSuccessCount;
+        // KRITISCH: Bei einem Split-Vote-Cycle zählen wir auch bei Reload die tatsächlich abgegebenen Stimmen
+        if (localSuccessCount > 0) {
+          console.warn(`[DEBUG:VOTING] Bei Reload: Füge ${localSuccessCount} neue Stimmen für diesen Batch hinzu`);
+
+          // SICHERHEITSPRÜFUNG: Stellen sicher, dass wir nicht über das Maximum hinausgehen
+          const totalAllowedVotes = eventUser.value.voteAmount;
+          const potentialNewTotal = usedVotesCount.value + localSuccessCount;
+
+          // Prüfen, ob wir mehr hinzufügen als wir dürfen (sollte jetzt nicht mehr passieren dank Batch-Begrenzung)
+          if (potentialNewTotal > totalAllowedVotes) {
+            // Wenn wir über das Maximum gehen würden, nur die wirklich verbleibenden Stimmen hinzufügen
+            const allowedAddition = Math.max(0, totalAllowedVotes - usedVotesCount.value);
+            console.warn(`[DEBUG:VOTING] Bei Reload: Begrenze Stimmenaddition auf ${allowedAddition} (statt ${localSuccessCount})`);
+            usedVotesCount.value += allowedAddition;
+
+            // Protokolliere eine detaillierte Warnung, wenn wir trotz Batch-Begrenzung hier ankommen
+            console.warn(`[DEBUG:VOTING] Warnung: Trotz Batch-Begrenzung wurde versucht, zu viele Stimmen zu zählen (${localSuccessCount} wäre hinzugefügt worden)`);
+          } else {
+            // Sonst normal addieren
+            usedVotesCount.value += localSuccessCount;
+          }
+        }
 
         console.warn(`[DEBUG:VOTING] Bei Reload: usedVotesCount nach Aktualisierung: ${usedVotesCount.value}`);
       } else {
-        // Im normalen Fall (keine Reload) Gesamtzähler addieren
-        usedVotesCount.value += localSuccessCount;
+        // Im normalen Fall (keine Reload) Gesamtzähler addieren, aber mit Sicherheitscheck
+        const totalAllowedVotes = eventUser.value.voteAmount;
+        const potentialNewTotal = usedVotesCount.value + localSuccessCount;
+
+        if (potentialNewTotal > totalAllowedVotes) {
+          // Wenn wir über das Maximum gehen würden, nur die wirklich verbleibenden Stimmen hinzufügen
+          const allowedAddition = Math.max(0, totalAllowedVotes - usedVotesCount.value);
+          console.warn(`[DEBUG:VOTING] Begrenze Stimmenaddition auf ${allowedAddition} (statt ${localSuccessCount})`);
+          // Protokolliere eine detaillierte Warnung, wenn wir trotz Batch-Begrenzung hier ankommen
+          console.warn(`[DEBUG:VOTING] Warnung: Trotz Batch-Begrenzung wurde versucht, zu viele Stimmen zu zählen`);
+          usedVotesCount.value += allowedAddition;
+        } else {
+          // Sonst normal addieren
+          usedVotesCount.value += localSuccessCount;
+        }
       }
 
       // Nachdem die Schleife beendet ist, betrachten wir den Batch als abgeschlossen
@@ -547,11 +757,28 @@ export function useVotingProcess(eventUser, event) {
       if (usedVotesCount.value >= totalAllowedVotes) {
         votingFullyCompleted.value = true;
 
-        // Extra Prüfung: Bei einem Reload stellen wir sicher, dass wir nicht mehr Stimmen
+        // Extra Prüfung: Bei einem Reload oder Split-Vote stellen wir sicher, dass wir nicht mehr Stimmen
         // abgeben als verfügbar, indem wir den Zähler auf das Maximum begrenzen
         if (usedVotesCount.value > totalAllowedVotes) {
           console.warn(`[DEBUG:VOTING] Stimmenzähler korrigiert: ${usedVotesCount.value} auf ${totalAllowedVotes}`);
           usedVotesCount.value = totalAllowedVotes;
+        }
+      } else {
+        // Wenn noch Stimmen übrig sind, stellen wir sicher, dass wir nicht im "vollständig abgestimmt"-Zustand sind
+        // Dies ist wichtig für Split-Vote-Szenarien, damit weitere Stimmabgaben möglich sind
+        votingFullyCompleted.value = false;
+
+        // SICHERHEITSPRÜFUNG: Stelle sicher, dass usedVotesCount nicht über das erlaubte Maximum hinausgeht
+        // Dies könnte durch Timing-Probleme bei parallelen Requests passieren
+        if (usedVotesCount.value > totalAllowedVotes) {
+          console.warn(`[DEBUG:VOTING] Zusätzliche Korrektur: usedVotesCount begrenzt von ${usedVotesCount.value} auf ${totalAllowedVotes}`);
+          usedVotesCount.value = totalAllowedVotes;
+          votingFullyCompleted.value = true;
+        }
+
+        // Zusätzlich sicherstellen, dass alle Flags für eine neue Abstimmung bereit sind
+        if (currentlyProcessingBatch.value) {
+          currentlyProcessingBatch.value = false;
         }
       }
 
@@ -609,14 +836,21 @@ export function useVotingProcess(eventUser, event) {
           const storedCounter = pollStatePersistence.restoreVoteCounter(pollId, event.value.id);
           const newCounter = usedVotesCount.value + 1;
 
+          // SICHERHEITSPRÜFUNG: Stelle sicher, dass wir nicht mehr Zählen als erlaubt sind
+          const maxAllowedVotes = eventUser.value.voteAmount || 0;
+          const limitedCounter = Math.min(newCounter, maxAllowedVotes);
+
           // Verwende den höheren Wert, um sicherzustellen, dass wir niemals einen kleineren Zähler haben
-          if (storedCounter > newCounter) {
-            voteCounter.value = storedCounter;
+          // Aber begrenze auf maximal erlaubte Stimmen
+          if (storedCounter > limitedCounter) {
+            voteCounter.value = Math.min(storedCounter, maxAllowedVotes);
           } else {
-            voteCounter.value = newCounter;
+            voteCounter.value = limitedCounter;
           }
         } else {
-          voteCounter.value = usedVotesCount.value + 1;
+          // Auch ohne event.value.id die Begrenzung anwenden
+          const maxAllowedVotes = eventUser.value.voteAmount || 0;
+          voteCounter.value = Math.min(usedVotesCount.value + 1, maxAllowedVotes);
         }
         // Auch für Teilabstimmungen die Event-ID mit übergeben, falls verfügbar
         if (event.value && event.value.id) {
@@ -655,6 +889,29 @@ export function useVotingProcess(eventUser, event) {
 
       // Aktive Session deaktivieren
       deactivateVotingSession();
+
+      // Stelle sicher, dass wir nicht in einem inkonsistenten Zustand stecken bleiben
+      // Indem wir explizit alle Flags zurücksetzen
+      pollFormSubmitting.value = false;
+      currentlyProcessingBatch.value = false;
+      isProcessingVotes.value = false;
+
+      // Im Fall eines Fehlers setzen wir sofort auch alle UI-Sperren zurück
+      try {
+        if (typeof window !== 'undefined') {
+          // Globale Flags für UI-Sperren zurücksetzen
+          window._pollFormSubmitting = false;
+          window._isProcessingVotes = false;
+          window._currentlyProcessingBatch = false;
+
+          // Prüfen, ob es globale Funktionen zum Entsperren gibt
+          if (typeof window.releaseUILocks === 'function') {
+            window.releaseUILocks();
+          }
+        }
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Zurücksetzen der UI-Sperren:', e);
+      }
 
       // UI-Flags werden sofort hier zurückgesetzt, um Blockaden zu vermeiden
       return false;
@@ -708,23 +965,53 @@ export function useVotingProcess(eventUser, event) {
     // Diese Prüfung ist besonders wichtig, wenn der Poll während der Abstimmung geschlossen wird
     if (poll.value && poll.value.closed) {
       console.warn("[DEBUG:VOTING] Poll ist geschlossen. Stimmabgabe wird abgebrochen.");
-      
+
       // KRITISCH: Wir müssen die Browser-Session SOFORT deaktivieren
       // um zu verhindern, dass weitere Events verarbeitet werden
       deactivateVotingSession();
-      
+
       // KRITISCH: Zuerst currentlyProcessingBatch zurücksetzen, um weitere Events zu blockieren
       currentlyProcessingBatch.value = false;
-      
+
       // Alle UI-Sperren direkt zurücksetzen
       isProcessingVotes.value = false;
       pollFormSubmitting.value = false;
-      
+
       // Danach nur zur Sicherheit die explizite Methode aufrufen, falls vorhanden
       if (typeof releaseUILocks === 'function') {
         releaseUILocks();
       }
-      
+
+      return false;
+    }
+
+    // KRITISCHER FIX: Prüfe ob pollFormData überhaupt gültige Poll-Daten enthält
+    // Dies verhindert das Problem mit ungültigen Antwort-IDs bei Poll-Wechseln
+    if (!pollFormData) {
+      console.error("[ERROR:VOTING] Keine Formular-Daten vorhanden für Stimmabgabe!");
+      return false;
+    }
+
+    // RACE-CONDITION-FIX: Prüfe, ob die poll.value.id mit der aktuellen Poll-ID übereinstimmt
+    // Dies verhindert, dass alte Stimmen für eine neue Poll abgegeben werden
+    if (currentPollId.value && poll.value && poll.value.id && currentPollId.value !== poll.value.id) {
+      console.error(`[ERROR:VOTING] Poll-ID-Mismatch! Aktuelle Poll: ${currentPollId.value}, Versuchte Stimmabgabe für: ${poll.value.id}`);
+      return false;
+    }
+
+    // MEGA-KRITISCH: Prüfe, ob eine globale aktive Poll-ID gesetzt ist, die von neuen Polls überschrieben wurde
+    // VERBESSERTE LOGIK: Nur prüfen, wenn die globale ID nicht null ist, um fehlerhafte Mismatch-Erkennungen zu vermeiden
+    if (typeof window !== 'undefined' && window._currentActivePollId !== null && window._currentActivePollId !== undefined
+      && poll.value && poll.value.id && window._currentActivePollId !== poll.value.id) {
+
+      // Aktualisiere die globale ID, um zukünftige Missverständnisse zu vermeiden
+      window._currentActivePollId = poll.value.id;
+
+      // Aktive Session trotzdem deaktivieren und Flags zurücksetzen
+      deactivateVotingSession();
+      releaseUILocks();
+
+      // Unauffällig beenden ohne Fehlermeldung
       return false;
     }
 
@@ -775,14 +1062,43 @@ export function useVotingProcess(eventUser, event) {
           if (poll.value && poll.value.id) {
             localStorage.removeItem(`poll_form_data_${poll.value.id}`);
           }
+
+          // ALLE UI-Sperren zurücksetzen
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
+
+          return false;
+        }
+
+        // RACE-CONDITION-FIX: Prüfe erneut, ob eine neue Poll aktiviert wurde
+        if (window._newPollActive === true) {
+          console.error("[ERROR:VOTING] Neue Poll wurde aktiviert während multipleAnswers verarbeitet wurden!");
+
+          // UI entsperren und alle aktiven Sessions deaktivieren
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
+
+          // Lokalen Speicher löschen
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+          }
+
           return false;
         }
 
         // PRÄ-VALIDIERUNG: Prüfe, ob alle ausgewählten Antwort-IDs gültig sind
         const invalidAnswerIds = [];
         for (const answerId of pollFormData.multipleAnswers) {
+          // SICHERHEITSCHECK: Prüfe, ob answerId überhaupt ein gültiger Wert ist
+          if (!answerId && answerId !== 0) {
+            invalidAnswerIds.push("undefined");
+            continue;
+          }
+
           const answerExists = poll.value.possibleAnswers.some(
-            (x) => parseInt(x.id) === parseInt(answerId)
+            (x) => x && x.id && parseInt(x.id) === parseInt(answerId)
           );
 
           if (!answerExists) {
@@ -798,6 +1114,11 @@ export function useVotingProcess(eventUser, event) {
           if (poll.value && poll.value.id) {
             localStorage.removeItem(`poll_form_data_${poll.value.id}`);
           }
+
+          // ALLE UI-Sperren zurücksetzen bei ungültigen Antworten
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
 
           return false;
         }
@@ -827,12 +1148,57 @@ export function useVotingProcess(eventUser, event) {
           if (poll.value && poll.value.id) {
             localStorage.removeItem(`poll_form_data_${poll.value.id}`);
           }
+
+          // ALLE UI-Sperren zurücksetzen
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
+
+          return false;
+        }
+
+        // RACE-CONDITION-FIX: Prüfe erneut, ob eine neue Poll aktiviert wurde
+        if (window._newPollActive === true) {
+          console.error("[ERROR:VOTING] Neue Poll wurde aktiviert während singleAnswer verarbeitet wurde!");
+
+          // UI entsperren und alle aktiven Sessions deaktivieren
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
+
+          // Lokalen Speicher löschen
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+          }
+
+          return false;
+        }
+
+        // SICHERHEITSCHECK: Prüfe, ob singleAnswer überhaupt ein gültiger Wert ist
+        if (!pollFormData.singleAnswer && pollFormData.singleAnswer !== 0) {
+          console.error(`[ERROR:VOTING] singleAnswer ist nicht definiert oder ungültig: ${pollFormData.singleAnswer}`);
+
+          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
+          if (poll.value && poll.value.id) {
+            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
+          }
+
+          // ALLE UI-Sperren zurücksetzen
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
+
           return false;
         }
 
         // PRÄ-VALIDIERUNG: Prüfe, ob die einzelne Antwort-ID gültig ist
+        // Behandle singleAnswer sowohl als String als auch als Number korrekt
+        const singleAnswerStr = String(pollFormData.singleAnswer);
         const answerExists = poll.value.possibleAnswers.some(
-          (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer)
+          (x) => x && x.id && (
+            String(x.id) === singleAnswerStr ||
+            (parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10))
+          )
         );
 
         if (!answerExists) {
@@ -843,12 +1209,19 @@ export function useVotingProcess(eventUser, event) {
             localStorage.removeItem(`poll_form_data_${poll.value.id}`);
           }
 
+          // ALLE UI-Sperren zurücksetzen bei ungültigen Antworten
+          releaseUILocks();
+          deactivateVotingSession();
+          currentlyProcessingBatch.value = false;
+
           return false;
         }
 
         // Jetzt können wir die Antwort sicher abrufen
+        // Wir können singleAnswerStr wiederverwenden, das bereits oben deklariert wurde
         const answer = poll.value.possibleAnswers.find(
-          (x) => parseInt(x.id) === parseInt(pollFormData.singleAnswer),
+          (x) => String(x.id) === singleAnswerStr ||
+            (parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10))
         );
 
         const input = {
@@ -880,7 +1253,7 @@ export function useVotingProcess(eventUser, event) {
     // Poll-ID zurücksetzen
     currentPollId.value = null;
 
-    // UI-Status zurücksetzen
+    // UI-Status zurücksetzen - KRITISCH: Diese Reihenfolge beibehalten für optimales Reset-Verhalten
     isProcessingVotes.value = false;
     pollFormSubmitting.value = false;
     currentlyProcessingBatch.value = false;
@@ -896,6 +1269,21 @@ export function useVotingProcess(eventUser, event) {
     if (oldPollId) {
       localStorage.removeItem(`poll_form_data_${oldPollId}`);
     }
+
+    // KRITISCH: Nach einer kurzen Verzögerung nochmals alle UI-Sperren prüfen und garantiert aufheben
+    // Dies verhindert das Problem mit dem "Stimme wird abgegeben" beim Öffnen eines neuen Polls
+    setTimeout(() => {
+      isProcessingVotes.value = false;
+      pollFormSubmitting.value = false;
+      currentlyProcessingBatch.value = false;
+
+      // Explizit alle Flags auf false setzen, als zusätzliche Sicherheit
+      if (typeof window !== 'undefined') {
+        window._pollFormSubmitting = false;
+        window._isProcessingVotes = false;
+        window._currentlyProcessingBatch = false;
+      }
+    }, 50);
   }
 
   // Eine explizite Methode zum kontrollierten Freigeben der UI

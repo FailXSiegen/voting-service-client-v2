@@ -44,13 +44,13 @@ async function onLogout() {
     localStorage.clear();
     // Zustand des Stores zurücksetzen
     await store.logoutUser();
-    // Zur Login-Seite navigieren
-    router.push({ name: "login" });
+    // Nach Logout einfach die Seite neu laden
+    location.reload();
   } catch (error) {
     console.error("Fehler beim Logout:", error);
-    // Im Fehlerfall trotzdem LocalStorage löschen und zur Login-Seite navigieren
+    // Im Fehlerfall trotzdem LocalStorage löschen und Seite neu laden
     localStorage.clear();
-    router.push({ name: "login" });
+    location.reload();
   }
 }
 </script>

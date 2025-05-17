@@ -109,11 +109,56 @@ const votingProcess = useVotingProcess(ref(), ref());
 const isSubmitting = ref(false);
 
 // Flag, das anzeigt, ob das Modal sichtbar ist
-let isVisible = false;
+const isVisible = ref(false);
+
+// Timer für automatische Sichtbarkeitsprüfung
+let visibilityCheckInterval = null;
+
+// Funktion zum Überprüfen, ob das Modal wirklich sichtbar ist
+function checkModalVisibility() {
+  // DOM-basierte Prüfung
+  const modalElement = document.getElementById('pollModal');
+  if (modalElement) {
+    const isDisplayed = modalElement.classList.contains('show') && 
+                        window.getComputedStyle(modalElement).display !== 'none';
+    
+    // Nur aktualisieren, wenn sich der Zustand ändert
+    if (isDisplayed !== isVisible.value) {
+      isVisible.value = isDisplayed;
+      
+      // Debug ausgeben
+      if (!isDisplayed) { 
+        // Wenn das Modal verschwunden ist, obwohl es sichtbar sein sollte, 
+        // versuchen es neu zu öffnen
+        if (props.poll && !props.poll.closed && 
+            props.eventUser.voteAmount > 0 && 
+            props.eventUser.allowToVote) {
+          
+          // Stelle sicher, dass wir nur wieder öffnen, wenn wir Teilstimmen abgegeben haben
+          const usedVotes = props.eventUser.voteAmount > 1 ? votingProcess.usedVotesCount?.value || 0 : 0;
+          const totalVotes = props.eventUser.voteAmount || 0;
+          
+          if (usedVotes > 0 && usedVotes < totalVotes) {
+            console.warn("[DEBUG:VOTING] Modal verschwunden bei Teilabstimmung! Versuche erneut zu öffnen...");
+            
+            // 250ms Verzögerung für stabile Wiedereröffnung
+            setTimeout(() => {
+              try {
+                showModal();
+              } catch (e) {
+                console.error("[DEBUG:VOTING] Fehler bei auto-reopen:", e);
+              }
+            }, 250);
+          }
+        }
+      }
+    }
+  }
+}
 
 // Getter-Funktion, um den sichtbaren Zustand des Modals abzufragen
 function getIsVisible() {
-  return isVisible;
+  return isVisible.value;
 }
 
 const props = defineProps({
@@ -156,12 +201,12 @@ onMounted(() => {
   if (modal.value) {
     // Event-Listener, der erkennt, wenn das Modal angezeigt wird
     modal.value.addEventListener('shown.bs.modal', () => {
-      isVisible = true;
+      isVisible.value = true;
     });
     
     // Event-Listener, der erkennt, wenn das Modal geschlossen wird
     modal.value.addEventListener('hidden.bs.modal', () => {
-      isVisible = false;
+      isVisible.value = false;
     });
   }
   
@@ -171,16 +216,31 @@ onMounted(() => {
     votingProcess.votingFullyCompleted.value = true;
   });
   
+  // Starte regelmäßige Sichtbarkeitsprüfung
+  visibilityCheckInterval = setInterval(checkModalVisibility, 1000);
+  
+  // Initial überprüfen
+  setTimeout(checkModalVisibility, 300);
+  
   // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
   const pollClosedWatcher = watch(
     () => props.poll?.closed,
     (isClosed) => {
       if (isClosed) {
         console.warn("[DEBUG:VOTING] Poll wurde geschlossen (reactive watch), schließe Modal");
-        hideModal();
+        // Nur schließen, wenn es keine Split-Vote-Situation ist
+        const totalAllowedVotes = props.eventUser?.voteAmount || 0;
+        const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+        
+        // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
+        if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
+          hideModal();
+        } else {
+          console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
+        }
       }
     },
-    { immediate: true } // Sofort beim Mounting prüfen
+    { immediate: false } // NICHT sofort beim Mounting prüfen
   );
   
   // KRITISCH: Überwache auch den Poll-State vom Parent-Component
@@ -188,17 +248,49 @@ onMounted(() => {
     () => props.activePollEventUser?.state,
     (state) => {
       if (state === 'closed') {
-        console.warn("[DEBUG:VOTING] Poll-State wurde auf 'closed' gesetzt (reactive watch), schließe Modal");
-        hideModal();
+        console.warn("[DEBUG:VOTING] Poll-State wurde auf 'closed' gesetzt (reactive watch)");
+        
+        // Nur schließen, wenn es keine Split-Vote-Situation ist
+        const totalAllowedVotes = props.eventUser?.voteAmount || 0;
+        const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+        
+        // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
+        if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
+          console.warn("[DEBUG:VOTING] Schließe Modal, da alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt");
+          hideModal();
+        } else {
+          console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
+        }
       }
     },
-    { immediate: true } // Sofort beim Mounting prüfen
+    { immediate: false } // NICHT sofort beim Mounting prüfen
   );
   
   // Watcher beim Unmounting entfernen
   onBeforeUnmount(() => {
     pollClosedWatcher();
     pollStateWatcher();
+    
+    // Cleanup des Sichtbarkeits-Intervalls
+    if (visibilityCheckInterval) {
+      clearInterval(visibilityCheckInterval);
+      visibilityCheckInterval = null;
+    }
+    
+    // Event-Listener entfernen
+    if (modal.value) {
+      try {
+        modal.value.removeEventListener('shown.bs.modal', () => {
+          isVisible.value = true;
+        });
+        
+        modal.value.removeEventListener('hidden.bs.modal', () => {
+          isVisible.value = false;
+        });
+      } catch (e) {
+        console.error("[DEBUG:VOTING] Fehler beim Entfernen der Event-Listener:", e);
+      }
+    }
   });
 });
 
@@ -216,9 +308,14 @@ function onSubmit(data) {
 }
 
 function showModal() {
+  // Überprüfe, ob wir in einer Split-Vote-Situation sind
+  const totalAllowedVotes = props.eventUser?.voteAmount || 0;
+  const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+  const inSplitVoteSituation = usedVotes > 0 && usedVotes < totalAllowedVotes;
+  
   // KRITISCHE SICHERHEITSPRÜFUNG: Wenn der Poll geschlossen ist, das Modal NICHT öffnen
-  // und stattdessen SOFORT schließen, falls es geöffnet ist
-  if (props.poll && props.poll.closed) {
+  // und stattdessen SOFORT schließen, falls es geöffnet ist - AUSSER wir sind in einer Split-Vote-Situation
+  if (props.poll && props.poll.closed && !inSplitVoteSituation) {
     console.warn("[DEBUG:VOTING] Poll ist geschlossen, Modal wird geschlossen");
     
     // Sofort schließen falls offen
@@ -232,15 +329,17 @@ function showModal() {
     
     return; // Sofort zurückkehren ohne das Modal zu öffnen
   }
-  
-  // EXTRA-PRÜFUNG: Prüfe auch beim Parents-Component, ob der Poll closed ist
-  try {
-    if (props.activePollEventUser?.state === "closed") {
-      console.warn("[DEBUG:VOTING] Poll-State ist 'closed' laut activePollEventUser, Modal wird nicht geöffnet");
-      return;
+    
+  // EXTRA-PRÜFUNG: Prüfe auch beim Parents-Component, ob der Poll closed ist - AUSSER bei Split-Vote-Situation
+  if (!inSplitVoteSituation) {
+    try {
+      if (props.activePollEventUser?.state === "closed") {
+        console.warn("[DEBUG:VOTING] Poll-State ist 'closed' laut activePollEventUser, Modal wird nicht geöffnet");
+        return;
+      }
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler bei extra Poll-State-Prüfung:', e);
     }
-  } catch (e) {
-    console.error('[DEBUG:VOTING] Fehler bei extra Poll-State-Prüfung:', e);
   }
   
   // Vor dem Öffnen des Modals müssen wir sicherstellen, dass alle Status zurückgesetzt sind
@@ -260,6 +359,14 @@ function showModal() {
   // Erhöhe immer den pollFormKey, um sicherzustellen, dass das Formular neu instanziiert wird
   pollFormKey.value += 1;
   
+  // KRITISCH: Die Flags vom voting-process explizit zurücksetzen
+  // Dies verhindert das Problem mit dem "Stimme wird abgegeben" beim Öffnen eines neuen Polls
+  if (votingProcess) {
+    votingProcess.isProcessingVotes.value = false;
+    votingProcess.pollFormSubmitting.value = false;
+    votingProcess.currentlyProcessingBatch.value = false;
+  }
+  
   // Um das "Wird abgestimmt" bei jedem Öffnen korrekt anzuzeigen, 
   // stellen wir sicher, dass die Komponente in einem frischen Zustand ist
   
@@ -269,90 +376,274 @@ function showModal() {
     return;
   }
   
+  // Bereinige zuvor eventuell verbliebene Modal-Elemente
+  try {
+    // Backdrop entfernen
+    const backdrops = document.getElementsByClassName('modal-backdrop');
+    if (backdrops.length > 0) {
+      // Array.from verwenden, da die HTMLCollection sich verändert bei DOM-Änderungen
+      Array.from(backdrops).forEach(backdrop => {
+        if (backdrop && backdrop.parentNode) {
+          backdrop.parentNode.removeChild(backdrop);
+        }
+      });
+    }
+    
+    // Body-Styles zurücksetzen
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    document.body.style.pointerEvents = '';
+    document.body.style.position = '';
+  } catch (e) {
+    console.error("[DEBUG:VOTING] Fehler beim Bereinigen vorheriger Modal-Elemente:", e);
+  }
+  
   // Dann das Modal zeigen
-  if (bootstrapModal) {
-    bootstrapModal.show();
-  } else if (modal.value) {
-    console.warn("[DEBUG:VOTING] bootstrapModal nicht initialisiert, erstelle neu");
-    bootstrapModal = new Modal(modal.value);
-    bootstrapModal.show();
-  } else {
-    console.error("[DEBUG:VOTING] Kann Modal nicht öffnen: DOM-Element nicht verfügbar");
+  try {
+    // Sicherheitsprüfung: Ist das DOM-Element vorhanden?
+    if (!modal.value) {
+      console.error("[DEBUG:VOTING] Kann Modal nicht öffnen: DOM-Element nicht verfügbar");
+      return; // Abbrechen, wenn kein DOM-Element vorhanden ist
+    }
+    
+    // Ist Bootstrap Modal bereits initialisiert?
+    if (bootstrapModal) {
+      // Stelle sicher, dass das Modal wirklich geschlossen ist, bevor wir es wieder öffnen
+      try {
+        // Versuche, das Modal zu verbergen
+        bootstrapModal.hide();
+        // Kleine Verzögerung, bevor wir es wieder öffnen
+        setTimeout(() => {
+          try {
+            // Prüfe, ob bereits ein anderes Modal geöffnet ist
+            const hasActiveModals = document.body.classList.contains('modal-open');
+            if (hasActiveModals) {
+              // Entferne alle zurückgebliebenen Modal-Elemente
+              const activeModals = document.getElementsByClassName('modal show');
+              if (activeModals.length > 0) {
+                Array.from(activeModals).forEach(modal => {
+                  if (modal && modal.id !== 'pollModal') {
+                    try {
+                      const instance = Modal.getInstance(modal);
+                      if (instance) {
+                        instance.hide();
+                      }
+                    } catch (e) {
+                      console.error("[DEBUG:VOTING] Fehler beim Schließen eines anderen Modals:", e);
+                    }
+                  }
+                });
+              }
+            }
+            
+            // Extra: Bootstrap-Timer-Verzögerung abschalten, damit das Modal sofort geöffnet wird
+            if (typeof Modal !== 'undefined' && Modal._getInstance) {
+              const modalContent = document.querySelector('#pollModal .modal-content');
+              if (modalContent) {
+                modalContent.style.transitionDuration = '0.1s';
+              }
+            }
+            
+            // Nach aufräumen Modal öffnen und dabei Option setzen, dass es nicht automatisch geschlossen werden kann
+            bootstrapModal.show();
+            
+            // Stelle sicher, dass Modal sichtbar bleibt durch zusätzliche Klasse
+            const modalElement = document.getElementById('pollModal');
+            if (modalElement) {
+              modalElement.classList.add('force-show');
+              modalElement.setAttribute('data-bs-keyboard', 'false');
+              modalElement.setAttribute('data-bs-backdrop', 'static');
+              
+              // Stelle sicher, dass das Modal im DOM richtig als sichtbar markiert ist
+              modalElement.style.display = 'block';
+              modalElement.classList.add('show');
+              modalElement.setAttribute('aria-modal', 'true');
+              modalElement.setAttribute('role', 'dialog');
+              document.body.classList.add('modal-open');
+            }
+          } catch (showErr) {
+            console.error("[DEBUG:VOTING] Fehler beim Show nach Timeout:", showErr);
+            
+            // Trotzdem versuchen, das Modal anzuzeigen
+            try {
+              bootstrapModal.show();
+            } catch (e) {
+              console.error("[DEBUG:VOTING] Auch zweiter Versuch fehlgeschlagen:", e);
+            }
+          }
+        }, 150); // Längere Verzögerung für bessere Stabilität
+      } catch (modalErr) {
+        // Wenn das Schließen fehlschlägt, versuchen wir das Modal trotzdem zu öffnen
+        console.warn("[DEBUG:VOTING] Fehler beim Schließen vor Neuanzeige:", modalErr);
+        try {
+          bootstrapModal.show();
+        } catch (e) {
+          console.error("[DEBUG:VOTING] Fehler beim direkten Anzeigen:", e);
+        }
+      }
+    } else {
+      // Falls nicht, neu initialisieren
+      console.warn("[DEBUG:VOTING] bootstrapModal nicht initialisiert, erstelle neu");
+      
+      // Prüfen, ob die Bootstrap Modal-Klasse verfügbar ist
+      if (typeof Modal === 'undefined') {
+        console.error("[DEBUG:VOTING] Bootstrap Modal-Klasse ist nicht verfügbar");
+        return;
+      }
+      
+      // Vor der Initialisierung nochmal prüfen, ob das DOM-Element existiert
+      if (!modal.value) {
+        console.error("[DEBUG:VOTING] DOM-Element ist während der Initialisierung verschwunden");
+        return;
+      }
+      
+      // Neues Modal erstellen und anzeigen
+      bootstrapModal = new Modal(modal.value);
+      bootstrapModal.show();
+    }
+  } catch (error) {
+    console.error("[DEBUG:VOTING] Fehler beim Öffnen des Modals:", error);
   }
 }
 
 function hideModal() {  
-  // WICHTIG: Stelle vor dem Schließen sicher, dass das Modal gesperrt ist,
-  // damit keine weiteren Klicks möglich sind
-  isSubmitting.value = true;
-  
-  // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
-  if (props.poll && props.poll.id) {
-    localStorage.removeItem(`poll_form_data_${props.poll.id}`);
-  }
-  
-  // Alle UI-relevanten Flags auf true setzen
-  if (votingProcess) {
-    votingProcess.pollFormSubmitting.value = true;
-    votingProcess.currentlyProcessingBatch.value = true;
-    votingProcess.isProcessingVotes.value = true;
-  }
-  
-  // WICHTIG: Wenn das Bootstrap-Modal nicht existiert, neu initialisieren
-  if (!bootstrapModal && modal.value) {
-    try {
-      bootstrapModal = new Modal(modal.value);
-    } catch (e) {
-      console.error('[DEBUG:VOTING] Fehler bei Bootstrap-Modal-Initialisierung:', e);
+  try {
+    // WICHTIG: Stelle vor dem Schließen sicher, dass das Modal gesperrt ist,
+    // damit keine weiteren Klicks möglich sind
+    isSubmitting.value = true;
+    
+    // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
+    if (props.poll && props.poll.id) {
+      localStorage.removeItem(`poll_form_data_${props.poll.id}`);
     }
-  }
-  
-  // Sofortiger Schließversuch ohne Verzögerung
-  if (bootstrapModal) {
-    try {
-      bootstrapModal.hide();
-    } catch (e) {
-      console.error('[DEBUG:VOTING] Fehler beim Schließen des Modals:', e);
+    
+    // Alle UI-relevanten Flags auf true setzen
+    if (votingProcess) {
+      votingProcess.pollFormSubmitting.value = true;
+      votingProcess.currentlyProcessingBatch.value = true;
+      votingProcess.isProcessingVotes.value = true;
     }
-  }
-  
-  // KRITISCH: Zusätzlich mit kurzer Verzögerung, damit die reaktiven Updates durch Vue erfolgen können
-  // Dadurch wird sichergestellt, dass die UI gesperrt bleibt und das Modal wirklich geschlossen wird
-  setTimeout(() => {
-    try {
-      // Erneuter Schließversuch
-      if (bootstrapModal) {
-        bootstrapModal.hide();
+    
+    // Sichere Prüfung, ob DOM-Element existiert, bevor Operationen durchgeführt werden
+    if (!modal.value) {
+      console.warn("[DEBUG:VOTING] Modal-Element nicht verfügbar beim Schließen");
+      // Trotzdem Backdrop und modal-open entfernen, falls vorhanden
+      cleanupModalEffects();
+      return;
+    }
+    
+    // WICHTIG: Wenn das Bootstrap-Modal nicht existiert, neu initialisieren
+    if (!bootstrapModal && modal.value) {
+      try {
+        // Prüfen, ob die Bootstrap Modal-Klasse verfügbar ist
+        if (typeof Modal === 'undefined') {
+          console.error("[DEBUG:VOTING] Bootstrap Modal-Klasse ist nicht verfügbar");
+          cleanupModalEffects(); // Trotzdem aufräumen
+          return;
+        }
+        
+        bootstrapModal = new Modal(modal.value);
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler bei Bootstrap-Modal-Initialisierung:', e);
+        cleanupModalEffects(); // Trotzdem aufräumen
       }
-      
-      // LOKAL states danach zurücksetzen (nicht vorher!)
-      reset(false); // Immer vollständiges Zurücksetzen erzwingen
-      
-      // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
-      pollFormKey.value += 1;
-    } catch (e) {
-      console.error('[DEBUG:VOTING] Fehler beim verzögerten Schließen des Modals:', e);
     }
+    
+    // Sofortiger Schließversuch ohne Verzögerung
+    if (bootstrapModal) {
+      try {
+        bootstrapModal.hide();
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Schließen des Modals:', e);
+        // Bei Fehler manuelles Aufräumen durchführen
+        cleanupModalEffects();
+      }
+    } else {
+      // Wenn kein Bootstrap-Modal vorhanden ist, trotzdem aufräumen
+      cleanupModalEffects();
+    }
+  } catch (error) {
+    console.error('[DEBUG:VOTING] Unerwarteter Fehler beim Schließen des Modals:', error);
+    // Bei unvorhergesehenem Fehler trotzdem versuchen aufzuräumen
+    cleanupModalEffects();
+  }
+}
 
-    // IMMER alle States zurücksetzen, sobald das Modal geschlossen ist
-    // Aber mit einer Verzögerung, damit das Modal wirklich sauber entfernt ist
-    
-    // Prüfe, ob alle Stimmen abgegeben wurden
-    const totalAllowedVotes = props.eventUser?.voteAmount || 0;
-    const usedVotes = votingProcess.usedVotesCount?.value || 0;
-    
-    // Bei abgeschlossener Abstimmung (alle Stimmen genutzt) sofort zurücksetzen
-    if (usedVotes >= totalAllowedVotes) {
-      votingProcess.resetVoteCounts();
-    } else if (votingProcess.isProcessingVotes.value) {
-      // Bei laufender Abstimmung mit Verzögerung zurücksetzen
-      
-      setTimeout(() => {
-        // Direkter Reset nach Verzögerung
-        votingProcess.resetVoteCounts();
-      }, 500);
+// Hilfsfunktion zum sicheren Entfernen von Modal-Effekten
+function cleanupModalEffects() {
+  try {
+    // Sicherer Versuch, das Modal-Element zu bereinigen
+    if (modal.value) {
+      // Bootstrap-Modal-Klassen entfernen
+      modal.value.classList.remove('show');
+      modal.value.style.display = 'none';
+      modal.value.setAttribute('aria-hidden', 'true');
     }
-  }, 50);
+    
+    // Backdrop entfernen
+    const backdrops = document.getElementsByClassName('modal-backdrop');
+    if (backdrops.length > 0) {
+      // Array.from verwenden, da die HTMLCollection sich verändert bei DOM-Änderungen
+      Array.from(backdrops).forEach(backdrop => {
+        if (backdrop && backdrop.parentNode) {
+          backdrop.parentNode.removeChild(backdrop);
+        }
+      });
+    }
+    
+    // Body-Styles zurücksetzen
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    document.body.style.pointerEvents = '';
+    document.body.style.position = '';
+    
+    // Verhindere mögliche verbleibende Overlays
+    const overlays = document.querySelectorAll('[data-bs-backdrop="static"]');
+    Array.from(overlays).forEach(overlay => {
+      if (overlay && overlay.parentNode && !overlay.closest('.modal')) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    });
+    
+    // KRITISCH: Zusätzlich mit kurzer Verzögerung, damit die reaktiven Updates durch Vue erfolgen können
+    // Dadurch wird sichergestellt, dass die UI gesperrt bleibt und das Modal wirklich geschlossen wird
+    setTimeout(() => {
+      try {
+        // Erneuter Schließversuch
+        if (bootstrapModal) {
+          bootstrapModal.hide();
+        }
+        
+        // LOKAL states danach zurücksetzen (nicht vorher!)
+        reset(false); // Immer vollständiges Zurücksetzen erzwingen
+        
+        // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
+        pollFormKey.value += 1;
+        
+        // Prüfe, ob alle Stimmen abgegeben wurden
+        const totalAllowedVotes = props.eventUser?.voteAmount || 0;
+        const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+        
+        // Bei abgeschlossener Abstimmung (alle Stimmen genutzt) sofort zurücksetzen
+        if (usedVotes >= totalAllowedVotes && votingProcess) {
+          votingProcess.resetVoteCounts();
+        } else if (votingProcess.isProcessingVotes.value) {
+          // Bei laufender Abstimmung mit Verzögerung zurücksetzen
+          setTimeout(() => {
+            if (votingProcess) {
+              votingProcess.resetVoteCounts();
+            }
+          }, 500);
+        }
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim verzögerten Schließen des Modals:', e);
+      }
+    }, 100);
+  } catch (error) {
+    console.error('[DEBUG:VOTING] Fehler beim Bereinigen der Modal-Effekte:', error);
+  }
 }
 
 function reset(keepSelection = false) {

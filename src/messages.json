@@ -593,6 +593,7 @@
     },
     "common": {
       "loading": "Ladevorgang",
+      "processing": "Verarbeitung läuft...",
       "error": {
         "loading": "Fehler beim Laden der Daten."
       }

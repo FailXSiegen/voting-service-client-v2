@@ -115,8 +115,8 @@ function onFilter() {
     (eventUser) =>
       !eventUser.verified && eventUser.username.includes(filter.username) ||
       !eventUser.verified && eventUser.publicName.includes(filter.username),
-    );
-  }
+  );
+}
 
 function onResetFilter() {
   filter.username = "";

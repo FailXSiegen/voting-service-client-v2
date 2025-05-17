@@ -44,8 +44,8 @@
                 v-if="columns.length > 2"
                 type="button"
                 class="btn btn-sm btn-outline-danger"
-                @click="removeColumn(index)"
                 title="Spalte entfernen"
+                @click="removeColumn(index)"
               >
                 <i class="bi bi-trash"></i>
               </button>
@@ -65,10 +65,10 @@
               <div class="editor-container_classic-editor editor-container_include-style">
                 <div class="editor-container__editor">
                   <ckeditor
-                    :modelValue="column.content"
+                    :model-value="column.content"
                     :editor="editorClass"
                     :config="editorConfig"
-                    @update:modelValue="value => updateColumnDirectly(index, value)"
+                    @update:model-value="value => updateColumnDirectly(index, value)"
                     @ready="onEditorReady($event, index)"
                   />
                 </div>
@@ -79,7 +79,7 @@
       </div>
     </div>
 
-    <div class="mt-2 mb-4" v-if="columns.length < 4">
+    <div v-if="columns.length < 4" class="mt-2 mb-4">
       <button
         type="button"
         class="btn btn-outline-success"
@@ -178,6 +178,24 @@ export default {
         }
       },
       immediate: true
+    }
+  },
+  
+  mounted() {
+    // Initialize with empty columns if no value provided
+    if (!this.value || !this.value.length) {
+      this.columns = [];
+      for (let i = 0; i < this.columnCount; i++) {
+        this.columns.push({ content: '' });
+      }
+      
+      // Initial emit to ensure parent component has data
+      this.$emit('input', [...this.columns]);
+      this.$emit('update:modelValue', [...this.columns]);
+      this.$emit('change', {
+        columnCount: this.columnCount,
+        columns: [...this.columns]
+      });
     }
   },
   
@@ -349,24 +367,6 @@ export default {
         default:
           return 'col-md-6';
       }
-    }
-  },
-  
-  mounted() {
-    // Initialize with empty columns if no value provided
-    if (!this.value || !this.value.length) {
-      this.columns = [];
-      for (let i = 0; i < this.columnCount; i++) {
-        this.columns.push({ content: '' });
-      }
-      
-      // Initial emit to ensure parent component has data
-      this.$emit('input', [...this.columns]);
-      this.$emit('update:modelValue', [...this.columns]);
-      this.$emit('change', {
-        columnCount: this.columnCount,
-        columns: [...this.columns]
-      });
     }
   }
 };

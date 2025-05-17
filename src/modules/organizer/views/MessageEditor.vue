@@ -18,7 +18,7 @@
 
           <!-- Development export button - only visible in development -->
           <div v-if="isDevelopment" class="mb-3 text-end">
-            <button @click="exportTranslations" class="btn btn-sm btn-outline-secondary">
+            <button class="btn btn-sm btn-outline-secondary" @click="exportTranslations">
               <i class="bi bi-download me-1"></i>
               Export messages.local.json
             </button>
@@ -49,8 +49,8 @@
               <div class="ms-2">
                 <button
                   class="btn btn-primary"
-                  @click="saveChanges"
                   :disabled="!hasChanges || saving"
+                  @click="saveChanges"
                 >
                   <i class="bi bi-save me-1"></i>
                   {{ $t('view.messageEditor.saveChanges') }}
@@ -76,7 +76,7 @@
                 <div class="row mb-4">
                   <div class="col-md-6">
                     <div class="form-check form-switch">
-                      <input class="form-check-input" type="checkbox" v-model="showOnlyModified" id="showModifiedOnly">
+                      <input id="showModifiedOnly" v-model="showOnlyModified" class="form-check-input" type="checkbox">
                       <label class="form-check-label" for="showModifiedOnly">
                         {{ $t('view.messageEditor.showOnlyModified') }}
                       </label>
@@ -85,7 +85,7 @@
                   <div class="col-md-6">
                     <div class="d-flex">
                       <div class="me-2">
-                        <select class="form-select form-select-sm" v-model="currentLocale">
+                        <select v-model="currentLocale" class="form-select form-select-sm">
                           <option value="de">Deutsch</option>
                           <option value="en">Englisch</option>
                         </select>
@@ -94,9 +94,9 @@
                         <div class="input-group">
                           <span class="input-group-text"><i class="bi bi-search"></i></span>
                           <input
+                            v-model="searchQuery"
                             type="text"
                             class="form-control"
-                            v-model="searchQuery"
                             placeholder="Suchen..."
                           >
                         </div>
@@ -135,8 +135,8 @@
                           </td>
                           <td>
                             <textarea
-                              class="form-control"
                               v-model="item.customValue"
+                              class="form-control"
                               rows="2"
                               :placeholder="'Übersetzung bearbeiten...'"
                             ></textarea>
@@ -144,9 +144,9 @@
                           <td>
                             <button
                               class="btn btn-sm btn-outline-secondary mb-2"
-                              @click="resetMessage(item)"
                               :disabled="!item.customValue || item.resetting"
                               title="Auf Standardwert zurücksetzen"
+                              @click="resetMessage(item)"
                             >
                               <span v-if="item.resetting" class="spinner-border spinner-border-sm me-1" role="status"></span>
                               <i v-else class="bi bi-arrow-counterclockwise me-1"></i>
@@ -176,7 +176,7 @@
               <div v-if="activeTab === 'structure'" class="json-structure">
                 <div class="d-flex mb-3">
                   <div class="me-2">
-                    <select class="form-select" v-model="jsonViewLocale">
+                    <select v-model="jsonViewLocale" class="form-select">
                       <option value="all">Alle Sprachen</option>
                       <option value="de">Deutsch</option>
                       <option value="en">Englisch</option>
@@ -384,7 +384,6 @@ const loadMessages = async (locale = currentLocale.value) => {
           let customValue = '';
           let modified = false;
 
-
           // Normaler Fall: Pfad in den benutzerdefinierten Übersetzungen suchen
           let current = customMessages;
           let found = true;
@@ -401,7 +400,6 @@ const loadMessages = async (locale = currentLocale.value) => {
             customValue = current;
             modified = true;
           }
-        
 
           // Eintrag zur Ergebnisliste hinzufügen
           result.push({
@@ -440,7 +438,6 @@ function getNestedPropertyExists(obj, pathArray) {
 
   return true;
 }
-
 
 // Get Apollo client
 const { resolveClient } = useApolloClient();

@@ -62,7 +62,7 @@ const props = defineProps({
     default: [],
   },
   // eslint-disable-next-line vue/require-default-prop
-  value: String,
+  value: [String, Number],
   // eslint-disable-next-line vue/require-default-prop
   helpText: String,
   items: {

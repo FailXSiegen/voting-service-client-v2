@@ -12,6 +12,7 @@ import Vue3EasyDataTable from "vue3-easy-data-table";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { createPinia } from "pinia";
 import jQuery from "jquery";
+import Vue3Toastify, { toast } from 'vue3-toastify';
 window.$ = window.jQuery = jQuery;
 
 import "vue3-easy-data-table/dist/style.css";
@@ -38,6 +39,14 @@ app.use(i18n);
 app.use(apolloProvider);
 app.use(head);
 app.use(ConfirmDialog);
+app.use(Vue3Toastify, {
+  autoClose: 3000, // Toasts schließen nach 3 Sekunden automatisch
+  clearOnUrlChange: true,
+  hideProgressBar: false,
+  position: "top-right",
+  pauseOnHover: true,
+  pauseOnFocusLoss: false
+});
 
 app.provide("appVersion", version);
 app.component("EasyDataTable", Vue3EasyDataTable);

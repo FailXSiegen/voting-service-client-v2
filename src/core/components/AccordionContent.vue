@@ -1,12 +1,12 @@
 <template>
   <div class="accordion-content">
-    <div class="accordion" :id="accordionId">
+    <div :id="accordionId" class="accordion">
       <div 
         v-for="(item, index) in accordionItems" 
         :key="index"
         class="accordion-item"
       >
-        <h2 class="accordion-header" :id="getHeadingId(index)">
+        <h2 :id="getHeadingId(index)" class="accordion-header">
           <button 
             class="accordion-button" 
             :class="{ collapsed: !isItemOpen(index) }" 
@@ -81,29 +81,6 @@ export default {
     }
   },
   
-  methods: {
-    /**
-     * Generate a unique ID for the accordion heading
-     */
-    getHeadingId(index) {
-      return `heading-${this.accordionId}-${index}`;
-    },
-    
-    /**
-     * Generate a unique ID for the accordion collapse element
-     */
-    getCollapseId(index) {
-      return `collapse-${this.accordionId}-${index}`;
-    },
-    
-    /**
-     * Check if a specific accordion item is open
-     */
-    isItemOpen(index) {
-      return index === this.openIndex;
-    }
-  },
-  
   /**
    * After the component is mounted, initialize the Bootstrap accordion
    */
@@ -127,6 +104,29 @@ export default {
     const accordionElement = document.getElementById(this.accordionId);
     if (accordionElement) {
       accordionElement.removeEventListener('shown.bs.collapse');
+    }
+  },
+  
+  methods: {
+    /**
+     * Generate a unique ID for the accordion heading
+     */
+    getHeadingId(index) {
+      return `heading-${this.accordionId}-${index}`;
+    },
+    
+    /**
+     * Generate a unique ID for the accordion collapse element
+     */
+    getCollapseId(index) {
+      return `collapse-${this.accordionId}-${index}`;
+    },
+    
+    /**
+     * Check if a specific accordion item is open
+     */
+    isItemOpen(index) {
+      return index === this.openIndex;
     }
   }
 };

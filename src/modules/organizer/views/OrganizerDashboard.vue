@@ -124,7 +124,7 @@
       </div>
 
       <!-- Message Editor for SuperOrganizer -->
-      <div class="row mt-4" v-if="coreStore.isSuperOrganizer">
+      <div v-if="coreStore.isSuperOrganizer" class="row mt-4">
         <div class="col-12">
           <div class="card">
             <div class="card-header bg-primary text-white">
