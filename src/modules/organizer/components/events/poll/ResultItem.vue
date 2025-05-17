@@ -272,8 +272,18 @@ const props = defineProps({
 // Definiere Emits für die Kommunikation mit dem Modal
 const emit = defineEmits(['percentage-type-change']);
 
-// Lokaler State, der auf initialPercentageType initialisiert wird
-const localPercentageType = ref(props.initialPercentageType);
+// Lokaler State für den Prozenttyp
+const localPercentageType = ref(''); // Wird später initialisiert
+
+// Setze den Anfangswert basierend auf Enthaltungen
+watch(() => hasAbstentions.value, (newHasAbstentions) => {
+  // Initialisiere nur, wenn noch kein Wert gesetzt wurde
+  if (localPercentageType.value === '') {
+    localPercentageType.value = newHasAbstentions 
+      ? 'maxPerOptionNoAbstention' // Wenn Enthaltungen vorhanden sind
+      : 'maxPerOption'; // Wenn keine Enthaltungen vorhanden sind
+  }
+}, { immediate: true });
 
 // Beobachte Änderungen am initialPercentageType-Prop
 watch(() => props.initialPercentageType, (newValue) => {
