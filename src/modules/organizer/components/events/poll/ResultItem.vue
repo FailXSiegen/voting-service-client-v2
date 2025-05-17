@@ -266,42 +266,14 @@ const props = defineProps({
   // Neuer Prop für den initialen Prozentanzeigetyp
   initialPercentageType: {
     type: String,
-    default: "maxPerOptionNoAbstention"
+    default: "maxPerOption"
   }
 });
 
 // Definiere Emits für die Kommunikation mit dem Modal
 const emit = defineEmits(['percentage-type-change']);
 
-// Lokaler State für den Prozenttyp
-const localPercentageType = ref('maxPerOption'); // Standard: "% der maximalen Stimmen pro Option"
-
-// Setze den Anfangswert wenn Enthaltungen vorhanden sind
-watch(() => hasAbstentions.value, (newHasAbstentions) => {
-  // Initialisiere nur, wenn noch kein Wert gesetzt wurde oder der Wert automatisch geändert werden kann
-  if (localPercentageType.value === '' || 
-      (newHasAbstentions && localPercentageType.value === 'maxPerOptionNoAbstention') ||
-      (!newHasAbstentions && localPercentageType.value === 'maxPerOption')) {
-    // Wenn Enthaltungen vorhanden und wir zeigen "ohne Enthaltungen" an, behalten wir das bei
-    // Andernfalls, zeigen wir "% der maximalen Stimmen pro Option"
-    localPercentageType.value = newHasAbstentions && localPercentageType.value === 'maxPerOptionNoAbstention'
-      ? 'maxPerOptionNoAbstention'
-      : 'maxPerOption';
-  }
-}, { immediate: true });
-
-// Beobachte Änderungen am initialPercentageType-Prop
-watch(() => props.initialPercentageType, (newValue) => {
-  localPercentageType.value = newValue;
-});
-
-// Funktion zum Ändern des Prozenttyps
-function changePercentageType(type) {
-  localPercentageType.value = type;
-  // Informiere die übergeordnete Komponente (Modal) über die Änderung
-  emit('percentage-type-change', type);
-}
-
+// Berechne zunächst alle erforderlichen Werte
 const totalValidVotes = computed(() => {
   if (!props.pollResult?.pollAnswer) return 0;
   return props.pollResult.pollAnswer.filter(
@@ -319,6 +291,31 @@ const abstentionCount = computed(() => {
 const hasAbstentions = computed(() => {
   return abstentionCount.value > 0;
 });
+
+// Lokaler State für den Prozenttyp - wird abhängig von hasAbstentions initialisiert
+const localPercentageType = ref(props.initialPercentageType);
+
+// Setze den Anfangswert basierend auf hasAbstentions
+watch(() => hasAbstentions.value, (newHasAbstentions) => {
+  // Bei Enthaltungen 'maxPerOptionNoAbstention' wählen, sonst Standard
+  if (newHasAbstentions) {
+    localPercentageType.value = 'maxPerOptionNoAbstention';
+  } else {
+    localPercentageType.value = 'maxPerOption';
+  }
+}, { immediate: true });
+
+// Beobachte Änderungen am initialPercentageType-Prop
+watch(() => props.initialPercentageType, (newValue) => {
+  localPercentageType.value = newValue;
+});
+
+// Funktion zum Ändern des Prozenttyps
+function changePercentageType(type) {
+  localPercentageType.value = type;
+  // Informiere die übergeordnete Komponente (Modal) über die Änderung
+  emit('percentage-type-change', type);
+}
 
 // Maximum selectable options per voter from poll configuration
 const maxSelectPerVoter = computed(() => {
