@@ -3,35 +3,6 @@
     <form @submit.prevent="onSubmit">
       <div class="mb-3">
         <CheckboxInput
-          id="allowToVote"
-          v-model:checked="formData.allowToVote"
-          :label="$t('view.event.create.labels.eventUser.allowToVote')"
-          :errors="v$.allowToVote?.$errors"
-          :has-errors="v$.allowToVote?.$errors?.length > 0"
-          @update="
-            ({ value }) => {
-              formData.allowToVote = value;
-            }
-          "
-        />
-      </div>
-      <div v-if="formData.allowToVote" class="mb-3">
-        <BaseInput
-          id="voteAmount"
-          :label="$t('view.event.create.labels.eventUser.voteAmount')"
-          :errors="v$.voteAmount?.$errors"
-          :has-errors="v$.voteAmount?.$errors?.length > 0"
-          :value="formData.voteAmount?.toString()"
-          type="number"
-          @change="
-            ({ value }) => {
-              formData.voteAmount = value;
-            }
-          "
-        />
-      </div>
-      <div class="mb-3">
-        <CheckboxInput
           id="tokenBasedLogin"
           v-model:checked="formData.tokenBasedLogin"
           :label="$t('view.event.create.labels.eventUser.tokenBasedLogin')"
@@ -52,24 +23,58 @@
           id="eventMultipleUser"
           :label="
             $t(
-              formData.tokenBasedLogin
-                ? 'view.event.create.labels.eventMultipleUser.emails'
-                : 'view.event.create.labels.eventMultipleUser.usernames',
+              'view.event.create.labels.eventMultipleUser.importFormat',
+              {
+                defaultValue: `${formData.tokenBasedLogin ? 'E-Mail' : 'Benutzername'};Name;Stimmen`
+              }
             )
           "
           :help-text="
-            $t(
-              formData.tokenBasedLogin
-                ? 'view.event.create.labels.eventMultipleUser.emailsHint'
-                : 'view.event.create.labels.eventMultipleUser.usernamesHint',
-            )
+            $t('view.event.create.labels.eventMultipleUser.importFormatHelp', {
+              defaultValue: `${formData.tokenBasedLogin ? 'email' : 'username'}[;public_name][;vote_amount]`
+            })
           "
           :errors="v$.usernames?.$errors"
           :has-errors="v$.usernames?.$errors?.length > 0"
-          :rows="20"
+          :rows="12"
           :cols="5"
           @change="onChangeUsernamesText"
         />
+      </div>
+      
+      <!-- Tabellarische Vorschau -->
+      <div v-if="parsedPreview.length > 0" class="preview-table mb-4">
+        <h5>Vorschau der zu erstellenden Benutzer</h5>
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm">
+            <thead class="table-light">
+              <tr>
+                <th>{{ formData.tokenBasedLogin ? 'E-Mail' : 'Benutzername' }}</th>
+                <th>Anzeigename</th>
+                <th>Stimmen</th>
+                <th>Stimmrecht</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(user, index) in parsedPreview" :key="index">
+                <td>{{ user.identifier }}</td>
+                <td><em v-if="!user.publicName">Leer</em><span v-else>{{ user.publicName }}</span></td>
+                <td>{{ user.voteAmount !== null ? user.voteAmount : 0 }}</td>
+                <td>
+                  <span v-if="user.allowToVote" class="badge bg-success">Ja</span>
+                  <span v-else class="badge bg-secondary">Nein</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="summary">
+          <small class="text-muted">
+            Insgesamt: {{ parsedPreview.length }} Benutzer, 
+            davon {{ parsedPreview.filter(u => u.allowToVote).length }} mit Stimmrecht.
+            Gesamtstimmen: {{ getTotalVotes() }}
+          </small>
+        </div>
       </div>
 
       <!-- Progress Feedback -->
@@ -116,7 +121,7 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
+import { computed, reactive, ref, watch } from "vue";
 import { required, requiredIf } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import { handleError } from "@/core/error/error-handler";
@@ -143,22 +148,19 @@ defineProps({
 
 const emit = defineEmits(["submit"]);
 const usernamesText = ref("");
+const parsedPreview = ref([]);
 
 // Form data setup
 const formData = reactive({
-  allowToVote: false,
   tokenBasedLogin: false,
-  voteAmount: 0,
   usernames: [],
+  usersWithData: [] // To store parsed user data with public_name and individual vote_amount
 });
 
 // Validation rules
 const rules = computed(() => {
   return {
     usernames: { required },
-    voteAmount: {
-      requiredIf: requiredIf(formData.allowToVote),
-    },
   };
 });
 
@@ -166,33 +168,56 @@ const v$ = useVuelidate(rules, formData);
 
 // Parse and validate usernames/emails from textarea
 function parseUsernamesText() {
-  const usernames = usernamesText.value?.split("\n") ?? [];
+  const lines = usernamesText.value?.split("\n") ?? [];
+  formData.usersWithData = [];
   try {
-    // Validate for empty lines and spaces
-    usernames.forEach((username, index) => {
-      if (username === "" || username.trim().indexOf(" ") >= 0) {
-        throw index;
+    // Validate and parse each line
+    lines.forEach((line, index) => {
+      // Skip empty lines
+      if (line.trim() === "") {
+        return;
       }
+
+      const parts = line.split(";").map(part => part.trim());
+      const identifier = parts[0]; // Username or email
+      const publicName = parts[1] || ""; // Optional public_name
+      const individualVoteAmount = parts[2] ? parseInt(parts[2], 10) : null; // Optional vote_amount
+
+      // Validate identifier (username/email)
+      if (identifier === "") {
+        throw { index, message: `Leerer Benutzername/E-Mail in Zeile ${index + 1}` };
+      }
+
+      // Validate email format if tokenBasedLogin is true
+      if (formData.tokenBasedLogin && !isValidEmail(identifier)) {
+        throw { index, message: `Ungültige E-Mail-Adresse in Zeile ${index + 1}: ${identifier}` };
+      }
+
+      // Validate vote amount if provided
+      if (individualVoteAmount !== null && (isNaN(individualVoteAmount) || individualVoteAmount < 0)) {
+        throw { index, message: `Ungültige Stimmenzahl in Zeile ${index + 1}: ${parts[2]}` };
+      }
+
+      // Add valid user to the list
+      // Ein Benutzer hat Stimmrecht, wenn eine individuelle Stimmenzahl > 0 angegeben wurde
+      formData.usersWithData.push({
+        identifier,
+        publicName,
+        voteAmount: individualVoteAmount,
+        allowToVote: individualVoteAmount !== null && individualVoteAmount > 0
+      });
     });
 
-    // Validate email format if tokenBasedLogin is true
-    if (formData.tokenBasedLogin) {
-      usernames.forEach((email, index) => {
-        if (!isValidEmail(email)) {
-          throw index;
-        }
-      });
-    }
-
-    formData.usernames = usernames.map((username) => username.trim());
+    // Update the usernames array for backward compatibility
+    formData.usernames = formData.usersWithData.map(user => user.identifier);
     return true;
-  } catch (index) {
-    const numberOfRow = index + 1;
+  } catch (error) {
     handleError(
       new NetworkError(
-        `Die Benutzerliste enthält fehlerhafte Eintragungen oder Leerzeilen in Zeile ${numberOfRow}`,
+        error.message || `Die Benutzerliste enthält fehlerhafte Eintragungen in Zeile ${error.index + 1}`,
       ),
     );
+    parsedPreview.value = []; // Bei Fehler Vorschau zurücksetzen
     return false;
   }
 }
@@ -200,6 +225,58 @@ function parseUsernamesText() {
 // Event handlers
 function onChangeUsernamesText({ value }) {
   usernamesText.value = value;
+  updatePreview();
+}
+
+// Generiere Vorschau der geparsten Benutzerdaten
+function updatePreview() {
+  try {
+    const lines = usernamesText.value?.split("\n") ?? [];
+    const preview = [];
+    
+    // Verarbeite jede Zeile
+    lines.forEach(line => {
+      // Überspringe leere Zeilen
+      if (line.trim() === "") {
+        return;
+      }
+
+      const parts = line.split(";").map(part => part.trim());
+      const identifier = parts[0]; // Username oder email
+      const publicName = parts[1] || ""; // Optional public_name
+      const individualVoteAmount = parts[2] ? parseInt(parts[2], 10) : null; // Optional vote_amount
+      
+      // Validiere den Identifier grob, ohne Fehlermeldung zu werfen
+      if (identifier === "") {
+        return;
+      }
+      
+      // Validiere Email-Format, aber nur für Vorschau (keine Fehlermeldung)
+      if (formData.tokenBasedLogin && !isValidEmail(identifier)) {
+        // In der Vorschau zeigen wir ungültige Einträge an, markieren sie aber später ggf.
+      }
+      
+      // Füge gültigen Benutzer zur Vorschau hinzu
+      preview.push({
+        identifier,
+        publicName,
+        voteAmount: individualVoteAmount,
+        allowToVote: individualVoteAmount !== null && individualVoteAmount > 0
+      });
+    });
+    
+    parsedPreview.value = preview;
+  } catch (error) {
+    console.error("Fehler bei der Vorschau-Generierung", error);
+    // Wir zeigen keine Fehlermeldung an, da dies nur die Vorschau ist
+  }
+}
+
+// Berechne Gesamtstimmen
+function getTotalVotes() {
+  return parsedPreview.value.reduce((sum, user) => {
+    return sum + (user.voteAmount !== null ? user.voteAmount : 0);
+  }, 0);
 }
 
 async function onSubmit() {
@@ -213,9 +290,8 @@ async function onSubmit() {
 
   emit("submit", {
     usernames: formData.usernames,
-    allowToVote: formData.allowToVote,
-    voteAmount: formData.voteAmount,
     tokenBasedLogin: formData.tokenBasedLogin,
+    usersWithData: formData.usersWithData // Pass the full user data including public_name and individual vote_amount
   });
 }
 </script>
@@ -223,6 +299,31 @@ async function onSubmit() {
 <style lang="scss" scoped>
 .multiple-event-user-new {
   max-width: 840px;
+
+  .preview-table {
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+
+    h5 {
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .table {
+      margin-bottom: 0.5rem;
+      
+      em {
+        color: #6c757d;
+        font-style: italic;
+      }
+    }
+
+    .summary {
+      margin-top: 0.5rem;
+    }
+  }
 
   .progress-feedback {
     .progress {

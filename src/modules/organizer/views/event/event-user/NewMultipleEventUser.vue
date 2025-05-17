@@ -244,9 +244,8 @@ async function createUsersInBatches(userDataList, isTokenBased) {
 // Submit handler bleibt größtenteils gleich, aber mit verbessertem Error Handling
 async function onSubmit({
   usernames,
-  allowToVote,
-  voteAmount,
   tokenBasedLogin,
+  usersWithData, // Extended user data with individual settings
 }) {
   isProcessing.value = true;
   progress.current = 0;
@@ -255,11 +254,19 @@ async function onSubmit({
   errorSummary.errors = [];
 
   try {
-    const userDataList = usernames.map((username) => ({
+    // Use the extended user data to create users with individual settings
+    const userDataList = usersWithData ? usersWithData.map((user) => ({
       eventId: id,
       verified: true,
-      allowToVote,
-      voteAmount: voteAmount || 0,
+      allowToVote: user.allowToVote,
+      voteAmount: user.voteAmount !== null ? user.voteAmount : 0,
+      publicName: user.publicName || '',
+      [tokenBasedLogin ? "email" : "username"]: user.identifier,
+    })) : usernames.map((username) => ({
+      eventId: id,
+      verified: true,
+      allowToVote: false,
+      voteAmount: 0,
       [tokenBasedLogin ? "email" : "username"]: username,
     }));
 

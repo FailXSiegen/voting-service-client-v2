@@ -193,6 +193,8 @@
               "emails": "Benutzerliste (E-Mail-Adressen)",
               "usernamesHint": "Immer ein Benutzer pro Zeile. Keine Leerzeichen im Benutzernamen. Keine leeren Zeilen",
               "emailsHint": "Immer eine E-Mail-Adresse pro Zeile. Keine Leerzeichen in der E-Mail-Adresse. Keine leeren Zeilen",
+              "importFormat": "Benutzerliste (Format: {defaultValue})",
+              "importFormatHelp": "<strong>Format:</strong> {defaultValue}<br><br><strong>Beispiele (eine Zeile pro Teilnehmer):</strong><br>user1@example.com;Max Mustermann;5<br>user2@example.com;Erika Musterfrau<br>user3@example.com;;3<br>user4@example.com<br><br>Ein Eintrag pro Zeile. <strong>Teilnehmer mit Stimmenzahl > 0 erhalten automatisch Stimmrecht.</strong>",
               "voteAmount": "Anzahl der Stimmen"
             },
             "videoConferenceConfig": {
