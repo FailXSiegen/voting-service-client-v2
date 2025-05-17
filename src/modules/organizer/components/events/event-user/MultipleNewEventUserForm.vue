@@ -30,9 +30,7 @@
             )
           "
           :help-text="
-            $t('view.event.create.labels.eventMultipleUser.importFormatHelp', {
-              defaultValue: `${formData.tokenBasedLogin ? 'email' : 'username'}[;public_name][;vote_amount]`
-            })
+            `<strong>Format:</strong> ${formData.tokenBasedLogin ? 'email' : 'username'}[;public_name][;vote_amount]<br><br><strong>Beispiele (eine Zeile pro Teilnehmer):</strong><br>user1@example.com;Max Mustermann;5<br>user2@example.com;Erika Musterfrau<br>user3@example.com;;3<br>user4@example.com<br><br>Ein Eintrag pro Zeile (leere Zeilen werden ignoriert). <strong>Teilnehmer mit Stimmenzahl > 0 erhalten automatisch Stimmrecht.</strong>`
           "
           :errors="v$.usernames?.$errors"
           :has-errors="v$.usernames?.$errors?.length > 0"
@@ -49,20 +47,27 @@
           <table class="table table-bordered table-sm">
             <thead class="table-light">
               <tr>
+                <th style="width: 45px">Zeile</th>
                 <th>{{ formData.tokenBasedLogin ? 'E-Mail' : 'Benutzername' }}</th>
                 <th>Anzeigename</th>
                 <th>Stimmen</th>
                 <th>Stimmrecht</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(user, index) in parsedPreview" :key="index">
+              <tr v-for="(user, index) in parsedPreview" :key="index" :class="{ 'table-danger': user.hasErrors }">
+                <td class="text-center">{{ user.lineIndex }}</td>
                 <td>{{ user.identifier }}</td>
                 <td><em v-if="!user.publicName">Leer</em><span v-else>{{ user.publicName }}</span></td>
                 <td>{{ user.voteAmount !== null ? user.voteAmount : 0 }}</td>
                 <td>
                   <span v-if="user.allowToVote" class="badge bg-success">Ja</span>
                   <span v-else class="badge bg-secondary">Nein</span>
+                </td>
+                <td>
+                  <span v-if="user.hasErrors" class="badge bg-danger" title="{{user.errors.join(', ')}}">Fehler</span>
+                  <span v-else class="badge bg-success">OK</span>
                 </td>
               </tr>
             </tbody>
@@ -99,7 +104,16 @@
         </small>
       </div>
 
-      <button class="btn btn-primary mt-5 mb-3" :disabled="isProcessing">
+      <div v-if="hasValidationErrors" class="alert alert-danger mt-3">
+        <h5>Fehler in der Benutzerliste</h5>
+        <ul class="mb-0">
+          <li v-for="(error, index) in validationErrors" :key="index">
+            Zeile {{ error.line }}: {{ error.messages.join(', ') }}
+          </li>
+        </ul>
+      </div>
+
+      <button class="btn btn-primary mt-5 mb-3" :disabled="isProcessing || hasValidationErrors">
         <i
           :class="[
             isProcessing ? 'bi-hourglass-split' : 'bi-play',
@@ -149,6 +163,8 @@ defineProps({
 const emit = defineEmits(["submit"]);
 const usernamesText = ref("");
 const parsedPreview = ref([]);
+const validationErrors = ref([]);
+const hasValidationErrors = computed(() => validationErrors.value.length > 0);
 
 // Form data setup
 const formData = reactive({
@@ -168,15 +184,13 @@ const v$ = useVuelidate(rules, formData);
 
 // Parse and validate usernames/emails from textarea
 function parseUsernamesText() {
-  const lines = usernamesText.value?.split("\n") ?? [];
+  // Teile Text nach Zeilen auf und filtere leere Zeilen heraus
+  const rawLines = usernamesText.value?.split("\n") ?? [];
+  const lines = rawLines.filter(line => line.trim() !== "");
   formData.usersWithData = [];
   try {
     // Validate and parse each line
     lines.forEach((line, index) => {
-      // Skip empty lines
-      if (line.trim() === "") {
-        return;
-      }
 
       const parts = line.split(";").map(part => part.trim());
       const identifier = parts[0]; // Username or email
@@ -231,41 +245,65 @@ function onChangeUsernamesText({ value }) {
 // Generiere Vorschau der geparsten Benutzerdaten
 function updatePreview() {
   try {
-    const lines = usernamesText.value?.split("\n") ?? [];
+    // Teile Text nach Zeilen auf und filtere leere Zeilen heraus
+    const rawLines = usernamesText.value?.split("\n") ?? [];
+    const lines = rawLines.filter(line => line.trim() !== "");
     const preview = [];
+    const errors = [];
+    const identifiers = new Set();
     
     // Verarbeite jede Zeile
-    lines.forEach(line => {
-      // Überspringe leere Zeilen
-      if (line.trim() === "") {
-        return;
-      }
+    lines.forEach((line, lineIndex) => {
 
       const parts = line.split(";").map(part => part.trim());
       const identifier = parts[0]; // Username oder email
       const publicName = parts[1] || ""; // Optional public_name
       const individualVoteAmount = parts[2] ? parseInt(parts[2], 10) : null; // Optional vote_amount
       
-      // Validiere den Identifier grob, ohne Fehlermeldung zu werfen
+      // Erfasse Validierungsfehler
+      const rowErrors = [];
+      
+      // Validiere den Identifier
       if (identifier === "") {
-        return;
+        rowErrors.push('Leerer Benutzername/E-Mail');
+      } else if (formData.tokenBasedLogin && !isValidEmail(identifier)) {
+        rowErrors.push('Ungültige E-Mail-Adresse');
       }
       
-      // Validiere Email-Format, aber nur für Vorschau (keine Fehlermeldung)
-      if (formData.tokenBasedLogin && !isValidEmail(identifier)) {
-        // In der Vorschau zeigen wir ungültige Einträge an, markieren sie aber später ggf.
+      // Prüfe auf doppelte Benutzernamen
+      if (identifier && identifiers.has(identifier)) {
+        rowErrors.push('Doppelter Benutzername/E-Mail');
+      } else if (identifier) {
+        identifiers.add(identifier);
       }
       
-      // Füge gültigen Benutzer zur Vorschau hinzu
+      // Validiere Stimmenzahl
+      if (individualVoteAmount !== null && (isNaN(individualVoteAmount) || individualVoteAmount < 0)) {
+        rowErrors.push('Ungültige Stimmenzahl');
+      }
+      
+      // Füge gültigen Benutzer zur Vorschau hinzu mit Fehlerinformationen
       preview.push({
+        lineIndex: lineIndex + 1, // Zeilennummer (1-basiert für Benutzer)
         identifier,
         publicName,
         voteAmount: individualVoteAmount,
-        allowToVote: individualVoteAmount !== null && individualVoteAmount > 0
+        allowToVote: individualVoteAmount !== null && individualVoteAmount > 0,
+        errors: rowErrors,
+        hasErrors: rowErrors.length > 0
       });
+      
+      // Sammle Fehler für die Formularvalidierung
+      if (rowErrors.length > 0) {
+        errors.push({
+          line: lineIndex + 1,
+          messages: rowErrors
+        });
+      }
     });
     
     parsedPreview.value = preview;
+    validationErrors.value = errors;
   } catch (error) {
     console.error("Fehler bei der Vorschau-Generierung", error);
     // Wir zeigen keine Fehlermeldung an, da dies nur die Vorschau ist
@@ -280,6 +318,14 @@ function getTotalVotes() {
 }
 
 async function onSubmit() {
+  // Aktualisiere Vorschau und prüfe auf Fehler
+  updatePreview();
+  
+  if (hasValidationErrors.value) {
+    handleError(new InvalidFormError("Die Benutzerliste enthält Fehler"));
+    return;
+  }
+  
   const parsedSuccessfully = parseUsernamesText();
   const result = await v$.value.$validate();
 
@@ -317,6 +363,14 @@ async function onSubmit() {
       em {
         color: #6c757d;
         font-style: italic;
+      }
+      
+      tr.table-danger {
+        --bs-table-bg: rgba(var(--bs-danger-rgb), 0.15);
+      }
+      
+      td {
+        vertical-align: middle;
       }
     }
 
