@@ -29,17 +29,26 @@
 <script setup>
 import ToTop from "@/core/components/ToTop.vue";
 import { useCore } from "@/core/store/core";
-import { ref, onMounted } from "vue";
+import { apolloClient } from "@/apollo-client";
+import { ref, onMounted, watch } from "vue";
 import { checkBrowserCompatibility, detectBrowser } from "@/core/utils/browser-compatibility";
+import { provideApolloClient, useSubscription } from "@vue/apollo-composable";
+import { TOKEN_REFRESH_REQUIRED_SUBSCRIPTION } from "@/core/graphql/subscription/token-refresh-required";
+import { refreshLogin } from "@/core/auth/login";
+import { handleError } from "@/core/error/error-handler";
 
 const loaded = ref(false);
 const browserCompatible = ref(true);
 const browserCompatibilityWarningDismissed = ref(false);
+const coreStore = useCore();
+
+// Provide Apollo client for this component
+provideApolloClient(apolloClient);
 
 // Initialise the core store.
 (async () => {
   try {
-    await useCore().init();
+    await coreStore.init();
     loaded.value = true;
     
     // Browser-Kompatibilität überprüfen
@@ -92,6 +101,61 @@ const browserCompatibilityWarningDismissed = ref(false);
     console.error("App.vue initialization failed:", error);
   }
 })();
+
+// Token refresh subscription logic
+const isAuthReady = ref(false);
+
+// Watch for changes in user authentication state
+watch(() => coreStore.isInitialized, (initialized) => {
+  if (initialized) {
+    isAuthReady.value = true;
+  }
+});
+
+// Only enable subscriptions when authentication is ready
+const tokenRefreshSubscription = useSubscription(
+  TOKEN_REFRESH_REQUIRED_SUBSCRIPTION,
+  () => ({
+    eventUserId: coreStore.user?.id || null
+  }),
+  { enabled: isAuthReady }
+);
+
+// Handle token refresh subscription
+tokenRefreshSubscription.onResult(async (result) => {
+  if (!result.data) return;
+  
+  const { tokenRefreshRequired } = result.data;
+  
+  // Only process if we have data and it's for the current user
+  if (tokenRefreshRequired && 
+      coreStore.user.id == tokenRefreshRequired.userId && 
+      coreStore.user.type === tokenRefreshRequired.userType) {
+    
+    console.info('[TokenRefresh] Server requested token refresh:', tokenRefreshRequired.reason);
+    
+    try {
+      // If token is directly provided by the server, use it
+      if (tokenRefreshRequired.token) {
+        // Login with the new token and indicate it's a token refresh
+        await coreStore.loginUser(tokenRefreshRequired.token, true);
+        console.info('[TokenRefresh] Successfully refreshed token from subscription data');
+      } else {
+        // Fallback to refresh login API call
+        const { token } = await refreshLogin();
+        
+        if (token) {
+          // Login with the new token and indicate it's a token refresh
+          await coreStore.loginUser(token, true);
+          console.info('[TokenRefresh] Successfully refreshed token via API');
+        }
+      }
+    } catch (error) {
+      console.error('[TokenRefresh] Failed to refresh token:', error);
+      handleError(error);
+    }
+  }
+});
 
 // Füge CSS für die Warnmeldung hinzu
 onMounted(() => {
