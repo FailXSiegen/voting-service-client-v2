@@ -792,8 +792,24 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       votingProcess.isProcessingVotes.value = false;
       votingProcess.currentlyProcessingBatch.value = false;
     
+      // KRITISCH: Das globale votingProcessModule jetzt auch direkt auf 0 setzen
+      // Dies stellt sicher, dass die Berechnung in PollForm.vue korrekt ist
+      if (typeof window !== 'undefined' && window.votingProcessModule) {
+        console.log("[DEBUG:VOTING] Setze direkt votingProcessModule.usedVotesCount = 0 vor resetVoteCounts");
+        window.votingProcessModule.usedVotesCount = 0;
+        window.votingProcessModule.voteCounter = 1;
+      }
+      
       // Vollständiges Zurücksetzen aller Zähler und Status-Werte
+      console.log("[DEBUG:VOTING] Vor resetVoteCounts: usedVotesCount =", votingProcess.usedVotesCount?.value, "voteCounter =", votingProcess.voteCounter?.value);
+      
+      // KRITISCHE ÄNDERUNG: Setze voteCounter.value AUF JEDEN FALL explizit auf 1
+      // Dies ist notwendig, weil dies der Wert ist, der als prop an PollForm gesendet wird
+      // und in PollForm.vue für die Berechnung von remainingVotes verwendet wird
+      voteCounter.value = 1;
+      
       votingProcess.resetVoteCounts();
+      console.log("[DEBUG:VOTING] Nach resetVoteCounts: usedVotesCount =", votingProcess.usedVotesCount?.value, "voteCounter =", votingProcess.voteCounter?.value);
     
       // Auch die aktuelle Abstimmungs-ID zurücksetzen
       currentPollSubmissionId.value = null;
@@ -805,6 +821,13 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
         votingProcess.isProcessingVotes.value = false;
         votingProcess.currentlyProcessingBatch.value = false;
         pollUserVotedCount.value = 0;
+        
+        // Nochmal sicherstellen, dass voteCounter definitiv 1 ist
+        // Dies ist wichtig für die korrekte Berechnung von remainingVotes in PollForm.vue
+        if (voteCounter.value !== 1) {
+          console.log("[DEBUG:VOTING] voteCounter nochmal korrigiert von", voteCounter.value, "auf 1");
+          voteCounter.value = 1;
+        }
       }, 100);
     
       // Flag nach angemessener Zeit zurücksetzen
@@ -812,8 +835,8 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
         window._newPollActive = false;
       }, 2000); // 2 Sekunden sind ausreichend
     
-      // Setze den Zähler auf 1 für einen frischen Start
-      voteCounter.value = 1;
+      // Zähler wurde bereits oben auf 1 gesetzt
+      // voteCounter.value = 1; // Auskommentiert, da oben bereits gesetzt
     
       // Für einen neuen Poll auch den persistenten Zustand zurücksetzen
       if (poll.value && poll.value.id && props.event && props.event.id) {

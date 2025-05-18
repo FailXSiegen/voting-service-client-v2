@@ -215,7 +215,7 @@ type="submit" class="btn btn-primary mx-auto d-block h1"
 <script setup>
 import { handleError } from "@/core/error/error-handler";
 import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { computed, reactive, watch, onMounted, onUnmounted, ref, inject } from "vue";
+import { computed, reactive, watch, onMounted, onUnmounted, ref, inject, watchEffect } from "vue";
 import { detectBrowser, isLocalStorageAvailable } from "@/core/utils/browser-compatibility";
 import { and, or, required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
@@ -292,6 +292,22 @@ const possibleAnswers = computed(() => {
 });
 
 const remainingVotes = computed(() => {
+  // Wenn wir einen neuen Poll haben (props.poll.id ist neu oder hat sich geändert),
+  // oder wenn ein poll-reset-Event stattgefunden hat, sollten wir die gesamte voteAmount verwenden
+  if (typeof window !== 'undefined' && window._newPollActive === true) {
+    console.log("[DEBUG:VOTING] remainingVotes: Verwende komplette voteAmount, da neuer Poll aktiv");
+    return props.eventUser.voteAmount;
+  }
+  
+  // WICHTIG: usedVotesCount hat Vorrang vor dem Berechnungswert, wenn er verfügbar ist
+  if (window && window.votingProcessModule && window.votingProcessModule.usedVotesCount !== undefined) {
+    const total = props.eventUser.voteAmount;
+    const used = window.votingProcessModule.usedVotesCount;
+    console.log(`[DEBUG:VOTING] remainingVotes: Verwende globalen usedVotesCount: ${total - used}`);
+    return total - used;
+  }
+  
+  // Standard-Berechnung als Fallback
   return props.eventUser.voteAmount - props.voteCounter + 1;
 });
 
@@ -374,6 +390,19 @@ watch(() => remainingVotes.value, (newValue, oldValue) => {
     formData.useAllAvailableVotes = true;
   }
 }, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
+
+// KRITISCH: Zugriff auf globales votingProcessModule für zuverlässige Berechnung von remainingVotes
+watchEffect(() => {
+  if (typeof window !== 'undefined' && window.votingProcessModule) {
+    // Bei jedem re-render prüfen, ob wir neue Informationen haben
+    if (window.votingProcessModule.usedVotesCount !== undefined && votingProcess.usedVotesCount?.value !== undefined) {
+      // Lokal zu global synchonisieren
+      if (window.votingProcessModule.usedVotesCount !== votingProcess.usedVotesCount.value) {
+        window.votingProcessModule.usedVotesCount = votingProcess.usedVotesCount.value;
+      }
+    }
+  }
+});
 
 onMounted(() => {
   // Immer mit maximaler Stimmenzahl starten
@@ -463,6 +492,15 @@ function handleAbstainChange(isChecked) {
 }
 
 watch(() => formData.votesToUse, (newValue, oldValue) => {
+  // Spezialfall: Wenn das Formular gerade zurückgesetzt wurde, nicht eingreifen
+  if (window._formResetInProgress === true) {
+    console.log("[DEBUG:VOTING] Watch votesToUse: Reset läuft, überspringe Korrektur");
+    return;
+  }
+
+  // Debug-Ausgabe
+  console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
+  
   // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
   // wenn sich der Wert tatsächlich geändert hat
   if (newValue === oldValue) return;
@@ -478,6 +516,7 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   
   // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
   if (correctedValue !== newValue) {
+    console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
     formData.votesToUse = correctedValue;
   }
   
@@ -485,6 +524,7 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   // aber nur wenn sich der Wert tatsächlich geändert hat
   const shouldUseAllVotes = (correctedValue === remainingVotes.value);
   if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
+    console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
     formData.useAllAvailableVotes = shouldUseAllVotes;
   }
 }, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
@@ -626,39 +666,52 @@ function reset(keepSelection = false) {
   isSubmitting.value = false;
 
   if (!keepSelection) {
-    // Formularwerte zurücksetzen
-    formData.singleAnswer = null;
-    formData.multipleAnswers = [];
-    formData.abstain = false;
+    // Formularvalidierung zurücksetzen
+    v$.value.$reset();
 
     // WICHTIG: Lokalen Formular-Cache löschen
     if (props.poll && props.poll.id) {
       localStorage.removeItem(`poll_form_data_${props.poll.id}`);
     }
 
-    // Votenzähler IMMER auf Maximum setzen, unabhängig von der Stimmanzahl
-    // Auf 100% setzen (alle verbleibenden Stimmen)
-    formData.votesToUse = remainingVotes.value;
+    // Formularwerte zurücksetzen
+    formData.singleAnswer = null;
+    formData.multipleAnswers = [];
+    formData.abstain = false;
+
+    // KRITISCH: Reihenfolge ist wichtig - zuerst useAllAvailableVotes, dann erst votesToUse
+    // Dadurch wird verhindert, dass die watch-Funktion für votesToUse 
+    // den useAllAvailableVotes-Wert zurücksetzt
     formData.useAllAvailableVotes = true;
+
+    // Garantiere, dass wir den korrekten Wert haben
+    const currentRemainingVotes = remainingVotes.value;
+    console.log("[DEBUG:VOTING] Reset mit remainingVotes:", currentRemainingVotes);
     
-    // Formularvalidierung zurücksetzen
-    v$.value.$reset();
+    // Sicherstellen, dass votesToUse einen gültigen Wert hat
+    if (typeof currentRemainingVotes !== 'number' || currentRemainingVotes < 1) {
+      // Fallback, wenn remainingVotes ungültig ist
+      console.warn("[DEBUG:VOTING] Ungültiger remainingVotes-Wert:", currentRemainingVotes);
+      const fallbackValue = props.eventUser?.voteAmount || 1;
+      formData.votesToUse = fallbackValue;
+    } else {
+      // Normaler Fall: Setze auf die verfügbaren Stimmen
+      formData.votesToUse = currentRemainingVotes;
+    }
     
-    // Manuelles DOM-Update erzwingen, um die Radiobuttons visuell zurückzusetzen
-    // und die 100%-Vorauswahl visuell zu aktualisieren
-    // In einer setTimeout, um nach dem Reactive-Update ausgeführt zu werden
+    // Zweimal setzen für garantierte Reaktivität
     setTimeout(() => {
+      // Nochmal garantieren, dass diese Werte korrekt gesetzt sind
+      formData.useAllAvailableVotes = true;
+      formData.votesToUse = remainingVotes.value;
+      
       // Nach der RadioInput-Gruppe suchen und manuell zurücksetzen
       const radioInputs = document.querySelectorAll('input[type="radio"]');
       radioInputs.forEach(input => {
         input.checked = false;
       });
       
-      // Nach der "Use all votes" Checkbox suchen und IMMER aktivieren
-      const checkbox = document.querySelector('#submit-answer-for-each-vote');
-      if (checkbox) {
-        checkbox.checked = true;
-      }
+      console.log("[DEBUG:VOTING] Nach Reset: votesToUse =", formData.votesToUse, "useAllAvailableVotes =", formData.useAllAvailableVotes);
     }, 50);
   }
   
