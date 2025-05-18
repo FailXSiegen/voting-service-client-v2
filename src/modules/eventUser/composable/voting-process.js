@@ -3,6 +3,7 @@ import l18n from "@/l18n";
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useMutation } from "@vue/apollo-composable";
 import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
+import { CREATE_BULK_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer";
 
 // Erstelle ein Symbol als eindeutigen Key für Browser-Isolation
 const instanceKey = Symbol('voting-process-instance');
@@ -755,6 +756,18 @@ export function useVotingProcess(eventUser, event) {
           console.warn(`[DEBUG:VOTING] Bei Reload: usedVotesCount war vor Abstimmung ${usedVotesCount.value}`);
           console.warn(`[DEBUG:VOTING] Bei Reload: Verarbeite ${localSuccessCount} neue Stimmen für diesen Batch`);
         }
+        
+        // Signal an UI senden, dass Stimmen erfolgreich abgegeben wurden
+        // Dies hilft PollModal, den Fortschritt anzuzeigen
+        if (typeof window !== 'undefined') {
+          try {
+            window.dispatchEvent(new CustomEvent('voting:progress', { 
+              detail: { count: localSuccessCount, total: usedVotesCount.value }
+            }));
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Feuern des voting:progress Events:', e);
+          }
+        }
 
         // SICHERHEITSPRÜFUNG: Bei Reload nur tatsächlich abgegebene Stimmen zum Zähler hinzufügen
         const totalAllowedVotes = eventUser.value.voteAmount;
@@ -799,19 +812,38 @@ export function useVotingProcess(eventUser, event) {
 
       // Nachdem die Schleife beendet ist, betrachten wir den Batch als abgeschlossen
 
-      // WICHTIG: Nach der Schleife direkt den currentlyProcessingBatch-Flag setzen
-      // Dadurch werden nur so viele Events verarbeitet, wie wir gerade abgestimmt haben
-
-      // Nur das Batch-Flag zurücksetzen - damit werden keine weiteren Events mehr verarbeitet!
+      // WICHTIG: Nach der Schleife ALLE Flags zurücksetzen, um die UI sofort freizugeben
+      // Dies ist besonders wichtig für Split-Vote-Szenarios, wo der Benutzer mehrere
+      // separate Stimmabgaben durchführen möchte
+      
+      // GEÄNDERT: Jetzt setzen wir ALLE Flags zurück, nicht nur das Batch-Flag
       currentlyProcessingBatch.value = false;
-
-      // Die anderen Flags bleiben gesetzt, bis die UI aktiv zurückgesetzt wird
-      // isProcessingVotes.value = false;
-      // pollFormSubmitting.value = false;
+      isProcessingVotes.value = false;
+      pollFormSubmitting.value = false;
+      
+      // Flag in übergeordneten Komponenten zurücksetzen
+      if (typeof window !== 'undefined') {
+        window._pollFormSubmitting = false;
+        window._isProcessingVotes = false;
+        window._currentlyProcessingBatch = false;
+        
+        // NEUER MECHANISMUS: Ein globales Event auslösen, wenn die Stimmabgabe abgeschlossen ist
+        // Dies wird von PollModal.vue abgefangen, um das isSubmitting-Flag sofort zurückzusetzen
+        try {
+          window.dispatchEvent(new CustomEvent('voting:complete', {
+            detail: { timestamp: Date.now(), usedVotes: usedVotesCount.value }
+          }));
+          console.log('[DEBUG:VOTING] voting:complete Event ausgelöst');
+        } catch (e) {
+          console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:complete Events:', e);
+        }
+      }
 
       // Die Session wird sofort deaktiviert, da handleFormSubmit abgeschlossen ist
-      // UI-Sperren werden nun SOFORT freigegeben, nicht auf Events warten
+      // UI-Sperren werden nun SOFORT freigegeben
       deactivateVotingSession();
+      
+      console.log("[DEBUG:VOTING] ALLE UI-Sperren wurden zurückgesetzt nach erfolgreicher Stimmabgabe");
 
       // NEUE PRÜFUNG: Setze votingFullyCompleted wenn alle Stimmen verbraucht sind
       const totalAllowedVotes = eventUser.value.voteAmount;
@@ -843,19 +875,44 @@ export function useVotingProcess(eventUser, event) {
         }
       }
 
-      // Sofortige UI-Freigabe garantieren
+      // Sofortige UI-Freigabe GARANTIEREN
       pollFormSubmitting.value = false;
       isProcessingVotes.value = false;
+      currentlyProcessingBatch.value = false;
+      
+      // Auch globale Flags zurücksetzen
+      if (typeof window !== 'undefined') {
+        window._pollFormSubmitting = false;
+        window._isProcessingVotes = false;
+        window._currentlyProcessingBatch = false;
+      }
+      
+      // Aktiv die UI entsperren für Benutzer, die Split-Voting machen wollen
+      // Nur wenn noch Stimmen übrig sind und wir nicht im "fully completed" Zustand sind
+      if (usedVotesCount.value < eventUser.value.voteAmount && !votingFullyCompleted.value) {
+        console.log("[DEBUG:VOTING] Noch Stimmen übrig für Split-Voting, alle UI-Sperren garantiert freigegeben");
+      }
 
-      // Trotzdem als Sicherheitsnetz einen Timeout setzen, falls etwas schiefgeht
-      setTimeout(() => {
-        // Unbedingt noch einmal alle UI-Flags freigeben, falls sie zwischenzeitlich gesetzt wurden
-        if (pollFormSubmitting.value || isProcessingVotes.value) {
-          // UI-Flags notfalls erneut zurücksetzen
-          pollFormSubmitting.value = false;
-          isProcessingVotes.value = false;
-        }
-      }, 5000);
+      // Aggressiveres Sicherheitsnetz: Schnellerer Timeout und mehrere Versuche
+      for (let i = 1; i <= 5; i++) {
+        setTimeout(() => {
+          // Unbedingt noch einmal alle UI-Flags freigeben, falls sie zwischenzeitlich gesetzt wurden
+          if (pollFormSubmitting.value || isProcessingVotes.value || currentlyProcessingBatch.value) {
+            // UI-Flags notfalls erneut zurücksetzen
+            console.log(`[DEBUG:VOTING] UI-Flags zurücksetzen (Versuch ${i}/5)`);
+            pollFormSubmitting.value = false;
+            isProcessingVotes.value = false;
+            currentlyProcessingBatch.value = false;
+            
+            // Auch globale Flags zurücksetzen
+            if (typeof window !== 'undefined') {
+              window._pollFormSubmitting = false;
+              window._isProcessingVotes = false;
+              window._currentlyProcessingBatch = false;
+            }
+          }
+        }, 1000 * i); // Staffeln: 1s, 2s, 3s, 4s, 5s
+      }
 
       // Log-Ausgabe
 
@@ -964,6 +1021,31 @@ export function useVotingProcess(eventUser, event) {
           window._pollFormSubmitting = false;
           window._isProcessingVotes = false;
           window._currentlyProcessingBatch = false;
+          
+          // KRITISCH: Event auslösen, damit PollModal.vue den isSubmitting-Zustand zurücksetzen kann
+          try {
+            // Prüfen, ob in den letzten 50ms bereits ein Event ausgelöst wurde
+            const now = Date.now();
+            const minTimeBetweenEvents = 50; // ms
+            
+            if (!window._lastVotingErrorTimestamp || (now - window._lastVotingErrorTimestamp) > minTimeBetweenEvents) {
+              // Event-Timestamp aktualisieren
+              window._lastVotingErrorTimestamp = now;
+              
+              // Eindeutige ID für das Event
+              const uniqueId = `error-${now}-${Math.random().toString(36).substring(2, 9)}`;
+              
+              // Event auslösen
+              window.dispatchEvent(new CustomEvent('voting:error', { 
+                detail: { timestamp: now, error: 'Error during vote processing', id: uniqueId, source: 'errorHandler' }
+              }));
+              console.log('[DEBUG:VOTING] voting:error Event ausgelöst bei Fehlerbehandlung');
+            } else {
+              console.log('[DEBUG:VOTING] Zu früh für ein neues Error-Event, überspringe');
+            }
+          } catch (eventError) {
+            console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:error Events:', eventError);
+          }
 
           // Prüfen, ob es globale Funktionen zum Entsperren gibt
           if (typeof window.releaseUILocks === 'function') {
@@ -1089,7 +1171,79 @@ export function useVotingProcess(eventUser, event) {
       return false;
     }
 
-    // Für useAllVotes: Wir senden die Anzahl der verbleibenden Stimmen statt des Zyklus
+    // BULK VOTE OPTIMIZATION: Wenn der User alle verbleibenden Stimmen für die gleiche Antwort
+    // abgeben möchte, können wir die Bulk-Vote-Optimierung nutzen
+    console.log("==================================================");
+    console.log(`BULK VOTE CHECK: useAllVotes=${useAllVotes}, remainingVotes=${remainingVotes}`);
+    console.log(`BULK VOTE CHECK: pollFormData:`, { 
+      abstain: pollFormData.abstain, 
+      singleAnswer: pollFormData.singleAnswer,
+      multipleAnswers: pollFormData.multipleAnswers?.length || 0,
+      useAllAvailableVotes: pollFormData.useAllAvailableVotes
+    });
+    console.log("==================================================");
+    
+    // WICHTIG: Prüfe sowohl useAllVotes als auch pollFormData.useAllAvailableVotes
+    // useAllVotes wird vom SyncEventDashboard gesetzt
+    // pollFormData.useAllAvailableVotes wird vom Formular gesetzt
+    if ((useAllVotes || pollFormData.useAllAvailableVotes) && remainingVotes > 1) {
+      // Prüfen, ob wir eine einzelne Antwort haben (entweder abstain oder singleAnswer)
+      let bulkInput;
+
+      if (pollFormData.abstain) {
+        bulkInput = {
+          eventUserId: eventUser.value.id,
+          pollId: poll.value?.id ?? 0,
+          type: poll.value.type,
+          answerContent: l18n.global.tc("view.polls.modal.abstain"),
+          possibleAnswerId: null,
+          voteCount: remainingVotes
+        };
+        
+        console.log("==================================================");
+        console.log(`CLIENT: BULK VOTE START (Enthaltung) - ${remainingVotes} Stimmen`);
+        console.log("==================================================");
+        return await submitBulkVote(bulkInput);
+      }
+      else if (pollFormData.singleAnswer && !pollFormData.multipleAnswers?.length) {
+        // Sicherstellen, dass possibleAnswers existiert
+        if (!poll.value || !poll.value.possibleAnswers || !Array.isArray(poll.value.possibleAnswers)) {
+          console.error(`[ERROR:VOTING] possibleAnswers ist nicht verfügbar für Bulk Vote: ${JSON.stringify(poll.value)}`);
+          return false;
+        }
+        
+        // Antwort validieren
+        const singleAnswerStr = String(pollFormData.singleAnswer);
+        const answer = poll.value.possibleAnswers.find(
+          (x) => x && x.id && (
+            String(x.id) === singleAnswerStr ||
+            (parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10))
+          )
+        );
+        
+        if (!answer) {
+          console.error(`[ERROR:VOTING] Ungültige singleAnswer-ID für Bulk Vote: ${pollFormData.singleAnswer}`);
+          return false;
+        }
+        
+        bulkInput = {
+          eventUserId: eventUser.value.id,
+          pollId: poll.value?.id ?? 0,
+          type: poll.value.type,
+          answerContent: answer.content,
+          possibleAnswerId: answer.id,
+          voteCount: remainingVotes
+        };
+        
+        console.log("==================================================");
+        console.log(`CLIENT: BULK VOTE START (SingleAnswer:${answer.id}) - ${remainingVotes} Stimmen`);
+        console.log("==================================================");
+        return await submitBulkVote(bulkInput);
+      }
+      // Bei mehreren unterschiedlichen Antworten den normalen Voting-Prozess nutzen
+    }
+
+    // Für useAllVotes ohne Bulk-Optimierung: Wir senden die Anzahl der verbleibenden Stimmen statt des Zyklus
     // Sonst senden wir 1 für einzelne Stimmen
     const votesToSubmit = useAllVotes ? remainingVotes : 1;
     const isLastAnswerInBallot = (votesToSubmit === 1 && pollFormData.multipleAnswers?.length === 0);
@@ -1299,6 +1453,114 @@ export function useVotingProcess(eventUser, event) {
       return true;
     } catch (error) {
       console.error("Fehler bei der Stimmabgabe:", error);
+      
+      // Bei Fehlern IMMER alle UI-Sperren freigeben
+      releaseUILocks();
+      
+      // Aktive Session deaktivieren
+      deactivateVotingSession();
+      
+      return false;
+    }
+  }
+  
+  /**
+   * Verarbeitet Bulk-Vote-Anfragen (viele identische Stimmen auf einmal)
+   * Diese Optimierung wird für den Fall verwendet, dass ein Benutzer alle Stimmen 
+   * für die gleiche Antwort abgeben möchte.
+   * 
+   * @param {Object} input - Eingabedaten für die Bulk-Vote-Mutation
+   * @returns {Promise<boolean>} - True wenn erfolgreich, sonst False
+   */
+  async function submitBulkVote(input) {
+    try {
+      // Starte Zeitmessung für Performance-Tracking
+      const startTime = performance.now();
+      
+      console.log("==================================================");
+      console.log(`CLIENT: BULK VOTE REQUEST DETAILS:`);
+      console.log(`EventUserId: ${input.eventUserId}`);
+      console.log(`PollId: ${input.pollId}`);
+      console.log(`Type: ${input.type}`);
+      console.log(`PossibleAnswerId: ${input.possibleAnswerId}`);
+      console.log(`AnswerContent: ${input.answerContent}`);
+      console.log(`VoteCount: ${input.voteCount}`);
+      console.log("==================================================");
+      
+      // Führe die Bulk-Vote-Mutation aus
+      const createBulkPollSubmitAnswerMutation = useMutation(
+        CREATE_BULK_POLL_SUBMIT_ANSWER,
+        {
+          variables: { input },
+        },
+      );
+      
+      try {
+        const result = await createBulkPollSubmitAnswerMutation.mutate();
+        const successCount = result.data?.createBulkPollSubmitAnswer || 0;
+        
+        // Ende der Zeitmessung
+        const endTime = performance.now();
+        const duration = Math.round(endTime - startTime);
+        
+        console.log("==================================================");
+        console.log(`CLIENT: BULK VOTE ERFOLGREICH - ${successCount}/${input.voteCount} Stimmen in ${duration}ms`);
+        console.log("==================================================");
+        
+        if (successCount > 0) {
+          // Zähler für die abgegebenen Stimmen aktualisieren
+          // WICHTIGER FIX: Wir erhöhen den Zähler um die tatsächliche Anzahl der erfolgreichen Stimmen!
+          // Nicht nur um 1 wie im alten Code!
+          usedVotesCount.value += successCount;
+          
+          // Erhöhe auch voteCounter für konsistente Anzeige
+          voteCounter.value += successCount;
+          
+          console.log(`CLIENT: BULK VOTE - usedVotesCount aktualisiert: ${usedVotesCount.value}`);
+          console.log(`CLIENT: BULK VOTE - voteCounter aktualisiert: ${voteCounter.value}`);
+          
+          // Speichere den aktualisierten Status, damit er auch nach einem Page-Reload erhalten bleibt
+          // WICHTIG: poll ist ein Parameter aus dem Kontext der aufrufenden Funktion
+          // Wir müssen pollId aus input verwenden, da poll hier nicht direkt verfügbar ist
+          if (input.pollId && eventUser && eventUser.value && eventUser.value.id) {
+            pollStatePersistence.upsertPollState(
+              input.pollId,
+              voteCounter.value,
+              usedVotesCount.value,
+              eventUser.value.id
+            );
+            console.log(`CLIENT: BULK VOTE - Status persistiert: ${input.pollId}, ${voteCounter.value}, ${usedVotesCount.value}`);
+          }
+          
+          // ALLE UI-Sperren sofort freigeben, um zu garantieren, dass das UI für Split-Voting nutzbar bleibt
+          releaseUILocks();
+          
+          // WICHTIG: Globale Flags zurücksetzen, die PollModal oder andere Komponenten gesetzt haben könnten
+          if (typeof window !== 'undefined') {
+            window._pollFormSubmitting = false;
+            window._isProcessingVotes = false;
+            window._currentlyProcessingBatch = false;
+          }
+          
+          console.log(`CLIENT: BULK VOTE - Alle UI-Sperren wurden freigegeben nach erfolgreicher Bulk-Abstimmung`);
+        } else {
+          console.warn(`CLIENT: BULK VOTE - Keine Stimmen erfolgreich verarbeitet`);
+          
+          // Auch bei 0 erfolgreichen Stimmen alle UI-Sperren freigeben
+          releaseUILocks();
+        }
+        
+        // Erfolgreich, wenn mindestens eine Stimme verarbeitet wurde
+        return successCount > 0;
+      } catch (mutationError) {
+        console.error(`[ERROR:BULK_VOTE] GraphQL Fehler bei der Bulk-Mutation:`, mutationError);
+        console.log(`[ERROR:BULK_VOTE] GraphQL Fehler Details:`, 
+                   mutationError.graphQLErrors || 'Keine GraphQL-Fehlerdetails');
+        return false;
+      }
+    } catch (error) {
+      console.error(`[ERROR:BULK_VOTE] Fehler bei der Bulk-Mutation für ${input.voteCount} Stimmen:`, error);
+      console.log(`[ERROR:BULK_VOTE] Stack:`, error.stack || 'Kein Stack verfügbar');
       return false;
     }
   }
@@ -1349,11 +1611,50 @@ export function useVotingProcess(eventUser, event) {
 
   // Eine explizite Methode zum kontrollierten Freigeben der UI
   function releaseUILocks() {
-    // Explizite Freigabe der UI-Sperren
+    // VERBESSERT: Explizite Freigabe ALLER UI-Sperren
     isProcessingVotes.value = false;
     pollFormSubmitting.value = false;
-
-    // Wir lassen currentlyProcessingBatch unberührt, da dies den Event-Empfang steuert
+    currentlyProcessingBatch.value = false; // Wir setzen jetzt auch dieses Flag zurück
+    
+    // Auch globale Flags zurücksetzen (wichtig für modalbasierte UI-Lockouts)
+    if (typeof window !== 'undefined') {
+      window._pollFormSubmitting = false;
+      window._isProcessingVotes = false;
+      window._currentlyProcessingBatch = false;
+      
+      // KRITISCHES CLEANUP: Auch bei direktem releaseUILocks()-Aufruf Event auslösen
+      // Dieser Mechanismus ist essentiell für die Koordination mit PollModal.vue
+      try {
+        window.dispatchEvent(new CustomEvent('voting:complete', {
+          detail: { timestamp: Date.now(), usedVotes: usedVotesCount?.value || 0 }
+        }));
+        console.log('[DEBUG:VOTING] voting:complete Event ausgelöst bei releaseUILocks');
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:complete Events bei releaseUILocks:', e);
+      }
+      
+      // Versuche, eventuelle Bootstrap-Modal-Sperren zu entfernen
+      try {
+        // Backdrop-Elemente entfernen
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        if (backdrops.length > 0) {
+          backdrops.forEach(backdrop => {
+            if (backdrop && backdrop.parentNode) {
+              backdrop.parentNode.removeChild(backdrop);
+            }
+          });
+          
+          // Body-Klassen zurücksetzen
+          document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        }
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Entfernen von Modal-Elementen:', e);
+      }
+    }
+    
+    console.log("[DEBUG:VOTING] UI-Sperren vollständig freigegeben durch releaseUILocks()");
   }
 
   return {

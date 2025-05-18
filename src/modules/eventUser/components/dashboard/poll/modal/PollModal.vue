@@ -14,9 +14,9 @@
       >
         <div v-if="poll" class="modal-content position-relative">
           <!-- Modal-wide overlay to block all interaction during submission -->
-          <!-- ABSOLUTE GARANTIERTE SPERRUNG: 100% zuverlässiges Locking mit mehrfachen Bedingungen -->
+          <!-- VERBESSERTE SPERRUNG: Vereinfachte Bedingung für bessere Zuverlässigkeit -->
           <div
-v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < eventUser.voteAmount) || !!(eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < eventUser.voteAmount)" 
+v-if="isSubmitting" 
                class="position-absolute w-100 h-100 top-0 start-0 z-3" 
                style="background-color: rgba(255,255,255,0.95); cursor: not-allowed;">
             <div class="position-absolute top-50 start-50 translate-middle text-center">
@@ -91,7 +91,7 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
 import { Modal } from "bootstrap";
 import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
 import VotingDetailsWithSubscription from "@/modules/eventUser/components/dashboard/poll/VotingDetailsWithSubscription.vue";
@@ -207,6 +207,9 @@ onMounted(() => {
     // Event-Listener, der erkennt, wenn das Modal geschlossen wird
     modal.value.addEventListener('hidden.bs.modal', () => {
       isVisible.value = false;
+      
+      // WICHTIGER FIX: Bei Modal-Schließung garantiert den isSubmitting-Status zurücksetzen
+      resetSubmittingState();
     });
   }
   
@@ -214,6 +217,9 @@ onMounted(() => {
   votingProcess.setVotingCompletedCallback(() => {
     // Force UI update to show completion state
     votingProcess.votingFullyCompleted.value = true;
+    
+    // KRITISCH: Stelle sicher, dass isSubmitting zurückgesetzt wird bei Abstimmungsabschluss
+    resetSubmittingState();
   });
   
   // Starte regelmäßige Sichtbarkeitsprüfung
@@ -221,6 +227,76 @@ onMounted(() => {
   
   // Initial überprüfen
   setTimeout(checkModalVisibility, 300);
+  
+  // NEUES SAFETY NET: Regelmäßig überprüfen, ob isSubmitting zurückgesetzt werden muss
+  // Falls ein Event nicht korrekt verarbeitet wurde oder ein Callback nicht ankam
+  const submittingCheckInterval = setInterval(() => {
+    // Prüfe, ob das isSubmitting-Flag länger als 30 Sekunden aktiv ist
+    if (isSubmitting.value && window._lastSubmittingStartTime) {
+      const submittingDuration = Date.now() - window._lastSubmittingStartTime;
+      
+      // Nach 30 Sekunden im submitting-Zustand forcieren wir ein Zurücksetzen
+      if (submittingDuration > 30000) { // 30 Sekunden
+        console.warn('[DEBUG:VOTING] isSubmitting ist seit mehr als 30 Sekunden aktiv - forciere Zurücksetzen');
+        resetSubmittingState();
+        
+        // Flags im voting-process auch zurücksetzen
+        if (votingProcess) {
+          votingProcess.releaseUILocks();
+        }
+      }
+    }
+  }, 5000); // Alle 5 Sekunden prüfen
+  
+  // NEU: Global-Events für garantierte UI-Entsperrung mit Schutz gegen Endlosschleifen
+  const handleVotingComplete = () => {
+    console.log('[DEBUG:VOTING] voting:complete Event empfangen in PollModal');
+    // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
+    isSubmitting.value = false;
+    // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
+    if (!isResetInProgress) {
+      resetSubmittingState();
+    }
+  };
+  
+  const handleVotingError = () => {
+    console.log('[DEBUG:VOTING] voting:error Event empfangen in PollModal');
+    // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
+    isSubmitting.value = false;
+    // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
+    if (!isResetInProgress) {
+      resetSubmittingState();
+    }
+  };
+  
+  const handleVotingReset = () => {
+    console.log('[DEBUG:VOTING] voting:reset Event empfangen in PollModal');
+    // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
+    isSubmitting.value = false;
+    // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
+    if (!isResetInProgress) {
+      resetSubmittingState();
+    }
+  };
+  
+  // Event-Listener registrieren
+  if (typeof window !== 'undefined') {
+    window.addEventListener('voting:complete', handleVotingComplete);
+    window.addEventListener('voting:error', handleVotingError);
+    window.addEventListener('voting:reset', handleVotingReset);
+  }
+  
+  // Cleanup für dieses Intervall hinzufügen
+  onBeforeUnmount(() => {
+    clearInterval(submittingCheckInterval);
+    
+    // Auch die Event-Listener entfernen
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('voting:complete', handleVotingComplete);
+      window.removeEventListener('voting:error', handleVotingError);
+      window.removeEventListener('voting:reset', handleVotingReset);
+    }
+  });
   
   // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
   const pollClosedWatcher = watch(
@@ -294,6 +370,83 @@ onMounted(() => {
   });
 });
 
+// Tracking-Variable, um mehrfache Aufrufe zu verhindern
+let isResetInProgress = false;
+
+// Neue Funktion zur expliziten Zurücksetzung des Submitting-Status
+function resetSubmittingState() {
+  // STOPPE ENDLOSSCHLEIFEN: Wenn bereits ein Reset läuft, nicht erneut starten
+  if (isResetInProgress) {
+    console.log('[DEBUG:VOTING] Reset läuft bereits, überspringe wiederholten Aufruf');
+    return;
+  }
+  
+  // Markiere, dass ein Reset in Bearbeitung ist
+  isResetInProgress = true;
+  
+  console.log('[DEBUG:VOTING] Explizite Zurücksetzung des isSubmitting-Status aufgerufen');
+  
+  // Sofort Overlay ausblenden (wichtig für direkte visuelle Feedback)
+  isSubmitting.value = false;
+  
+  // Stelle sicher, dass alle Werte korrekt aktualisiert sind
+  nextTick(() => {
+    try {
+      // Prüfe aktuelle Stimmwerte für Debug - Verwende PROPS für sicheren Zugriff
+      const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+      // KORRIGIERT: Verwende props.eventUser statt eventUser direkt (Vermeidet ReferenceError)
+      const totalVotes = props.eventUser?.voteAmount || 0;
+      console.log(`[DEBUG:VOTING] Stimmzähler vor UI-Entsperrung: ${usedVotes}/${totalVotes}`);
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim Debug-Log:', e);
+    }
+  });
+  
+  // Extra Reset aller UI-Flags, um sicherzustellen, dass alles korrekt zurückgesetzt ist
+  if (pollForm.value && typeof pollForm.value.resetSubmitState === 'function') {
+    try {
+      pollForm.value.resetSubmitState();
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim Reset des PollForm:', e);
+    }
+  }
+  
+  // GARANTIERE, dass isSubmitting false ist
+  isSubmitting.value = false;
+  
+  // Lösche den Event-Listener temporär, um Endlosschleifen zu vermeiden
+  const tempRemoveListeners = () => {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('voting:complete', handleVotingComplete);
+      window.removeEventListener('voting:error', handleVotingError);
+      window.removeEventListener('voting:reset', handleVotingReset);
+      
+      // Nach kurzer Zeit wieder hinzufügen
+      setTimeout(() => {
+        window.addEventListener('voting:complete', handleVotingComplete);
+        window.addEventListener('voting:error', handleVotingError);
+        window.addEventListener('voting:reset', handleVotingReset);
+        
+        // Reset als abgeschlossen markieren
+        isResetInProgress = false;
+      }, 100);
+    }
+  };
+  
+  // DOM-basierte Garantie für Overlay-Ausblendung
+  try {
+    const overlay = document.querySelector('.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]');
+    if (overlay) {
+      overlay.style.display = 'none';
+    }
+  } catch (e) {
+    console.error('[DEBUG:VOTING] Fehler bei DOM-Manipulation:', e);
+  }
+  
+  // Event-Listener temporär entfernen
+  tempRemoveListeners();
+}
+
 function onSubmit(data) {
   if (isSubmitting.value) {
     console.warn('Vermeidung von doppelter Stimmabgabe: Formular ist bereits im Submitting-Zustand');
@@ -302,9 +455,55 @@ function onSubmit(data) {
   
   isSubmitting.value = true;
   
+  // WICHTIG: Speichere den Zeitpunkt des Submit-Beginns für automatische Überwachung
+  if (typeof window !== 'undefined') {
+    window._lastSubmittingStartTime = Date.now();
+  }
+  
+  // Safety-Timeout: Falls keine Antwort kommt, nach 45 Sekunden UI entsperren
+  const safetyTimeout = setTimeout(() => {
+    if (isSubmitting.value) {
+      console.warn('[DEBUG:VOTING] Safety-Timeout ausgelöst: isSubmitting wird zurückgesetzt');
+      resetSubmittingState();
+      
+      // Auch voting-process Flags zurücksetzen
+      if (votingProcess) {
+        votingProcess.releaseUILocks();
+      }
+    }
+  }, 45000); // 45 Sekunden
+  
+  // Event emittieren und Callback für Erfolg/Fehler registrieren
   emit("submit", data);
   
+  // Neues Event-System für besser koordinierte UI-Updates:
+  // Lausche auf globale Voting-Events für garantierte UI-Entsperrung
+  const handleVotingComplete = () => {
+    clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
+    console.log('[DEBUG:VOTING] VotingComplete-Event empfangen, setze isSubmitting zurück');
+    resetSubmittingState();
+  };
+  
+  const handleVotingError = () => {
+    clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
+    console.log('[DEBUG:VOTING] VotingError-Event empfangen, setze isSubmitting zurück');
+    resetSubmittingState();
+  };
+  
+  // Globale Event-Listener für bessere Koordination
+  if (typeof window !== 'undefined') {
+    window.addEventListener('voting:complete', handleVotingComplete);
+    window.addEventListener('voting:error', handleVotingError);
+    
+    // Nach 5 Sekunden Events wieder entfernen, um Memory-Leaks zu vermeiden
+    setTimeout(() => {
+      window.removeEventListener('voting:complete', handleVotingComplete);
+      window.removeEventListener('voting:error', handleVotingError);
+    }, 5000);
+  }
+  
   // Status wird durch pollAnswerLifeCycle-Event oder Fehlerbehandlung zurückgesetzt
+  // UND durch die neuen Safety-Mechanismen
 }
 
 function showModal() {
@@ -674,6 +873,42 @@ function reset(keepSelection = false) {
     }
   }
   
+  // Auch alle Event-Handler explizit freischalten
+  if (typeof window !== 'undefined') {
+    // Global-Flags zurücksetzen (wichtig für übergeordnete Komponenten)
+    window._pollFormSubmitting = false; 
+    window._isProcessingVotes = false;
+    window._currentlyProcessingBatch = false;
+    window._lastSubmittingStartTime = null; // Timestamp zurücksetzen
+  }
+  
+  // GARANTIERTE UI-ENTSPERRUNG mit zusätzlichem DOM-basierten Ansatz
+  try {
+    // Overlay forciert ausblenden via DOM-Manipulation
+    const overlay = document.querySelector('.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]');
+    if (overlay) {
+      overlay.style.display = 'none';
+      console.log('[DEBUG:VOTING] Overlay via DOM forciert ausgeblendet in reset()');
+    }
+    
+    // Modal-Lockouts zurücksetzen
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    
+    // Backdrops entfernen
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    if (backdrops.length > 0) {
+      backdrops.forEach(backdrop => {
+        if (backdrop && backdrop.parentNode) {
+          backdrop.parentNode.removeChild(backdrop);
+        }
+      });
+    }
+  } catch (e) {
+    console.error('[DEBUG:VOTING] Fehler bei DOM-basierter UI-Entsperrung:', e);
+  }
+  
   // Stelle sicher, dass die Overlay-Anzeige auch wirklich aktualisiert wird
   // durch eine sofortige zweite Aktualisierung für bessere Reaktivität
   
@@ -685,6 +920,16 @@ function reset(keepSelection = false) {
     if (props.poll && props.poll.id) {
       localStorage.removeItem(`poll_form_data_${props.poll.id}`);
     }
+    
+    // Bei jeder Zurücksetzung UI-Lock im voting-process garantiert aufheben
+    if (votingProcess && typeof votingProcess.releaseUILocks === 'function') {
+      votingProcess.releaseUILocks(); 
+    }
+    
+    // Event auslösen für globale Koordination
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('modal:reset-complete'));
+    }
   }, 50);
 }
 
@@ -694,7 +939,8 @@ defineExpose({
   modalState,
   isSubmitting,
   pollForm,
-  reset
+  reset,
+  resetSubmittingState // Neue Funktion für externe Komponenten verfügbar machen
 });
 </script>
 
