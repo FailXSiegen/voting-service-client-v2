@@ -115,21 +115,20 @@ const wsLink = new GraphQLWsLink(
         connectionPresence: true,
         forceReconnect: true
       };
-      
+
       try {
         // PRIMÄR: Auth Token aus localStorage verwenden (für alle Browser)
         const accessToken = localStorage.getItem(AUTH_TOKEN);
         if (accessToken) {
           // Standard JWT-Authentifizierungs-Header
           authParams.authorization = `Bearer ${accessToken}`;
-          console.info('[Websocket] Auth-Token für WebSocket-Verbindung bereitgestellt');
         } else {
           console.warn('[Websocket] Kein Auth-Token im localStorage gefunden!');
         }
       } catch (e) {
         console.warn('[Websocket] Fehler beim Abrufen des Auth-Tokens:', e);
       }
-      
+
       return authParams;
     }
   }),
@@ -249,7 +248,7 @@ function startWebSocketKeepAlive() {
             const coreStore = useCore();
             if (coreStore && coreStore.isActiveEventUserSession) {
               coreStore.setEventUserOnlineState(true);
-              
+
               // Nach erfolgreicher Keep-Alive-Anfrage auch die letzte Aktivitätszeit aktualisieren,
               // um zu verhindern, dass der Inactivity-Cleanup-Service den Benutzer als offline markiert
               // (Da dieser eine 15-Minuten-Grenze verwendet - siehe inactivity-cleanup.js)
@@ -374,10 +373,10 @@ export async function terminateWebsocketClient() {
 export async function reconnectWebsocketClient() {
   try {
     console.info("[Websocket] Starte vollständige WebSocket-Neuverbindung");
-    
+
     // 1. Setze den Reconnect-Zähler zurück, damit neue Verbindungsversuche möglich sind
     wsReconnectCount = 0;
-    
+
     // 2. Vollständiger Neuaufbau der WebSocket-Verbindung durch schließen und neu öffnen
     try {
       // Zuerst bestehende Verbindung vollständig beenden (WICHTIG!)
@@ -385,19 +384,19 @@ export async function reconnectWebsocketClient() {
         await wsLink.client.terminate();
         console.info("[Websocket] Bestehende Verbindung beendet");
       }
-            
+
       // 3. Verbindung explizit neu aufbauen (das Wichtigste für die Wiederherstellung des Online-Status)
       if (wsLink && wsLink.client && typeof wsLink.client.connect === 'function') {
         await wsLink.client.connect();
         console.info("[Websocket] Neue Verbindung explizit gestartet");
       }
-      
+
       // 4. Warte kurz, damit die WebSocket-Verbindung vollständig aufgebaut werden kann
       await new Promise(resolve => setTimeout(resolve, 500));
     } catch (wsError) {
       console.error("[Websocket] Fehler beim Neuaufbau der WebSocket-Verbindung:", wsError);
     }
-    
+
     // 5. Sende sofort ein Keep-Alive-Signal, um den Online-Status zu aktualisieren
     try {
       await apolloClient.query({
@@ -415,20 +414,20 @@ export async function reconnectWebsocketClient() {
     } catch (keepAliveError) {
       console.error("[Websocket] Fehler beim Senden des sofortigen Keep-Alive:", keepAliveError);
     }
-    
+
     // 6. Starte ein neues Keep-Alive-Intervall für zukünftige Pings
     startWebSocketKeepAlive();
-    
+
     // 7. Aktualisiere den Apollo-Store, um sicherzustellen, dass alle Abonnements wieder aktiv sind
     await apolloClient.resetStore();
-    
+
     // 8. Logge die Cookie-Verfügbarkeit für Debugging-Zwecke
     try {
       console.info("[Websocket] Cookie-Status:", document.cookie ? "Cookies vorhanden" : "Keine Cookies verfügbar");
     } catch (e) {
       console.warn("[Websocket] Cookie-Status konnte nicht geprüft werden:", e);
     }
-    
+
     return true;
   } catch (error) {
     // eslint-disable-next-line no-console
