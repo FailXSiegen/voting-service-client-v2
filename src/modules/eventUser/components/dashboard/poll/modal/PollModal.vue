@@ -248,33 +248,7 @@ onMounted(() => {
     }
   }, 5000); // Alle 5 Sekunden prüfen
   
-  // NEU: Global-Events für garantierte UI-Entsperrung mit Schutz gegen Endlosschleifen
-  const handleVotingComplete = () => {
-    // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
-    isSubmitting.value = false;
-    // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
-    if (!isResetInProgress) {
-      resetSubmittingState();
-    }
-  };
-  
-  const handleVotingError = () => {
-    // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
-    isSubmitting.value = false;
-    // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
-    if (!isResetInProgress) {
-      resetSubmittingState();
-    }
-  };
-  
-  const handleVotingReset = () => {
-    // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
-    isSubmitting.value = false;
-    // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
-    if (!isResetInProgress) {
-      resetSubmittingState();
-    }
-  };
+  // NEU: Verwende die global deklarierten Event-Handler-Funktionen für garantierte UI-Entsperrung
   
   // Event-Listener registrieren
   if (typeof window !== 'undefined') {
@@ -370,6 +344,36 @@ onMounted(() => {
 // Tracking-Variable, um mehrfache Aufrufe zu verhindern
 let isResetInProgress = false;
 
+// Deklariere die Event-Handler-Funktionen VOR ihrer Verwendung
+const handleVotingComplete = () => {
+  console.log("[DEBUG:VOTING] handleVotingComplete wurde aufgerufen");
+  // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
+  isSubmitting.value = false;
+  // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
+  if (!isResetInProgress) {
+    console.log("[DEBUG:VOTING] handleVotingComplete ruft resetSubmittingState auf");
+    resetSubmittingState();
+  }
+};
+
+const handleVotingError = () => {
+  // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
+  isSubmitting.value = false;
+  // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
+  if (!isResetInProgress) {
+    resetSubmittingState();
+  }
+};
+
+const handleVotingReset = () => {
+  // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
+  isSubmitting.value = false;
+  // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
+  if (!isResetInProgress) {
+    resetSubmittingState();
+  }
+};
+
 // Neue Funktion zur expliziten Zurücksetzung des Submitting-Status
 function resetSubmittingState() {
   // STOPPE ENDLOSSCHLEIFEN: Wenn bereits ein Reset läuft, nicht erneut starten
@@ -411,19 +415,29 @@ function resetSubmittingState() {
   // Lösche den Event-Listener temporär, um Endlosschleifen zu vermeiden
   const tempRemoveListeners = () => {
     if (typeof window !== 'undefined') {
-      window.removeEventListener('voting:complete', handleVotingComplete);
-      window.removeEventListener('voting:error', handleVotingError);
-      window.removeEventListener('voting:reset', handleVotingReset);
-      
-      // Nach kurzer Zeit wieder hinzufügen
-      setTimeout(() => {
-        window.addEventListener('voting:complete', handleVotingComplete);
-        window.addEventListener('voting:error', handleVotingError);
-        window.addEventListener('voting:reset', handleVotingReset);
+      try {
+        window.removeEventListener('voting:complete', handleVotingComplete);
+        window.removeEventListener('voting:error', handleVotingError);
+        window.removeEventListener('voting:reset', handleVotingReset);
         
-        // Reset als abgeschlossen markieren
-        isResetInProgress = false;
-      }, 100);
+        // Nach kurzer Zeit wieder hinzufügen
+        setTimeout(() => {
+          try {
+            window.addEventListener('voting:complete', handleVotingComplete);
+            window.addEventListener('voting:error', handleVotingError);
+            window.addEventListener('voting:reset', handleVotingReset);
+            
+            // Reset als abgeschlossen markieren
+            isResetInProgress = false;
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Hinzufügen der Event-Listener nach Pause:', e);
+            isResetInProgress = false; // Trotzdem Reset als abgeschlossen markieren
+          }
+        }, 100);
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Entfernen der Event-Listener:', e);
+        isResetInProgress = false; // Reset trotzdem als abgeschlossen markieren
+      }
     }
   };
   
@@ -472,25 +486,26 @@ function onSubmit(data) {
   
   // Neues Event-System für besser koordinierte UI-Updates:
   // Lausche auf globale Voting-Events für garantierte UI-Entsperrung
-  const handleVotingComplete = () => {
+  // Da handleVotingComplete global definiert ist, erstellen wir hier eine lokale Funktion mit dem gleichen Namen
+  const localHandleVotingComplete = () => {
     clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
     resetSubmittingState();
   };
   
-  const handleVotingError = () => {
+  const localHandleVotingError = () => {
     clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
     resetSubmittingState();
   };
   
   // Globale Event-Listener für bessere Koordination
   if (typeof window !== 'undefined') {
-    window.addEventListener('voting:complete', handleVotingComplete);
-    window.addEventListener('voting:error', handleVotingError);
+    window.addEventListener('voting:complete', localHandleVotingComplete);
+    window.addEventListener('voting:error', localHandleVotingError);
     
     // Nach 5 Sekunden Events wieder entfernen, um Memory-Leaks zu vermeiden
     setTimeout(() => {
-      window.removeEventListener('voting:complete', handleVotingComplete);
-      window.removeEventListener('voting:error', handleVotingError);
+      window.removeEventListener('voting:complete', localHandleVotingComplete);
+      window.removeEventListener('voting:error', localHandleVotingError);
     }, 5000);
   }
   

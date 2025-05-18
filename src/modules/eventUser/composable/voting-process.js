@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import l18n from "@/l18n";
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useMutation } from "@vue/apollo-composable";
@@ -11,6 +11,14 @@ const instanceKey = Symbol('voting-process-instance');
 // Globale Map um zu tracken, welche Browser-Instanz aktiv abstimmt
 // Diese ist über Hooks hinweg isoliert
 const globalBrowserSessions = new Map();
+
+// Stelle ein globales Modul bereit, auf das andere Komponenten zugreifen können
+if (typeof window !== 'undefined') {
+  window.votingProcessModule = {
+    usedVotesCount: 0,
+    voteCounter: 1
+  };
+}
 
 export function useVotingProcess(eventUser, event) {
   // Jeder Hook-Aufruf erstellt eine isolierte Instanz der Zustände
@@ -1531,8 +1539,17 @@ export function useVotingProcess(eventUser, event) {
 
   function resetVoteCounts() {
     // VOLLSTÄNDIGER Reset aller Zähler und Status-Werte
+    console.log("[DEBUG:VOTING] In resetVoteCounts - Vor Reset: usedVotesCount =", usedVotesCount.value, "voteCounter =", voteCounter.value);
     usedVotesCount.value = 0;
     voteCounter.value = 1;
+    
+    // Globale Werte ebenfalls aktualisieren
+    if (typeof window !== 'undefined' && window.votingProcessModule) {
+      window.votingProcessModule.usedVotesCount = 0;
+      window.votingProcessModule.voteCounter = 1;
+    }
+    
+    console.log("[DEBUG:VOTING] In resetVoteCounts - Nach Reset: usedVotesCount =", usedVotesCount.value, "voteCounter =", voteCounter.value);
 
     // Alte Poll-ID speichern, um lokale Daten zu löschen
     const oldPollId = currentPollId.value;
@@ -1575,6 +1592,7 @@ export function useVotingProcess(eventUser, event) {
 
   // Eine explizite Methode zum kontrollierten Freigeben der UI
   function releaseUILocks() {
+    console.log("[DEBUG:VOTING] releaseUILocks aufgerufen - usedVotesCount =", usedVotesCount.value, "voteCounter =", voteCounter.value);
     // VERBESSERT: Explizite Freigabe ALLER UI-Sperren
     isProcessingVotes.value = false;
     pollFormSubmitting.value = false;
@@ -1620,6 +1638,22 @@ export function useVotingProcess(eventUser, event) {
     console.log("[DEBUG:VOTING] UI-Sperren vollständig freigegeben durch releaseUILocks()");
   }
 
+  // Bei Änderungen an usedVotesCount immer auch das globale Modul aktualisieren
+  watch(() => usedVotesCount.value, (newValue) => {
+    if (typeof window !== 'undefined' && window.votingProcessModule) {
+      window.votingProcessModule.usedVotesCount = newValue;
+      console.log("[DEBUG:VOTING] Globales votingProcessModule aktualisiert: usedVotesCount =", newValue);
+    }
+  });
+  
+  // Bei Änderungen an voteCounter immer auch das globale Modul aktualisieren
+  watch(() => voteCounter.value, (newValue) => {
+    if (typeof window !== 'undefined' && window.votingProcessModule) {
+      window.votingProcessModule.voteCounter = newValue;
+      console.log("[DEBUG:VOTING] Globales votingProcessModule aktualisiert: voteCounter =", newValue);
+    }
+  });
+  
   return {
     voteCounter,
     handleFormSubmit,
