@@ -72,6 +72,7 @@ export const useCore = defineStore("core", {
     // Authentication state tracking
     isInitialized: false,
     authInitPromise: null,
+    lastTokenRefresh: null,
     // Konfigurationsoptionen für statische Seiten (werden vom Server geladen)
     systemSettings: {
       useDirectStaticPaths: false,
@@ -105,6 +106,7 @@ export const useCore = defineStore("core", {
       const token = localStorage.getItem(AUTH_TOKEN);
       return token;
     },
+    getLastTokenRefresh: (state) => state.lastTokenRefresh,
     getCurrentEventStyles: (state) => state.eventStyles,
     // Getter für die globalen Systemeinstellungen
     getUseDirectStaticPaths: (state) => state.systemSettings?.useDirectStaticPaths || false,
@@ -171,8 +173,8 @@ export const useCore = defineStore("core", {
               try {
                 const { token: newToken } = await refreshLogin();
                 if (newToken) {
-                  // Login with the new token
-                  await this.loginUser(newToken);
+                  // Login with the new token and indicate it's a refresh
+                  await this.loginUser(newToken, true);
                   return;
                 }
               } catch (refreshError) {
@@ -212,9 +214,10 @@ export const useCore = defineStore("core", {
 
     /**
      * @param {String} token
+     * @param {Boolean} isTokenRefresh - Indicates if this is from a token refresh operation
      * @returns {Promise<void>}
      */
-    async loginUser(token) {
+    async loginUser(token, isTokenRefresh = false) {
       // Validate token.
       if (typeof token !== "string" || token.length === 0) {
         throw new Error("Token can not be empty!");
@@ -222,6 +225,11 @@ export const useCore = defineStore("core", {
 
       // Store token in local storage.
       localStorage.setItem(AUTH_TOKEN, token);
+      
+      // If this is a token refresh, update the timestamp
+      if (isTokenRefresh) {
+        this.lastTokenRefresh = new Date().toISOString();
+      }
 
       // Decode jwt.
       try {

@@ -71,9 +71,9 @@ const refreshTokenLink = setContext(async () => {
     // The token is invalid, so we request a new one.
     const { token } = await refreshLogin();
 
-    // Login the user width the new token.
+    // Login the user with the new token and mark as token refresh.
     const coreStore = useCore();
-    await coreStore.loginUser(token);
+    await coreStore.loginUser(token, true);
   } catch (error) {
     console.error("RefreshTokenLink - Failed to refresh token:", error);
     // If refresh fails, remove the token
