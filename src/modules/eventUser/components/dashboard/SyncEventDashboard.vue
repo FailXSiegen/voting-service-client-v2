@@ -1735,6 +1735,42 @@ async function onSubmitPoll(pollFormData) {
         if (pollModal.value.pollForm) {
           pollModal.value.pollForm.isSubmitting = false;
         }
+        
+        // NEUE KOORDINATION: Event direkt an resetSubmittingState durchreichen
+        if (typeof pollModal.value.resetSubmittingState === 'function') {
+          try {
+            pollModal.value.resetSubmittingState();
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Aufruf von resetSubmittingState:', e);
+          }
+        }
+      }
+      
+      // NEUES EVENTBASIERTES SYSTEM: Globale Events auslösen zur UI-Koordination - MIT RATE LIMITING
+      if (typeof window !== 'undefined') {
+        try {
+          // Prüfen, ob in den letzten 100ms bereits ein Event ausgelöst wurde
+          const now = Date.now();
+          const minTimeBetweenEvents = 100; // ms
+          
+          if (!window._lastSyncDashboardEventTimestamp || (now - window._lastSyncDashboardEventTimestamp) > minTimeBetweenEvents) {
+            // Event-Timestamp aktualisieren
+            window._lastSyncDashboardEventTimestamp = now;
+            
+            // Eindeutige ID für das Event
+            const uniqueId = `sync-dashboard-${now}-${Math.random().toString(36).substring(2, 9)}`;
+            
+            // Event auslösen
+            window.dispatchEvent(new CustomEvent('voting:complete', { 
+              detail: { timestamp: now, id: uniqueId, source: 'syncDashboard' }
+            }));
+            console.log('[DEBUG:VOTING] voting:complete Event global ausgelöst von SyncEventDashboard');
+          } else {
+            console.log('[DEBUG:VOTING] Zu früh für ein neues Dashboard-Event, überspringe');
+          }
+        } catch (e) {
+          console.error('[DEBUG:VOTING] Fehler beim Auslösen des globalen voting:complete Event:', e);
+        }
       }
       
       // Zusätzlich einen kurzen Timeout setzen, um sicherzustellen,
@@ -1752,6 +1788,42 @@ async function onSubmitPoll(pollFormData) {
           if (pollModal.value.pollForm) {
             pollModal.value.pollForm.isSubmitting = false;
           }
+          
+          // NEUE KOORDINATION: Event direkt an resetSubmittingState durchreichen
+          if (typeof pollModal.value.resetSubmittingState === 'function') {
+            try {
+              pollModal.value.resetSubmittingState();
+            } catch (e) {
+              console.error('[DEBUG:VOTING] Fehler beim Aufruf von resetSubmittingState im Timeout:', e);
+            }
+          }
+        }
+        
+        // Erneut globales Event auslösen zur garantierten UI-Koordination mit Rate Limiting
+        if (typeof window !== 'undefined') {
+          try {
+            // Prüfen, ob in den letzten 150ms bereits ein Event ausgelöst wurde
+            const now = Date.now();
+            const minTimeBetweenEvents = 150; // ms - größere Pause für Timeout-Events
+            
+            if (!window._lastTimeoutEventTimestamp || (now - window._lastTimeoutEventTimestamp) > minTimeBetweenEvents) {
+              // Event-Timestamp aktualisieren
+              window._lastTimeoutEventTimestamp = now;
+              
+              // Eindeutige ID für das Event
+              const uniqueId = `sync-timeout-${now}-${Math.random().toString(36).substring(2, 9)}`;
+              
+              // Event auslösen
+              window.dispatchEvent(new CustomEvent('voting:complete', { 
+                detail: { timestamp: now, id: uniqueId, isTimeout: true, source: 'syncDashboardTimeout' }
+              }));
+              console.log('[DEBUG:VOTING] voting:complete Event global ausgelöst (erneut mit Timeout)');
+            } else {
+              console.log('[DEBUG:VOTING] Zu früh für ein neues Timeout-Event, überspringe');
+            }
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Auslösen des globalen voting:complete Event im Timeout:', e);
+          }
         }
       }, 1000);
       
@@ -1763,6 +1835,17 @@ async function onSubmitPoll(pollFormData) {
       
       // Aktive Session als fehlgeschlagen markieren
       votingProcess.deactivateVotingSession();
+      
+      // Globales Error-Event auslösen
+      if (typeof window !== 'undefined') {
+        try {
+          window.dispatchEvent(new CustomEvent('voting:error', { 
+            detail: { timestamp: Date.now(), error: error }
+          }));
+        } catch (e) {
+          console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:error Events:', e);
+        }
+      }
       
       // UI sofort zurücksetzen und Fehler anzeigen
       resetUIAfterSubmission();
@@ -1783,6 +1866,28 @@ async function onSubmitPoll(pollFormData) {
 function resetUIAfterSubmission() {
   const totalAllowedVotes = eventUser.value?.voteAmount || 0;
   const usedVotes = votingProcess.usedVotesCount?.value || 0;
+  
+  // KRITISCH: Globales Reset-Event auslösen für neue Event-basierte Koordination
+  // Dies wird von PollModal.vue abgefangen, um das isSubmitting-Flag zurückzusetzen
+  if (typeof window !== 'undefined') {
+    try {
+      window.dispatchEvent(new CustomEvent('voting:reset', { 
+        detail: { timestamp: Date.now() }
+      }));
+      console.log('[DEBUG:VOTING] voting:reset Event global ausgelöst von resetUIAfterSubmission');
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim Auslösen des globalen voting:reset Event:', e);
+    }
+  }
+  
+  // Direkter Aufruf von resetSubmittingState, falls verfügbar
+  if (pollModal?.value?.resetSubmittingState) {
+    try {
+      pollModal.value.resetSubmittingState();
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim Aufruf von resetSubmittingState in resetUIAfterSubmission:', e);
+    }
+  }
   
   try {
     // Prüfen, ob wir alle Stimmen verwendet haben
