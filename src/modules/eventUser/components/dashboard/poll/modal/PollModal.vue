@@ -250,7 +250,6 @@ onMounted(() => {
   
   // NEU: Global-Events für garantierte UI-Entsperrung mit Schutz gegen Endlosschleifen
   const handleVotingComplete = () => {
-    console.log('[DEBUG:VOTING] voting:complete Event empfangen in PollModal');
     // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
     isSubmitting.value = false;
     // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
@@ -260,7 +259,6 @@ onMounted(() => {
   };
   
   const handleVotingError = () => {
-    console.log('[DEBUG:VOTING] voting:error Event empfangen in PollModal');
     // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
     isSubmitting.value = false;
     // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
@@ -270,7 +268,6 @@ onMounted(() => {
   };
   
   const handleVotingReset = () => {
-    console.log('[DEBUG:VOTING] voting:reset Event empfangen in PollModal');
     // Sofort isSubmitting auf false setzen für direkte visuelle Rückmeldung
     isSubmitting.value = false;
     // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
@@ -377,14 +374,11 @@ let isResetInProgress = false;
 function resetSubmittingState() {
   // STOPPE ENDLOSSCHLEIFEN: Wenn bereits ein Reset läuft, nicht erneut starten
   if (isResetInProgress) {
-    console.log('[DEBUG:VOTING] Reset läuft bereits, überspringe wiederholten Aufruf');
     return;
   }
   
   // Markiere, dass ein Reset in Bearbeitung ist
   isResetInProgress = true;
-  
-  console.log('[DEBUG:VOTING] Explizite Zurücksetzung des isSubmitting-Status aufgerufen');
   
   // Sofort Overlay ausblenden (wichtig für direkte visuelle Feedback)
   isSubmitting.value = false;
@@ -480,13 +474,11 @@ function onSubmit(data) {
   // Lausche auf globale Voting-Events für garantierte UI-Entsperrung
   const handleVotingComplete = () => {
     clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
-    console.log('[DEBUG:VOTING] VotingComplete-Event empfangen, setze isSubmitting zurück');
     resetSubmittingState();
   };
   
   const handleVotingError = () => {
     clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
-    console.log('[DEBUG:VOTING] VotingError-Event empfangen, setze isSubmitting zurück');
     resetSubmittingState();
   };
   
@@ -888,7 +880,6 @@ function reset(keepSelection = false) {
     const overlay = document.querySelector('.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]');
     if (overlay) {
       overlay.style.display = 'none';
-      console.log('[DEBUG:VOTING] Overlay via DOM forciert ausgeblendet in reset()');
     }
     
     // Modal-Lockouts zurücksetzen

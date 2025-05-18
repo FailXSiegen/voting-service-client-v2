@@ -1764,9 +1764,6 @@ async function onSubmitPoll(pollFormData) {
             window.dispatchEvent(new CustomEvent('voting:complete', { 
               detail: { timestamp: now, id: uniqueId, source: 'syncDashboard' }
             }));
-            console.log('[DEBUG:VOTING] voting:complete Event global ausgelöst von SyncEventDashboard');
-          } else {
-            console.log('[DEBUG:VOTING] Zu früh für ein neues Dashboard-Event, überspringe');
           }
         } catch (e) {
           console.error('[DEBUG:VOTING] Fehler beim Auslösen des globalen voting:complete Event:', e);
@@ -1817,10 +1814,7 @@ async function onSubmitPoll(pollFormData) {
               window.dispatchEvent(new CustomEvent('voting:complete', { 
                 detail: { timestamp: now, id: uniqueId, isTimeout: true, source: 'syncDashboardTimeout' }
               }));
-              console.log('[DEBUG:VOTING] voting:complete Event global ausgelöst (erneut mit Timeout)');
-            } else {
-              console.log('[DEBUG:VOTING] Zu früh für ein neues Timeout-Event, überspringe');
-            }
+            } 
           } catch (e) {
             console.error('[DEBUG:VOTING] Fehler beim Auslösen des globalen voting:complete Event im Timeout:', e);
           }
@@ -1874,7 +1868,6 @@ function resetUIAfterSubmission() {
       window.dispatchEvent(new CustomEvent('voting:reset', { 
         detail: { timestamp: Date.now() }
       }));
-      console.log('[DEBUG:VOTING] voting:reset Event global ausgelöst von resetUIAfterSubmission');
     } catch (e) {
       console.error('[DEBUG:VOTING] Fehler beim Auslösen des globalen voting:reset Event:', e);
     }
