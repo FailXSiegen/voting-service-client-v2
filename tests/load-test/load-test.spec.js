@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Importiere die Module
-const { CONFIG } = require('./config');
+const { CONFIG } = require('../lib/config');
 const {
   sleep,
   cleanupResultsDirectory,
@@ -12,10 +12,10 @@ const {
   getTestUserId,
   getDisplayName,
   ensureScreenshotsDirectory
-} = require('./utils');
-const { loginAsOrganizer, createAndStartPoll } = require('./loginOrganizer');
-const { loginAsUser } = require('./loginUser');
-const { executeVotingInBatches } = require('./votingFunctions');
+} = require('../lib/utils');
+const { loginAsOrganizer, createAndStartPoll } = require('../lib/loginOrganizer');
+const { loginAsUser } = require('../lib/loginUser');
+const { executeVotingInBatches } = require('../lib/votingFunctions');
 
 // Haupttest-Funktion zum Laden von Benutzern
 test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
@@ -800,7 +800,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
         let getAllTrackingData = null;
         if (CONFIG.VOTE_TRACKING_ENABLED) {
           try {
-            const voteNotifier = require('./voteNotifier');
+            const voteNotifier = require('../lib/voteNotifier');
             getAllTrackingData = voteNotifier.getAllTrackingData;
           } catch (e) {
             console.warn(`[Test ${testId}] Vote-Tracking ist aktiviert, aber die Funktionen konnten nicht importiert werden: ${e.message}`);
