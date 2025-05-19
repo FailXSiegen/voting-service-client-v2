@@ -521,12 +521,47 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
     return;
   }
 
+  // KRITISCH: Endlosschleifen-Erkennung und Schutz
+  // Erkenne mögliche Endlosschleifen bei Werten nahe 0 oder remainingVotes
+  if (typeof window._votesToUsePreviousValues === 'undefined') {
+    window._votesToUsePreviousValues = [];
+  }
+  
+  // Füge aktuellen Wert zum Verlauf hinzu
+  window._votesToUsePreviousValues.push(newValue);
+  
+  // Behalte nur die letzten 5 Werte
+  if (window._votesToUsePreviousValues.length > 5) {
+    window._votesToUsePreviousValues.shift();
+  }
+  
+  // Prüfe auf oszillierende Werte (mögliche Endlosschleife)
+  const uniqueValues = new Set(window._votesToUsePreviousValues);
+  if (window._votesToUsePreviousValues.length >= 4 && uniqueValues.size <= 2) {
+    console.warn("[DEBUG:VOTING] Mögliche Endlosschleife erkannt in votesToUse watch. Überspringe Update.");
+    return;
+  }
+
   // Debug-Ausgabe
   console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
   
   // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
   // wenn sich der Wert tatsächlich geändert hat
   if (newValue === oldValue) return;
+  
+  // KRITISCH: Spezialbehandlung für den Fall, dass remainingVotes 0 ist
+  // In diesem Fall akzeptieren wir nur 0 als gültigen Wert für votesToUse
+  if (remainingVotes.value === 0) {
+    if (newValue !== 0) {
+      console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
+      formData.votesToUse = 0;
+    }
+    // Checkbox auf true setzen, da 0 von 0 = 100%
+    if (!formData.useAllAvailableVotes) {
+      formData.useAllAvailableVotes = true;
+    }
+    return;
+  }
   
   let correctedValue = newValue;
   
