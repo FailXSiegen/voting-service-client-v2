@@ -327,6 +327,28 @@ const remainingVotes = computed(() => {
   }
   
   const total = props.eventUser.voteAmount;
+  
+  // KRITISCH: Wenn total und usedVotes gleich sind, können keine Stimmen mehr abgegeben werden
+  // In diesem Fall können wir direkt 0 zurückgeben, um unerwünschtes Verhalten zu vermeiden
+  if (total <= usedVotes) {
+    // Reset formData.votesToUse auf 0, wenn alle Stimmen aufgebraucht sind
+    // Dies verhindert Endlosschleifen bei der Validierung
+    if (formData && formData.votesToUse !== 0) {
+      // Nicht-reaktive Änderung durch direkten Zugriff auf das Objekt
+      setTimeout(() => {
+        formData.votesToUse = 0;
+        
+        // Alle Stimmen aufgebraucht = 100% verwendet
+        formData.useAllAvailableVotes = true;
+        
+        console.log("[DEBUG:VOTING] Keine Stimmen mehr übrig: votesToUse auf 0 gesetzt");
+      }, 0);
+    }
+    
+    console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, keine Stimmen mehr übrig`);
+    return 0;
+  }
+  
   console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, verbleibend=${total - usedVotes}`);
   return total - usedVotes;
 });
@@ -442,6 +464,50 @@ onMounted(() => {
       storageFunctional.value = false;
     }
   }
+  
+  // KRITISCHES FIX: Safety Timer einrichten, der isSubmitting nach einer gewissen Zeit zurücksetzt
+  // Dies ist besonders wichtig für Split-Voting, wenn die UI hängenbleibt
+  const safetyTimer = setInterval(() => {
+    // Prüfen, ob wir in einer Split-Vote-Situation sind (bereits abgegebene Stimmen, aber nicht alle)
+    const maxAllowedVotes = props.eventUser?.voteAmount || 0;
+    const currentUsedVotes = votingProcess?.usedVotesCount?.value || 0;
+    const isSplitVoting = currentUsedVotes > 0 && currentUsedVotes < maxAllowedVotes;
+    
+    // Wenn wir in Split-Voting sind und isSubmitting ist gesetzt, nach 10 Sekunden zurücksetzen
+    if (isSplitVoting && isSubmitting.value) {
+      // Prüfe, wann isSubmitting zuletzt gesetzt wurde
+      const lastSubmitTime = window._lastSubmittingStartTime || 0;
+      const now = Date.now();
+      
+      // Wenn mehr als 10 Sekunden vergangen sind, isSubmitting zurücksetzen
+      if (now - lastSubmitTime > 10000) {
+        console.warn("[DEBUG:VOTING] Safety Timer: isSubmitting wird zurückgesetzt nach 10s in Split-Voting");
+        isSubmitting.value = false;
+        
+        // Auch die voting-process Flags zurücksetzen
+        if (votingProcess) {
+          // Nur setzen, wenn sie existieren und true sind
+          if (votingProcess.pollFormSubmitting && votingProcess.pollFormSubmitting.value === true) {
+            votingProcess.pollFormSubmitting.value = false;
+          }
+          
+          if (votingProcess.isProcessingVotes && votingProcess.isProcessingVotes.value === true) {
+            votingProcess.isProcessingVotes.value = false;
+          }
+          
+          // Auch die releaseUILocks-Funktion aufrufen, falls verfügbar
+          if (typeof votingProcess.releaseUILocks === 'function') {
+            votingProcess.releaseUILocks();
+          }
+        }
+      }
+    }
+  }, 5000); // Alle 5 Sekunden prüfen
+  
+  // Safety Timer bereinigen, wenn Komponente entfernt wird
+  onUnmounted(() => {
+    clearInterval(safetyTimer);
+  });
   
   // Browser-Erkennung für Safari und andere problematische Browser
   const browser = detectBrowser();
