@@ -155,6 +155,27 @@ activePollQuery = useQuery(
 activePollQuery.onResult(({ data }) => {
   if (data?.activePoll) {
     activePoll.value = data?.activePoll;
+    
+    // IMPORTANT: activePoll query is the source of truth for ALL voting statistics
+    // It contains all the data we need directly from the database
+    if (data.activePoll) {
+      // Update vote counts
+      const maxVotes = parseInt(data.activePoll.maxVotes, 10) || 0;
+      const answerCount = parseInt(data.activePoll.answerCount, 10) || 0;
+      
+      // Update user counts too from the same source
+      const userCount = parseInt(data.activePoll.pollUserCount, 10) || 0;
+      const votedCount = parseInt(data.activePoll.pollUserVotedCount, 10) || 0;
+      
+      
+      // Set all values from the same data source
+      activePollMaxAnswer.value = maxVotes;
+      activePollAnswerCount.value = answerCount;
+      pollUserCount.value = userCount;
+      pollUserVotedCount.value = votedCount;
+    }
+    
+    console.log('[ORGANIZER DEBUG] SyncPollListing - Current activePoll:', activePoll.value);
   }
 });
 
@@ -165,8 +186,23 @@ activePollEventUserQuery = useQuery(
   { fetchPolicy: "cache-and-network" },
 );
 activePollEventUserQuery.onResult(({ data }) => {
+  
   if (data?.activePollEventUser) {
     activePollEventUser.value = data?.activePollEventUser;
+    
+    // Always get user counts from activePollEventUser - this is the source of truth
+    if (data.activePollEventUser.pollUser && data.activePollEventUser.pollUserVoted) {
+      const userCount = data.activePollEventUser.pollUser.length;
+      const votedCount = data.activePollEventUser.pollUserVoted.length;
+      // ALWAYS update the user count from activePollEventUser
+      // This is the most accurate source for total users
+      pollUserCount.value = userCount;
+      
+      // For voted users, always use the value from activePollEventUser
+      // This is the authoritative source for which users have voted
+      pollUserVotedCount.value = votedCount;
+      
+    }
   }
 });
 
@@ -333,14 +369,46 @@ const pollAnswerLifeCycleSubscription = useSubscription(
 );
 pollAnswerLifeCycleSubscription.onResult(({ data }) => {
   if (!data?.pollAnswerLifeCycle) {
+    console.warn('[ORGANIZER DEBUG] SyncPollListing - No valid data in pollAnswerLifeCycle event');
     return;
   }
-  activePollAnswerCount.value = data?.pollAnswerLifeCycle?.pollAnswersCount;
-  activePollMaxAnswer.value = data?.pollAnswerLifeCycle?.maxVotes;
-  pollUserCount.value = data?.pollAnswerLifeCycle?.pollUserCount;
-  pollUserVotedCount.value = data?.pollAnswerLifeCycle?.pollUserVotedCount;
-  // Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
-  activePollEventUserQuery.refetch();
+
+  // IMPORTANT: Make sure we have valid numeric values for all fields
+  const newAnswerCount = parseInt(data?.pollAnswerLifeCycle?.pollAnswersCount, 10) || 0;
+  const newMaxVotes = parseInt(data?.pollAnswerLifeCycle?.maxVotes, 10) || 0;
+  const newUserCount = parseInt(data?.pollAnswerLifeCycle?.pollUserCount, 10) || 0;
+  const newVotedCount = parseInt(data?.pollAnswerLifeCycle?.pollUserVotedCount, 10) || 0;
+  
+  // CRITICAL: For the first PubSub update, we need to be careful about overwriting user counts
+  // Only update vote-related counts from PubSub, keep the user counts from activePollEventUser
+  // unless there are updates with votes
+  
+  // ONLY update answer count from PubSub if it's not zero (which would overwrite valid data)
+  if (newAnswerCount > 0 || activePollAnswerCount.value === 0) {
+    activePollAnswerCount.value = newAnswerCount;
+  } 
+  
+  // Only update maxVotes if it's a real value (> 0) to avoid overwriting with zero
+  if (newMaxVotes > 0 && newMaxVotes !== activePollMaxAnswer.value) {
+    activePollMaxAnswer.value = newMaxVotes;
+  }
+  
+  // UPDATE user counts from PubSub IF they're greater than 0
+  // This ensures we get correct voted counts when answers are submitted
+  if (newUserCount > 0) {
+    pollUserCount.value = newUserCount;
+  }
+  
+  if (newVotedCount > 0) {
+    pollUserVotedCount.value = newVotedCount;
+  }
+  
+  // CRITICAL: If there are answers, there must be at least one user who voted
+  // Fix logical inconsistency where we have votes but no voted users
+  if (activePollAnswerCount.value > 0 && pollUserVotedCount.value === 0) {
+    pollUserVotedCount.value = 1;
+  }
+  
 });
 
 const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE, {
@@ -351,9 +419,48 @@ pollLifeCycleSubscription.onResult(({ data }) => {
   
   if (data?.pollLifeCycle?.poll && data?.pollLifeCycle?.state !== "closed") {
     console.log('[ORGANIZER] Setting active poll from subscription:', data.pollLifeCycle.poll);
+    
+    // For a new poll, only reset vote counters (not user counters)
+    if (data?.pollLifeCycle?.state === "new") {
+      console.log('[ORGANIZER] New poll detected, resetting vote counters only');
+      
+      // We don't reset activePollAnswerCount here anymore
+      // Instead, we get its value from the activePoll query
+      
+      // For a new poll, we don't need to reset vote counts here
+      // Instead, we'll get the proper values from activePollQuery
+      
+      // Trigger activePollQuery refetch to get the correct values from poll_result
+      activePollQuery.refetch().then(result => {
+        if (result?.data?.activePoll) {
+          const poll = result.data.activePoll;
+          
+          // Update maxVotes from poll_result
+          if (poll.maxVotes !== undefined) {
+            const maxVotes = parseInt(poll.maxVotes, 10) || 0;
+            activePollMaxAnswer.value = maxVotes;
+          }
+          
+          // Also update answerCount from poll_result
+          if (poll.answerCount !== undefined) {
+            const answerCount = parseInt(poll.answerCount, 10) || 0;
+            activePollAnswerCount.value = answerCount;
+          }
+        }
+      });
+      
+      // Do NOT reset pollUserCount and pollUserVotedCount here!
+      // These values should come from activePollEventUser
+    }
+    
+    // Set the new active poll
     activePoll.value = data.pollLifeCycle.poll;
-    // WICHTIG: Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
-    activePollEventUserQuery.refetch();
+    
+    // Always refetch poll user data when a new poll starts
+    // But with a small delay to ensure things settle
+    setTimeout(() => {
+      activePollEventUserQuery.refetch();
+    }, 200);
   }
   
   if (data?.pollLifeCycle?.state === "closed") {

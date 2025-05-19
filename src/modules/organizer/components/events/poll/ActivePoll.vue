@@ -12,10 +12,10 @@
           v-if="activePollMaxAnswer > 0"
           v-html="
             t('view.polls.active.voteStatus', {
-              votes: parseInt(activePollAnswerCount, 10),
-              maxVotes: activePollMaxAnswer,
-              users: pollUserVotedCount,
-              maxUsers: pollUserCount,
+              votes: safeAnswerCount,
+              maxVotes: safeMaxAnswer,
+              users: safeVotedCount,
+              maxUsers: safeUserCount,
             })
           "
         />
@@ -23,10 +23,10 @@
           v-if="activePollMaxAnswer === 0"
           v-html="
             t('view.polls.active.voteStatus', {
-              votes: parseInt(activePoll.answerCount, 10),
-              maxVotes: activePoll.maxVotes,
-              users: activePoll.pollUserVotedCount,
-              maxUsers: activePoll.pollUserCount,
+              votes: parseInt(activePoll.answerCount, 10) || 0,
+              maxVotes: parseInt(activePoll.maxVotes, 10) || 1,
+              users: parseInt(activePoll.pollUserVotedCount, 10) || 0,
+              maxUsers: parseInt(activePoll.pollUserCount, 10) || 1,
             })
           "
         />
@@ -100,6 +100,7 @@
 
 <script setup>
 import t from "@/core/util/l18n";
+import { computed } from "vue";
 
 const emit = defineEmits(["close"]);
 const props = defineProps({
@@ -128,6 +129,12 @@ const props = defineProps({
     required: true,
   },
 });
+
+// Computed properties to ensure valid display values
+const safeAnswerCount = computed(() => parseInt(props.activePollAnswerCount, 10) || 0);
+const safeMaxAnswer = computed(() => parseInt(props.activePollMaxAnswer, 10) || 1);
+const safeUserCount = computed(() => parseInt(props.pollUserCount, 10) || 1);
+const safeVotedCount = computed(() => parseInt(props.pollUserVotedCount, 10) || 0);
 
 function hasVoted(pollUser) {
   return props.activePollEventUser?.pollUserVoted?.find((pollUserVoted) => {
