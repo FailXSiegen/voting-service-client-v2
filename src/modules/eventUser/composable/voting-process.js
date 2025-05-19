@@ -756,6 +756,34 @@ export function useVotingProcess(eventUser, event) {
       // Finales UI-Update
       currentlySubmittedInBatch.value = localSuccessCount;
 
+      // KRITISCH: Bei großen Batches explizit isSubmitting zurücksetzen
+      // Dies verhindert, dass große Batches die UI-Entsperrung verhindern
+      // Insbesondere wichtig bei Split-Voting von vielen Stimmen
+      if (localSuccessCount > 500) {
+        console.warn(`[DEBUG:VOTING] Explizite Freigabe nach großem Batch von ${localSuccessCount} Stimmen`);
+        
+        // Sofort alle UI-Sperren freigeben
+        isProcessingVotes.value = false;
+        pollFormSubmitting.value = false;
+        currentlyProcessingBatch.value = false;
+        
+        // Auch globale Flags zurücksetzen
+        if (typeof window !== 'undefined') {
+          window._pollFormSubmitting = false;
+          window._isProcessingVotes = false;
+          window._currentlyProcessingBatch = false;
+          
+          // Event für UI-Entsperrung auslösen
+          try {
+            window.dispatchEvent(new CustomEvent('voting:complete', {
+              detail: { timestamp: Date.now(), usedVotes: usedVotesCount.value }
+            }));
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:complete Events:', e);
+          }
+        }
+      }
+
       // Nach einem Reload muss der Zähler korrekt addiert werden
       // VEREINFACHTE UND VERBESSERTE COUNTER-LOGIK: Gemeinsame Verarbeitung für normale und Reload-Fälle
       if (localSuccessCount > 0) {
