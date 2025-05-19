@@ -29,7 +29,7 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
             @click="setVotePercentage(25)"
           >
             25% ({{ Math.round(remainingVotes * 0.25) }})
@@ -37,7 +37,7 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
             @click="setVotePercentage(50)"
           >
             50% ({{ Math.round(remainingVotes * 0.5) }})
@@ -45,7 +45,7 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
             @click="setVotePercentage(75)"
           >
             75% ({{ Math.round(remainingVotes * 0.75) }})
@@ -53,7 +53,7 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
             @click="setVotePercentage(100)"
           >
             100% ({{ remainingVotes }})
@@ -69,7 +69,7 @@
               class="form-range flex-grow-1 me-2" 
               min="1" 
               :max="remainingVotes"
-              :disabled="isSubmitting"
+              :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
             >
           </div>
           <!-- Numerical input -->
@@ -81,7 +81,7 @@
                 class="form-control"
                 min="1"
                 :max="remainingVotes"
-                :disabled="isSubmitting"
+                :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
               >
               <span class="input-group-text">{{ $t('view.polls.modal.votes') }}</span>
             </div>
@@ -109,7 +109,7 @@
             :label="$t('view.polls.modal.useAllVotes')"
             :help-text="$t('view.polls.modal.canSubmitAnswerForEachVoteHelptext')"
             :checked="formData.useAllAvailableVotes"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
             @update:checked="onCheckboxChange"
           />
         </div>
@@ -118,7 +118,7 @@
     <hr v-if="hasMultipleVotes" />
     <div class="d-flex justify-content-center answer-wrapper">
       <!-- Can only select one. -->
-      <fieldset v-if="voteType === VOTE_TYPE_SINGLE" :disabled="isSubmitting">
+      <fieldset v-if="voteType === VOTE_TYPE_SINGLE" :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)">
         <RadioInput
           id="poll-answer"
           :items="possibleAnswers"
@@ -140,7 +140,7 @@
       <!-- Can select multiple or all. -->
       <fieldset
         v-else-if="voteType === VOTE_TYPE_MULTIPLE_ALL"
-        :disabled="formData.abstain || isSubmitting"
+        :disabled="formData.abstain || (isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount))"
         :class="{ 'opacity-50': formData.abstain }"
       >
         <CheckboxInputGroup
@@ -167,7 +167,7 @@
     <!-- Abstain. -->
     <template v-if="showAbstain">
       <hr />
-      <fieldset :disabled="isSubmitting">
+      <fieldset :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)">
         <CheckboxInput
           id="allow-abstain"
           :label="$t('view.polls.modal.abstain')"
@@ -180,9 +180,9 @@
 
     <hr />
     <div class="overlay-container position-relative">
-      <!-- ABSOLUTE GARANTIERTE SPERRUNG mit der gleichen verstärkten Bedingung wie im Modal -->
+      <!-- VERBESSERTE SPERRUNG mit Bedingung, die Split-Voting ermöglicht -->
       <div
-v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
+v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
            class="position-absolute w-100 h-100 top-0 start-0 z-1" 
            style="background-color: rgba(255,255,255,0.95); cursor: not-allowed;">
         <div class="position-absolute top-50 start-50 translate-middle text-center">
@@ -197,12 +197,12 @@ v-if="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.cu
         </div>
       </div>
       
-      <!-- KRITISCH: Die gleiche absolut garantierte Sperrungsbedingung für den Button -->
+      <!-- KRITISCH: Verbesserte Sperrungsbedingung für den Button, die Split-Voting ermöglicht -->
       <button
 type="submit" class="btn btn-primary mx-auto d-block h1" 
-              :disabled="isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
-              :class="{ 'opacity-50': isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) }">
-        <span v-if="!(isSubmitting || votingProcess.isProcessingVotes?.value || votingProcess.currentlyProcessingBatch?.value || votingProcess.pollFormSubmitting?.value || (votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) || !!(props.eventUser.voteAmount && votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount))" class="h3">{{ $t("view.polls.modal.submitPoll") }}</span>
+              :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
+              :class="{ 'opacity-50': isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) }">
+        <span v-if="!(isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount))" class="h3">{{ $t("view.polls.modal.submitPoll") }}</span>
         <span v-else class="d-flex align-items-center justify-content-center">
           <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
           <span class="h3">{{ $t("view.polls.modal.submitting") }}</span>
@@ -299,16 +299,36 @@ const remainingVotes = computed(() => {
     return props.eventUser.voteAmount;
   }
   
-  // WICHTIG: usedVotesCount hat Vorrang vor dem Berechnungswert, wenn er verfügbar ist
-  if (window && window.votingProcessModule && window.votingProcessModule.usedVotesCount !== undefined) {
-    const total = props.eventUser.voteAmount;
-    const used = window.votingProcessModule.usedVotesCount;
-    console.log(`[DEBUG:VOTING] remainingVotes: Verwende globalen usedVotesCount: ${total - used}`);
-    return total - used;
+  // KRITISCH: Wir brauchen eine zuverlässige, konsistente Quelle für used votes
+  // Egal ob aus lokalem votingProcess oder globalem Modul
+  let usedVotes = 0;
+  
+  // Zuerst prüfen wir alle möglichen Quellen und verwenden den HÖCHSTEN Wert
+  // Dies stellt sicher, dass wir niemals Stimmen "verlieren"
+  if (votingProcess && votingProcess.usedVotesCount && votingProcess.usedVotesCount.value !== undefined) {
+    usedVotes = Math.max(usedVotes, votingProcess.usedVotesCount.value || 0);
   }
   
-  // Standard-Berechnung als Fallback
-  return props.eventUser.voteAmount - props.voteCounter + 1;
+  if (window && window.votingProcessModule && window.votingProcessModule.usedVotesCount !== undefined) {
+    usedVotes = Math.max(usedVotes, window.votingProcessModule.usedVotesCount || 0);
+  }
+  
+  // Zuletzt die voteCounter-Berechnung als zusätzliche Quelle (falls höher)
+  const voteCounterBasedUsed = (props.voteCounter > 1) ? (props.voteCounter - 1) : 0;
+  usedVotes = Math.max(usedVotes, voteCounterBasedUsed);
+  
+  // Jetzt zur Sicherheit in beide andere Quellen zurückspeichern für Konsistenz
+  if (votingProcess && votingProcess.usedVotesCount) {
+    votingProcess.usedVotesCount.value = usedVotes;
+  }
+  
+  if (window && window.votingProcessModule) {
+    window.votingProcessModule.usedVotesCount = usedVotes;
+  }
+  
+  const total = props.eventUser.voteAmount;
+  console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, verbleibend=${total - usedVotes}`);
+  return total - usedVotes;
 });
 
 // Ursprüngliche Berechnung, ob mehrere Stimmen vorhanden sind
@@ -391,23 +411,26 @@ watch(() => remainingVotes.value, (newValue, oldValue) => {
   }
 }, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
 
-// KRITISCH: Zugriff auf globales votingProcessModule für zuverlässige Berechnung von remainingVotes
-watchEffect(() => {
-  if (typeof window !== 'undefined' && window.votingProcessModule) {
-    // Bei jedem re-render prüfen, ob wir neue Informationen haben
-    if (window.votingProcessModule.usedVotesCount !== undefined && votingProcess.usedVotesCount?.value !== undefined) {
-      // Lokal zu global synchonisieren
-      if (window.votingProcessModule.usedVotesCount !== votingProcess.usedVotesCount.value) {
-        window.votingProcessModule.usedVotesCount = votingProcess.usedVotesCount.value;
-      }
-    }
-  }
-});
+// KRITISCH: Entfernen der alten bidirektionalen Synchronisierung
+// Diese wird jetzt direkt in der remainingVotes-Berechnung durchgeführt
+// und ist dort wesentlich zuverlässiger, da sie bei jedem Zugriffsversuch
+// auf remainingVotes sofort erfolgt
 
 onMounted(() => {
-  // Immer mit maximaler Stimmenzahl starten
-  formData.useAllAvailableVotes = true;
-  formData.votesToUse = remainingVotes.value;
+  // Um die Anzahl der verwendeten Stimmen korrekt zu initialisieren,
+  // rufen wir einfach remainingVotes.value auf. Dies löst die 
+  // verbesserte Berechnung aus, die alle Quellen synchronisiert.
+  
+  // Ein kurzer Timeout ist wichtig, damit alle Komponenten vollständig geladen sind
+  setTimeout(() => {
+    // Dieser Aufruf synchronisiert alle Quellen und erhält den maximalen usedVotes-Wert
+    const actualRemaining = remainingVotes.value;
+    console.log(`[DEBUG:VOTING] onMounted Initialisierung: Verbleibende Stimmen=${actualRemaining}`);
+    
+    // Immer mit maximaler Stimmenzahl starten
+    formData.useAllAvailableVotes = true;
+    formData.votesToUse = actualRemaining;
+  }, 100);
 
   // KRITISCH: Beim ersten Laden sicherstellen, dass keine alten Daten vorhanden sind
   if (props.poll && props.poll.id) {
@@ -684,20 +707,24 @@ function reset(keepSelection = false) {
     // den useAllAvailableVotes-Wert zurücksetzt
     formData.useAllAvailableVotes = true;
 
-    // Garantiere, dass wir den korrekten Wert haben
-    const currentRemainingVotes = remainingVotes.value;
-    console.log("[DEBUG:VOTING] Reset mit remainingVotes:", currentRemainingVotes);
-    
-    // Sicherstellen, dass votesToUse einen gültigen Wert hat
-    if (typeof currentRemainingVotes !== 'number' || currentRemainingVotes < 1) {
-      // Fallback, wenn remainingVotes ungültig ist
-      console.warn("[DEBUG:VOTING] Ungültiger remainingVotes-Wert:", currentRemainingVotes);
-      const fallbackValue = props.eventUser?.voteAmount || 1;
-      formData.votesToUse = fallbackValue;
-    } else {
-      // Normaler Fall: Setze auf die verfügbaren Stimmen
-      formData.votesToUse = currentRemainingVotes;
-    }
+    // Kleiner Timeout, um sicherzustellen, dass alle Komponenten up-to-date sind
+    setTimeout(() => {
+      // Garantiere, dass wir den korrekten Wert haben
+      // Dies wird die verbesserte Synchronisierung auslösen
+      const currentRemainingVotes = remainingVotes.value;
+      console.log("[DEBUG:VOTING] Reset mit remainingVotes:", currentRemainingVotes);
+      
+      // Sicherstellen, dass votesToUse einen gültigen Wert hat
+      if (typeof currentRemainingVotes !== 'number' || currentRemainingVotes < 1) {
+        // Fallback, wenn remainingVotes ungültig ist
+        console.warn("[DEBUG:VOTING] Ungültiger remainingVotes-Wert:", currentRemainingVotes);
+        const fallbackValue = props.eventUser?.voteAmount || 1;
+        formData.votesToUse = fallbackValue;
+      } else {
+        // Normaler Fall: Setze auf die verfügbaren Stimmen
+        formData.votesToUse = currentRemainingVotes;
+      }
+    }, 50);
     
     // Zweimal setzen für garantierte Reaktivität
     setTimeout(() => {

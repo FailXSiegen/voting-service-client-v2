@@ -792,24 +792,35 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       votingProcess.isProcessingVotes.value = false;
       votingProcess.currentlyProcessingBatch.value = false;
     
-      // KRITISCH: Das globale votingProcessModule jetzt auch direkt auf 0 setzen
-      // Dies stellt sicher, dass die Berechnung in PollForm.vue korrekt ist
-      if (typeof window !== 'undefined' && window.votingProcessModule) {
-        console.log("[DEBUG:VOTING] Setze direkt votingProcessModule.usedVotesCount = 0 vor resetVoteCounts");
-        window.votingProcessModule.usedVotesCount = 0;
-        window.votingProcessModule.voteCounter = 1;
+      // Prüfe, ob wir in einer Split-Vote-Situation sind
+      const maxVoteCount = eventUser.value?.voteAmount || 0;
+      const currentUsedVoteCount = votingProcess?.usedVotesCount?.value || 0;
+      const inSplitVoteSituation = currentUsedVoteCount > 0 && currentUsedVoteCount < maxVoteCount;
+      
+      // KRITISCHES FIX: Nur zurücksetzen, wenn wir NICHT in einer Split-Vote-Situation sind
+      // Bei Split-Voting müssen die Zählerstände erhalten bleiben
+      if (!inSplitVoteSituation) {
+        // KRITISCH: Das globale votingProcessModule jetzt auch direkt auf 0 setzen
+        // Dies stellt sicher, dass die Berechnung in PollForm.vue korrekt ist
+        if (typeof window !== 'undefined' && window.votingProcessModule) {
+          console.log("[DEBUG:VOTING] Setze direkt votingProcessModule.usedVotesCount = 0 vor resetVoteCounts");
+          window.votingProcessModule.usedVotesCount = 0;
+          window.votingProcessModule.voteCounter = 1;
+        }
+        
+        // Vollständiges Zurücksetzen aller Zähler und Status-Werte
+        console.log("[DEBUG:VOTING] Vor resetVoteCounts: usedVotesCount =", votingProcess.usedVotesCount?.value, "voteCounter =", votingProcess.voteCounter?.value);
+        
+        // KRITISCHE ÄNDERUNG: Setze voteCounter.value AUF JEDEN FALL explizit auf 1
+        // Dies ist notwendig, weil dies der Wert ist, der als prop an PollForm gesendet wird
+        // und in PollForm.vue für die Berechnung von remainingVotes verwendet wird
+        voteCounter.value = 1;
+        
+        votingProcess.resetVoteCounts();
+        console.log("[DEBUG:VOTING] Nach resetVoteCounts: usedVotesCount =", votingProcess.usedVotesCount?.value, "voteCounter =", votingProcess.voteCounter?.value);
+      } else {
+        console.log("[DEBUG:VOTING] Split-Vote-Situation erkannt, Stimmenzähler wird NICHT zurückgesetzt. usedVotesCount =", currentUsedVoteCount, "von", maxVoteCount);
       }
-      
-      // Vollständiges Zurücksetzen aller Zähler und Status-Werte
-      console.log("[DEBUG:VOTING] Vor resetVoteCounts: usedVotesCount =", votingProcess.usedVotesCount?.value, "voteCounter =", votingProcess.voteCounter?.value);
-      
-      // KRITISCHE ÄNDERUNG: Setze voteCounter.value AUF JEDEN FALL explizit auf 1
-      // Dies ist notwendig, weil dies der Wert ist, der als prop an PollForm gesendet wird
-      // und in PollForm.vue für die Berechnung von remainingVotes verwendet wird
-      voteCounter.value = 1;
-      
-      votingProcess.resetVoteCounts();
-      console.log("[DEBUG:VOTING] Nach resetVoteCounts: usedVotesCount =", votingProcess.usedVotesCount?.value, "voteCounter =", votingProcess.voteCounter?.value);
     
       // Auch die aktuelle Abstimmungs-ID zurücksetzen
       currentPollSubmissionId.value = null;
@@ -822,11 +833,17 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
         votingProcess.currentlyProcessingBatch.value = false;
         pollUserVotedCount.value = 0;
         
-        // Nochmal sicherstellen, dass voteCounter definitiv 1 ist
-        // Dies ist wichtig für die korrekte Berechnung von remainingVotes in PollForm.vue
-        if (voteCounter.value !== 1) {
+        // Erneut prüfen, ob wir in einer Split-Vote-Situation sind
+        const timeoutMaxVotes = eventUser.value?.voteAmount || 0;
+        const timeoutUsedVotes = votingProcess?.usedVotesCount?.value || 0;
+        const timeoutInSplitVoteSituation = timeoutUsedVotes > 0 && timeoutUsedVotes < timeoutMaxVotes;
+        
+        // Nochmal sicherstellen, dass voteCounter korrekt ist - nur wenn KEINE Split-Vote-Situation vorliegt
+        if (!timeoutInSplitVoteSituation && voteCounter.value !== 1) {
           console.log("[DEBUG:VOTING] voteCounter nochmal korrigiert von", voteCounter.value, "auf 1");
           voteCounter.value = 1;
+        } else if (timeoutInSplitVoteSituation) {
+          console.log("[DEBUG:VOTING] Split-Vote-Situation beim Timeout-Check, voteCounter wird nicht zurückgesetzt. Aktuell:", voteCounter.value);
         }
       }, 100);
     
@@ -1054,11 +1071,11 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
       // KRITISCHE SOFORTAKTIONEN - IMMER AUSFÜHREN!
     
       // 1. Alle UI-Sperren sofort freigeben
-      votingProcess.releaseUILocks();
-      votingProcess.isProcessingVotes.value = false;
-      votingProcess.pollFormSubmitting.value = false;
-      votingProcess.currentlyProcessingBatch.value = false;
-      votingProcess.deactivateVotingSession();
+      // votingProcess.releaseUILocks();
+      // votingProcess.isProcessingVotes.value = false;
+      // votingProcess.pollFormSubmitting.value = false;
+      // votingProcess.currentlyProcessingBatch.value = false;
+      // votingProcess.deactivateVotingSession();
     
       // 2. Poll-Modal GARANTIERT sofort schließen
       if (pollModal.value) {

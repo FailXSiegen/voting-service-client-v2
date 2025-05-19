@@ -14,9 +14,9 @@
       >
         <div v-if="poll" class="modal-content position-relative">
           <!-- Modal-wide overlay to block all interaction during submission -->
-          <!-- VERBESSERTE SPERRUNG: Vereinfachte Bedingung für bessere Zuverlässigkeit -->
+          <!-- VERBESSERTE SPERRUNG: Bedingung mit Split-Vote-Erkennung -->
           <div
-v-if="isSubmitting" 
+v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < eventUser.voteAmount)" 
                class="position-absolute w-100 h-100 top-0 start-0 z-3" 
                style="background-color: rgba(255,255,255,0.95); cursor: not-allowed;">
             <div class="position-absolute top-50 start-50 translate-middle text-center">
@@ -34,7 +34,7 @@ v-if="isSubmitting"
             <h5 class="modal-title">
               {{ poll.title }}<br />
               <small v-if="props.event.multivoteType !== 2" id="pollCounter">
-                <b>(Stimmzettel {{ voteCounter }} von {{ eventUser.voteAmount }})</b>
+                <b>(Stimmzettel {{ votingProcess.usedVotesCount?.value + 1 }} von {{ eventUser.voteAmount }})</b>
               </small>
             </h5>
           </div>
@@ -388,17 +388,17 @@ function resetSubmittingState() {
   isSubmitting.value = false;
   
   // Stelle sicher, dass alle Werte korrekt aktualisiert sind
-  nextTick(() => {
-    try {
-      // Prüfe aktuelle Stimmwerte für Debug - Verwende PROPS für sicheren Zugriff
-      const usedVotes = votingProcess?.usedVotesCount?.value || 0;
-      // KORRIGIERT: Verwende props.eventUser statt eventUser direkt (Vermeidet ReferenceError)
-      const totalVotes = props.eventUser?.voteAmount || 0;
-      console.log(`[DEBUG:VOTING] Stimmzähler vor UI-Entsperrung: ${usedVotes}/${totalVotes}`);
-    } catch (e) {
-      console.error('[DEBUG:VOTING] Fehler beim Debug-Log:', e);
-    }
-  });
+  // nextTick(() => {
+  //   try {
+  //     // Prüfe aktuelle Stimmwerte für Debug - Verwende PROPS für sicheren Zugriff
+  //     const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+  //     // KORRIGIERT: Verwende props.eventUser statt eventUser direkt (Vermeidet ReferenceError)
+  //     const totalVotes = props.eventUser?.voteAmount || 0;
+  //     console.log(`[DEBUG:VOTING] Stimmzähler vor UI-Entsperrung: ${usedVotes}/${totalVotes}`);
+  //   } catch (e) {
+  //     console.error('[DEBUG:VOTING] Fehler beim Debug-Log:', e);
+  //   }
+  // });
   
   // Extra Reset aller UI-Flags, um sicherzustellen, dass alles korrekt zurückgesetzt ist
   if (pollForm.value && typeof pollForm.value.resetSubmitState === 'function') {
@@ -831,14 +831,15 @@ function cleanupModalEffects() {
         // Prüfe, ob alle Stimmen abgegeben wurden
         const totalAllowedVotes = props.eventUser?.voteAmount || 0;
         const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+        const inSplitVoteSituation = usedVotes > 0 && usedVotes < totalAllowedVotes;
         
-        // Bei abgeschlossener Abstimmung (alle Stimmen genutzt) sofort zurücksetzen
-        if (usedVotes >= totalAllowedVotes && votingProcess) {
+        // Nur zurücksetzen, wenn es KEINE Split-Vote-Situation ist oder alle Stimmen abgegeben wurden
+        if ((!inSplitVoteSituation || usedVotes >= totalAllowedVotes) && votingProcess) {
           votingProcess.resetVoteCounts();
-        } else if (votingProcess.isProcessingVotes.value) {
-          // Bei laufender Abstimmung mit Verzögerung zurücksetzen
+        } else if (!inSplitVoteSituation && votingProcess.isProcessingVotes.value) {
+          // Bei laufender Abstimmung mit Verzögerung zurücksetzen - aber nicht bei Split-Vote
           setTimeout(() => {
-            if (votingProcess) {
+            if (votingProcess && !inSplitVoteSituation) {
               votingProcess.resetVoteCounts();
             }
           }, 500);
