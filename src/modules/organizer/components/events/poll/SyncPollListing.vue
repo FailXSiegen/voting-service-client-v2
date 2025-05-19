@@ -336,15 +336,26 @@ pollAnswerLifeCycleSubscription.onResult(({ data }) => {
   activePollEventUserQuery.refetch();
 });
 
-const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE);
+const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE, {
+  eventId: props.event.id  // Make sure we specify the correct eventId!
+});
 pollLifeCycleSubscription.onResult(({ data }) => {
+  console.log('[ORGANIZER] Received POLL_LIFE_CYCLE event:', data?.pollLifeCycle);
+  
   if (data?.pollLifeCycle?.poll && data?.pollLifeCycle?.state !== "closed") {
+    console.log('[ORGANIZER] Setting active poll from subscription:', data.pollLifeCycle.poll);
     activePoll.value = data.pollLifeCycle.poll;
     // WICHTIG: Temporär deaktiviert um das Problem mit flackernden Radio-Buttons zu testen
     activePollEventUserQuery.refetch();
   }
+  
   if (data?.pollLifeCycle?.state === "closed") {
+    console.log('[ORGANIZER] Poll closed notification received, resetting active poll');
     resetActivePoll();
+    // Force refetch all poll data to update UI
+    pollResultsQuery.refetch();
+    pollsWithNoResultsQuery.refetch();
+    toast(t("success.organizer.poll.pollClosed"), { type: "info" });
   }
 });
 
