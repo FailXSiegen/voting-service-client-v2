@@ -171,7 +171,9 @@ const existActivePoll = computed(
   () => poll.value !== null && pollState.value !== "closed",
 );
 const connectionLost = computed(
-  () => !eventUser.value?.online || !eventUser.value?.id,
+  () => {
+    return !eventUser.value?.online || !eventUser.value?.id;
+  },
 );
 
 // Watchdog-Timer für UI-Lock-Situationen einrichten

@@ -172,8 +172,14 @@ newEventUserSubscription.onResult(({ data }) => {
   eventUsers.value = copyOfEventUsers;
 });
 
-const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE);
+const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, () => ({
+  variables: { eventId }
+}));
 eventUserLifeCycleSubscription.onResult(({ data }) => {
+  if (!data || !data.eventUserLifeCycle) {
+    console.warn('[ORGANIZER DEBUG] EventNavigation - No valid data in eventUserLifeCycle event');
+    return;
+  }
   // We have to make a copy to add a new entry to the event users array.
   const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
   const eventUser = copyOfEventUsers.find((user) => {
@@ -182,8 +188,9 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
       parseInt(data?.eventUserLifeCycle?.eventUserId, 10)
     );
   });
+  
   if (!eventUser) {
-    // No event user found. So we ignore this.
+    console.warn('[ORGANIZER DEBUG] EventNavigation - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
     return;
   }
   eventUser.online = data?.eventUserLifeCycle?.online;

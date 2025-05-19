@@ -128,20 +128,29 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 });
 
 // Handle event user life cycle updates.
-const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE);
+const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, () => ({
+  variables: { eventId: id }
+}));
 eventUserLifeCycleSubscription.onResult(({ data }) => {
+
+  if (!data || !data.eventUserLifeCycle) {
+    console.warn('[ORGANIZER DEBUG] LobbyRoom - No valid data in eventUserLifeCycle event');
+    return;
+  }
+    
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value)); 
   const eventUser = copyOfEventUsers.find((user) => {
     return (
       parseInt(user.id, 10) ===
       parseInt(data?.eventUserLifeCycle?.eventUserId, 10)
     );
   });
+  
   if (!eventUser) {
-    // No event user found. So we ignore this.
+    console.warn('[ORGANIZER DEBUG] LobbyRoom - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
     return;
-  }
+  }  
   eventUser.online = data?.eventUserLifeCycle?.online;
   eventUsers.value = copyOfEventUsers;
 });
