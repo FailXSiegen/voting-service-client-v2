@@ -4,6 +4,7 @@ import { usePollStatePersistence } from "@/core/composable/poll-state-persistenc
 import { useMutation } from "@vue/apollo-composable";
 import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
 import { CREATE_BULK_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer";
+import { apolloClient } from "@/apollo-client"; // Ensure we import the Apollo client
 
 // Erstelle ein Symbol als eindeutigen Key für Browser-Isolation
 const instanceKey = Symbol('voting-process-instance');
@@ -1538,19 +1539,64 @@ export function useVotingProcess(eventUser, event) {
    */
   async function submitBulkVote(input) {
     try {
+      // Defensive checks for input validation
+      if (!input) {
+        console.error(`[ERROR:VOTING] submitBulkVote: input is undefined`);
+        return false;
+      }
+      
       // Starte Zeitmessung für Performance-Tracking
       const startTime = performance.now();
+
+      // Import provideApolloClient dynamically to avoid circular dependencies
+      const { provideApolloClient } = await import('@vue/apollo-composable');
+      
+      // Ensure Apollo client is provided to avoid "oe is undefined" errors
+      // which may occur when the Apollo client is not available in the current context
+      provideApolloClient(apolloClient);
 
       // Führe die Bulk-Vote-Mutation aus
       const createBulkPollSubmitAnswerMutation = useMutation(
         CREATE_BULK_POLL_SUBMIT_ANSWER,
         {
           variables: { input },
+          // Add errorPolicy to handle partial errors
+          errorPolicy: 'all',
+          // Use the Apollo client instance explicitly
+          client: apolloClient
         },
       );
+      
+      // Check if mutation or mutate function is undefined
+      if (!createBulkPollSubmitAnswerMutation) {
+        console.error(`[ERROR:VOTING] createBulkPollSubmitAnswerMutation is undefined`);
+        return false;
+      }
+      
+      if (typeof createBulkPollSubmitAnswerMutation.mutate !== 'function') {
+        console.error(`[ERROR:VOTING] createBulkPollSubmitAnswerMutation.mutate is not a function:`, 
+                     createBulkPollSubmitAnswerMutation);
+        return false;
+      }
 
       try {
-        const result = await createBulkPollSubmitAnswerMutation.mutate();
+        // Execute mutation with additional error handling and timeout
+        const timeout = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Bulk mutation timeout')), 15000)
+        );
+        
+        // Use Promise.race to implement timeout
+        const result = await Promise.race([
+          createBulkPollSubmitAnswerMutation.mutate(),
+          timeout
+        ]);
+        
+        // Validate result to avoid undefined errors
+        if (!result) {
+          console.error(`[ERROR:VOTING] Bulk mutation result is undefined`);
+          return false;
+        }
+        
         const successCount = result.data?.createBulkPollSubmitAnswer || 0;
 
         // Ende der Zeitmessung
@@ -1606,11 +1652,43 @@ export function useVotingProcess(eventUser, event) {
         console.error(`[ERROR:BULK_VOTE] GraphQL Fehler bei der Bulk-Mutation:`, mutationError);
         console.log(`[ERROR:BULK_VOTE] GraphQL Fehler Details:`,
           mutationError.graphQLErrors || 'Keine GraphQL-Fehlerdetails');
+        
+        // Log specific error details to help diagnose "oe is undefined" issue
+        if (mutationError instanceof TypeError && mutationError.message.includes('oe is undefined')) {
+          console.error(`[ERROR:BULK_VOTE] "oe is undefined" Fehler beim Ausführen der Bulk-Mutation:`, {
+            errorName: mutationError.name,
+            errorMessage: mutationError.message,
+            stackTrace: mutationError.stack,
+            input: JSON.stringify(input),
+          });
+        }
+        
+        // Release UI locks to prevent UI from being stuck
+        if (typeof releaseUILocks === 'function') {
+          releaseUILocks();
+        }
+        
         return false;
       }
     } catch (error) {
-      console.error(`[ERROR:BULK_VOTE] Fehler bei der Bulk-Mutation für ${input.voteCount} Stimmen:`, error);
+      console.error(`[ERROR:BULK_VOTE] Fehler bei der Bulk-Mutation für ${input?.voteCount || 'unknown'} Stimmen:`, error);
       console.log(`[ERROR:BULK_VOTE] Stack:`, error.stack || 'Kein Stack verfügbar');
+      
+      // Log specific error details to help diagnose "oe is undefined" issue
+      if (error instanceof TypeError && error.message.includes('oe is undefined')) {
+        console.error(`[ERROR:BULK_VOTE] "oe is undefined" Fehler beim Ausführen der Bulk-Mutation:`, {
+          errorName: error.name,
+          errorMessage: error.message,
+          stackTrace: error.stack,
+          input: JSON.stringify(input),
+        });
+      }
+      
+      // Release UI locks to prevent UI from being stuck
+      if (typeof releaseUILocks === 'function') {
+        releaseUILocks();
+      }
+      
       return false;
     }
   }
@@ -1753,16 +1831,79 @@ export function useVotingProcess(eventUser, event) {
 
 async function mutateAnswer(input) {
   try {
+    // Defensive checks for input validation
+    if (!input) {
+      console.error(`[ERROR:VOTING] mutateAnswer: input is undefined`);
+      return false;
+    }
+
+    // Import provideApolloClient dynamically to avoid circular dependencies
+    const { provideApolloClient } = await import('@vue/apollo-composable');
+    
+    // Ensure Apollo client is provided to avoid "oe is undefined" errors
+    // which may occur when the Apollo client is not available in the current context
+    provideApolloClient(apolloClient);
+
+    // Create mutation with better error handling
     const createPollSubmitAnswerMutation = useMutation(
       CREATE_POLL_SUBMIT_ANSWER,
       {
         variables: { input },
+        // Add errorPolicy to handle partial errors
+        errorPolicy: 'all',
+        // Use the Apollo client instance explicitly
+        client: apolloClient
       },
     );
-    await createPollSubmitAnswerMutation.mutate();
+    
+    // Check if mutation or mutate function is undefined
+    if (!createPollSubmitAnswerMutation) {
+      console.error(`[ERROR:VOTING] createPollSubmitAnswerMutation is undefined`);
+      return false;
+    }
+    
+    if (typeof createPollSubmitAnswerMutation.mutate !== 'function') {
+      console.error(`[ERROR:VOTING] createPollSubmitAnswerMutation.mutate is not a function:`, 
+                    createPollSubmitAnswerMutation);
+      return false;
+    }
+    
+    // Execute mutation with additional error handling and timeout
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Mutation timeout')), 10000)
+    );
+    
+    // Use Promise.race to implement timeout
+    const result = await Promise.race([
+      createPollSubmitAnswerMutation.mutate(),
+      timeout
+    ]);
+    
     return true;
   } catch (error) {
-    console.error(`Fehler bei der Mutation für Zyklus ${input.voteCycle}/${input.answerItemCount}:`, error);
-    throw error;
+    // Detailed error logging
+    console.error(`[ERROR:VOTING] Fehler bei der Mutation für Zyklus ${input?.voteCycle || 'unknown'}/${input?.answerItemCount || 'unknown'}:`, error);
+    
+    // Log specific error details to help diagnose "oe is undefined" issue
+    if (error instanceof TypeError && error.message.includes('oe is undefined')) {
+      console.error(`[ERROR:VOTING] "oe is undefined" Fehler beim Ausführen der Mutation:`, {
+        errorName: error.name,
+        errorMessage: error.message,
+        stackTrace: error.stack,
+        input: JSON.stringify(input),
+      });
+      
+      // Try to immediately cleanup any potential memory issues
+      if (typeof window.gc === 'function') {
+        try {
+          window.gc();
+        } catch (e) {
+          // Ignore errors if gc is not available
+        }
+      }
+    }
+    
+    // Don't propagate error to avoid breaking the voting flow
+    return false;
   }
 }
