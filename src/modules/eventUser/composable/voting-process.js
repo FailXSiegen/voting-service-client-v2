@@ -54,6 +54,13 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Import provideApolloClient at the module level to prevent any "oe is undefined" issues
+// This ensures that the Apollo client is properly provided to all composables
+import { provideApolloClient } from '@vue/apollo-composable';
+
+// Explicitly provide the Apollo client at the module level
+provideApolloClient(apolloClient);
+
 export function useVotingProcess(eventUser, event) {
   // Jeder Hook-Aufruf erstellt eine isolierte Instanz der Zustände
   const pollFormSubmitting = ref(false);
@@ -1547,13 +1554,8 @@ export function useVotingProcess(eventUser, event) {
       
       // Starte Zeitmessung für Performance-Tracking
       const startTime = performance.now();
-
-      // Import provideApolloClient dynamically to avoid circular dependencies
-      const { provideApolloClient } = await import('@vue/apollo-composable');
       
-      // Ensure Apollo client is provided to avoid "oe is undefined" errors
-      // which may occur when the Apollo client is not available in the current context
-      provideApolloClient(apolloClient);
+      // Apollo client is now provided at the module level, so we don't need to do it here
 
       // Führe die Bulk-Vote-Mutation aus
       const createBulkPollSubmitAnswerMutation = useMutation(
@@ -1580,16 +1582,16 @@ export function useVotingProcess(eventUser, event) {
       }
 
       try {
-        // Execute mutation with additional error handling and timeout
-        const timeout = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Bulk mutation timeout')), 15000)
-        );
+        // Add a warning for slow mutations but don't abort them
+        const warningTimeoutId = setTimeout(() => {
+          console.warn('[DEBUG:VOTING] Bulk mutation is taking longer than expected, but will continue waiting...');
+        }, 10000); // Warning after 10 seconds for bulk operations
         
-        // Use Promise.race to implement timeout
-        const result = await Promise.race([
-          createBulkPollSubmitAnswerMutation.mutate(),
-          timeout
-        ]);
+        // Execute the mutation without a hard timeout
+        const result = await createBulkPollSubmitAnswerMutation.mutate();
+        
+        // Clear the warning timeout
+        clearTimeout(warningTimeoutId);
         
         // Validate result to avoid undefined errors
         if (!result) {
@@ -1836,13 +1838,8 @@ async function mutateAnswer(input) {
       console.error(`[ERROR:VOTING] mutateAnswer: input is undefined`);
       return false;
     }
-
-    // Import provideApolloClient dynamically to avoid circular dependencies
-    const { provideApolloClient } = await import('@vue/apollo-composable');
     
-    // Ensure Apollo client is provided to avoid "oe is undefined" errors
-    // which may occur when the Apollo client is not available in the current context
-    provideApolloClient(apolloClient);
+    // Apollo client is now provided at the module level, so we don't need to do it here
 
     // Create mutation with better error handling
     const createPollSubmitAnswerMutation = useMutation(
@@ -1868,18 +1865,24 @@ async function mutateAnswer(input) {
       return false;
     }
     
-    // Execute mutation with additional error handling and timeout
-    const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Mutation timeout')), 10000)
-    );
-    
-    // Use Promise.race to implement timeout
-    const result = await Promise.race([
-      createPollSubmitAnswerMutation.mutate(),
-      timeout
-    ]);
-    
-    return true;
+    // Execute mutation with better error handling but no hard timeout
+    try {
+      // Add a warning for slow mutations but don't abort them
+      const warningTimeoutId = setTimeout(() => {
+        console.warn('[DEBUG:VOTING] Mutation is taking longer than expected, but will continue waiting...');
+      }, 5000); // Warning after 5 seconds
+      
+      // Execute the mutation without a hard timeout
+      const result = await createPollSubmitAnswerMutation.mutate();
+      
+      // Clear the warning timeout
+      clearTimeout(warningTimeoutId);
+      
+      return true;
+    } catch (mutationError) {
+      console.error('[ERROR:VOTING] Inner mutation error:', mutationError);
+      throw mutationError; // Re-throw to be handled by the outer catch
+    }
   } catch (error) {
     // Detailed error logging
     console.error(`[ERROR:VOTING] Fehler bei der Mutation für Zyklus ${input?.voteCycle || 'unknown'}/${input?.answerItemCount || 'unknown'}:`, error);
