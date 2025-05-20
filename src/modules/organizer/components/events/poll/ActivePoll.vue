@@ -43,10 +43,18 @@
     </div>
 
     <div class="card active-poll-details mb-3">
-      <div class="card-header">
-        <h2 v-if="activePollEventUser" class="h4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 v-if="activePollEventUser" class="h4 mb-0">
           {{ t("view.polls.active.details") }}
         </h2>
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-sm" 
+          @click="onRefresh"
+          :disabled="isRefreshing"
+        >
+          {{ $t("view.polls.active.refresh") || "Aktualisieren" }}
+        </button>
       </div>
 
       <div class="card-body">
@@ -100,9 +108,11 @@
 
 <script setup>
 import t from "@/core/util/l18n";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
-const emit = defineEmits(["close"]);
+const isRefreshing = ref(false);
+
+const emit = defineEmits(["close", "refresh"]);
 const props = defineProps({
   activePoll: {
     type: Object,
@@ -148,6 +158,14 @@ function hasVoted(pollUser) {
 function onCloseActivePoll() {
   emit("close");
 }
+
+function onRefresh() {
+  isRefreshing.value = true;
+  emit("refresh");
+}
+
+// Expose isRefreshing to parent component
+defineExpose({ isRefreshing });
 </script>
 
 <style scoped>
