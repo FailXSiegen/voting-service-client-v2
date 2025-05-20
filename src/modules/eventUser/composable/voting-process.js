@@ -20,8 +20,37 @@ if (typeof window !== 'undefined') {
     voteCounter: 1
   };
   
+  // Tracking von bereits verarbeiteten Poll-Closed Events um Duplikate zu vermeiden
+  const processedPollClosedEvents = new Map();
+  
   // Globaler Listener für poll:closed Events
   window.addEventListener('poll:closed', (event) => {
+    const pollId = event.detail?.pollId;
+    const timestamp = event.detail?.timestamp || Date.now();
+    
+    // Deduplizieren: Prüfe, ob wir dieses Poll-ID bereits kürzlich verarbeitet haben
+    if (pollId) {
+      const lastProcessed = processedPollClosedEvents.get(pollId);
+      const DEDUPLICATION_WINDOW_MS = 5000; // 5 Sekunden Fenster für Deduplizierung
+      
+      // Wenn wir das Event für diese Poll kürzlich verarbeitet haben, ignorieren
+      if (lastProcessed && (timestamp - lastProcessed) < DEDUPLICATION_WINDOW_MS) {
+        console.log(`[DEBUG:VOTING] Poll ist bereits als geschlossen markiert, ignoriere weiteres Life-Cycle-Event`);
+        return;
+      }
+      
+      // Update der letzten Verarbeitungszeit
+      processedPollClosedEvents.set(pollId, timestamp);
+      
+      // Ältere Einträge aus der Map entfernen (für Speicher-Management)
+      const CLEANUP_THRESHOLD_MS = 60000; // 1 Minute
+      processedPollClosedEvents.forEach((value, key) => {
+        if (timestamp - value > CLEANUP_THRESHOLD_MS) {
+          processedPollClosedEvents.delete(key);
+        }
+      });
+    }
+    
     console.log('[DEBUG:VOTING] Global poll:closed Event empfangen:', event.detail);
     
     // Setze das globale Flag, um weitere Vote-Verarbeitung zu blockieren
@@ -45,7 +74,7 @@ if (typeof window !== 'undefined') {
       // Event für UI-Entsperrung auslösen
       try {
         window.dispatchEvent(new CustomEvent('voting:complete', {
-          detail: { timestamp: Date.now(), pollClosed: true }
+          detail: { timestamp: Date.now(), pollClosed: true, pollId }
         }));
       } catch (e) {
         console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:complete Events:', e);
@@ -1186,16 +1215,44 @@ export function useVotingProcess(eventUser, event) {
       if (typeof window !== 'undefined') {
         window.pollClosedEventReceived = true;
         
-        // Event auslösen, dass die Poll geschlossen wurde
-        try {
-          window.dispatchEvent(new CustomEvent('poll:closed', {
-            detail: { 
-              pollId: poll.value?.id,
-              timestamp: Date.now()
-            }
-          }));
-        } catch (e) {
-          console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+        // Track last poll:closed event dispatched per poll ID
+        if (!window._lastPollClosedEvents) {
+          window._lastPollClosedEvents = new Map();
+        }
+        
+        const pollId = poll.value?.id;
+        const currentTime = Date.now();
+        const DEDUPLICATION_WINDOW_MS = 5000; // 5 seconds
+        
+        // Check if we've dispatched an event for this poll recently
+        const lastEventTime = window._lastPollClosedEvents.get(pollId);
+        
+        // Only dispatch if we haven't sent one recently
+        if (!lastEventTime || (currentTime - lastEventTime > DEDUPLICATION_WINDOW_MS)) {
+          // Event auslösen, dass die Poll geschlossen wurde
+          try {
+            window.dispatchEvent(new CustomEvent('poll:closed', {
+              detail: { 
+                pollId: pollId,
+                timestamp: currentTime,
+                source: 'submitSingleVote'
+              }
+            }));
+            
+            // Record this event dispatch
+            window._lastPollClosedEvents.set(pollId, currentTime);
+            
+            // Clean up old entries
+            window._lastPollClosedEvents.forEach((time, id) => {
+              if (currentTime - time > 60000) { // 1 minute
+                window._lastPollClosedEvents.delete(id);
+              }
+            });
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+          }
+        } else {
+          console.log('[DEBUG:VOTING] Ignoriere doppeltes poll:closed Event von submitSingleVote');
         }
       }
 
@@ -1582,16 +1639,25 @@ export function useVotingProcess(eventUser, event) {
       }
 
       try {
-        // Add a warning for slow mutations but don't abort them
+        // Track if warning has been shown to avoid duplicate messages
+        let warningShown = false;
+        
+        // Add a less frequent warning for slow mutations but don't abort them
         const warningTimeoutId = setTimeout(() => {
           console.warn('[DEBUG:VOTING] Bulk mutation is taking longer than expected, but will continue waiting...');
-        }, 10000); // Warning after 10 seconds for bulk operations
+          warningShown = true;
+        }, 15000); // Longer initial wait (15 seconds) for bulk operations
         
         // Execute the mutation without a hard timeout
         const result = await createBulkPollSubmitAnswerMutation.mutate();
         
         // Clear the warning timeout
         clearTimeout(warningTimeoutId);
+        
+        // Log completion if a warning was shown
+        if (warningShown) {
+          console.log('[DEBUG:VOTING] Long-running bulk mutation completed successfully');
+        }
         
         // Validate result to avoid undefined errors
         if (!result) {
@@ -1867,16 +1933,25 @@ async function mutateAnswer(input) {
     
     // Execute mutation with better error handling but no hard timeout
     try {
-      // Add a warning for slow mutations but don't abort them
+      // Track if warning has been shown to avoid duplicate messages
+      let warningShown = false;
+      
+      // Add a less frequent warning for slow mutations but don't abort them
       const warningTimeoutId = setTimeout(() => {
         console.warn('[DEBUG:VOTING] Mutation is taking longer than expected, but will continue waiting...');
-      }, 5000); // Warning after 5 seconds
+        warningShown = true;
+      }, 10000); // Longer initial wait (10 seconds) to reduce noise
       
       // Execute the mutation without a hard timeout
       const result = await createPollSubmitAnswerMutation.mutate();
       
       // Clear the warning timeout
       clearTimeout(warningTimeoutId);
+      
+      // Log completion if a warning was shown
+      if (warningShown) {
+        console.log('[DEBUG:VOTING] Long-running mutation completed successfully');
+      }
       
       return true;
     } catch (mutationError) {
