@@ -61,6 +61,7 @@
     v-if="!activePoll && pollsWithNoResults?.length > 0"
     :polls="pollsWithNoResults"
     :current-online-user-count="verifiedUsersCountAllowToVoteOnline"
+    :start-button-disabled="!canStartPoll"
     @copy="onCopyPoll"
     @edit="onEditPoll"
     @remove="onRemovePoll"

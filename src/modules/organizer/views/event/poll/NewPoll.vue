@@ -12,6 +12,7 @@
     <template #content>
       <PollForm
         :show-submit-and-start-button="showSubmitAndStartButton"
+        :is-submitting="!canSubmit"
         @submit="onSubmit"
         @submit-and-start="onSubmitAndStart"
       />

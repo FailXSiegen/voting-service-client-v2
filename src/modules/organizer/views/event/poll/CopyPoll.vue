@@ -13,6 +13,7 @@
       <PollForm
         v-if="loaded"
         :prefill-data="prefillData"
+        :is-submitting="!canSubmit"
         @submit="onSubmit"
         @submit-and-start="onSubmitAndStart"
       />
@@ -42,6 +43,7 @@ const router = useRouter();
 const route = useRoute();
 const eventId = route.params.id;
 const pollId = route.params.pollId;
+const canSubmit = ref(true);
 
 const loaded = ref(false);
 const event = ref(null);
@@ -99,23 +101,39 @@ eventQuery.onResult(({ data }) => {
 });
 
 async function onSubmit(formData) {
-  // Create new poll.
-  await createNewPoll(formData, false);
-  // Back to polls view.
-  await router.push({ name: RouteOrganizerPolls });
-  // Show success message.
-  toast(t("success.organizer.poll.createdSuccessfully"), { type: "success" });
+  canSubmit.value = false;
+  try {
+    // Create new poll.
+    await createNewPoll(formData, false);
+    // Back to polls view.
+    await router.push({ name: RouteOrganizerPolls });
+    // Show success message.
+    toast(t("success.organizer.poll.createdSuccessfully"), { type: "success" });
+  } catch (error) {
+    console.error("Error creating poll:", error);
+    // Re-enable buttons in case of error
+    canSubmit.value = true;
+    throw error;
+  }
 }
 
 async function onSubmitAndStart(formData) {
-  // Create new poll.
-  await createNewPoll(formData, true);
-  // Back to polls view.
-  await router.push({ name: RouteOrganizerPolls });
-  // Show success message.
-  toast(t("success.organizer.poll.createdAndStartedSuccessfully"), {
-    type: "success",
-  });
+  canSubmit.value = false;
+  try {
+    // Create new poll.
+    await createNewPoll(formData, true);
+    // Back to polls view.
+    await router.push({ name: RouteOrganizerPolls });
+    // Show success message.
+    toast(t("success.organizer.poll.createdAndStartedSuccessfully"), {
+      type: "success",
+    });
+  } catch (error) {
+    console.error("Error creating and starting poll:", error);
+    // Re-enable buttons in case of error
+    canSubmit.value = true;
+    throw error;
+  }
 }
 
 /**
