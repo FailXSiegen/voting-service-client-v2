@@ -255,6 +255,7 @@ onMounted(() => {
     window.addEventListener('voting:complete', handleVotingComplete);
     window.addEventListener('voting:error', handleVotingError);
     window.addEventListener('voting:reset', handleVotingReset);
+    window.addEventListener('poll:closed', handlePollClosed); // Neuer Listener für Poll-Closed-Events
   }
   
   // Cleanup für dieses Intervall hinzufügen
@@ -266,6 +267,7 @@ onMounted(() => {
       window.removeEventListener('voting:complete', handleVotingComplete);
       window.removeEventListener('voting:error', handleVotingError);
       window.removeEventListener('voting:reset', handleVotingReset);
+      window.removeEventListener('poll:closed', handlePollClosed); // Neuer Listener entfernen
     }
   });
   
@@ -278,6 +280,23 @@ onMounted(() => {
         // Nur schließen, wenn es keine Split-Vote-Situation ist
         const totalAllowedVotes = props.eventUser?.voteAmount || 0;
         const usedVotes = votingProcess?.usedVotesCount?.value || 0;
+        
+        // Setze globales Flag, um weitere Vote-Verarbeitung zu blockieren
+        if (typeof window !== 'undefined') {
+          window.pollClosedEventReceived = true;
+          
+          // Event auslösen, dass die Poll geschlossen wurde
+          try {
+            window.dispatchEvent(new CustomEvent('poll:closed', {
+              detail: { 
+                pollId: props.poll?.id,
+                timestamp: Date.now()
+              }
+            }));
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+          }
+        }
         
         // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
         if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
@@ -296,6 +315,23 @@ onMounted(() => {
     (state) => {
       if (state === 'closed') {
         console.warn("[DEBUG:VOTING] Poll-State wurde auf 'closed' gesetzt (reactive watch)");
+        
+        // Setze globales Flag, um weitere Vote-Verarbeitung zu blockieren
+        if (typeof window !== 'undefined') {
+          window.pollClosedEventReceived = true;
+          
+          // Event auslösen, dass die Poll geschlossen wurde
+          try {
+            window.dispatchEvent(new CustomEvent('poll:closed', {
+              detail: { 
+                pollId: props.poll?.id,
+                timestamp: Date.now()
+              }
+            }));
+          } catch (e) {
+            console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+          }
+        }
         
         // Nur schließen, wenn es keine Split-Vote-Situation ist
         const totalAllowedVotes = props.eventUser?.voteAmount || 0;
@@ -371,6 +407,46 @@ const handleVotingReset = () => {
   // Dann vollständiges Reset durchführen, aber nur wenn nicht bereits ein Reset läuft
   if (!isResetInProgress) {
     resetSubmittingState();
+  }
+};
+
+// Handler für "Poll wurde geschlossen" Events
+const handlePollClosed = (event) => {
+  console.log('[DEBUG:VOTING] PollModal hat poll:closed Event empfangen:', event.detail);
+  
+  // Prüfen, ob das Event für diese Poll relevant ist
+  if (props.poll && event.detail && event.detail.pollId && 
+      props.poll.id === event.detail.pollId) {
+    
+    console.log('[DEBUG:VOTING] Poll wurde geschlossen, setze UI-Status zurück');
+    
+    // Setze globales Flag, um weitere Vote-Verarbeitung zu blockieren
+    if (typeof window !== 'undefined') {
+      window.pollClosedEventReceived = true;
+      
+      // Alle UI-Flags zurücksetzen
+      window._pollFormSubmitting = false;
+      window._isProcessingVotes = false;
+      window._currentlyProcessingBatch = false;
+    }
+    
+    // Sofort UI-Sperrung aufheben
+    isSubmitting.value = false;
+    
+    // Voting-Process zurücksetzen, falls vorhanden
+    if (votingProcess && typeof votingProcess.releaseUILocks === 'function') {
+      votingProcess.releaseUILocks();
+    }
+    
+    // Form zurücksetzen, falls vorhanden
+    if (pollForm.value && typeof pollForm.value.resetSubmitState === 'function') {
+      pollForm.value.resetSubmitState();
+    }
+    
+    // Poll als geschlossen markieren - falls das Server-Update noch nicht angekommen ist
+    if (props.poll) {
+      props.poll.closed = true;
+    }
   }
 };
 
