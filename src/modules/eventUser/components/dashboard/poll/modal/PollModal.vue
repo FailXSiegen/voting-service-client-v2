@@ -271,6 +271,9 @@ onMounted(() => {
     }
   });
   
+  // Track the last time the poll closed watcher fired an event
+  const lastPollClosedEventTime = ref(0);
+  
   // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
   const pollClosedWatcher = watch(
     () => props.poll?.closed,
@@ -285,16 +288,29 @@ onMounted(() => {
         if (typeof window !== 'undefined') {
           window.pollClosedEventReceived = true;
           
-          // Event auslösen, dass die Poll geschlossen wurde
-          try {
-            window.dispatchEvent(new CustomEvent('poll:closed', {
-              detail: { 
-                pollId: props.poll?.id,
-                timestamp: Date.now()
-              }
-            }));
-          } catch (e) {
-            console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+          // Deduplicate poll closed events from the watcher
+          const currentTime = Date.now();
+          const DEDUPLICATION_WINDOW_MS = 5000; // 5 seconds
+          
+          // Only dispatch the event if we haven't recently dispatched one
+          if (currentTime - lastPollClosedEventTime.value > DEDUPLICATION_WINDOW_MS) {
+            // Event auslösen, dass die Poll geschlossen wurde
+            try {
+              window.dispatchEvent(new CustomEvent('poll:closed', {
+                detail: { 
+                  pollId: props.poll?.id,
+                  timestamp: currentTime,
+                  source: 'pollClosedWatcher'
+                }
+              }));
+              
+              // Update the last event time
+              lastPollClosedEventTime.value = currentTime;
+            } catch (e) {
+              console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+            }
+          } else {
+            console.log('[DEBUG:VOTING] Ignoriere doppeltes poll:closed Event von pollClosedWatcher');
           }
         }
         
@@ -410,6 +426,9 @@ const handleVotingReset = () => {
   }
 };
 
+// Track of recently processed poll-closed events per poll id
+const recentlyProcessedPollClosedEvents = new Map();
+
 // Handler für "Poll wurde geschlossen" Events
 const handlePollClosed = (event) => {
   console.log('[DEBUG:VOTING] PollModal hat poll:closed Event empfangen:', event.detail);
@@ -417,6 +436,29 @@ const handlePollClosed = (event) => {
   // Prüfen, ob das Event für diese Poll relevant ist
   if (props.poll && event.detail && event.detail.pollId && 
       props.poll.id === event.detail.pollId) {
+      
+    // Deduplicate poll close events to avoid processing the same event multiple times
+    const pollId = event.detail.pollId;
+    const currentTime = Date.now();
+    const timestamp = event.detail.timestamp || currentTime;
+    const DEDUPLICATION_WINDOW_MS = 5000; // 5 seconds
+    
+    // Check if we've already processed an event for this poll recently
+    const lastProcessed = recentlyProcessedPollClosedEvents.get(pollId);
+    if (lastProcessed && (currentTime - lastProcessed) < DEDUPLICATION_WINDOW_MS) {
+      console.log('[DEBUG:VOTING] PollModal: Ignoriere doppeltes poll:closed Event');
+      return;
+    }
+    
+    // Mark this poll ID as processed
+    recentlyProcessedPollClosedEvents.set(pollId, currentTime);
+    
+    // Clean up old entries from the map
+    recentlyProcessedPollClosedEvents.forEach((value, key) => {
+      if (currentTime - value > 60000) { // 1 minute
+        recentlyProcessedPollClosedEvents.delete(key);
+      }
+    });
     
     console.log('[DEBUG:VOTING] Poll wurde geschlossen, setze UI-Status zurück');
     
