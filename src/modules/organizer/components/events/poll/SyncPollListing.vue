@@ -20,19 +20,30 @@
       {{ $t("view.user.verified.noActivePoll") }}
     </p>
   </div>
-  <p>
-    {{ $t("view.polls.userCountText") }}
-    <span
-      :class="[
-        'badge',
-        verifiedUsersCountAllowToVoteOnline > 0
-          ? 'text-bg-success'
-          : 'text-bg-danger',
-      ]"
+  <div class="d-flex align-items-center mb-2">
+    <p class="mb-0 me-2">
+      {{ $t("view.polls.userCountText") }}
+      <span
+        :class="[
+          'badge',
+          verifiedUsersCountAllowToVoteOnline > 0
+            ? 'text-bg-success'
+            : 'text-bg-danger',
+        ]"
+      >
+        {{ verifiedUsersCountAllowToVoteOnline }}
+      </span>
+    </p>
+    <button 
+      type="button" 
+      class="btn btn-outline-secondary btn-sm mt-1" 
+      style="--bs-btn-padding-y: 0; --bs-btn-padding-x: .1rem; --bs-btn-font-size: .75em;"
+      @click="onRefreshUserCount"
+      :disabled="isRefreshingUserCount"
     >
-      {{ verifiedUsersCountAllowToVoteOnline }}
-    </span>
-  </p>
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+  </div>
   <AlertBox
     v-if="verifiedUsersCountAllowToVoteOnline === 0"
     type="danger"
@@ -115,6 +126,7 @@ const router = useRouter();
 const route = useRoute();
 const id = route.params.id;
 const activePollComponent = ref(null);
+const isRefreshingUserCount = ref(false);
 
 const eventUsers = ref([]);
 const activePoll = ref(null);
@@ -506,5 +518,15 @@ function resetActivePoll() {
   pollUserVotedCount.value = 0;
   pollsWithNoResultsQuery.refetch();
   pollResultsQuery.refetch();
+}
+
+function onRefreshUserCount() {
+  isRefreshingUserCount.value = true;
+  eventUsersQuery.refetch().then(() => {
+    isRefreshingUserCount.value = false;
+  }).catch(error => {
+    console.error("Error refreshing user count:", error);
+    isRefreshingUserCount.value = false;
+  });
 }
 </script>
