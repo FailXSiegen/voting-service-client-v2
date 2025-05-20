@@ -320,7 +320,8 @@
           "closeDialog": "Abstimmung schließen?",
           "details": "Abstimmungsdetails",
           "alreadyVoted": "Bisherige Stimmenabgabe",
-          "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}"
+          "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}",
+          "refresh": "Aktualisieren"
         },
         "userUpdate": "Ihr Status wurde aktualisiert.",
         "voteIncrease": "Ihre Stimmenanzahl wurde von {previousVoteAmount} auf {voteAmount} erhöht (+ {difference} Stimmen).",

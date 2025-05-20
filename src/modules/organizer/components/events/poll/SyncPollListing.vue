@@ -8,6 +8,8 @@
     :poll-user-count="pollUserCount"
     :poll-user-voted-count="pollUserVotedCount"
     @close="onCloseActivePoll"
+    @refresh="onRefreshActivePoll"
+    ref="activePollComponent"
   />
   <div
     v-if="!activePoll"
@@ -111,6 +113,7 @@ const props = defineProps({
 const router = useRouter();
 const route = useRoute();
 const id = route.params.id;
+const activePollComponent = ref(null);
 
 const eventUsers = ref([]);
 const activePoll = ref(null);
@@ -474,6 +477,24 @@ pollLifeCycleSubscription.onResult(({ data }) => {
 });
 
 // Functions.
+
+function onRefreshActivePoll() {
+  Promise.all([
+    activePollQuery.refetch(),
+    activePollEventUserQuery.refetch()
+  ]).then(() => {
+    // Wenn die Abfragen abgeschlossen sind, isRefreshing auf false setzen
+    if (activePollComponent.value) {
+      activePollComponent.value.isRefreshing = false;
+    }
+  }).catch(error => {
+    console.error("Error refreshing poll data:", error);
+    // Bei Fehler auch isRefreshing auf false setzen
+    if (activePollComponent.value) {
+      activePollComponent.value.isRefreshing = false;
+    }
+  });
+}
 
 function resetActivePoll() {
   activePoll.value = null;
