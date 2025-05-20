@@ -18,6 +18,39 @@ if (typeof window !== 'undefined') {
     usedVotesCount: 0,
     voteCounter: 1
   };
+  
+  // Globaler Listener für poll:closed Events
+  window.addEventListener('poll:closed', (event) => {
+    console.log('[DEBUG:VOTING] Global poll:closed Event empfangen:', event.detail);
+    
+    // Setze das globale Flag, um weitere Vote-Verarbeitung zu blockieren
+    window.pollClosedEventReceived = true;
+    
+    // Versuche alle aktiven Vote-Prozesse zu stoppen
+    if (globalBrowserSessions.size > 0) {
+      console.log('[DEBUG:VOTING] Stoppe alle aktiven Voting-Sessions aufgrund von poll:closed Event');
+      
+      // Iteriere über alle Sessions und deaktiviere sie
+      globalBrowserSessions.forEach((session, key) => {
+        session.isActive = false;
+        globalBrowserSessions.set(key, session);
+      });
+      
+      // Zusätzlich alle UI-Flags zurücksetzen
+      window._pollFormSubmitting = false;
+      window._isProcessingVotes = false;
+      window._currentlyProcessingBatch = false;
+      
+      // Event für UI-Entsperrung auslösen
+      try {
+        window.dispatchEvent(new CustomEvent('voting:complete', {
+          detail: { timestamp: Date.now(), pollClosed: true }
+        }));
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:complete Events:', e);
+      }
+    }
+  });
 }
 
 export function useVotingProcess(eventUser, event) {
@@ -1140,6 +1173,23 @@ export function useVotingProcess(eventUser, event) {
     // Diese Prüfung ist besonders wichtig, wenn der Poll während der Abstimmung geschlossen wird
     if (poll.value && poll.value.closed) {
       console.warn("[DEBUG:VOTING] Poll ist geschlossen. Stimmabgabe wird abgebrochen.");
+
+      // Setze globales Flag, um weitere Vote-Verarbeitung zu blockieren
+      if (typeof window !== 'undefined') {
+        window.pollClosedEventReceived = true;
+        
+        // Event auslösen, dass die Poll geschlossen wurde
+        try {
+          window.dispatchEvent(new CustomEvent('poll:closed', {
+            detail: { 
+              pollId: poll.value?.id,
+              timestamp: Date.now()
+            }
+          }));
+        } catch (e) {
+          console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
+        }
+      }
 
       // KRITISCH: Wir müssen die Browser-Session SOFORT deaktivieren
       // um zu verhindern, dass weitere Events verarbeitet werden
