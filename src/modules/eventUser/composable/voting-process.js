@@ -4,7 +4,6 @@ import { usePollStatePersistence } from "@/core/composable/poll-state-persistenc
 import { useMutation } from "@vue/apollo-composable";
 import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
 import { CREATE_BULK_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer";
-import { apolloClient } from "@/apollo-client"; // Ensure we import the Apollo client
 
 // Erstelle ein Symbol als eindeutigen Key für Browser-Isolation
 const instanceKey = Symbol('voting-process-instance');
@@ -19,76 +18,7 @@ if (typeof window !== 'undefined') {
     usedVotesCount: 0,
     voteCounter: 1
   };
-  
-  // Tracking von bereits verarbeiteten Poll-Closed Events um Duplikate zu vermeiden
-  const processedPollClosedEvents = new Map();
-  
-  // Globaler Listener für poll:closed Events
-  window.addEventListener('poll:closed', (event) => {
-    const pollId = event.detail?.pollId;
-    const timestamp = event.detail?.timestamp || Date.now();
-    
-    // Deduplizieren: Prüfe, ob wir dieses Poll-ID bereits kürzlich verarbeitet haben
-    if (pollId) {
-      const lastProcessed = processedPollClosedEvents.get(pollId);
-      const DEDUPLICATION_WINDOW_MS = 5000; // 5 Sekunden Fenster für Deduplizierung
-      
-      // Wenn wir das Event für diese Poll kürzlich verarbeitet haben, ignorieren
-      if (lastProcessed && (timestamp - lastProcessed) < DEDUPLICATION_WINDOW_MS) {
-        console.log(`[DEBUG:VOTING] Poll ist bereits als geschlossen markiert, ignoriere weiteres Life-Cycle-Event`);
-        return;
-      }
-      
-      // Update der letzten Verarbeitungszeit
-      processedPollClosedEvents.set(pollId, timestamp);
-      
-      // Ältere Einträge aus der Map entfernen (für Speicher-Management)
-      const CLEANUP_THRESHOLD_MS = 60000; // 1 Minute
-      processedPollClosedEvents.forEach((value, key) => {
-        if (timestamp - value > CLEANUP_THRESHOLD_MS) {
-          processedPollClosedEvents.delete(key);
-        }
-      });
-    }
-    
-    console.log('[DEBUG:VOTING] Global poll:closed Event empfangen:', event.detail);
-    
-    // Setze das globale Flag, um weitere Vote-Verarbeitung zu blockieren
-    window.pollClosedEventReceived = true;
-    
-    // Versuche alle aktiven Vote-Prozesse zu stoppen
-    if (globalBrowserSessions.size > 0) {
-      console.log('[DEBUG:VOTING] Stoppe alle aktiven Voting-Sessions aufgrund von poll:closed Event');
-      
-      // Iteriere über alle Sessions und deaktiviere sie
-      globalBrowserSessions.forEach((session, key) => {
-        session.isActive = false;
-        globalBrowserSessions.set(key, session);
-      });
-      
-      // Zusätzlich alle UI-Flags zurücksetzen
-      window._pollFormSubmitting = false;
-      window._isProcessingVotes = false;
-      window._currentlyProcessingBatch = false;
-      
-      // Event für UI-Entsperrung auslösen
-      try {
-        window.dispatchEvent(new CustomEvent('voting:complete', {
-          detail: { timestamp: Date.now(), pollClosed: true, pollId }
-        }));
-      } catch (e) {
-        console.error('[DEBUG:VOTING] Fehler beim Auslösen des voting:complete Events:', e);
-      }
-    }
-  });
 }
-
-// Import provideApolloClient at the module level to prevent any "oe is undefined" issues
-// This ensures that the Apollo client is properly provided to all composables
-import { provideApolloClient } from '@vue/apollo-composable';
-
-// Explicitly provide the Apollo client at the module level
-provideApolloClient(apolloClient);
 
 export function useVotingProcess(eventUser, event) {
   // Jeder Hook-Aufruf erstellt eine isolierte Instanz der Zustände
@@ -831,18 +761,18 @@ export function useVotingProcess(eventUser, event) {
       // Insbesondere wichtig bei Split-Voting von vielen Stimmen
       if (localSuccessCount > 500) {
         console.warn(`[DEBUG:VOTING] Explizite Freigabe nach großem Batch von ${localSuccessCount} Stimmen`);
-        
+
         // Sofort alle UI-Sperren freigeben
         isProcessingVotes.value = false;
         pollFormSubmitting.value = false;
         currentlyProcessingBatch.value = false;
-        
+
         // Auch globale Flags zurücksetzen
         if (typeof window !== 'undefined') {
           window._pollFormSubmitting = false;
           window._isProcessingVotes = false;
           window._currentlyProcessingBatch = false;
-          
+
           // Event für UI-Entsperrung auslösen
           try {
             window.dispatchEvent(new CustomEvent('voting:complete', {
@@ -1211,51 +1141,6 @@ export function useVotingProcess(eventUser, event) {
     if (poll.value && poll.value.closed) {
       console.warn("[DEBUG:VOTING] Poll ist geschlossen. Stimmabgabe wird abgebrochen.");
 
-      // Setze globales Flag, um weitere Vote-Verarbeitung zu blockieren
-      if (typeof window !== 'undefined') {
-        window.pollClosedEventReceived = true;
-        
-        // Track last poll:closed event dispatched per poll ID
-        if (!window._lastPollClosedEvents) {
-          window._lastPollClosedEvents = new Map();
-        }
-        
-        const pollId = poll.value?.id;
-        const currentTime = Date.now();
-        const DEDUPLICATION_WINDOW_MS = 5000; // 5 seconds
-        
-        // Check if we've dispatched an event for this poll recently
-        const lastEventTime = window._lastPollClosedEvents.get(pollId);
-        
-        // Only dispatch if we haven't sent one recently
-        if (!lastEventTime || (currentTime - lastEventTime > DEDUPLICATION_WINDOW_MS)) {
-          // Event auslösen, dass die Poll geschlossen wurde
-          try {
-            window.dispatchEvent(new CustomEvent('poll:closed', {
-              detail: { 
-                pollId: pollId,
-                timestamp: currentTime,
-                source: 'submitSingleVote'
-              }
-            }));
-            
-            // Record this event dispatch
-            window._lastPollClosedEvents.set(pollId, currentTime);
-            
-            // Clean up old entries
-            window._lastPollClosedEvents.forEach((time, id) => {
-              if (currentTime - time > 60000) { // 1 minute
-                window._lastPollClosedEvents.delete(id);
-              }
-            });
-          } catch (e) {
-            console.error('[DEBUG:VOTING] Fehler beim Auslösen des poll:closed-Events:', e);
-          }
-        } else {
-          console.log('[DEBUG:VOTING] Ignoriere doppeltes poll:closed Event von submitSingleVote');
-        }
-      }
-
       // KRITISCH: Wir müssen die Browser-Session SOFORT deaktivieren
       // um zu verhindern, dass weitere Events verarbeitet werden
       deactivateVotingSession();
@@ -1603,68 +1488,19 @@ export function useVotingProcess(eventUser, event) {
    */
   async function submitBulkVote(input) {
     try {
-      // Defensive checks for input validation
-      if (!input) {
-        console.error(`[ERROR:VOTING] submitBulkVote: input is undefined`);
-        return false;
-      }
-      
       // Starte Zeitmessung für Performance-Tracking
       const startTime = performance.now();
-      
-      // Apollo client is now provided at the module level, so we don't need to do it here
 
       // Führe die Bulk-Vote-Mutation aus
       const createBulkPollSubmitAnswerMutation = useMutation(
         CREATE_BULK_POLL_SUBMIT_ANSWER,
         {
           variables: { input },
-          // Add errorPolicy to handle partial errors
-          errorPolicy: 'all',
-          // Use the Apollo client instance explicitly
-          client: apolloClient
         },
       );
-      
-      // Check if mutation or mutate function is undefined
-      if (!createBulkPollSubmitAnswerMutation) {
-        console.error(`[ERROR:VOTING] createBulkPollSubmitAnswerMutation is undefined`);
-        return false;
-      }
-      
-      if (typeof createBulkPollSubmitAnswerMutation.mutate !== 'function') {
-        console.error(`[ERROR:VOTING] createBulkPollSubmitAnswerMutation.mutate is not a function:`, 
-                     createBulkPollSubmitAnswerMutation);
-        return false;
-      }
 
       try {
-        // Track if warning has been shown to avoid duplicate messages
-        let warningShown = false;
-        
-        // Add a less frequent warning for slow mutations but don't abort them
-        const warningTimeoutId = setTimeout(() => {
-          console.warn('[DEBUG:VOTING] Bulk mutation is taking longer than expected, but will continue waiting...');
-          warningShown = true;
-        }, 15000); // Longer initial wait (15 seconds) for bulk operations
-        
-        // Execute the mutation without a hard timeout
         const result = await createBulkPollSubmitAnswerMutation.mutate();
-        
-        // Clear the warning timeout
-        clearTimeout(warningTimeoutId);
-        
-        // Log completion if a warning was shown
-        if (warningShown) {
-          console.log('[DEBUG:VOTING] Long-running bulk mutation completed successfully');
-        }
-        
-        // Validate result to avoid undefined errors
-        if (!result) {
-          console.error(`[ERROR:VOTING] Bulk mutation result is undefined`);
-          return false;
-        }
-        
         const successCount = result.data?.createBulkPollSubmitAnswer || 0;
 
         // Ende der Zeitmessung
@@ -1720,43 +1556,11 @@ export function useVotingProcess(eventUser, event) {
         console.error(`[ERROR:BULK_VOTE] GraphQL Fehler bei der Bulk-Mutation:`, mutationError);
         console.log(`[ERROR:BULK_VOTE] GraphQL Fehler Details:`,
           mutationError.graphQLErrors || 'Keine GraphQL-Fehlerdetails');
-        
-        // Log specific error details to help diagnose "oe is undefined" issue
-        if (mutationError instanceof TypeError && mutationError.message.includes('oe is undefined')) {
-          console.error(`[ERROR:BULK_VOTE] "oe is undefined" Fehler beim Ausführen der Bulk-Mutation:`, {
-            errorName: mutationError.name,
-            errorMessage: mutationError.message,
-            stackTrace: mutationError.stack,
-            input: JSON.stringify(input),
-          });
-        }
-        
-        // Release UI locks to prevent UI from being stuck
-        if (typeof releaseUILocks === 'function') {
-          releaseUILocks();
-        }
-        
         return false;
       }
     } catch (error) {
-      console.error(`[ERROR:BULK_VOTE] Fehler bei der Bulk-Mutation für ${input?.voteCount || 'unknown'} Stimmen:`, error);
+      console.error(`[ERROR:BULK_VOTE] Fehler bei der Bulk-Mutation für ${input.voteCount} Stimmen:`, error);
       console.log(`[ERROR:BULK_VOTE] Stack:`, error.stack || 'Kein Stack verfügbar');
-      
-      // Log specific error details to help diagnose "oe is undefined" issue
-      if (error instanceof TypeError && error.message.includes('oe is undefined')) {
-        console.error(`[ERROR:BULK_VOTE] "oe is undefined" Fehler beim Ausführen der Bulk-Mutation:`, {
-          errorName: error.name,
-          errorMessage: error.message,
-          stackTrace: error.stack,
-          input: JSON.stringify(input),
-        });
-      }
-      
-      // Release UI locks to prevent UI from being stuck
-      if (typeof releaseUILocks === 'function') {
-        releaseUILocks();
-      }
-      
       return false;
     }
   }
@@ -1766,13 +1570,13 @@ export function useVotingProcess(eventUser, event) {
     console.log("[DEBUG:VOTING] In resetVoteCounts - Vor Reset: usedVotesCount =", usedVotesCount.value, "voteCounter =", voteCounter.value);
     usedVotesCount.value = 0;
     voteCounter.value = 1;
-    
+
     // Globale Werte ebenfalls aktualisieren
     if (typeof window !== 'undefined' && window.votingProcessModule) {
       window.votingProcessModule.usedVotesCount = 0;
       window.votingProcessModule.voteCounter = 1;
     }
-    
+
     console.log("[DEBUG:VOTING] In resetVoteCounts - Nach Reset: usedVotesCount =", usedVotesCount.value, "voteCounter =", voteCounter.value);
 
     // Alte Poll-ID speichern, um lokale Daten zu löschen
@@ -1869,7 +1673,7 @@ export function useVotingProcess(eventUser, event) {
       console.log("[DEBUG:VOTING] Globales votingProcessModule aktualisiert: usedVotesCount =", newValue);
     }
   });
-  
+
   // Bei Änderungen an voteCounter immer auch das globale Modul aktualisieren
   watch(() => voteCounter.value, (newValue) => {
     if (typeof window !== 'undefined' && window.votingProcessModule) {
@@ -1877,7 +1681,7 @@ export function useVotingProcess(eventUser, event) {
       console.log("[DEBUG:VOTING] Globales votingProcessModule aktualisiert: voteCounter =", newValue);
     }
   });
-  
+
   return {
     voteCounter,
     handleFormSubmit,
@@ -1899,89 +1703,16 @@ export function useVotingProcess(eventUser, event) {
 
 async function mutateAnswer(input) {
   try {
-    // Defensive checks for input validation
-    if (!input) {
-      console.error(`[ERROR:VOTING] mutateAnswer: input is undefined`);
-      return false;
-    }
-    
-    // Apollo client is now provided at the module level, so we don't need to do it here
-
-    // Create mutation with better error handling
     const createPollSubmitAnswerMutation = useMutation(
       CREATE_POLL_SUBMIT_ANSWER,
       {
         variables: { input },
-        // Add errorPolicy to handle partial errors
-        errorPolicy: 'all',
-        // Use the Apollo client instance explicitly
-        client: apolloClient
       },
     );
-    
-    // Check if mutation or mutate function is undefined
-    if (!createPollSubmitAnswerMutation) {
-      console.error(`[ERROR:VOTING] createPollSubmitAnswerMutation is undefined`);
-      return false;
-    }
-    
-    if (typeof createPollSubmitAnswerMutation.mutate !== 'function') {
-      console.error(`[ERROR:VOTING] createPollSubmitAnswerMutation.mutate is not a function:`, 
-                    createPollSubmitAnswerMutation);
-      return false;
-    }
-    
-    // Execute mutation with better error handling but no hard timeout
-    try {
-      // Track if warning has been shown to avoid duplicate messages
-      let warningShown = false;
-      
-      // Add a less frequent warning for slow mutations but don't abort them
-      const warningTimeoutId = setTimeout(() => {
-        console.warn('[DEBUG:VOTING] Mutation is taking longer than expected, but will continue waiting...');
-        warningShown = true;
-      }, 10000); // Longer initial wait (10 seconds) to reduce noise
-      
-      // Execute the mutation without a hard timeout
-      const result = await createPollSubmitAnswerMutation.mutate();
-      
-      // Clear the warning timeout
-      clearTimeout(warningTimeoutId);
-      
-      // Log completion if a warning was shown
-      if (warningShown) {
-        console.log('[DEBUG:VOTING] Long-running mutation completed successfully');
-      }
-      
-      return true;
-    } catch (mutationError) {
-      console.error('[ERROR:VOTING] Inner mutation error:', mutationError);
-      throw mutationError; // Re-throw to be handled by the outer catch
-    }
+    await createPollSubmitAnswerMutation.mutate();
+    return true;
   } catch (error) {
-    // Detailed error logging
-    console.error(`[ERROR:VOTING] Fehler bei der Mutation für Zyklus ${input?.voteCycle || 'unknown'}/${input?.answerItemCount || 'unknown'}:`, error);
-    
-    // Log specific error details to help diagnose "oe is undefined" issue
-    if (error instanceof TypeError && error.message.includes('oe is undefined')) {
-      console.error(`[ERROR:VOTING] "oe is undefined" Fehler beim Ausführen der Mutation:`, {
-        errorName: error.name,
-        errorMessage: error.message,
-        stackTrace: error.stack,
-        input: JSON.stringify(input),
-      });
-      
-      // Try to immediately cleanup any potential memory issues
-      if (typeof window.gc === 'function') {
-        try {
-          window.gc();
-        } catch (e) {
-          // Ignore errors if gc is not available
-        }
-      }
-    }
-    
-    // Don't propagate error to avoid breaking the voting flow
-    return false;
+    console.error(`Fehler bei der Mutation für Zyklus ${input.voteCycle}/${input.answerItemCount}:`, error);
+    throw error;
   }
 }
