@@ -91,6 +91,7 @@
         <button
           class="btn btn-primary d-block w-100"
           type="submit"
+          :disabled="isSubmitting"
           @click.prevent="onSubmit()"
         >
           <i class="bi-plus bi--2xl align-middle" />
@@ -104,7 +105,7 @@
           v-if="showSubmitAndStartButton"
           class="btn btn-secondary d-block w-100"
           type="submit"
-          :disabled="currentOnlineUserCount === 0"
+          :disabled="currentOnlineUserCount === 0 || isSubmitting"
           @click.prevent="onSubmitAndStart()"
         >
           <i class="bi-play bi--2xl align-middle" />
@@ -143,6 +144,10 @@ const props = defineProps({
   showSubmitAndStartButton: {
     type: Boolean,
     default: true,
+  },
+  isSubmitting: {
+    type: Boolean,
+    default: false,
   },
 });
 

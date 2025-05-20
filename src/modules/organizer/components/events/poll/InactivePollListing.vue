@@ -18,7 +18,7 @@
           <button
             v-if="showStartButton"
             class="btn btn-success my-2 me-2"
-            :disabled="disabled || currentOnlineUserCount === 0"
+            :disabled="disabled || currentOnlineUserCount === 0 || startButtonDisabled"
             :title="$t('view.polls.listing.start')"
             @click="onStart(poll.id)"
           >
@@ -69,6 +69,10 @@ defineProps({
     default: true,
   },
   disabled: {
+    type: Boolean,
+    default: false,
+  },
+  startButtonDisabled: {
     type: Boolean,
     default: false,
   },

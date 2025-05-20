@@ -14,6 +14,7 @@
         v-if="loaded"
         :prefill-data="prefillData"
         :show-submit-and-start-button="showSubmitAndStartButton"
+        :is-submitting="!canSubmit"
         @submit="onSubmit"
         @submit-and-start="onSubmitAndStart"
       />
