@@ -10,7 +10,6 @@ variables:
   REGISTRY_URL: $CI_REGISTRY
   API_IMAGE: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA
   CLIENT_IMAGE: $CI_REGISTRY_IMAGE/client:$CI_COMMIT_SHA
-  CONSUMER_IMAGE: $CI_REGISTRY_IMAGE/consumer:$CI_COMMIT_SHA
 
 before_script:
   - docker info
@@ -39,16 +38,6 @@ build-client:
     - main
     - develop
 
-build-consumer:
-  stage: build
-  services:
-    - docker:dind
-  script:
-    - docker build -f docker/production/Dockerfile.consumer -t $CONSUMER_IMAGE .
-    - docker push $CONSUMER_IMAGE
-  only:
-    - main
-    - develop
 
 # Test Stage
 test-api:
@@ -94,7 +83,6 @@ deploy-staging:
     - ssh $STAGING_USER@$STAGING_HOST "cd /opt/voting-tool-staging && 
         export API_IMAGE=$API_IMAGE &&
         export CLIENT_IMAGE=$CLIENT_IMAGE &&
-        export CONSUMER_IMAGE=$CONSUMER_IMAGE &&
         export DOMAIN=staging.voting.failx.de &&
         docker-compose pull &&
         docker-compose up -d &&
@@ -124,7 +112,6 @@ deploy-production:
     - ssh $PRODUCTION_USER@$PRODUCTION_HOST "cd /opt/voting-tool-production && 
         export API_IMAGE=$API_IMAGE &&
         export CLIENT_IMAGE=$CLIENT_IMAGE &&
-        export CONSUMER_IMAGE=$CONSUMER_IMAGE &&
         export DOMAIN=$PRODUCTION_DOMAIN &&
         docker-compose pull &&
         docker-compose up -d &&
