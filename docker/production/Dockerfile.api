@@ -1,0 +1,59 @@
+# Multi-stage build for production API
+FROM node:18-alpine AS base
+
+# Install dependencies including monitoring and diagnostic tools
+RUN apk add --no-cache curl tini netcat-openbsd dumb-init
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY voting-service-api/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Development stage for building
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY voting-service-api/package*.json ./
+RUN npm ci
+COPY voting-service-api/ ./
+RUN npm run build
+
+# Production stage
+FROM base AS production
+
+# Copy built application
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+COPY voting-service-api/src/lib/emails/ ./dist/lib/emails/
+
+# Copy health check and entrypoint scripts
+COPY docker/production/healthcheck.js ./healthcheck.js
+COPY docker/production/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/uploads && \
+    chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Setup health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node /app/healthcheck.js api
+
+# Expose port
+EXPOSE 4000
+
+# Use dumb-init as init system
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Start the service
+CMD ["/docker-entrypoint.sh", "node", "dist/index.js"]

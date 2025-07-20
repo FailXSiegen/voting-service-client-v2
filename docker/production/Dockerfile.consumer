@@ -1,0 +1,52 @@
+# Multi-stage build for production consumer
+FROM node:18-alpine AS base
+
+# Install dependencies
+RUN apk add --no-cache curl tini netcat-openbsd dumb-init
+
+WORKDIR /app
+
+# Copy package files
+COPY voting-service-api/package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Development stage for building
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY voting-service-api/package*.json ./
+RUN npm ci
+COPY voting-service-api/ ./
+RUN npm run build
+
+# Production stage
+FROM base AS production
+
+# Copy built application
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/package*.json ./
+
+# Copy health check script
+COPY docker/production/healthcheck.js ./healthcheck.js
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs
+
+# Create necessary directories
+RUN mkdir -p /app/logs && \
+    chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Setup health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node /app/healthcheck.js consumer
+
+# Use dumb-init as init system
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Start the consumer service
+CMD ["node", "dist/src/services/vote-consumer.js"]

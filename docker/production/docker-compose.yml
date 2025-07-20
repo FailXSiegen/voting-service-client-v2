@@ -1,0 +1,218 @@
+version: '3.8'
+
+networks:
+  voting_network:
+    driver: bridge
+  traefik_network:
+    external: true
+
+volumes:
+  db_data:
+  uploads:
+  rabbitmq_data:
+  logs_volume:
+
+services:
+  # API Service
+  api:
+    image: ${API_IMAGE:-gitlab.failx.de/hetzner/voting-tool/api:latest}
+    container_name: voting_api
+    restart: unless-stopped
+    networks:
+      - voting_network
+      - traefik_network
+    volumes:
+      - uploads:/app/uploads
+      - logs_volume:/app/logs
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - HOST=${DOMAIN}
+      - APP_PORT=4000
+      - GRAPHQL_ENDPOINT=/graphql
+      - WEBSOCKET_ENDPOINT=/graphql
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_VHOST=/
+    depends_on:
+      - db
+      - rabbitmq
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/logout`))"
+      - "traefik.http.routers.voting-api.priority=1"
+      - "traefik.http.routers.voting-api.entrypoints=websecure"
+      - "traefik.http.routers.voting-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-api.loadbalancer.server.port=4000"
+      - "traefik.docker.network=traefik_network"
+
+  # Vote Consumer Service
+  consumer:
+    image: ${CONSUMER_IMAGE:-gitlab.failx.de/hetzner/voting-tool/consumer:latest}
+    container_name: voting_consumer
+    restart: unless-stopped
+    networks:
+      - voting_network
+    volumes:
+      - logs_volume:/app/logs
+    environment:
+      - NODE_ENV=production
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_VHOST=/
+    depends_on:
+      - db
+      - rabbitmq
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Client Service
+  client:
+    image: ${CLIENT_IMAGE:-gitlab.failx.de/hetzner/voting-tool/client:latest}
+    container_name: voting_client
+    restart: unless-stopped
+    networks:
+      - traefik_network
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-client.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.voting-client.priority=10"
+      - "traefik.http.routers.voting-client-event.rule=Host(`${DOMAIN}`) && PathPrefix(`/event`) && !PathPrefix(`/event/verify-slug`)"
+      - "traefik.http.routers.voting-client-event.priority=5"
+      - "traefik.http.routers.voting-client-event.service=voting-client"
+      - "traefik.http.routers.voting-client-event.entrypoints=websecure"
+      - "traefik.http.routers.voting-client-event.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.voting-client.entrypoints=websecure"
+      - "traefik.http.routers.voting-client.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-client.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik_network"
+
+  # Database Service
+  db:
+    image: mariadb:10.11
+    container_name: voting_db
+    restart: unless-stopped
+    networks:
+      - voting_network
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+      - MYSQL_USER=${DATABASE_USER}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+      - MYSQL_DATABASE=${DATABASE_NAME}
+    volumes:
+      - db_data:/var/lib/mysql
+    command: |
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --max_connections=1500
+      --innodb-buffer-pool-size=512M
+      --query-cache-size=64M
+      --slow-query-log=1
+      --long_query_time=2
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: voting_rabbitmq
+    restart: unless-stopped
+    networks:
+      - voting_network
+      - traefik_network
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+      - RABBITMQ_VM_MEMORY_HIGH_WATERMARK=0.7
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-rabbitmq.rule=Host(`rabbitmq.${DOMAIN}`)"
+      - "traefik.http.routers.voting-rabbitmq.entrypoints=websecure"
+      - "traefik.http.routers.voting-rabbitmq.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-rabbitmq.loadbalancer.server.port=15672"
+      - "traefik.docker.network=traefik_network"
