@@ -1,0 +1,635 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+enum PollType {
+  SECRET
+  PUBLIC
+}
+enum VideoConferenceType {
+  ZOOM
+}
+type Query {
+  # Fetches a list of upcoming events by organizer id.
+  event(id: ID!, organizerId: ID!): Event
+  # Fetches a list of upcoming events by organizer id.
+  upcomingEvents(organizerId: ID): [Event]
+  # Fetches a list of expired events by organizer id.
+  expiredEvents(organizerId: ID!): [Event]
+  # Fetches a list of expired events.
+  allUpcomingEvents: [Event]
+  # Fetches a list of expired events.
+  allPastEvents(page: Int, pageSize: Int): [Event]
+  # Fetches current organizer.
+  organizer(organizerId: ID): Organizer
+  # Fetches a list of all organizers.
+  organizers: [Organizer]
+  # Fetches a list of evnet users by event id.
+  eventUsers(eventId: ID): [EventUser]
+  # Fetches an event user by id.
+  eventUser(id: ID): EventUser
+  # Fetches all polls by event id.
+  polls(eventId: ID): [Poll]
+  # Fetches all polls with no results by event id.
+  pollsWithNoResults(eventId: ID): [Poll]
+  # Fetches all open polls by event id.
+  activePoll(eventId: ID): OpenPollWithResult
+  #fetch active poll for eventUser
+  activePollEventUser(eventId: ID): ActivePollEventUser
+  # Fetches all poll results by event id.
+  pollResult(eventId: ID, page: Int, pageSize: Int): [PollResult]
+  # Fetches a zoom meeting by id
+  zoomMeeting(id: ID!): ZoomMeeting
+  # Fetches a poll by  id.
+  poll(id: ID): Poll
+  # Fetches the current vote cycle for a user in a specific poll
+  userVoteCycle(eventUserId: ID!, pollId: ID!): UserVoteCycleResult
+  
+  # Get all static content
+  staticContents: [StaticContent]
+  # Get static content by page key
+  staticContentsByPage(pageKey: String!): [StaticContent]
+  # Get specific static content
+  staticContent(id: ID!): StaticContent
+  # Get static content by page and section
+  staticContentBySection(pageKey: String!, sectionKey: String!): StaticContent
+  # Get static content by page slug
+  staticContentByPageSlug(pageSlug: String!): [StaticContent]
+  # Get version history for a static content
+  staticContentVersions(contentId: ID!): [StaticContentVersion]
+
+  # Get all page slugs
+  pageSlugs: [PageSlug]
+
+  # Get page slug by page key
+  pageSlugByPageKey(pageKey: String!): PageSlug
+
+  # Get page slug by slug
+  pageSlugBySlug(slug: String!): PageSlug
+
+  # Get system settings
+  systemSettings: SystemSettings
+
+  # Get all media items
+  mediaItems: [Media]
+
+  # Get specific media item
+  media(id: ID!): Media
+
+  # Get all translations
+  translations: String!
+
+  # Get translations for a specific locale
+  # If includeDefaults is true, returns both default and custom translations
+  translationsByLocale(locale: String!, includeDefaults: Boolean): String!
+}
+type Mutation {
+  # Create a new organizer.
+  createOrganizer(input: CreateOrganizerInput!): Organizer!
+  # Update an organizer.
+  updateOrganizer(input: UpdateOrganizerInput!): Organizer!
+  # Delete an organizer.
+  deleteOrganizer(id: ID!): Boolean
+  # Creates a new event.
+  createEvent(input: CreateEventInput!): Event!
+  # Updates an event.
+  updateEvent(input: UpdateEventInput!): Event!
+  # Updates an event status.
+  updateEventStatus(input: UpdateEventStatusInput!): Boolean
+  # Transfers an event to another organizer.
+  transferEvent(eventId: ID!, newOrganizerId: ID!): Event!
+  # Resets an event back to its original organizer.
+  resetEventOrganizer(eventId: ID!): Event!
+  # Removes an event.
+  removeEvent(organizerId: ID!, id: ID!): Boolean
+  # Create a new poll.
+  createPoll(input: CreateNewPollInput!, instantStart: Boolean!): Poll!
+  # Updates a poll.
+  updatePoll(input: UpdatePollInput!, instantStart: Boolean!): Poll!
+  # Deletes a poll.
+  removePoll(id: ID!): Boolean!
+  # Starts a poll.
+  startPoll(id: ID!): Poll!
+  # Stops a poll.
+  stopPoll(id: ID!): Boolean!
+  # Creates a poll answer on poll submit.
+  createPollSubmitAnswer(input: PollSubmitAnswerInput!): Boolean
+  # Creates multiple identical poll answers in a single batch (optimized for bulk voting)
+  createBulkPollSubmitAnswer(input: BulkPollSubmitAnswerInput!): Int
+  # Creates a new poll answer.
+  createPollAnswer(input: PollPossibleAnswerInput!): PollPossibleAnswer!
+  # Creates a new event user for an event.
+  createEventUser(input: CreateEventUserInput!): EventUser!
+  # Deletes an event user.
+  deleteEventUser(eventUserId: ID!): Boolean
+  # Updates an event user.
+  updateEventUser(input: UpdateEventUserInput!): EventUser!
+  # Updates an event user to guest (verfied: true, allowToVote: false).
+  updateUserToGuest(eventUserId: ID!): EventUser!
+  # Updates an event user to participant (verfied: true, allowToVote: true).
+  updateUserToParticipant(eventUserId: ID!): EventUser!
+  # Creates a pollUserVoted entry for each voting cycle an eventuser has
+  createPollUserVoted(input: PollUserVotedInput!): Boolean
+  # Creates a new zoom meeting.
+  createZoomMeeting(input: CreateZoomMeetingInput!): ZoomMeeting!
+  # Updates a zoom meeting.
+  updateZoomMeeting(input: UpdateZoomMeetingInput!): ZoomMeeting!
+  # Deletes a zoom meeting.
+  deleteZoomMeeting(id: ID!): Boolean
+  # Creates an event user, generates an auth token and sends an email to the target email.
+  createEventUserAuthToken(input: CreateEventUserAuthTokenInput!): Boolean
+  
+  # Create new static content
+  createStaticContent(input: CreateStaticContentInput!): StaticContent!
+  # Update existing static content
+  updateStaticContent(input: UpdateStaticContentInput!): StaticContent!
+  # Delete static content
+  deleteStaticContent(id: ID!): Boolean!
+  # Publish or unpublish static content
+  toggleStaticContentPublished(id: ID!, isPublished: Boolean!): StaticContent!
+  # Revert to a previous version
+  revertStaticContentToVersion(contentId: ID!, versionId: ID!): StaticContent!
+
+  # Create or update page slug
+  upsertPageSlug(pageKey: String!, slug: String!): PageSlug!
+
+  # Delete page slug
+  deletePageSlug(pageKey: String!): Boolean!
+
+  # Delete media item
+  deleteMedia(id: ID!): Boolean!
+  
+  # Update system settings
+  updateSystemSettings(input: SystemSettingsInput!): SystemSettings!
+
+  # Save translations (creates or updates)
+  saveTranslations(translations: [SaveTranslationInput!]!): Boolean!
+
+  # Delete a specific translation
+  deleteTranslation(locale: String!, key: String!): Boolean!
+}
+type Subscription {
+  # Notifies about user access rights updates.
+  updateEventUserAccessRights(eventUserId: ID): EventUserAccessRights!
+  # Notifies about the life cycle of a poll.
+  pollLifeCycle(eventId: ID): PollLifeCylclePayload!
+  # Notifies about a new event user record.
+  newEventUser: EventUser!
+  # Notifies about event user online states.
+  eventUserLifeCycle(eventId: ID): EventUserLifeCyclePayload!
+  # Notifies about the count of left poll answers.
+  pollAnswerLifeCycle(eventId: ID): PollAnswerLifeCyclePayLoad!
+  # Separate subscription for voting details updates without affecting the poll form
+  votingDetailsUpdate(eventId: ID!): ActivePollEventUser
+  # Notifies when a token refresh is required (e.g. verification status changed)
+  tokenRefreshRequired(eventUserId: ID): TokenRefreshPayload!
+}
+type Organizer {
+  id: ID!
+  createDatetime: Int!
+  username: String!
+  email: String!
+  password: String!
+  publicName: String!
+  publicOrganisation: String
+  events: [Event]
+  confirmedEmail: Boolean!
+  superAdmin: Boolean!
+  verified: Boolean!
+  hash: String
+  zoomMeetings: [ZoomMeeting]
+}
+type Event {
+  id: ID!
+  createDatetime: Int
+  modifiedDatetime: Int
+  title: String
+  slug: String
+  description: String
+  styles: String
+  logo: String
+  scheduledDatetime: Int!
+  organizer: Organizer
+  originalOrganizer: Organizer
+  lobbyOpen: Boolean
+  active: Boolean
+  multivoteType: Int
+  zoomMeeting: ZoomMeeting
+  videoConferenceConfig: String
+  async: Boolean!
+  allowMagicLink: Boolean!
+  publicVoteVisible: Boolean!
+  finished: Boolean!
+  endDatetime: Int
+}
+type EventUser {
+  id: ID!
+  publicName: String!
+  verified: Boolean!
+  allowToVote: Boolean!
+  online: Boolean!
+  username: String!
+  voteAmount: Int!
+  eventId: ID!
+  createDatetime: Int!
+}
+type EventUserAccessRights {
+  eventId: ID!
+  eventUserId: ID!
+  verified: Boolean!
+  allowToVote: Boolean!
+  voteAmount: Int!
+}
+type EventUserLifeCyclePayload {
+  online: Boolean
+  eventUserId: ID
+  eventId: ID
+}
+type Poll {
+  id: ID!
+  eventId: ID!
+  createDatetime: Int
+  title: String!
+  type: PollType!
+  pollAnswer: String
+  list: String
+  possibleAnswers: [PollPossibleAnswer]
+  minVotes: Int
+  maxVotes: Int
+  allowAbstain: Boolean
+}
+type OpenPollWithResult {
+  id: ID!
+  title: String!
+  maxVotes: Int
+  answerCount: Int
+  pollUserCount: Int
+  pollUserVotedCount: Int
+}
+type ActivePollEventUser {
+  state: String!
+  poll: Poll
+  pollResultId: ID
+  pollUserVoted: [PollUserVoted]
+  pollUser: [PollUser]
+  pollAnswers: [PollAnswer]
+}
+type PollResult {
+  id: ID!
+  maxVotes: Int
+  maxVoteCycles: Int
+  createDatetime: Int
+  type: PollType!
+  poll: Poll!
+  pollUser: [PollUser!]
+  pollAnswer: [PollAnswer!]
+  closed: Boolean!
+}
+type PollPossibleAnswer {
+  id: ID!
+  createDatetime: Int
+  content: String!
+}
+type PollUser {
+  id: ID!
+  pollId: ID!
+  eventUserId: ID!
+  publicName: String!
+}
+type PollUserVoted {
+  id: ID!
+  pollResultId: ID!
+  eventUserId: ID!
+  publicName: String
+}
+
+type UserVoteCycleResult {
+  voteCycle: Int!
+  maxVotes: Int!
+}
+type PollAnswer {
+  id: ID!
+  pollResultId: ID!
+  answerContent: String!
+  pollUserId: ID
+}
+type PollLifeCylclePayload {
+  state: String!
+  eventId: ID!
+  poll: Poll
+  pollResultId: ID
+}
+type PollAnswerLifeCyclePayLoad {
+  pollResultId: ID!
+  maxVotes: Int!
+  pollAnswersCount: Int!
+  pollUserCount: Int!
+  pollUserVotedCount: Int!
+  eventId: ID!
+}
+type Result {
+  id: ID!
+  pollId: ID!
+  content: String!
+}
+type ZoomMeeting {
+  id: ID!
+  title: String!
+  sdkKey: String!
+  sdkSecret: String!
+  meetingId: String
+  password: String
+}
+input PollPossibleAnswerInput {
+  content: String!
+}
+input CreateOrganizerInput {
+  username: String!
+  email: String!
+  password: String!
+  publicName: String!
+  publicOrganisation: String!
+}
+input UpdateOrganizerInput {
+  id: ID!
+  email: String
+  password: String
+  publicName: String
+  publicOrganisation: String
+  confirmedEmail: Boolean
+  verified: Boolean
+  superAdmin: Boolean
+}
+input CreateEventInput {
+  title: String!
+  slug: String!
+  description: String
+  styles: String
+  logo: String
+  scheduledDatetime: Int!
+  organizerId: ID!
+  lobbyOpen: Boolean!
+  active: Boolean!
+  multivoteType: Int!
+  videoConferenceConfig: String
+  async: Boolean!
+  allowMagicLink: Boolean!
+  publicVoteVisible: Boolean!
+  finished: Boolean
+  endDatetime: Int
+}
+input UpdateEventInput {
+  id: ID!
+  title: String!
+  slug: String!
+  description: String
+  styles: String
+  logo: String
+  scheduledDatetime: Int
+  lobbyOpen: Boolean
+  active: Boolean
+  multivoteType: Int
+  videoConferenceConfig: String
+  async: Boolean!
+  allowMagicLink: Boolean!
+  publicVoteVisible: Boolean!
+  finished: Boolean
+  endDatetime: Int
+}
+input UpdateEventStatusInput {
+  id: ID!
+  active: Boolean!
+}
+input CreateEventUserInput {
+  eventId: ID!
+  username: String!
+  verified: Boolean!
+  allowToVote: Boolean!
+  publicName: String
+  voteAmount: Int
+}
+input UpdateEventUserInput {
+  id: ID!
+  eventId: ID!
+  username: String!
+  verified: Boolean!
+  allowToVote: Boolean!
+  publicName: String
+  voteAmount: Int
+}
+input CreateEventUserAuthTokenInput {
+  eventId: ID!
+  email: String!
+  verified: Boolean!
+  allowToVote: Boolean!
+  voteAmount: Int!
+}
+input CreateNewPollInput {
+  eventId: ID!
+  title: String!
+  type: PollType!
+  pollAnswer: String
+  list: String
+  possibleAnswers: [PollPossibleAnswerInput!]
+  minVotes: Int
+  maxVotes: Int
+  allowAbstain: Boolean
+  startDatetime: Int
+  endDatetime: Int
+}
+input UpdatePollInput {
+  id: ID!
+  eventId: ID!
+  title: String!
+  type: PollType!
+  pollAnswer: String
+  list: String
+  possibleAnswers: [PollPossibleAnswerInput!]
+  minVotes: Int
+  maxVotes: Int
+  allowAbstain: Boolean
+  startDatetime: Int
+  endDatetime: Int
+}
+input PollInput {
+  id: ID!
+  type: PollType!
+  eventId: ID!
+}
+input PollSubmitAnswerInput {
+  answerContent: String!
+  pollId: ID!
+  eventUserId: ID
+  type: PollType!
+  possibleAnswerId: ID
+  voteCycle: Int!
+  answerItemLength: Int!
+  answerItemCount: Int!
+  multivote: Boolean!
+  browserInstanceId: String
+  isLastAnswerInBallot: Boolean
+}
+input PollUserVotedInput {
+  pollResultId: ID!
+  eventUserId: ID!
+  voteCycle: Int!
+}
+
+input BulkPollSubmitAnswerInput {
+  pollId: ID!
+  eventUserId: ID!
+  type: PollType!
+  possibleAnswerId: ID
+  answerContent: String
+  voteCount: Int!
+}
+input CreateZoomMeetingInput {
+  organizerId: ID!
+  title: String!
+  sdkKey: String!
+  sdkSecret: String!
+}
+input UpdateZoomMeetingInput {
+  id: ID!
+  title: String
+  sdkKey: String
+  sdkSecret: String
+}
+
+type ColumnContent {
+  content: String!
+}
+
+type AccordionItem {
+  title: String!
+  content: String!
+}
+
+type StaticContent {
+  id: ID!
+  pageKey: String!
+  sectionKey: String!
+  pageSlug: String
+  slug: String
+  contentType: String!
+  content: String!
+  title: String
+  headerClass: String
+  ordering: Int
+  isPublished: Boolean!
+  createdBy: Organizer
+  createdAt: String!
+  updatedAt: String!
+  publishedAt: String
+  versions: [StaticContentVersion]
+  columnCount: Int
+  columnsContent: [ColumnContent]
+  accordionItems: [AccordionItem]
+}
+
+type StaticContentVersion {
+  id: ID!
+  contentId: ID!
+  contentType: String!
+  content: String!
+  title: String
+  headerClass: String
+  version: Int!
+  pageSlug: String
+  slug: String
+  changedBy: Organizer
+  createdAt: String!
+  columnCount: Int
+  columnsContent: [ColumnContent]
+  accordionItems: [AccordionItem]
+}
+
+input ColumnContentInput {
+  content: String!
+}
+
+input AccordionItemInput {
+  title: String!
+  content: String!
+}
+
+input CreateStaticContentInput {
+  pageKey: String!
+  sectionKey: String!
+  pageSlug: String
+  contentType: String!
+  content: String!
+  title: String
+  headerClass: String
+  ordering: Int
+  isPublished: Boolean
+  columnCount: Int
+  columnsContent: [ColumnContentInput]
+  accordionItems: [AccordionItemInput]
+}
+
+input UpdateStaticContentInput {
+  id: ID!
+  pageSlug: String
+  content: String
+  title: String
+  headerClass: String
+  ordering: Int
+  isPublished: Boolean
+  contentType: String
+  columnCount: Int
+  columnsContent: [ColumnContentInput]
+  accordionItems: [AccordionItemInput]
+}
+
+type PageSlug {
+  id: ID!
+  pageKey: String!
+  slug: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Media {
+  id: ID!
+  filename: String!
+  url: String!
+  mimeType: String!
+  fileSize: Int!
+  createdBy: Organizer
+  uploadedAt: String!
+}
+
+# Token refresh notification payload
+type TokenRefreshPayload {
+  eventUserId: ID!
+  userId: ID!
+  userType: String!
+  token: String!
+  reason: String
+  previousVerificationStatus: Boolean
+  currentVerificationStatus: Boolean
+}
+
+# System settings for global configuration
+type SystemSettings {
+  id: ID!
+  useDirectStaticPaths: Boolean!
+  useDbFooterNavigation: Boolean!
+  updatedAt: String
+  updatedBy: Organizer
+}
+
+# Input for system settings update
+input SystemSettingsInput {
+  useDirectStaticPaths: Boolean
+  useDbFooterNavigation: Boolean
+}
+
+# Input for translation updates
+input SaveTranslationInput {
+  locale: String!
+  key: String!
+  value: String!
+}
