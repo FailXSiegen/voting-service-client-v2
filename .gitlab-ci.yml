@@ -21,10 +21,10 @@ build-api:
   services:
     - docker:dind
   script:
-    - echo "=== DEBUG: Checking build context ==="
+    - echo "=== DEBUG - Checking build context ==="
     - ls -la
     - ls -la voting-service-api/ | head -10
-    - echo "=== DEBUG: Starting docker build ==="
+    - echo "=== DEBUG - Starting docker build ==="
     - docker build -f docker/production/Dockerfile.api -t $API_IMAGE .
     - docker push $API_IMAGE
   only:
