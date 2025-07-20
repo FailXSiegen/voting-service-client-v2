@@ -1,0 +1,32 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies including monitoring and diagnostic tools
+RUN apk add --no-cache curl tini netcat-openbsd
+COPY voting-service-api/package*.json ./
+RUN npm install
+
+# Copy source code, health check script and entrypoint
+COPY voting-service-api/ ./
+COPY docker/local/healthcheck-simplified.js ./healthcheck.js
+COPY docker/local/docker-entrypoint.sh /docker-entrypoint.sh
+
+# Build the application
+RUN npm run build
+
+# Create directory for logs
+RUN mkdir -p /app/logs
+
+# Setup health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node /app/healthcheck.js api
+
+# Expose ports
+EXPOSE 3000 4000
+
+# Use tini as init system to handle signals properly
+ENTRYPOINT ["/sbin/tini", "--"]
+
+# Start the service with entrypoint that runs migrations
+CMD ["/docker-entrypoint.sh", "node", "dist/index.js"]

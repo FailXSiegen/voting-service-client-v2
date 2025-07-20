@@ -1,0 +1,8 @@
+FROM rabbitmq:management
+
+# Create and set permissions for log directory
+RUN mkdir -p /var/log/rabbitmq && \
+    chmod -R 777 /var/log/rabbitmq
+
+# Copy configuration
+COPY docker/local/rabbitmq/config/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf

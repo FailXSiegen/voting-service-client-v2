@@ -1,0 +1,136 @@
+version: '3.8'
+
+networks:
+  voting_network:
+    driver: bridge
+
+volumes:
+  db_data:
+  uploads:
+  traefik_data:
+
+services:
+  # Traefik - reverse proxy
+  traefik:
+    image: traefik:v2.9
+    container_name: voting_traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - traefik_data:/etc/traefik/acme
+    networks:
+      - voting_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.digitalwahl.org`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=web,websecure"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.auth.basicauth.users=${TRAEFIK_AUTH}"
+      - "traefik.http.routers.traefik.middlewares=auth@docker"
+      
+  # API Service
+  api:
+    build:
+      context: ../..
+      dockerfile: docker/local/Dockerfile.api
+    container_name: voting_api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DB_USER}
+      - DATABASE_PASSWORD=${DB_PASSWORD}
+      - DATABASE_NAME=${DB_NAME}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - EMAIL_FROM=${EMAIL_FROM}
+      - HOST=digitalwahl.org
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      - db
+    networks:
+      - voting_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`digitalwahl.org`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`))"
+      - "traefik.http.routers.api.entrypoints=web,websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.api.middlewares=redirect-to-https@docker"
+
+  # Client Service
+  client:
+    build:
+      context: ../..
+      dockerfile: docker/local/Dockerfile.client
+    container_name: voting_client
+    restart: unless-stopped
+    depends_on:
+      - api
+    networks:
+      - voting_network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.client.rule=Host(`digitalwahl.org`)"
+      - "traefik.http.routers.client.entrypoints=web,websecure"
+      - "traefik.http.routers.client.tls=true"
+      - "traefik.http.routers.client.tls.certresolver=letsencrypt"
+      - "traefik.http.services.client.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.client.middlewares=redirect-to-https@docker"
+
+  # Database Service
+  db:
+    image: mariadb:10.5
+    container_name: voting_db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../../voting-service-api/.docker/mariadb-conf:/etc/mysql/conf.d
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --max_connections=1500
+    networks:
+      - voting_network
+    
+  # Backup Service
+  backup:
+    image: alpine:3.17
+    container_name: voting_backup
+    volumes:
+      - db_data:/data/db:ro
+      - uploads:/data/uploads:ro
+      - ./backups:/backups
+    depends_on:
+      - db
+    environment:
+      - BACKUP_CRON=${BACKUP_CRON:-0 3 * * *}
+      - BACKUP_RETENTION=${BACKUP_RETENTION:-7}
+    command: >
+      /bin/sh -c '
+        apk add --no-cache mariadb-client tzdata tar gzip
+        mkdir -p /backups
+        echo "$$BACKUP_CRON /bin/sh -c \"date && \
+          mysqldump -h db -u $$DB_USER -p$$DB_PASSWORD $$DB_NAME | gzip > /backups/db_$$(date +\"%Y%m%d_%H%M%S\").sql.gz && \
+          tar -czf /backups/uploads_$$(date +\"%Y%m%d_%H%M%S\").tar.gz -C /data/uploads . && \
+          find /backups -name \"*.sql.gz\" -mtime +$$BACKUP_RETENTION -delete && \
+          find /backups -name \"*.tar.gz\" -mtime +$$BACKUP_RETENTION -delete\" >> /var/log/backup.log 2>&1" > /etc/crontabs/root
+        crond -f -d 8
+      '
+    networks:
+      - voting_network

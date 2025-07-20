@@ -1,0 +1,137 @@
+stages:
+  - build
+  - test
+  - deploy-staging
+  - deploy-production
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  REGISTRY_URL: $CI_REGISTRY
+  API_IMAGE: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA
+  CLIENT_IMAGE: $CI_REGISTRY_IMAGE/client:$CI_COMMIT_SHA
+  CONSUMER_IMAGE: $CI_REGISTRY_IMAGE/consumer:$CI_COMMIT_SHA
+
+before_script:
+  - docker info
+  - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
+# Build Stage
+build-api:
+  stage: build
+  services:
+    - docker:dind
+  script:
+    - docker build -f docker/production/Dockerfile.api -t $API_IMAGE .
+    - docker push $API_IMAGE
+  only:
+    - main
+    - develop
+
+build-client:
+  stage: build
+  services:
+    - docker:dind
+  script:
+    - docker build -f docker/production/Dockerfile.client -t $CLIENT_IMAGE .
+    - docker push $CLIENT_IMAGE
+  only:
+    - main
+    - develop
+
+build-consumer:
+  stage: build
+  services:
+    - docker:dind
+  script:
+    - docker build -f docker/production/Dockerfile.consumer -t $CONSUMER_IMAGE .
+    - docker push $CONSUMER_IMAGE
+  only:
+    - main
+    - develop
+
+# Test Stage
+test-api:
+  stage: test
+  image: node:18-alpine
+  script:
+    - cd voting-service-api
+    - npm ci
+    - npm run lint
+    # - npm run test # Uncomment when tests are available
+  only:
+    - main
+    - develop
+
+test-client:
+  stage: test
+  image: node:18-alpine
+  script:
+    - cd voting-service-client-v2
+    - npm ci
+    - npm run lint
+    # - npm run test:unit # Uncomment when tests are available
+  only:
+    - main
+    - develop
+
+# Staging Deployment
+deploy-staging:
+  stage: deploy-staging
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$STAGING_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying to staging server..."
+    - ssh $STAGING_USER@$STAGING_HOST "mkdir -p /opt/voting-tool-staging"
+    - rsync -avz --exclude='.git' ./docker/production/ $STAGING_USER@$STAGING_HOST:/opt/voting-tool-staging/
+    - rsync -avz ./docker/production/docker-compose.staging.yml $STAGING_USER@$STAGING_HOST:/opt/voting-tool-staging/docker-compose.yml
+    - ssh $STAGING_USER@$STAGING_HOST "cd /opt/voting-tool-staging && 
+        export API_IMAGE=$API_IMAGE &&
+        export CLIENT_IMAGE=$CLIENT_IMAGE &&
+        export CONSUMER_IMAGE=$CONSUMER_IMAGE &&
+        export DOMAIN=staging.voting.failx.de &&
+        docker-compose pull &&
+        docker-compose up -d &&
+        docker system prune -f"
+  environment:
+    name: staging
+    url: https://staging.voting.failx.de
+  only:
+    - main
+
+# Production Deployment (Manual)
+deploy-production:
+  stage: deploy-production
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$PRODUCTION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PRODUCTION_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "Deploying to production server..."
+    - ssh $PRODUCTION_USER@$PRODUCTION_HOST "mkdir -p /opt/voting-tool-production"
+    - rsync -avz --exclude='.git' ./docker/production/ $PRODUCTION_USER@$PRODUCTION_HOST:/opt/voting-tool-production/
+    - rsync -avz ./docker/production/docker-compose.production.yml $PRODUCTION_USER@$PRODUCTION_HOST:/opt/voting-tool-production/docker-compose.yml
+    - ssh $PRODUCTION_USER@$PRODUCTION_HOST "cd /opt/voting-tool-production && 
+        export API_IMAGE=$API_IMAGE &&
+        export CLIENT_IMAGE=$CLIENT_IMAGE &&
+        export CONSUMER_IMAGE=$CONSUMER_IMAGE &&
+        export DOMAIN=$PRODUCTION_DOMAIN &&
+        docker-compose pull &&
+        docker-compose up -d &&
+        docker system prune -f"
+  environment:
+    name: production
+    url: https://$PRODUCTION_DOMAIN
+  when: manual
+  only:
+    - main

@@ -1,0 +1,715 @@
+version: '3.8'
+
+networks:
+  traefik:
+    driver: bridge
+  gitlab:
+    driver: bridge
+
+# YAML Anchors für wiederverwendbare Konfigurationen
+x-common-labels: &common-labels
+  - "com.centurylinklabs.watchtower.enable=false"
+
+x-common-environment: &common-environment
+  - TZ=${TZ}
+
+x-ollama-base: &ollama-base
+  image: ollama/ollama:latest
+  restart: unless-stopped
+  networks:
+    - traefik
+  volumes:
+    - ollama_data:/root/.ollama
+  environment:
+    - TZ=${TZ}
+    - OLLAMA_HOST=0.0.0.0
+    # CPU-Performance maximieren
+    - OLLAMA_NUM_THREAD=14                    # Alle 14 CPU-Kerne nutzen
+    - OLLAMA_NUM_PARALLEL=6                   # Mehr parallele Requests
+    - OLLAMA_MAX_LOADED_MODELS=4              # Mehr Modelle gleichzeitig im RAM
+    - OLLAMA_FLASH_ATTENTION=1                # Flash Attention für bessere Performance
+    # Memory-Optimierungen
+    - OLLAMA_RUNNER_CPU_COUNT=14              # CPU-Runner auf alle Kerne
+    - GOMAXPROCS=14                           # Go Runtime auf alle Kerne
+    # Keine GPU-Limits
+    - OLLAMA_NUM_GPU=0
+    - OLLAMA_MAX_VRAM=0
+  # Docker Resource-Limits drastisch erhöhen
+  deploy:
+    resources:
+      limits:
+        cpus: '14.0'        # Alle CPU-Kerne freigeben
+        memory: 48G         # 75% des RAMs (48GB von 64GB)
+      reservations:
+        cpus: '12.0'        # Mindestens 12 Kerne garantiert
+        memory: 32G         # Mindestens 32GB garantiert
+  # System-Optimierungen
+  ulimits:
+    memlock:
+      soft: -1
+      hard: -1
+  # Shared Memory erhöhen für bessere Performance
+  shm_size: '8gb'
+
+services:
+  # Traefik Reverse Proxy mit Let's Encrypt
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+    environment:
+      - TZ=${TZ}
+    command:
+      - --global.checkNewVersion=false
+      - --global.sendAnonymousUsage=false
+      - --api.dashboard=true
+      - --api.debug=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --entrypoints.websecure.address=:443
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=gitlab-setup_traefik
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=${EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --log.level=INFO
+      - --accesslog=true
+      - --metrics.prometheus=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$2y$$10$$K7n1L0XiGHK8v8/XuRTRCO1OhMqJsHyiRnU5Ld0MK3fFG5zJ0FqpC"
+
+  # Portainer für Container-Management
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    environment:
+      - TZ=${TZ}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=letsencrypt"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+
+  # PostgreSQL für n8n
+  n8n-postgres:
+    image: postgres:16-alpine
+    container_name: n8n-postgres
+    restart: unless-stopped
+    networks:
+      - traefik
+      - gitlab
+    environment:
+      - TZ=${TZ}
+      - POSTGRES_USER=${N8N_POSTGRES_USER:-n8n}
+      - POSTGRES_PASSWORD=${N8N_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${N8N_POSTGRES_DB:-n8n}
+    volumes:
+      - n8n_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h localhost -U ${N8N_POSTGRES_USER:-n8n} -d ${N8N_POSTGRES_DB:-n8n}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # Duplicati Backup Management
+  duplicati:
+    image: linuxserver/duplicati:latest
+    container_name: duplicati
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - duplicati_config:/config
+      - gitlab_config:/source/gitlab_config:ro
+      - gitlab_data:/source/gitlab_data:ro
+      - gitlab_logs:/source/gitlab_logs:ro
+      - portainer_data:/source/portainer_data:ro
+      - n8n_data:/source/n8n_data:ro
+      - n8n_postgres_data:/source/n8n_postgres_data:ro
+      - typo3_data:/source/typo3_data:ro
+      - typo3_db_data:/source/typo3_db_data:ro
+      - digitalwahl_data:/source/digitalwahl_data:ro
+      - traefik_letsencrypt:/source/traefik_letsencrypt:ro
+      - open_webui_data:/source/open_webui_data:ro
+      - ollama_data:/source/ollama_data:ro
+      - qdrant_data:/source/qdrant_data:ro
+      - /var/backups/duplicati:/backups
+      - ./:/source/config:ro
+      - ./backup-scripts:/scripts:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.duplicati.rule=Host(`backup.${DOMAIN}`)"
+      - "traefik.http.routers.duplicati.entrypoints=websecure"
+      - "traefik.http.routers.duplicati.tls.certresolver=letsencrypt"
+      - "traefik.http.services.duplicati.loadbalancer.server.port=8200"
+
+  
+  # GitLab CE - Korrigierte Version
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    hostname: gitlab.${DOMAIN}
+    restart: unless-stopped
+    networks:
+      - traefik
+      - gitlab
+    volumes:
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.${DOMAIN}'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        gitlab_rails['gitlab_ssh_host'] = 'gitlab.${DOMAIN}'
+        gitlab_rails['initial_root_password'] = '${GITLAB_ROOT_PASSWORD}'
+
+        # SSL wird von Traefik gehandhabt - WICHTIG!
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on",
+          "X-Forwarded-For" => "$$proxy_add_x_forwarded_for",
+          "X-Forwarded-Host" => "$$http_host"
+        }
+
+        # Performance Optimierungen für 14 CPU / 64GB RAM (angepasst!)
+        puma['worker_processes'] = 8          # Mehr Worker für Ihre CPU
+        puma['min_threads'] = 4
+        puma['max_threads'] = 16
+        puma['worker_timeout'] = 60
+        sidekiq['max_concurrency'] = 30      # Mehr Concurrency
+
+        # PostgreSQL Optimierungen (angepasst für mehr RAM)
+        postgresql['shared_buffers'] = "2GB"    # Verdoppelt für 64GB RAM
+        postgresql['max_worker_processes'] = 14  # Alle CPU-Kerne nutzen
+        postgresql['max_connections'] = 300
+        postgresql['work_mem'] = "32MB"         # Mehr work_mem
+        postgresql['maintenance_work_mem'] = "128MB"
+        postgresql['effective_cache_size'] = "8GB"  # Mehr Cache
+
+        # Redis Optimierungen
+        redis['save'] = ['900 1']
+        redis['maxmemory'] = "1gb"            # Mehr Redis-Memory
+        redis['maxmemory_policy'] = "allkeys-lru"
+
+        # Registry für Docker Images - KORRIGIERT!
+        registry_external_url 'https://registry.${DOMAIN}'
+        gitlab_rails['registry_enabled'] = true
+        registry_nginx['listen_port'] = 5050
+        registry_nginx['listen_https'] = false
+        # WICHTIG: Registry Headers für Traefik
+        registry_nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on"
+        }
+
+        # Backup & Monitoring
+        gitlab_rails['backup_keep_time'] = 604800
+        gitlab_rails['backup_path'] = "/var/opt/gitlab/backups"
+        prometheus_monitoring['enable'] = true
+
+    # WICHTIG: Mehr Shared Memory für GitLab
+    shm_size: '2gb'                         # Erhöht von 512m auf 2GB
+    ports:
+      - "2222:22"                           # SSH-Port bleibt korrekt
+    # Docker Resource-Limits hinzufügen
+    deploy:
+      resources:
+        limits:
+          cpus: '8.0'                       # GitLab kann 8 CPU-Kerne nutzen
+          memory: 16G                       # 16GB für GitLab
+        reservations:
+          cpus: '4.0'
+          memory: 8G
+    labels:
+      - "traefik.enable=true"
+      # GitLab Web Interface
+      - "traefik.http.routers.gitlab.rule=Host(`gitlab.${DOMAIN}`)"
+      - "traefik.http.routers.gitlab.entrypoints=websecure"
+      - "traefik.http.routers.gitlab.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.gitlab.service=gitlab-web"
+      - "traefik.http.services.gitlab-web.loadbalancer.server.port=80"
+      
+      # GitLab Registry - KORRIGIERT!
+      - "traefik.http.routers.gitlab-registry.rule=Host(`registry.${DOMAIN}`)"
+      - "traefik.http.routers.gitlab-registry.entrypoints=websecure"
+      - "traefik.http.routers.gitlab-registry.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.gitlab-registry.service=gitlab-registry-svc"
+      - "traefik.http.services.gitlab-registry-svc.loadbalancer.server.port=5050"
+      
+      # Watchtower ausschließen
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # GitLab Runner
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    restart: unless-stopped
+    networks:
+      - gitlab
+    volumes:
+      - gitlab_runner_config:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - TZ=${TZ}
+    depends_on:
+      - gitlab
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # n8n Workflow Automation
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    networks:
+      - traefik
+      - gitlab
+    environment:
+      - TZ=${TZ}
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.${DOMAIN}/
+      - GENERIC_TIMEZONE=${TZ}
+      - N8N_SECURE_COOKIE=true
+      - N8N_METRICS=true
+      - EXECUTIONS_DATA_PRUNE=true
+      - EXECUTIONS_DATA_MAX_AGE=168
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=n8n-postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${N8N_POSTGRES_DB:-n8n}
+      - DB_POSTGRESDB_USER=${N8N_POSTGRES_USER:-n8n}
+      - DB_POSTGRESDB_PASSWORD=${N8N_POSTGRES_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - N8N_USER_MANAGEMENT_JWT_SECRET=${N8N_USER_MANAGEMENT_JWT_SECRET}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/backup:/backup
+      - ./shared:/data/shared
+    depends_on:
+      n8n-postgres:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.${DOMAIN}`)"
+      - "traefik.http.routers.n8n.entrypoints=websecure"
+      - "traefik.http.routers.n8n.tls.certresolver=letsencrypt"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+  # n8n MCP (Model Context Protocol) Server
+  n8n-mcp:
+    image: ghcr.io/czlonkowski/n8n-mcp:latest
+    container_name: n8n-mcp
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - N8N_API_URL=http://n8n:5678
+      - N8N_API_KEY=${N8N_API_KEY}
+    volumes:
+      - n8n_mcp_data:/data
+    depends_on:
+      - n8n
+
+  # n8n MCP HTTP Wrapper
+  n8n-mcp-http:
+    build: ./mcp-http-wrapper
+    container_name: n8n-mcp-http
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - PORT=3000
+      - N8N_API_KEY=${N8N_API_KEY}
+      - N8N_API_URL=http://n8n:5678
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - n8n
+      - n8n-mcp
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n-mcp-http.rule=Host(`n8n-mcp.${DOMAIN}`)"
+      - "traefik.http.routers.n8n-mcp-http.entrypoints=websecure"
+      - "traefik.http.routers.n8n-mcp-http.tls.certresolver=letsencrypt"
+      - "traefik.http.services.n8n-mcp-http.loadbalancer.server.port=3000"
+
+  # Open WebUI für LLMs
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:latest
+    container_name: open-webui
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY}
+      - WEBUI_URL=https://ai.${DOMAIN}
+      - ENABLE_SIGNUP=false
+      - DEFAULT_USER_ROLE=user
+    volumes:
+      - open_webui_data:/app/backend/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - ollama
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.open-webui.rule=Host(`ai.${DOMAIN}`)"
+      - "traefik.http.routers.open-webui.entrypoints=websecure"
+      - "traefik.http.routers.open-webui.tls.certresolver=letsencrypt"
+      - "traefik.http.services.open-webui.loadbalancer.server.port=8080"
+
+  # Ollama CPU Version (Standard)
+  ollama:
+    profiles: ["", "cpu"]
+    <<: *ollama-base
+    container_name: ollama
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama.rule=Host(`ollama.${DOMAIN}`)"
+      - "traefik.http.routers.ollama.entrypoints=websecure"
+      - "traefik.http.routers.ollama.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ollama.loadbalancer.server.port=11434"
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # Ollama GPU Version
+  ollama-gpu:
+    profiles: ["gpu-nvidia"]
+    <<: *ollama-base
+    container_name: ollama-gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ollama-gpu.rule=Host(`ollama.${DOMAIN}`)"
+      - "traefik.http.routers.ollama-gpu.entrypoints=websecure"
+      - "traefik.http.routers.ollama-gpu.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ollama-gpu.loadbalancer.server.port=11434"
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # Automatische Modell-Downloads
+  ollama-init:
+    profiles: ["", "cpu"]
+    image: ollama/ollama:latest
+    container_name: ollama-init
+    networks:
+      - traefik
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - |
+        sleep 15
+        echo "Downloading optimized models for high-performance CPU..."
+        # Größere, bessere Modelle die Ihre Hardware ausnutzen
+        OLLAMA_HOST=ollama:11434 ollama pull llama3.1:8b-instruct-q8_0
+        OLLAMA_HOST=ollama:11434 ollama pull gemma3:latest
+        OLLAMA_HOST=ollama:11434 ollama pull qwen3:latest
+        # Code-Modelle
+        OLLAMA_HOST=ollama:11434 ollama pull codellama:34b-instruct
+        echo "High-performance model download completed"
+    depends_on:
+      - ollama
+
+  # Ollama Init für GPU
+  ollama-init-gpu:
+    profiles: ["gpu-nvidia"]
+    image: ollama/ollama:latest
+    container_name: ollama-init-gpu
+    networks:
+      - traefik
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: /bin/sh
+    command:
+      - "-c"
+      - |
+        sleep 10
+        echo "Downloading standard models..."
+        OLLAMA_HOST=ollama-gpu:11434 ollama pull llama3.1:8b
+        OLLAMA_HOST=ollama-gpu:11434 ollama pull nomic-embed-text
+        OLLAMA_HOST=ollama-gpu:11434 ollama pull qwen2.5:7b
+        echo "Model download completed"
+    depends_on:
+      - ollama-gpu
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+      - QDRANT__WEB_UI__ENABLED=true
+      - QDRANT__STORAGE__WAL__WAL_CAPACITY_MB=32
+      - QDRANT__STORAGE__WAL__WAL_SEGMENTS_AHEAD=0
+      - QDRANT__SERVICE__MAX_REQUEST_SIZE_MB=32
+      - QDRANT__SERVICE__MAX_WORKERS=0
+    volumes:
+      - qdrant_data:/qdrant/storage
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.qdrant.rule=Host(`vector.${DOMAIN}`)"
+      - "traefik.http.routers.qdrant.entrypoints=websecure"
+      - "traefik.http.routers.qdrant.tls.certresolver=letsencrypt"
+      - "traefik.http.services.qdrant.loadbalancer.server.port=6333"
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # Flowise - Visueller LLM Workflow Builder
+  flowise:
+    image: flowiseai/flowise
+    container_name: flowise
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - PORT=3000
+      - FLOWISE_USERNAME=${FLOWISE_USERNAME:-admin}
+      - FLOWISE_PASSWORD=${FLOWISE_PASSWORD}
+    volumes:
+      - flowise_data:/root/.flowise
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    profiles: ["flowise"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flowise.rule=Host(`flows.${DOMAIN}`)"
+      - "traefik.http.routers.flowise.entrypoints=websecure"
+      - "traefik.http.routers.flowise.tls.certresolver=letsencrypt"
+      - "traefik.http.services.flowise.loadbalancer.server.port=3000"
+
+  # Watchtower für automatische Updates
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    networks:
+      - traefik
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - TZ=${TZ}
+      - WATCHTOWER_SCHEDULE=0 0 3 * * 1
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=watchtower@${DOMAIN}
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=${EMAIL}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${SMTP_SERVER}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=${SMTP_PORT}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=${SMTP_USER}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${SMTP_PASSWORD}
+    command: n8n open-webui duplicati watchtower qdrant flowise
+    labels:
+      - "traefik.enable=false"
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - gitlab
+    volumes:
+      - redis_data:/data
+    environment:
+      - TZ=${TZ}
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+
+  # Grafana Monitoring
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    networks:
+      - traefik
+      - gitlab
+    environment:
+      - TZ=${TZ}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://monitoring.${DOMAIN}
+      - GF_SERVER_SERVE_FROM_SUB_PATH=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`monitoring.${DOMAIN}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+
+  # LimeSurvey Database
+  limesurvey-db:
+    image: mariadb:10.11
+    container_name: limesurvey-db
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - MYSQL_ROOT_PASSWORD=${LIMESURVEY_DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=limesurvey
+      - MYSQL_USER=limesurvey
+      - MYSQL_PASSWORD=${LIMESURVEY_DB_PASSWORD}
+    volumes:
+      - limesurvey_db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # LimeSurvey Application
+  limesurvey:
+    image: martialblog/limesurvey:6-apache
+    container_name: limesurvey
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - DB_TYPE=mysql
+      - DB_HOST=limesurvey-db
+      - DB_PORT=3306
+      - DB_NAME=limesurvey
+      - DB_USERNAME=limesurvey
+      - DB_PASSWORD=${LIMESURVEY_DB_PASSWORD}
+      - ADMIN_USER=${LIMESURVEY_ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${LIMESURVEY_ADMIN_PASSWORD}
+      - ADMIN_NAME=${LIMESURVEY_ADMIN_NAME:-Administrator}
+      - ADMIN_EMAIL=${EMAIL}
+      - PUBLIC_URL=https://cv-siegerland.${DOMAIN}
+      - URL_FORMAT=path
+      - SHOW_SCRIPT_NAME=false
+    volumes:
+      - limesurvey_data:/var/www/html/upload
+    depends_on:
+      limesurvey-db:
+        condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.limesurvey.rule=Host(`cv-siegerland.${DOMAIN}`)"
+      - "traefik.http.routers.limesurvey.entrypoints=websecure"
+      - "traefik.http.routers.limesurvey.tls.certresolver=letsencrypt"
+      - "traefik.http.services.limesurvey.loadbalancer.server.port=8080"
+      # Wichtig für Reverse Proxy - Host Header explizit setzen
+      - "traefik.http.middlewares.limesurvey-headers.headers.customrequestheaders.Host=cv-siegerland.${DOMAIN}"
+      - "traefik.http.routers.limesurvey.middlewares=limesurvey-headers"
+
+volumes:
+  # Traefik & Proxy
+  traefik_letsencrypt:
+    driver: local
+
+  # Management
+  portainer_data:
+    driver: local
+  duplicati_config:
+    driver: local
+
+  # GitLab
+  gitlab_config:
+    driver: local
+  gitlab_logs:
+    driver: local
+  gitlab_data:
+    driver: local
+  gitlab_runner_config:
+    driver: local
+
+  # Applications
+  n8n_data:
+    driver: local
+  n8n_postgres_data:
+    driver: local
+  n8n_mcp_data:
+    driver: local
+  open_webui_data:
+    driver: local
+  ollama_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  flowise_data:
+    driver: local
+
+  # TYPO3
+  typo3_data:
+    driver: local
+  typo3_uploads:
+    driver: local
+  typo3_db_data:
+    driver: local
+
+  # digitalwahl
+  digitalwahl_data:
+    driver: local
+  digitalwahl_logs:
+    driver: local
+
+  # Infrastructure
+  redis_data:
+    driver: local
+  grafana_data:
+    driver: local
+  
+  # LimeSurvey
+  limesurvey_data:
+    driver: local
+  limesurvey_db_data:
+    driver: local

@@ -1,0 +1,235 @@
+version: '3.8'
+
+networks:
+  voting_network:
+    driver: bridge
+  traefik_network:
+    external: true
+
+volumes:
+  db_data:
+  uploads:
+  rabbitmq_data:
+  logs_volume:
+
+services:
+  # API Service
+  api:
+    image: ${API_IMAGE:-gitlab.failx.de/hetzner/voting-tool/api:latest}
+    container_name: voting_api_staging
+    restart: unless-stopped
+    networks:
+      - voting_network
+      - traefik_network
+    volumes:
+      - uploads:/app/uploads
+      - logs_volume:/app/logs
+    environment:
+      - NODE_ENV=staging
+      - JWT_SECRET=${JWT_SECRET:-staging-secret-key}
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DATABASE_USER:-staging_user}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-staging_password}
+      - DATABASE_NAME=${DATABASE_NAME:-voting_staging}
+      - EMAIL_HOST=${EMAIL_HOST:-mailhog}
+      - EMAIL_PORT=${EMAIL_PORT:-1025}
+      - EMAIL_USER=${EMAIL_USER:-}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD:-}
+      - HOST=${DOMAIN:-staging.voting.failx.de}
+      - APP_PORT=4000
+      - GRAPHQL_ENDPOINT=/graphql
+      - WEBSOCKET_ENDPOINT=/graphql
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - RABBITMQ_VHOST=/
+    depends_on:
+      - db
+      - rabbitmq
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-api-staging.rule=Host(`${DOMAIN:-staging.voting.failx.de}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/logout`))"
+      - "traefik.http.routers.voting-api-staging.priority=1"
+      - "traefik.http.routers.voting-api-staging.entrypoints=websecure"
+      - "traefik.http.routers.voting-api-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-api-staging.loadbalancer.server.port=4000"
+      - "traefik.docker.network=traefik_network"
+
+  # Vote Consumer Service
+  consumer:
+    image: ${CONSUMER_IMAGE:-gitlab.failx.de/hetzner/voting-tool/consumer:latest}
+    container_name: voting_consumer_staging
+    restart: unless-stopped
+    networks:
+      - voting_network
+    volumes:
+      - logs_volume:/app/logs
+    environment:
+      - NODE_ENV=staging
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DATABASE_USER:-staging_user}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-staging_password}
+      - DATABASE_NAME=${DATABASE_NAME:-voting_staging}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASSWORD:-guest}@rabbitmq:5672/
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - RABBITMQ_VHOST=/
+    depends_on:
+      - db
+      - rabbitmq
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # Client Service
+  client:
+    image: ${CLIENT_IMAGE:-gitlab.failx.de/hetzner/voting-tool/client:latest}
+    container_name: voting_client_staging
+    restart: unless-stopped
+    networks:
+      - traefik_network
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-client-staging.rule=Host(`${DOMAIN:-staging.voting.failx.de}`)"
+      - "traefik.http.routers.voting-client-staging.priority=10"
+      - "traefik.http.routers.voting-client-event-staging.rule=Host(`${DOMAIN:-staging.voting.failx.de}`) && PathPrefix(`/event`) && !PathPrefix(`/event/verify-slug`)"
+      - "traefik.http.routers.voting-client-event-staging.priority=5"
+      - "traefik.http.routers.voting-client-event-staging.service=voting-client-staging"
+      - "traefik.http.routers.voting-client-event-staging.entrypoints=websecure"
+      - "traefik.http.routers.voting-client-event-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.voting-client-staging.entrypoints=websecure"
+      - "traefik.http.routers.voting-client-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-client-staging.loadbalancer.server.port=80"
+      - "traefik.docker.network=traefik_network"
+
+  # Database Service
+  db:
+    image: mariadb:10.11
+    container_name: voting_db_staging
+    restart: unless-stopped
+    networks:
+      - voting_network
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD:-staging_root_password}
+      - MYSQL_USER=${DATABASE_USER:-staging_user}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD:-staging_password}
+      - MYSQL_DATABASE=${DATABASE_NAME:-voting_staging}
+    volumes:
+      - db_data:/var/lib/mysql
+    command: |
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --max_connections=500
+      --innodb-buffer-pool-size=256M
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: voting_rabbitmq_staging
+    restart: unless-stopped
+    networks:
+      - voting_network
+      - traefik_network
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-rabbitmq-staging.rule=Host(`rabbitmq-staging.voting.failx.de`)"
+      - "traefik.http.routers.voting-rabbitmq-staging.entrypoints=websecure"
+      - "traefik.http.routers.voting-rabbitmq-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-rabbitmq-staging.loadbalancer.server.port=15672"
+      - "traefik.docker.network=traefik_network"
+
+  # Mailhog for email testing in staging
+  mailhog:
+    image: mailhog/mailhog
+    container_name: voting_mailhog_staging
+    restart: unless-stopped
+    networks:
+      - voting_network
+      - traefik_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 128M
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.voting-mailhog-staging.rule=Host(`mail-staging.voting.failx.de`)"
+      - "traefik.http.routers.voting-mailhog-staging.entrypoints=websecure"
+      - "traefik.http.routers.voting-mailhog-staging.tls.certresolver=letsencrypt"
+      - "traefik.http.services.voting-mailhog-staging.loadbalancer.server.port=8025"
+      - "traefik.docker.network=traefik_network"
