@@ -11,15 +11,14 @@ variables:
   API_IMAGE: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHA
   CLIENT_IMAGE: $CI_REGISTRY_IMAGE/client:$CI_COMMIT_SHA
 
-before_script:
-  - docker info
-  - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-
 # Build Stage
 build-api:
   stage: build
   services:
     - docker:dind
+  before_script:
+    - docker info
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker build -f docker/production/Dockerfile.api -t $API_IMAGE .
     - docker push $API_IMAGE
@@ -31,6 +30,9 @@ build-client:
   stage: build
   services:
     - docker:dind
+  before_script:
+    - docker info
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   script:
     - docker build -f docker/production/Dockerfile.client -t $CLIENT_IMAGE .
     - docker push $CLIENT_IMAGE
