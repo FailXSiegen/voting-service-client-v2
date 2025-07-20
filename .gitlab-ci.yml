@@ -1,8 +1,8 @@
 stages:
   - build
   - test
-  - deploy-staging
-  - deploy-production
+  # - deploy-staging    # Disabled for internal development
+  # - deploy-production # Disabled for internal development
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -66,8 +66,8 @@ test-client:
     - main
     - develop
 
-# Staging Deployment
-deploy-staging:
+# Staging Deployment (Disabled for internal development)
+.deploy-staging:
   stage: deploy-staging
   image: alpine:latest
   before_script:
@@ -95,8 +95,8 @@ deploy-staging:
   only:
     - main
 
-# Production Deployment (Manual)
-deploy-production:
+# Production Deployment (Disabled for internal development)
+.deploy-production:
   stage: deploy-production
   image: alpine:latest
   before_script:
