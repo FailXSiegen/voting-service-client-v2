@@ -3,7 +3,7 @@ version: '3.8'
 networks:
   voting_network:
     driver: bridge
-  traefik_network:
+  gitlab-setup_traefik:
     external: true
 
 volumes:
@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
     networks:
       - voting_network
-      - traefik_network
+      - gitlab-setup_traefik
     volumes:
       - uploads:/app/uploads
       - logs_volume:/app/logs
@@ -60,7 +60,7 @@ services:
       - "traefik.http.routers.voting-api.entrypoints=websecure"
       - "traefik.http.routers.voting-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.voting-api.loadbalancer.server.port=4000"
-      - "traefik.docker.network=traefik_network"
+      - "traefik.docker.network=gitlab-setup_traefik"
 
 
   # Client Service
@@ -69,7 +69,7 @@ services:
     container_name: voting_client
     restart: unless-stopped
     networks:
-      - traefik_network
+      - gitlab-setup_traefik
     depends_on:
       - api
     deploy:
@@ -97,7 +97,7 @@ services:
       - "traefik.http.routers.voting-client.entrypoints=websecure"
       - "traefik.http.routers.voting-client.tls.certresolver=letsencrypt"
       - "traefik.http.services.voting-client.loadbalancer.server.port=80"
-      - "traefik.docker.network=traefik_network"
+      - "traefik.docker.network=gitlab-setup_traefik"
 
   # Database Service
   db:
