@@ -8,7 +8,7 @@ RUN apk add --no-cache curl tini netcat-openbsd dumb-init
 WORKDIR /app
 
 # Copy package files
-COPY voting-service-api/package.json voting-service-api/package-lock.json ./
+COPY voting-service-api/package*.json ./
 
 # Install dependencies
 RUN npm ci --only=production && npm cache clean --force
@@ -16,7 +16,7 @@ RUN npm ci --only=production && npm cache clean --force
 # Development stage for building
 FROM node:18-alpine AS build
 WORKDIR /app
-COPY voting-service-api/package.json voting-service-api/package-lock.json ./
+COPY voting-service-api/package*.json ./
 RUN npm ci
 COPY voting-service-api/ ./
 RUN npm run build
