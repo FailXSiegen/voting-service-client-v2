@@ -32,7 +32,7 @@ build_api:
   stage: build
   script:
     - echo "🔨 Building API image..."
-    - docker build -f voting-tool/docker/production/Dockerfile.api -t ${API_IMAGE}:latest -t ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} .
+    - docker build -f docker/production/Dockerfile.api -t ${API_IMAGE}:latest -t ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} .
     - |
       if docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${REGISTRY} 2>/dev/null; then
         docker push ${API_IMAGE}:latest
@@ -51,7 +51,7 @@ build_client:
   stage: build
   script:
     - echo "🔨 Building Client image..."
-    - docker build -f voting-tool/docker/production/Dockerfile.client -t ${CLIENT_IMAGE}:latest -t ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} .
+    - docker build -f docker/production/Dockerfile.client -t ${CLIENT_IMAGE}:latest -t ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} .
     - |
       if docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${REGISTRY} 2>/dev/null; then
         docker push ${CLIENT_IMAGE}:latest
@@ -81,7 +81,7 @@ deploy:
       mkdir -p ${DEPLOY_PATH}
       
       # Docker-Compose und andere Dateien kopieren
-      cp voting-tool/docker/production/docker-compose.yml ${DEPLOY_PATH}/
+      cp docker/production/docker-compose.yml ${DEPLOY_PATH}/
       
       # .env Datei erstellen mit den neuesten Image Tags
       cat > ${DEPLOY_PATH}/.env << EOF
@@ -95,19 +95,19 @@ deploy:
       
       # Database (wird aus GitLab CI/CD Variablen gelesen)
       DATABASE_HOST=db
-      DATABASE_USER=${DATABASE_USER}
-      DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      DATABASE_NAME=${DATABASE_NAME}
-      DATABASE_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+      DATABASE_USER=${VOTING_DB_USER:-voting_user}
+      DATABASE_PASSWORD=${VOTING_DB_PASSWORD:-voting_password}
+      DATABASE_NAME=${VOTING_DB_NAME:-voting_db}
+      DATABASE_ROOT_PASSWORD=${VOTING_DB_ROOT_PASSWORD:-root_password}
       
       # JWT Secret
-      JWT_SECRET=${JWT_SECRET}
+      JWT_SECRET=${VOTING_JWT_SECRET:-voting-jwt-secret-key}
       
       # Email Settings
-      EMAIL_HOST=${EMAIL_HOST}
-      EMAIL_PORT=${EMAIL_PORT}
-      EMAIL_USER=${EMAIL_USER}
-      EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      EMAIL_HOST=${VOTING_EMAIL_HOST:-smtp.example.com}
+      EMAIL_PORT=${VOTING_EMAIL_PORT:-587}
+      EMAIL_USER=${VOTING_EMAIL_USER:-noreply@example.com}
+      EMAIL_PASSWORD=${VOTING_EMAIL_PASSWORD:-email_password}
       EOF
       
       # Deploy mit docker-compose
