@@ -68,7 +68,7 @@ services:
       - "traefik.http.middlewares.voting-ws.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.middlewares.voting-ws.headers.customrequestheaders.Connection=keep-alive, Upgrade"
       - "traefik.http.middlewares.voting-ws.headers.customrequestheaders.Upgrade=websocket"
-      # - "traefik.http.routers.voting-api.middlewares=voting-ws"
+      - "traefik.http.routers.voting-api.middlewares=voting-ws"
 
 
   # Client Service
