@@ -27,6 +27,7 @@ FROM base AS production
 # Copy built application
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
+COPY --from=build /app/node_modules ./node_modules
 
 # Copy health check and entrypoint scripts
 COPY docker/production/healthcheck.js ./healthcheck.js

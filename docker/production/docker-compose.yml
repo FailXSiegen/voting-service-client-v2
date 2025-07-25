@@ -61,6 +61,11 @@ services:
       - "traefik.http.routers.voting-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.voting-api.loadbalancer.server.port=4000"
       - "traefik.docker.network=gitlab-setup_traefik"
+      # WebSocket Support
+      - "traefik.http.middlewares.voting-ws.headers.customrequestheaders.X-Forwarded-Proto=https"
+      - "traefik.http.middlewares.voting-ws.headers.customrequestheaders.Connection=keep-alive, Upgrade"
+      - "traefik.http.middlewares.voting-ws.headers.customrequestheaders.Upgrade=websocket"
+      - "traefik.http.routers.voting-api.middlewares=voting-ws"
 
 
   # Client Service
