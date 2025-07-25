@@ -26,6 +26,7 @@ services:
       - logs_volume:/app/logs
     environment:
       - NODE_ENV=production
+      - ENABLE_JWT=1
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ISSUER=${DOMAIN}
       - DATABASE_HOST=db
@@ -64,9 +65,9 @@ services:
       - "traefik.http.routers.voting-api.service=voting-api@docker"
       - "traefik.http.services.voting-api.loadbalancer.server.port=4000"
       - "traefik.docker.network=gitlab-setup_traefik"
-      # WebSocket Support - only set X-Forwarded-Proto for HTTPS
-      - "traefik.http.middlewares.voting-https.headers.customrequestheaders.X-Forwarded-Proto=https"
-      - "traefik.http.routers.voting-api.middlewares=voting-https"
+      # WebSocket Support - temporarily disable middleware for debugging
+      # - "traefik.http.middlewares.voting-https.headers.customrequestheaders.X-Forwarded-Proto=https"
+      # - "traefik.http.routers.voting-api.middlewares=voting-https"
 
 
   # Client Service
