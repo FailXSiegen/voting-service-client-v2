@@ -1,0 +1,142 @@
+version: '3.8'
+
+networks:
+  vereinswahl_network:
+    driver: bridge
+  gitlab-setup_traefik:
+    external: true
+    name: gitlab-setup_traefik
+
+volumes:
+  vereinswahl_db_data:
+  vereinswahl_uploads:
+  vereinswahl_logs_volume:
+
+services:
+  # API Service
+  api:
+    image: ${API_IMAGE:-gitlab.failx.de/hetzner/voting-tool/api:latest}
+    container_name: vereinswahl_api_${CI_COMMIT_SHORT_SHA:-latest}
+    restart: unless-stopped
+    networks:
+      - vereinswahl_network
+      - gitlab-setup_traefik
+    volumes:
+      - vereinswahl_uploads:/app/uploads
+      - vereinswahl_logs_volume:/app/logs
+    environment:
+      - NODE_ENV=production
+      - ENABLE_JWT=1
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ISSUER=${DOMAIN}
+      - COOKIE_SIGN_SECRET=${COOKIE_SIGN_SECRET}
+      - DATABASE_HOST=db
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      - HOST=${DOMAIN}
+      - APP_PORT=4000
+      - GRAPHQL_ENDPOINT=/graphql
+      - WEBSOCKET_ENDPOINT=/graphql
+    depends_on:
+      - db
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vereinswahl-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/logout`))"
+      - "traefik.http.routers.vereinswahl-api.priority=100"
+      - "traefik.http.routers.vereinswahl-api.entrypoints=websecure"
+      - "traefik.http.routers.vereinswahl-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.vereinswahl-api.service=vereinswahl-api@docker"
+      - "traefik.http.services.vereinswahl-api.loadbalancer.server.port=4000"
+      - "traefik.docker.network=gitlab-setup_traefik"
+
+  # Client Service
+  client:
+    image: ${CLIENT_IMAGE:-gitlab.failx.de/hetzner/voting-tool/client:latest}
+    container_name: vereinswahl_client_${CI_COMMIT_SHORT_SHA:-latest}
+    restart: unless-stopped
+    networks:
+      - vereinswahl_network
+      - gitlab-setup_traefik
+    depends_on:
+      - api
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.2'
+          memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vereinswahl-client.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.vereinswahl-client.priority=10"
+      - "traefik.http.routers.vereinswahl-client-event.rule=Host(`${DOMAIN}`) && PathPrefix(`/event`) && !PathPrefix(`/event/verify-slug`)"
+      - "traefik.http.routers.vereinswahl-client-event.priority=5"
+      - "traefik.http.routers.vereinswahl-client-event.service=vereinswahl-client"
+      - "traefik.http.routers.vereinswahl-client-event.entrypoints=websecure"
+      - "traefik.http.routers.vereinswahl-client-event.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.vereinswahl-client.entrypoints=websecure"
+      - "traefik.http.routers.vereinswahl-client.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vereinswahl-client.loadbalancer.server.port=80"
+      - "traefik.docker.network=gitlab-setup_traefik"
+
+  # Database Service
+  db:
+    image: mariadb:10.11
+    container_name: vereinswahl_db_${CI_COMMIT_SHORT_SHA:-latest}
+    restart: unless-stopped
+    networks:
+      - vereinswahl_network
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+      - MYSQL_USER=${DATABASE_USER}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+      - MYSQL_DATABASE=${DATABASE_NAME}
+    volumes:
+      - vereinswahl_db_data:/var/lib/mysql
+    command: |
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --max_connections=1500
+      --innodb-buffer-pool-size=512M
+      --query-cache-size=64M
+      --slow-query-log=1
+      --long_query_time=2
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

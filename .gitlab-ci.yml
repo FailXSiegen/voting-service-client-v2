@@ -162,6 +162,101 @@ deploy:
     - docker
     - deploy
 
+# Deploy Vereinswahl Instance
+deploy_vereinswahl:
+  stage: deploy
+  script:
+    - echo "🚀 Deploying Vereinswahl Voting Tool..."
+    
+    # Variables
+    - export VEREINSWAHL_DEPLOY_PATH="/var/www/html/voting-tool-vereinswahl"
+    - export VEREINSWAHL_DOMAIN="vereinswahl.vielwerth-junginger.de"
+    
+    # Backup erstellen
+    - |
+      if [ -f "${VEREINSWAHL_DEPLOY_PATH}/docker-compose.yml" ]; then
+        cp ${VEREINSWAHL_DEPLOY_PATH}/docker-compose.yml ${VEREINSWAHL_DEPLOY_PATH}/docker-compose.yml.backup.$(date +%Y%m%d_%H%M%S)
+        echo "✅ Backup created"
+      fi
+      
+      # Verzeichnis erstellen falls nicht vorhanden
+      mkdir -p ${VEREINSWAHL_DEPLOY_PATH}
+      
+      # Docker-Compose kopieren
+      cp docker/production/docker-compose-vereinswahl.yml ${VEREINSWAHL_DEPLOY_PATH}/docker-compose.yml
+      
+      # Check if registry images are available, otherwise use local images
+      if docker pull ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} 2>/dev/null; then
+        export API_IMAGE="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export CLIENT_IMAGE="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        echo "✅ Using registry images with SHA tags"
+      else
+        # Tag local images with SHA for deployment
+        docker tag ${API_IMAGE}:latest ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag API image"
+        docker tag ${CLIENT_IMAGE}:latest ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag Client image"
+        export API_IMAGE="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export CLIENT_IMAGE="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        echo "✅ Using locally tagged images with SHA"
+      fi
+      
+      # Set environment variables for deployment
+      export CI_COMMIT_SHORT_SHA="${CI_COMMIT_SHORT_SHA}"
+      export DOMAIN="${VEREINSWAHL_DOMAIN}"
+      export NODE_ENV="production"
+      export DATABASE_HOST="db"
+      export DATABASE_USER="${VEREINSWAHL_DB_USER:-vereinswahl_user}"
+      export DATABASE_PASSWORD="${VEREINSWAHL_DB_PASSWORD:-vereinswahl_password}"
+      export DATABASE_NAME="${VEREINSWAHL_DB_NAME:-vereinswahl_db}"
+      export DATABASE_ROOT_PASSWORD="${VEREINSWAHL_DB_ROOT_PASSWORD:-vereinswahl_root_password}"
+      export JWT_SECRET="${VEREINSWAHL_JWT_SECRET:-vereinswahl-jwt-secret-key}"
+      export COOKIE_SIGN_SECRET="${VEREINSWAHL_COOKIE_SIGN_SECRET:-vereinswahl-cookie-secret-key}"
+      export EMAIL_HOST="${VEREINSWAHL_EMAIL_HOST:-smtp.example.com}"
+      export EMAIL_PORT="${VEREINSWAHL_EMAIL_PORT:-587}"
+      export EMAIL_USER="${VEREINSWAHL_EMAIL_USER:-noreply@vielwerth-junginger.de}"
+      export EMAIL_PASSWORD="${VEREINSWAHL_EMAIL_PASSWORD:-email_password}"
+      
+      # Create clean .env file manually (avoid env parsing issues)
+      cat > ${VEREINSWAHL_DEPLOY_PATH}/.env << 'ENVEOF'
+      API_IMAGE=${API_IMAGE}
+      CLIENT_IMAGE=${CLIENT_IMAGE}
+      CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA}
+      DOMAIN=${DOMAIN}
+      NODE_ENV=${NODE_ENV}
+      DATABASE_HOST=${DATABASE_HOST}
+      DATABASE_USER=${DATABASE_USER}
+      DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      DATABASE_NAME=${DATABASE_NAME}
+      DATABASE_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
+      JWT_SECRET=${JWT_SECRET}
+      COOKIE_SIGN_SECRET=${COOKIE_SIGN_SECRET}
+      EMAIL_HOST=${EMAIL_HOST}
+      EMAIL_PORT=${EMAIL_PORT}
+      EMAIL_USER=${EMAIL_USER}
+      EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      ENVEOF
+      
+      # Deploy mit docker-compose
+      cd ${VEREINSWAHL_DEPLOY_PATH}
+      docker compose pull || echo "⚠️ Pull failed, using local images"
+      docker compose up -d --remove-orphans
+      
+      # Status anzeigen
+      docker ps | grep vereinswahl
+      echo "✅ Vereinswahl voting tool deployment completed"
+  
+  environment:
+    name: vereinswahl-production
+    url: https://${VEREINSWAHL_DOMAIN}
+  when: manual
+  only:
+    - main
+  needs:
+    - build_api
+    - build_client
+  tags:
+    - docker
+    - deploy
+
 # Rollback Job
 rollback:
   stage: deploy
