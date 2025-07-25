@@ -14,7 +14,7 @@ async function checkApiHealth() {
 
   return new Promise((resolve, reject) => {
     const options = {
-      hostname: 'localhost',
+      hostname: '127.0.0.1',
       port: 4000,
       path: '/graphql',
       method: 'POST',
@@ -53,7 +53,7 @@ async function checkApiHealth() {
 
 async function checkWebSocketHealth() {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket('ws://localhost:4000/graphql', {
+    const ws = new WebSocket('ws://127.0.0.1:4000/graphql', {
       headers: {
         'Sec-WebSocket-Protocol': 'graphql-ws'
       },
