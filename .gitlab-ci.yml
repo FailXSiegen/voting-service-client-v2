@@ -86,46 +86,35 @@ deploy:
       # .env Datei erstellen mit den neuesten Image Tags
       # Check if registry images are available, otherwise use local images
       if docker pull ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} 2>/dev/null; then
-        API_TAG="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        CLIENT_TAG="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export API_IMAGE="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export CLIENT_IMAGE="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
         echo "✅ Using registry images with SHA tags"
       else
         # Tag local images with SHA for deployment
         docker tag ${API_IMAGE}:latest ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag API image"
         docker tag ${CLIENT_IMAGE}:latest ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag Client image"
-        API_TAG="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        CLIENT_TAG="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export API_IMAGE="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export CLIENT_IMAGE="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
         echo "✅ Using locally tagged images with SHA"
       fi
       
-      cat > ${DEPLOY_PATH}/.env << EOF
-      # Docker Images
-      API_IMAGE=${API_TAG}
-      CLIENT_IMAGE=${CLIENT_TAG}
+      # Set environment variables for deployment
+      export CI_COMMIT_SHORT_SHA="${CI_COMMIT_SHORT_SHA}"
+      export DOMAIN="${DOMAIN}"
+      export NODE_ENV="production"
+      export DATABASE_HOST="db"
+      export DATABASE_USER="${VOTING_DB_USER:-voting_user}"
+      export DATABASE_PASSWORD="${VOTING_DB_PASSWORD:-voting_password}"
+      export DATABASE_NAME="${VOTING_DB_NAME:-voting_db}"
+      export DATABASE_ROOT_PASSWORD="${VOTING_DB_ROOT_PASSWORD:-root_password}"
+      export JWT_SECRET="${VOTING_JWT_SECRET:-voting-jwt-secret-key}"
+      export EMAIL_HOST="${VOTING_EMAIL_HOST:-smtp.example.com}"
+      export EMAIL_PORT="${VOTING_EMAIL_PORT:-587}"
+      export EMAIL_USER="${VOTING_EMAIL_USER:-noreply@example.com}"
+      export EMAIL_PASSWORD="${VOTING_EMAIL_PASSWORD:-email_password}"
       
-      # Commit Info for Container Names
-      CI_COMMIT_SHORT_SHA=${CI_COMMIT_SHORT_SHA}
-      
-      # Application Settings
-      DOMAIN=${DOMAIN}
-      NODE_ENV=production
-      
-      # Database (wird aus GitLab CI/CD Variablen gelesen)
-      DATABASE_HOST=db
-      DATABASE_USER=${VOTING_DB_USER:-voting_user}
-      DATABASE_PASSWORD=${VOTING_DB_PASSWORD:-voting_password}
-      DATABASE_NAME=${VOTING_DB_NAME:-voting_db}
-      DATABASE_ROOT_PASSWORD=${VOTING_DB_ROOT_PASSWORD:-root_password}
-      
-      # JWT Secret
-      JWT_SECRET=${VOTING_JWT_SECRET:-voting-jwt-secret-key}
-      
-      # Email Settings
-      EMAIL_HOST=${VOTING_EMAIL_HOST:-smtp.example.com}
-      EMAIL_PORT=${VOTING_EMAIL_PORT:-587}
-      EMAIL_USER=${VOTING_EMAIL_USER:-noreply@example.com}
-      EMAIL_PASSWORD=${VOTING_EMAIL_PASSWORD:-email_password}
-      EOF
+      # Create .env file from environment variables (like your example)
+      env | grep -v "^CI_" | grep -v "^$" | grep "=" | sed 's/ *= */=/g' > ${DEPLOY_PATH}/.env
       
       # Deploy mit docker-compose
       cd ${DEPLOY_PATH}
