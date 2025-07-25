@@ -41,6 +41,7 @@ services:
       - APP_PORT=4000
       - GRAPHQL_ENDPOINT=/graphql
       - WEBSOCKET_ENDPOINT=/graphql
+      - COOKIE_SIGN_SECRET=${COOKIE_SIGN_SECRET}
     depends_on:
       - db
     deploy:
