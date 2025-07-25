@@ -60,6 +60,7 @@ services:
       - "traefik.http.routers.voting-api.priority=100"
       - "traefik.http.routers.voting-api.entrypoints=websecure"
       - "traefik.http.routers.voting-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.voting-api.service=voting-api"
       - "traefik.http.services.voting-api.loadbalancer.server.port=4000"
       - "traefik.docker.network=gitlab-setup_traefik"
       # WebSocket Support
