@@ -1,0 +1,101 @@
+version: '3.8'
+
+# Lokale Test-Konfiguration für Voting Tool
+# Nutzt lokale Builds statt Registry Images
+
+networks:
+  voting_network:
+    driver: bridge
+
+volumes:
+  db_data:
+  uploads:
+  logs_volume:
+
+services:
+  # API Service (Lokaler Build)
+  api:
+    build:
+      context: .
+      dockerfile: docker/test/Dockerfile.api
+    container_name: voting_api_test
+    restart: unless-stopped
+    networks:
+      - voting_network
+    ports:
+      - "4000:4000"
+    volumes:
+      - uploads:/app/uploads
+      - logs_volume:/app/logs
+    environment:
+      - NODE_ENV=development
+      - JWT_SECRET=test-jwt-secret-key-123456789
+      - DATABASE_HOST=db
+      - DATABASE_USER=voting_user
+      - DATABASE_PASSWORD=voting_password
+      - DATABASE_NAME=voting_db
+      - EMAIL_HOST=smtp.example.com
+      - EMAIL_PORT=587
+      - EMAIL_USER=test@example.com
+      - EMAIL_PASSWORD=test-password
+      - HOST=localhost
+      - APP_PORT=4000
+      - GRAPHQL_ENDPOINT=/graphql
+      - WEBSOCKET_ENDPOINT=/graphql
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "node", "/app/healthcheck.js", "api"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Client Service (Lokaler Build)
+  client:
+    build:
+      context: .
+      dockerfile: docker/production/Dockerfile.client
+    container_name: voting_client_test
+    restart: unless-stopped
+    networks:
+      - voting_network
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Database Service
+  db:
+    image: mariadb:10.11
+    container_name: voting_db_test
+    restart: unless-stopped
+    networks:
+      - voting_network
+    environment:
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_USER=voting_user
+      - MYSQL_PASSWORD=voting_password
+      - MYSQL_DATABASE=voting_db
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command: |
+      mysqld
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --max_connections=1500
+      --innodb-buffer-pool-size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
