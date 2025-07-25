@@ -84,10 +84,24 @@ deploy:
       cp docker/production/docker-compose.yml ${DEPLOY_PATH}/
       
       # .env Datei erstellen mit den neuesten Image Tags
+      # Check if registry images are available, otherwise use local images
+      if docker pull ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} 2>/dev/null; then
+        API_TAG="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        CLIENT_TAG="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        echo "✅ Using registry images with SHA tags"
+      else
+        # Tag local images with SHA for deployment
+        docker tag ${API_IMAGE}:latest ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag API image"
+        docker tag ${CLIENT_IMAGE}:latest ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag Client image"
+        API_TAG="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        CLIENT_TAG="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        echo "✅ Using locally tagged images with SHA"
+      fi
+      
       cat > ${DEPLOY_PATH}/.env << EOF
       # Docker Images
-      API_IMAGE=${API_IMAGE}:${CI_COMMIT_SHORT_SHA}
-      CLIENT_IMAGE=${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}
+      API_IMAGE=${API_TAG}
+      CLIENT_IMAGE=${CLIENT_TAG}
       
       # Application Settings
       DOMAIN=${DOMAIN}
