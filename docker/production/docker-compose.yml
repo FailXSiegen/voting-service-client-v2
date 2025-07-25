@@ -57,7 +57,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.voting-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/logout`))"
-      - "traefik.http.routers.voting-api.priority=20"
+      - "traefik.http.routers.voting-api.priority=100"
       - "traefik.http.routers.voting-api.entrypoints=websecure"
       - "traefik.http.routers.voting-api.tls.certresolver=letsencrypt"
       - "traefik.http.services.voting-api.loadbalancer.server.port=4000"
