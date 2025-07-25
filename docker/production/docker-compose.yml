@@ -23,8 +23,6 @@ services:
     volumes:
       - uploads:/app/uploads
       - logs_volume:/app/logs
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET}
