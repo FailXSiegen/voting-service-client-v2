@@ -53,12 +53,7 @@ async function checkApiHealth() {
 
 async function checkWebSocketHealth() {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket('ws://127.0.0.1:4000/graphql', {
-      headers: {
-        'Sec-WebSocket-Protocol': 'graphql-ws'
-      },
-      timeout: 3000
-    });
+    const ws = new WebSocket('ws://127.0.0.1:4000/graphql', ['graphql-transport-ws']);
 
     let connectionAcknowledged = false;
 
