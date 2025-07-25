@@ -5,6 +5,7 @@ networks:
     driver: bridge
   gitlab-setup_traefik:
     external: true
+    name: gitlab-setup_traefik
 
 volumes:
   db_data:
