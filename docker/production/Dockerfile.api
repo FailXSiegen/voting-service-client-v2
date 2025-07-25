@@ -19,17 +19,50 @@ WORKDIR /app
 COPY voting-service-api/package.json voting-service-api/package-lock.json ./
 RUN npm ci
 COPY voting-service-api/ ./
-RUN npm run build
+
+# Build with debug info
+RUN echo "=== DEBUG: Building API application ===" && \
+    echo "Node version: $(node --version)" && \
+    echo "NPM version: $(npm --version)" && \
+    echo "Current directory: $(pwd)" && \
+    echo "Environment variables:" && \
+    env | grep -E "(NODE_ENV|DATABASE_|JWT_|EMAIL_)" || echo "No relevant env vars found" && \
+    echo "Package.json scripts:" && \
+    cat package.json | grep -A 10 '"scripts"' && \
+    echo "Database.json content:" && \
+    cat database.json && \
+    echo "Source files:" && \
+    find src -name "*.js" | head -10 && \
+    echo "=== Starting build ===" && \
+    npm run build && \
+    echo "=== Build completed ===" && \
+    echo "Dist directory contents:" && \
+    ls -la dist/ && \
+    echo "Migrations directory:" && \
+    ls -la migrations/
 
 # Production stage
 FROM base AS production
 
-# Copy built application
+# Copy built application with debug info
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/database.json ./database.json
 COPY --from=build /app/migrations ./migrations
+
+# Debug: Show what was copied to production
+RUN echo "=== DEBUG: Production stage API ===" && \
+    echo "Production directory contents:" && \
+    ls -la /app && \
+    echo "Dist directory contents:" && \
+    ls -la /app/dist && \
+    echo "Database.json in production:" && \
+    cat /app/database.json && \
+    echo "Main entry point exists:" && \
+    ls -la /app/dist/index.js 2>/dev/null || echo "dist/index.js not found" && \
+    echo "Node modules installed:" && \
+    ls /app/node_modules | head -10
 
 # Copy health check and entrypoint scripts
 COPY docker/production/healthcheck.js ./healthcheck.js
