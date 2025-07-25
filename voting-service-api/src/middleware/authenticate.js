@@ -59,6 +59,10 @@ export default async function (req, res, next) {
         body.query.includes('staticContentsByPage') ||
         body.query.includes('GetFaqContent') ||
         body.operationName === 'GetFaqContent' ||
+        // Translations queries
+        body.query.includes('translations') ||
+        body.query.includes('GetTranslations') ||
+        body.operationName === 'GetTranslations' ||
         // WebSocket keep-alive query
         body.query.includes('__typename') ||
         body.operationName === 'KeepAlive'
