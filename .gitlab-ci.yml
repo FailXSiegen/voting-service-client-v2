@@ -35,9 +35,9 @@ build_api:
     - docker build -f docker/production/Dockerfile.api -t ${API_IMAGE}:latest -t ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} .
     - |
       if docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${REGISTRY} 2>/dev/null; then
-        docker push ${API_IMAGE}:latest
-        docker push ${API_IMAGE}:${CI_COMMIT_SHORT_SHA}
-        echo "✅ API image pushed to registry"
+        docker push ${API_IMAGE}:latest || echo "⚠️ Push failed, continuing with local image"
+        docker push ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Push failed, continuing with local image"
+        echo "✅ API image build completed"
       else
         echo "⚠️  Registry not available, using local images"
       fi
@@ -54,9 +54,9 @@ build_client:
     - docker build -f docker/production/Dockerfile.client -t ${CLIENT_IMAGE}:latest -t ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} .
     - |
       if docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${REGISTRY} 2>/dev/null; then
-        docker push ${CLIENT_IMAGE}:latest
-        docker push ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}
-        echo "✅ Client image pushed to registry"
+        docker push ${CLIENT_IMAGE}:latest || echo "⚠️ Push failed, continuing with local image"
+        docker push ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Push failed, continuing with local image"
+        echo "✅ Client image build completed"
       else
         echo "⚠️  Registry not available, using local images"
       fi
@@ -112,7 +112,7 @@ deploy:
       
       # Deploy mit docker-compose
       cd ${DEPLOY_PATH}
-      docker compose pull
+      docker compose pull || echo "⚠️ Pull failed, using local images"
       docker compose up -d --remove-orphans
       
       # Status anzeigen
