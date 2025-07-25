@@ -152,7 +152,7 @@ deploy:
   environment:
     name: production
     url: https://${DOMAIN}
-  when: manual
+  when: on_success
   only:
     - main
   needs:
