@@ -50,6 +50,7 @@ COPY --from=build /app/package*.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/database.json ./database.json
 COPY --from=build /app/migrations ./migrations
+COPY --from=build /app/bin ./bin
 
 # Debug: Show what was copied to production
 RUN echo "=== DEBUG: Production stage API ===" && \
