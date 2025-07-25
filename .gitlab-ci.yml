@@ -114,6 +114,7 @@ deploy:
       export DATABASE_NAME="${VOTING_DB_NAME:-voting_db}"
       export DATABASE_ROOT_PASSWORD="${VOTING_DB_ROOT_PASSWORD:-root_password}"
       export JWT_SECRET="${VOTING_JWT_SECRET:-voting-jwt-secret-key}"
+      export COOKIE_SIGN_SECRET="${VOTING_COOKIE_SIGN_SECRET:-voting-cookie-secret-key}"
       export EMAIL_HOST="${VOTING_EMAIL_HOST:-smtp.example.com}"
       export EMAIL_PORT="${VOTING_EMAIL_PORT:-587}"
       export EMAIL_USER="${VOTING_EMAIL_USER:-noreply@example.com}"
@@ -132,6 +133,7 @@ deploy:
       DATABASE_NAME=${DATABASE_NAME}
       DATABASE_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
       JWT_SECRET=${JWT_SECRET}
+      COOKIE_SIGN_SECRET=${COOKIE_SIGN_SECRET}
       EMAIL_HOST=${EMAIL_HOST}
       EMAIL_PORT=${EMAIL_PORT}
       EMAIL_USER=${EMAIL_USER}
