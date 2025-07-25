@@ -1,6 +1,17 @@
 #!/bin/sh
 set -e
 
+echo "=== DEBUG: API Container Startup ==="
+echo "Current time: $(date)"
+echo "Current user: $(whoami)"
+echo "Current directory: $(pwd)"
+echo "Environment variables:"
+env | grep -E "(NODE_ENV|DATABASE_|JWT_|EMAIL_|RABBITMQ_|HOST|DOMAIN)" | sort
+echo "Command to execute: $@"
+echo "Files in app directory:"
+ls -la /app
+echo "=========================="
+
 # Function to wait for database
 wait_for_db() {
     echo "Waiting for database connection..."

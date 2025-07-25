@@ -12,8 +12,47 @@ RUN npm ci
 # Copy source code
 COPY voting-service-client-v2/ ./
 
-# Build the application
-RUN npm run build
+# Set build-time environment variables for Vite
+ARG VITE_API_BASE_URL
+ARG VITE_SUBSCRIPTION_URL
+ARG DOMAIN
+
+# Set production environment variables for build
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://digitalwahl.failx.de}
+ENV VITE_SUBSCRIPTION_URL=${VITE_SUBSCRIPTION_URL:-wss://digitalwahl.failx.de/graphql}
+ENV VITE_GRAPHQL_ENDPOINT="/graphql"
+ENV VITE_LOGIN_ENDPOINT="/login"
+ENV VITE_VALIDATE_PASSWORD_ENDPOINT="/login/password-verify"
+ENV VITE_REFRESH_LOGIN_ENDPOINT="/login/refresh"
+ENV VITE_EVENT_USER_AUTH_TOKEN_LOGIN_ENDPOINT="/login/event-user-auth-token"
+ENV VITE_REQUEST_ACTIVATE_EVENT_USER_AUTH_TOKEN="/login/activate-event-user-auth-token"
+ENV VITE_LOGOUT_ENDPOINT="/logout"
+ENV VITE_REQUEST_ORGANIZER_REQUEST_PASSWORD_CHANGE_ENDPOINT="/organizer/password-forgot"
+ENV VITE_REQUEST_ORGANIZER_CHANGE_PASSWORD_ENDPOINT="/organizer/update-password"
+ENV VITE_REQUEST_ORGANIZER_CREATE="/organizer/create"
+ENV VITE_REQUEST_ORGANIZER_VALIDATE_HASH_ENDPOINT="/organizer/validate-hash"
+ENV VITE_REQUEST_ORGANIZER_EXPORT_RESULTS="/event/export-results"
+ENV VITE_REQUEST_EVENT_VERIFY_SLUG="/event/verify-slug"
+ENV VITE_REQUEST_EVENT_FETCH_BY_ID="/event"
+ENV VITE_REQUEST_ZOOM_AUTH="/zoom/auth/token"
+ENV VITE_RECAPTCHA_SITE_KEY=""
+
+# Build the application with debug info
+RUN echo "=== DEBUG: Building client application ===" && \
+    echo "Node version: $(node --version)" && \
+    echo "NPM version: $(npm --version)" && \
+    echo "Current directory: $(pwd)" && \
+    echo "Environment variables:" && \
+    env | grep -E "(NODE_ENV|API_URL|VITE_|VUE_)" || echo "No relevant env vars found" && \
+    echo "Package.json scripts:" && \
+    cat package.json | grep -A 10 '"scripts"' && \
+    echo "=== Starting build ===" && \
+    npm run build && \
+    echo "=== Build completed ===" && \
+    echo "Dist directory contents:" && \
+    ls -la dist/ && \
+    echo "Index.html content:" && \
+    head -20 dist/index.html
 
 # Production stage with Nginx
 FROM nginx:alpine AS production
@@ -25,8 +64,17 @@ RUN apk add --no-cache curl
 COPY docker/production/nginx.conf /etc/nginx/nginx.conf
 COPY docker/production/default.conf /etc/nginx/conf.d/default.conf
 
-# Copy built application
+# Copy built application with debug info
 COPY --from=build /app/dist /usr/share/nginx/html
+
+# Debug: Show what was copied
+RUN echo "=== DEBUG: Production stage ===" && \
+    echo "Nginx HTML directory contents:" && \
+    ls -la /usr/share/nginx/html && \
+    echo "Index.html in production:" && \
+    head -10 /usr/share/nginx/html/index.html && \
+    echo "Assets directory:" && \
+    ls -la /usr/share/nginx/html/assets/ 2>/dev/null || echo "No assets directory found"
 
 # Create non-root user for nginx
 RUN addgroup -g 1001 -S nginx-app && \
