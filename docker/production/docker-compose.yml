@@ -15,7 +15,7 @@ services:
   # API Service
   api:
     image: ${API_IMAGE:-gitlab.failx.de/hetzner/voting-tool/api:latest}
-    container_name: voting_api
+    container_name: voting_api_${CI_COMMIT_SHORT_SHA:-latest}
     restart: unless-stopped
     networks:
       - voting_network
@@ -73,7 +73,7 @@ services:
   # Client Service
   client:
     image: ${CLIENT_IMAGE:-gitlab.failx.de/hetzner/voting-tool/client:latest}
-    container_name: voting_client
+    container_name: voting_client_${CI_COMMIT_SHORT_SHA:-latest}
     restart: unless-stopped
     networks:
       - gitlab-setup_traefik
@@ -109,7 +109,7 @@ services:
   # Database Service
   db:
     image: mariadb:10.11
-    container_name: voting_db
+    container_name: voting_db_${CI_COMMIT_SHORT_SHA:-latest}
     restart: unless-stopped
     networks:
       - voting_network
