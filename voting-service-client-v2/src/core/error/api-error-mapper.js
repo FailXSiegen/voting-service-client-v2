@@ -19,6 +19,7 @@ export function mapApiErrorToClientError(apiErrorName) {
     case "InvalidCredentialsError":
     case "UnauthorizedError":
     case "InvalidPasswordError":
+    case "AuthenticationError":
       return new UnauthorizedError();
     default:
       return new NetworkError();
