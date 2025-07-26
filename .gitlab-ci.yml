@@ -288,6 +288,14 @@ rollback:
     - deploy
 
 # ============================================
+# SERVER RUNNER JOBS (wenn verfügbar)
+# ============================================
+
+# Include Server-Runner Jobs falls verfügbar
+include:
+  - local: '.gitlab-ci-server-runner.yml'
+
+# ============================================
 # TEST STAGE JOBS - Manuell triggerbare Tests
 # ============================================
 

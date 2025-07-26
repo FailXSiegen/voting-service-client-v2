@@ -1,0 +1,154 @@
+# GitLab CI für Server-Runner (Shell Executor)
+# Verwendet den lokal installierten Runner auf dem voting.failx.de Server
+
+# Backup Job für Server-Runner
+backup_database_server:
+  stage: test-prepare
+  script:
+    - echo "📦 Erstelle Datenbank-Backup (Server-Runner)..."
+    - |
+      # Wechsle ins voting-tool Verzeichnis
+      cd /var/www/html/voting-tool
+      
+      # Backup-Verzeichnis erstellen
+      mkdir -p /var/www/html/voting-tool-backups
+      
+      # Timestamp für Backup
+      export BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+      export BACKUP_FILE="/var/www/html/voting-tool-backups/voting-db-backup-${BACKUP_TIMESTAMP}.sql"
+      
+      # Prüfe Docker Compose Status
+      echo "Docker Compose Status:"
+      docker compose ps
+      
+      # Erstelle Backup
+      echo "Erstelle Backup: ${BACKUP_FILE}"
+      docker compose exec -T db mysqldump -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} > "${BACKUP_FILE}"
+      
+      # Prüfe Backup
+      if [ -s "${BACKUP_FILE}" ]; then
+        echo "✅ Backup erfolgreich erstellt: ${BACKUP_FILE}"
+        echo "Backup-Größe: $(du -h ${BACKUP_FILE} | cut -f1)"
+        
+        # Speichere Info für nachfolgende Jobs
+        echo "BACKUP_FILE=${BACKUP_FILE}" > backup-info.env
+        echo "BACKUP_TIMESTAMP=${BACKUP_TIMESTAMP}" >> backup-info.env
+      else
+        echo "❌ Backup fehlgeschlagen!"
+        exit 1
+      fi
+  artifacts:
+    reports:
+      dotenv: backup-info.env
+    expire_in: 1 week
+  when: manual
+  only:
+    - main
+  tags:
+    - server  # Nur auf Server-Runner ausführen
+
+# Import Job für Server-Runner  
+import_test_data_server:
+  stage: test-prepare
+  script:
+    - echo "📥 Importiere Testdaten (Server-Runner)..."
+    - |
+      # Wechsle ins voting-tool Verzeichnis
+      cd /var/www/html/voting-tool
+      
+      # Git Repository aktualisieren (falls Runner nicht automatisch pullt)
+      git pull origin main || echo "Git pull failed, using existing files"
+      
+      # Prüfe ob SQL-Datei existiert
+      if [ ! -f "test-data/load-test-scenario.sql" ]; then
+        echo "❌ SQL-Datei nicht gefunden!"
+        echo "Verfügbare Dateien:"
+        find . -name "*.sql" -type f || echo "Keine SQL-Dateien gefunden"
+        exit 1
+      fi
+      
+      # Docker Compose Status prüfen
+      echo "Docker Compose Status:"
+      docker compose ps
+      
+      # Importiere Testdaten
+      echo "Importiere SQL-Daten..."
+      docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < test-data/load-test-scenario.sql
+      
+      if [ $? -eq 0 ]; then
+        echo "✅ Testdaten erfolgreich importiert"
+        
+        # Prüfe importierte Daten
+        USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null)
+        echo "Importierte Testnutzer: ${USER_COUNT}"
+        
+        # Speichere Event-Informationen
+        echo "TEST_EVENT_SLUG=lasttest-2025" > test-info.env
+        echo "TEST_EVENT_URL=https://voting.failx.de/#/register/lasttest-2025" >> test-info.env
+        echo "TEST_USER_COUNT=${USER_COUNT}" >> test-info.env
+      else
+        echo "❌ Import fehlgeschlagen!"
+        exit 1
+      fi
+  artifacts:
+    reports:
+      dotenv: test-info.env
+    expire_in: 1 week
+  needs:
+    - backup_database_server
+  when: manual
+  only:
+    - main
+  tags:
+    - server
+
+# Restore Job für Server-Runner
+restore_database_server:
+  stage: test-cleanup
+  script:
+    - echo "♻️ Stelle Datenbank wieder her (Server-Runner)..."
+    - |
+      # Wechsle ins voting-tool Verzeichnis
+      cd /var/www/html/voting-tool
+      
+      # Verwende Backup-File aus vorherigem Job oder suche neuestes
+      if [ -z "${BACKUP_FILE}" ]; then
+        echo "Suche nach neuestem Backup..."
+        BACKUP_FILE=$(ls -t /var/www/html/voting-tool-backups/voting-db-backup-*.sql 2>/dev/null | head -1)
+        echo "Gefundenes Backup: ${BACKUP_FILE}"
+      fi
+      
+      # Prüfe Backup-Datei
+      if [ -f "${BACKUP_FILE}" ]; then
+        echo "Stelle Backup wieder her: ${BACKUP_FILE}"
+        
+        # Docker Compose Status prüfen
+        echo "Docker Compose Status:"
+        docker compose ps
+        
+        # Importiere Backup
+        docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < "${BACKUP_FILE}"
+        
+        if [ $? -eq 0 ]; then
+          echo "✅ Datenbank erfolgreich wiederhergestellt"
+          
+          # Prüfe ob Testdaten entfernt wurden
+          USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null || echo "0")
+          echo "Verbleibende Testnutzer: ${USER_COUNT}"
+        else
+          echo "❌ Wiederherstellung fehlgeschlagen!"
+          exit 1
+        fi
+      else
+        echo "❌ Backup-Datei nicht gefunden: ${BACKUP_FILE}"
+        echo "Verfügbare Backups:"
+        ls -la /var/www/html/voting-tool-backups/ || echo "Keine Backups gefunden"
+        exit 1
+      fi
+  needs:
+    - backup_database_server
+  when: manual
+  only:
+    - main
+  tags:
+    - server
