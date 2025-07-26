@@ -291,12 +291,22 @@ rollback:
 # TEST STAGE JOBS - Manuell triggerbare Tests
 # ============================================
 
-# Datenbank Backup erstellen
+# Datenbank Backup erstellen (Shell-Executor notwendig!)
 backup_database:
   stage: test-prepare
   script:
     - echo "📦 Erstelle Datenbank-Backup..."
     - |
+      # Prüfe ob wir auf dem Deploy-Server sind
+      if [ ! -d "/var/www/html/voting-tool" ]; then
+        echo "❌ FEHLER: Deploy-Pfad nicht gefunden!"
+        echo "Dieser Job muss auf einem Shell-Executor mit Zugriff auf /var/www/html/ laufen."
+        echo "Aktueller Pfad: $(pwd)"
+        echo "Verfügbare Pfade:"
+        ls -la /var/www/ 2>/dev/null || echo "Kein /var/www/ Verzeichnis"
+        exit 1
+      fi
+      
       # Variablen für Test-Umgebung
       export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
       export BACKUP_DIR="/var/www/html/voting-tool-backups"
@@ -310,7 +320,16 @@ backup_database:
       
       # Datenbank-Backup erstellen
       cd ${TEST_DEPLOY_PATH}
-      docker compose exec -T db mysqldump -u root -p${DATABASE_ROOT_PASSWORD} ${DATABASE_NAME} > ${BACKUP_FILE}
+      
+      # Prüfe ob Docker Compose läuft
+      if ! docker compose ps | grep -q "Up"; then
+        echo "❌ FEHLER: Docker Compose Services nicht aktiv!"
+        docker compose ps
+        exit 1
+      fi
+      
+      # Erstelle Backup
+      docker compose exec -T db mysqldump -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} > ${BACKUP_FILE}
       
       # Prüfe Backup-Größe
       if [ -s ${BACKUP_FILE} ]; then
@@ -332,15 +351,21 @@ backup_database:
   only:
     - main
   tags:
-    - docker
-    - deploy
+    - shell  # WICHTIG: Shell-Executor statt Docker!
 
-# Testdaten importieren
+# Testdaten importieren (Shell-Executor notwendig!)
 import_test_data:
   stage: test-prepare
   script:
     - echo "📥 Importiere Testdaten..."
     - |
+      # Prüfe ob wir auf dem Deploy-Server sind
+      if [ ! -d "/var/www/html/voting-tool" ]; then
+        echo "❌ FEHLER: Deploy-Pfad nicht gefunden!"
+        echo "Dieser Job muss auf einem Shell-Executor mit Zugriff auf /var/www/html/ laufen."
+        exit 1
+      fi
+      
       export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
       
       # Kopiere SQL-Datei zum Server
@@ -348,18 +373,31 @@ import_test_data:
       
       cd ${TEST_DEPLOY_PATH}
       
+      # Prüfe ob Docker Compose läuft
+      if ! docker compose ps | grep -q "Up"; then
+        echo "❌ FEHLER: Docker Compose Services nicht aktiv!"
+        docker compose ps
+        exit 1
+      fi
+      
       # Importiere Testdaten
-      docker compose exec -T db mysql -u root -p${DATABASE_ROOT_PASSWORD} ${DATABASE_NAME} < load-test-scenario.sql
+      echo "Importiere SQL-Daten..."
+      docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < load-test-scenario.sql
       
       if [ $? -eq 0 ]; then
         echo "✅ Testdaten erfolgreich importiert"
+        
+        # Prüfe ob Daten wirklich importiert wurden
+        USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N)
+        echo "Importierte Testnutzer: ${USER_COUNT}"
         
         # Aufräumen
         rm -f load-test-scenario.sql
         
         # Speichere Event-Informationen
         echo "TEST_EVENT_SLUG=lasttest-2025" > test-info.env
-        echo "TEST_EVENT_URL=https://${DOMAIN}/#/register/lasttest-2025" >> test-info.env
+        echo "TEST_EVENT_URL=https://${VOTING_DOMAIN:-voting.failx.de}/#/register/lasttest-2025" >> test-info.env
+        echo "TEST_USER_COUNT=${USER_COUNT}" >> test-info.env
       else
         echo "❌ Import der Testdaten fehlgeschlagen!"
         exit 1
@@ -374,8 +412,7 @@ import_test_data:
   only:
     - main
   tags:
-    - docker
-    - deploy
+    - shell  # WICHTIG: Shell-Executor statt Docker!
 
 # Playwright Load Tests ausführen (Ressourcen-optimiert)
 run_load_tests:
@@ -485,25 +522,50 @@ run_performance_test:
     - docker
     - deploy
 
-# Datenbank wiederherstellen
+# Datenbank wiederherstellen (Shell-Executor notwendig!)
 restore_database:
   stage: test-cleanup
   script:
     - echo "♻️ Stelle Datenbank-Backup wieder her..."
     - |
+      # Prüfe ob wir auf dem Deploy-Server sind
+      if [ ! -d "/var/www/html/voting-tool" ]; then
+        echo "❌ FEHLER: Deploy-Pfad nicht gefunden!"
+        echo "Dieser Job muss auf einem Shell-Executor mit Zugriff auf /var/www/html/ laufen."
+        exit 1
+      fi
+      
       export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
       
       cd ${TEST_DEPLOY_PATH}
+      
+      # Prüfe ob Docker Compose läuft
+      if ! docker compose ps | grep -q "Up"; then
+        echo "❌ FEHLER: Docker Compose Services nicht aktiv!"
+        docker compose ps
+        exit 1
+      fi
+      
+      # Suche nach neuestem Backup falls BACKUP_FILE nicht gesetzt
+      if [ -z "${BACKUP_FILE}" ]; then
+        echo "Suche nach neuestem Backup..."
+        BACKUP_FILE=$(ls -t /var/www/html/voting-tool-backups/voting-db-backup-*.sql 2>/dev/null | head -1)
+        echo "Gefundenes Backup: ${BACKUP_FILE}"
+      fi
       
       # Prüfe ob Backup-Datei existiert
       if [ -f "${BACKUP_FILE}" ]; then
         echo "Stelle Backup wieder her: ${BACKUP_FILE}"
         
         # Importiere Backup
-        docker compose exec -T db mysql -u root -p${DATABASE_ROOT_PASSWORD} ${DATABASE_NAME} < ${BACKUP_FILE}
+        docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < ${BACKUP_FILE}
         
         if [ $? -eq 0 ]; then
           echo "✅ Datenbank erfolgreich wiederhergestellt"
+          
+          # Prüfe ob Testdaten entfernt wurden
+          USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null || echo "0")
+          echo "Verbleibende Testnutzer: ${USER_COUNT}"
           
           # Optional: Backup-Datei behalten für Archivierung
           echo "Backup-Datei bleibt erhalten: ${BACKUP_FILE}"
@@ -513,6 +575,8 @@ restore_database:
         fi
       else
         echo "❌ Backup-Datei nicht gefunden: ${BACKUP_FILE}"
+        echo "Verfügbare Backups:"
+        ls -la /var/www/html/voting-tool-backups/ 2>/dev/null || echo "Keine Backups gefunden"
         exit 1
       fi
   needs:
@@ -521,5 +585,4 @@ restore_database:
   only:
     - main
   tags:
-    - docker
-    - deploy
+    - shell  # WICHTIG: Shell-Executor statt Docker!
