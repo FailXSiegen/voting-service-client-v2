@@ -373,11 +373,24 @@ import_test_data:
       
       # Kopiere SQL-Datei in Volume über temporären Container
       echo "Kopiere SQL-Datei in temporären Container..."
+      echo "Current directory: $(pwd)"
+      echo "Available files:"
+      ls -la test-data/ || echo "test-data directory not found"
+      
+      # Debug: Prüfe aktuelles Verzeichnis und Inhalt
+      if [ ! -f "test-data/load-test-scenario.sql" ]; then
+        echo "❌ SQL-Datei nicht gefunden!"
+        echo "Working directory: $(pwd)"
+        echo "Directory contents:"
+        find . -name "*.sql" -type f 2>/dev/null || echo "Keine SQL-Dateien gefunden"
+        exit 1
+      fi
+      
       docker run --rm \
         -v "$(pwd)/test-data:/source:ro" \
         -v voting-test-sql:/sql \
         alpine:latest \
-        cp /source/load-test-scenario.sql /sql/
+        sh -c "ls -la /source/ && cp /source/load-test-scenario.sql /sql/ && echo 'SQL-Datei erfolgreich kopiert'"
       
       # Importiere Testdaten über temporären MySQL-Client
       echo "Importiere SQL-Daten über temporären Container..."
