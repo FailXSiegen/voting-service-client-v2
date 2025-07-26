@@ -74,6 +74,10 @@ function login(
       if (response?.status >= 500) {
         throw new NetworkError(t("error.network.internalServerError"));
       }
+      if (response?.status === 401 || response?.status === 403) {
+        // Für Login-Fehler spezifische Behandlung
+        throw new NetworkError(t("view.login.invalidCredentials"));
+      }
       if (response?.status >= 400) {
         throw new NetworkError(t("error.network.consumerError"));
       }
