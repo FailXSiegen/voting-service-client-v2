@@ -4,6 +4,9 @@
 stages:
   - build
   - deploy
+  - test-prepare
+  - test-execute
+  - test-cleanup
 
 variables:
   # Docker Registry
@@ -277,6 +280,243 @@ rollback:
         echo "❌ No backup found!"
         exit 1
       fi
+  when: manual
+  only:
+    - main
+  tags:
+    - docker
+    - deploy
+
+# ============================================
+# TEST STAGE JOBS - Manuell triggerbare Tests
+# ============================================
+
+# Datenbank Backup erstellen
+backup_database:
+  stage: test-prepare
+  script:
+    - echo "📦 Erstelle Datenbank-Backup..."
+    - |
+      # Variablen für Test-Umgebung
+      export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
+      export BACKUP_DIR="/var/www/html/voting-tool-backups"
+      
+      # Backup-Verzeichnis erstellen
+      mkdir -p ${BACKUP_DIR}
+      
+      # Timestamp für Backup
+      export BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+      export BACKUP_FILE="${BACKUP_DIR}/voting-db-backup-${BACKUP_TIMESTAMP}.sql"
+      
+      # Datenbank-Backup erstellen
+      cd ${TEST_DEPLOY_PATH}
+      docker compose exec -T db mysqldump -u root -p${DATABASE_ROOT_PASSWORD} ${DATABASE_NAME} > ${BACKUP_FILE}
+      
+      # Prüfe Backup-Größe
+      if [ -s ${BACKUP_FILE} ]; then
+        echo "✅ Backup erfolgreich erstellt: ${BACKUP_FILE}"
+        echo "Backup-Größe: $(du -h ${BACKUP_FILE} | cut -f1)"
+        
+        # Speichere Backup-Pfad für spätere Jobs
+        echo "BACKUP_FILE=${BACKUP_FILE}" > backup-info.env
+        echo "BACKUP_TIMESTAMP=${BACKUP_TIMESTAMP}" >> backup-info.env
+      else
+        echo "❌ Backup fehlgeschlagen - Datei ist leer!"
+        exit 1
+      fi
+  artifacts:
+    reports:
+      dotenv: backup-info.env
+    expire_in: 1 week
+  when: manual
+  only:
+    - main
+  tags:
+    - docker
+    - deploy
+
+# Testdaten importieren
+import_test_data:
+  stage: test-prepare
+  script:
+    - echo "📥 Importiere Testdaten..."
+    - |
+      export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
+      
+      # Kopiere SQL-Datei zum Server
+      cp test-data/load-test-scenario.sql ${TEST_DEPLOY_PATH}/
+      
+      cd ${TEST_DEPLOY_PATH}
+      
+      # Importiere Testdaten
+      docker compose exec -T db mysql -u root -p${DATABASE_ROOT_PASSWORD} ${DATABASE_NAME} < load-test-scenario.sql
+      
+      if [ $? -eq 0 ]; then
+        echo "✅ Testdaten erfolgreich importiert"
+        
+        # Aufräumen
+        rm -f load-test-scenario.sql
+        
+        # Speichere Event-Informationen
+        echo "TEST_EVENT_SLUG=lasttest-2025" > test-info.env
+        echo "TEST_EVENT_URL=https://${DOMAIN}/#/register/lasttest-2025" >> test-info.env
+      else
+        echo "❌ Import der Testdaten fehlgeschlagen!"
+        exit 1
+      fi
+  artifacts:
+    reports:
+      dotenv: test-info.env
+    expire_in: 1 week
+  needs:
+    - backup_database
+  when: manual
+  only:
+    - main
+  tags:
+    - docker
+    - deploy
+
+# Playwright Load Tests ausführen (Ressourcen-optimiert)
+run_load_tests:
+  stage: test-execute
+  image: mcr.microsoft.com/playwright:v1.40.0-jammy
+  variables:
+    # Ressourcen-Limits für Container
+    NODE_OPTIONS: "--max-old-space-size=2048"
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "0"
+  script:
+    - echo "🎭 Führe Playwright Load Tests aus (Pipeline-optimiert)..."
+    - |
+      cd voting-tool/voting-service-client-v2
+      
+      # System-Info
+      echo "System-Ressourcen:"
+      free -h
+      nproc
+      
+      # Installiere Dependencies
+      npm ci
+      
+      # Installiere nur Chromium
+      npx playwright install chromium
+      npx playwright install-deps chromium
+      
+      # Setze Test-Umgebungsvariablen
+      export TEST_BASE_URL="https://${DOMAIN}"
+      export TEST_EVENT_SLUG="${TEST_EVENT_SLUG}"
+      export MAX_BROWSERS=3  # Limitiere gleichzeitige Browser
+      
+      # Verwende Pipeline-optimierte Config
+      echo "Kopiere Pipeline-Config..."
+      cp tests/lib/config-pipeline.js tests/lib/config.js
+      
+      # Führe Load Tests mit Pipeline-Config aus
+      echo "Starte Load Test mit 20 Nutzern (Pipeline-optimiert)..."
+      npx playwright test tests/load-test/load-test.spec.js \
+        --config=playwright-pipeline.config.js \
+        --workers=1 \
+        --retries=1
+      
+      # Sammle Ergebnisse
+      if [ -d "voting-results" ]; then
+        echo "✅ Test-Ergebnisse gefunden"
+        ls -la voting-results/
+      fi
+      
+      # Generiere Reports
+      node tests/lib/resultFormatter.js || true
+  artifacts:
+    when: always
+    paths:
+      - voting-tool/voting-service-client-v2/voting-results/
+      - voting-tool/voting-service-client-v2/test-results/
+      - voting-tool/voting-service-client-v2/playwright-report/
+    reports:
+      junit: voting-tool/voting-service-client-v2/test-results/junit.xml
+    expire_in: 1 week
+  needs:
+    - import_test_data
+  when: manual
+  only:
+    - main
+  tags:
+    - docker
+    - deploy
+
+# Performance Test ausführen
+run_performance_test:
+  stage: test-execute
+  image: mcr.microsoft.com/playwright:v1.40.0-jammy
+  script:
+    - echo "⚡ Führe Performance Tests aus..."
+    - |
+      cd voting-tool/voting-service-client-v2
+      
+      # Installiere Dependencies
+      npm ci
+      
+      # Setze Test-Umgebungsvariablen
+      export TEST_BASE_URL="https://${DOMAIN}"
+      export TEST_EVENT_SLUG="${TEST_EVENT_SLUG}"
+      export TEST_MODE="performance"
+      
+      # Erstelle neuen Performance-Test wenn noch nicht vorhanden
+      if [ ! -f "tests/performance/performance-test.spec.js" ]; then
+        mkdir -p tests/performance
+        # Kopiere und modifiziere den Load-Test für Performance-Messungen
+        cp tests/load-test/load-test.spec.js tests/performance/performance-test.spec.js
+      fi
+      
+      # Führe Performance Tests aus
+      npx playwright test tests/performance/ --reporter=html
+  artifacts:
+    when: always
+    paths:
+      - voting-tool/voting-service-client-v2/voting-results/
+      - voting-tool/voting-service-client-v2/playwright-report/
+    expire_in: 1 week
+  needs:
+    - import_test_data
+  when: manual
+  only:
+    - main
+  tags:
+    - docker
+    - deploy
+
+# Datenbank wiederherstellen
+restore_database:
+  stage: test-cleanup
+  script:
+    - echo "♻️ Stelle Datenbank-Backup wieder her..."
+    - |
+      export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
+      
+      cd ${TEST_DEPLOY_PATH}
+      
+      # Prüfe ob Backup-Datei existiert
+      if [ -f "${BACKUP_FILE}" ]; then
+        echo "Stelle Backup wieder her: ${BACKUP_FILE}"
+        
+        # Importiere Backup
+        docker compose exec -T db mysql -u root -p${DATABASE_ROOT_PASSWORD} ${DATABASE_NAME} < ${BACKUP_FILE}
+        
+        if [ $? -eq 0 ]; then
+          echo "✅ Datenbank erfolgreich wiederhergestellt"
+          
+          # Optional: Backup-Datei behalten für Archivierung
+          echo "Backup-Datei bleibt erhalten: ${BACKUP_FILE}"
+        else
+          echo "❌ Wiederherstellung fehlgeschlagen!"
+          exit 1
+        fi
+      else
+        echo "❌ Backup-Datei nicht gefunden: ${BACKUP_FILE}"
+        exit 1
+      fi
+  needs:
+    - backup_database
   when: manual
   only:
     - main
