@@ -4,18 +4,18 @@ const fs = require('fs');
 
 // Globale Konfiguration für den Lasttest
 const CONFIG = {
-    MAX_USERS_PER_TEST: 100,        // Gesamtanzahl der Teilnehmer (2 Tests mit je 50 Benutzern)
-    USERS_PER_BATCH: 50,            // Anzahl der Benutzer pro Test-Batch (2 Batches zu je 50)
+    MAX_USERS_PER_TEST: parseInt(process.env.MAX_USERS_PER_TEST) || 10,        // Reduziert für schnelle Tests
+    USERS_PER_BATCH: parseInt(process.env.USERS_PER_BATCH) || 5,            // 2 Batches zu je 5 Benutzern
     ORGANIZER: 1,                   // Anzahl der Organisatoren
-    VOTE_BATCH_SIZE: 50,            // Erhöht: Anzahl der gleichzeitigen Abstimmungen pro Batch
-    BATCH_VOTE_DELAY: 500,          // Stark reduziert: Verzögerung zwischen Abstimmungsbatches (500ms)
-    API_URL: 'http://localhost:4000',
-    CLIENT_URL: 'http://localhost:5173',
-    EVENT_SLUG: 'loadtest-event',
-    EVENT_ID: 976,
-    ORGANIZER_USERNAME: 'loadtest',
-    ORGANIZER_EMAIL: 'loadtest@example.org',
-    ORGANIZER_PASSWORD: 'TestPassword123!',
+    VOTE_BATCH_SIZE: parseInt(process.env.VOTE_BATCH_SIZE) || 5,            // Kleine Batches für schnelle Tests
+    BATCH_VOTE_DELAY: 500,          // Verzögerung zwischen Abstimmungsbatches (500ms)
+    API_URL: process.env.TEST_BASE_URL || 'http://localhost:4000',
+    CLIENT_URL: process.env.TEST_BASE_URL || 'http://localhost:5173',
+    EVENT_SLUG: process.env.TEST_EVENT_SLUG || 'loadtest-event',
+    EVENT_ID: parseInt(process.env.TEST_EVENT_ID) || 5, // Aus GitLab Pipeline oder Fallback
+    ORGANIZER_USERNAME: 'loadtest-admin',  // Aus der DB
+    ORGANIZER_EMAIL: 'loadtest-admin@test.local',
+    ORGANIZER_PASSWORD: 'TestAdmin123!',   // Aus der DB
     USER_PASSWORD: 'test123',
     VOTING_DELAY: 1000,             // Reduziert: Wartezeit nach Öffnen der Abstimmung
     MAX_RETRIES: 3,                 // Reduziert: Anzahl der Abstimmungsversuche pro Teilnehmer

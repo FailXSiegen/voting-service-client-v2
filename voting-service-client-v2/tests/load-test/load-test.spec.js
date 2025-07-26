@@ -16,13 +16,20 @@ const {
 const { loginAsOrganizer, createAndStartPoll } = require('../lib/loginOrganizer');
 const { loginAsUser } = require('../lib/loginUser');
 const { executeVotingInBatches } = require('../lib/votingFunctions');
+const { loadEventInfo } = require('../lib/eventLoader');
 
 // Haupttest-Funktion zum Laden von Benutzern
 test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
-  // VOR BEGINN DER TESTS: Lösche alle alten Ergebnisdateien
+  // VOR BEGINN DER TESTS: Lösche alle alten Ergebnisdateien und lade Event-Info
   test.beforeAll(async () => {
     console.log('=== TEST SETUP: Lösche alle alten Ergebnisdateien ===');
     cleanupResultsDirectory();
+    
+    // Event-Info ausgeben
+    console.log('=== EVENT-INFO ===');
+    console.log(`Event-ID: ${CONFIG.EVENT_ID}, Slug: ${CONFIG.EVENT_SLUG}`);
+    console.log(`Test-Umfang: ${CONFIG.MAX_USERS_PER_TEST} Nutzer in ${CONFIG.MAX_USERS_PER_TEST / CONFIG.USERS_PER_BATCH} Batches`);
+    
     console.log('=== TEST SETUP ABGESCHLOSSEN ===');
   });
 
