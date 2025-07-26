@@ -239,62 +239,74 @@ CALL CreateTestUsers();
 -- Abstimmung 1: Geheime Ja/Nein/Enthaltung Abstimmung
 INSERT INTO poll (
     event_id,
+    create_datetime,
     title,
     poll_answer,
+    list,
     `type`,
-    possible_answers,
+    repeated,
     min_votes,
     max_votes,
+    allow_abstain,
     original_id
 ) VALUES (
     @event_id,
+    UNIX_TIMESTAMP(),
     'Geheime Abstimmung: Soll das neue Lasttest-Feature implementiert werden?',
     'Bitte stimmen Sie ab',
+    '', -- Empty list
     1, -- Geheime Abstimmung
-    1, -- Possible answers aktiviert
+    0, -- Nicht wiederholbar
     1, -- Minimum 1 Stimme
     1, -- Maximum 1 Stimme
+    1, -- Enthaltung erlaubt
     NULL
 );
 
 SET @poll1_id = LAST_INSERT_ID();
 
 -- Mögliche Antworten für Abstimmung 1
-INSERT INTO poll_possible_answer (poll_id, title, `order`) VALUES
-    (@poll1_id, 'Ja', 1),
-    (@poll1_id, 'Nein', 2),
-    (@poll1_id, 'Enthaltung', 3);
+INSERT INTO poll_possible_answer (poll_id, create_datetime, content) VALUES
+    (@poll1_id, UNIX_TIMESTAMP(), 'Ja'),
+    (@poll1_id, UNIX_TIMESTAMP(), 'Nein'),
+    (@poll1_id, UNIX_TIMESTAMP(), 'Enthaltung');
 
 -- Abstimmung 2: Offene Multiple-Choice Abstimmung
 INSERT INTO poll (
     event_id,
+    create_datetime,
     title,
     poll_answer,
+    list,
     `type`,
-    possible_answers,
+    repeated,
     min_votes,
     max_votes,
+    allow_abstain,
     original_id
 ) VALUES (
     @event_id,
+    UNIX_TIMESTAMP(),
     'Offene Abstimmung: Welche Features sollen priorisiert werden? (max. 3 Auswahlen)',
     'Wählen Sie bis zu 3 Features aus',
+    '', -- Empty list
     2, -- Offene Abstimmung
-    1, -- Possible answers aktiviert
+    0, -- Nicht wiederholbar
     1, -- Minimum 1 Stimme
     3, -- Maximum 3 Stimmen
+    0, -- Keine Enthaltung
     NULL
 );
 
 SET @poll2_id = LAST_INSERT_ID();
 
 -- Mögliche Antworten für Abstimmung 2
-INSERT INTO poll_possible_answer (poll_id, title, `order`) VALUES
-    (@poll2_id, 'Verbesserte Performance', 1),
-    (@poll2_id, 'Neue UI/UX', 2),
-    (@poll2_id, 'Mobile App', 3),
-    (@poll2_id, 'Erweiterte Statistiken', 4),
-    (@poll2_id, 'Integration mit externen Systemen', 5);
+INSERT INTO poll_possible_answer (poll_id, create_datetime, content) VALUES
+    (@poll2_id, UNIX_TIMESTAMP(), 'Verbesserte Performance'),
+    (@poll2_id, UNIX_TIMESTAMP(), 'Neue UI/UX'),
+    (@poll2_id, UNIX_TIMESTAMP(), 'Mobile App'),
+    (@poll2_id, UNIX_TIMESTAMP(), 'Erweiterte Statistiken'),
+    (@poll2_id, UNIX_TIMESTAMP(), 'Integration mit externen Systemen');
 
 -- ===================================================================
 -- 5. AUSGABE DER ERSTELLTEN TEST-IDs
