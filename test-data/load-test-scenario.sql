@@ -7,33 +7,38 @@
 -- ===================================================================
 
 -- Lösche abhängige Daten zuerst (wegen Foreign Key Constraints)
--- Lösche Poll-Votes
-DELETE pv FROM poll_vote pv 
-JOIN poll p ON pv.poll_id = p.id 
-JOIN event e ON p.event_id = e.id 
-WHERE e.slug = 'lasttest-2025';
+-- Verwende einfachere DELETE-Statements für bessere Kompatibilität
 
--- Lösche Poll-User
-DELETE pu FROM poll_user pu 
-JOIN poll p ON pu.poll_id = p.id 
-JOIN event e ON p.event_id = e.id 
-WHERE e.slug = 'lasttest-2025';
+-- Finde alle Event-IDs für lasttest-2025
+SET @cleanup_event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');
 
--- Lösche Poll-Options
-DELETE po FROM poll_option po 
-JOIN poll p ON po.poll_id = p.id 
-JOIN event e ON p.event_id = e.id 
-WHERE e.slug = 'lasttest-2025';
+-- Lösche Poll-abhängige Daten wenn Event existiert
+DELETE FROM poll_answer WHERE poll_result_id IN (
+    SELECT pr.id FROM poll_result pr 
+    WHERE pr.poll_id IN (SELECT id FROM poll WHERE event_id = @cleanup_event_id)
+);
 
--- Lösche Polls
-DELETE p FROM poll p 
-JOIN event e ON p.event_id = e.id 
-WHERE e.slug = 'lasttest-2025';
+DELETE FROM poll_user_voted WHERE poll_result_id IN (
+    SELECT pr.id FROM poll_result pr 
+    WHERE pr.poll_id IN (SELECT id FROM poll WHERE event_id = @cleanup_event_id)
+);
+
+DELETE FROM poll_result WHERE poll_id IN (
+    SELECT id FROM poll WHERE event_id = @cleanup_event_id
+);
+
+DELETE FROM poll_possible_answer WHERE poll_id IN (
+    SELECT id FROM poll WHERE event_id = @cleanup_event_id
+);
+
+DELETE FROM poll_user WHERE poll_id IN (
+    SELECT id FROM poll WHERE event_id = @cleanup_event_id
+);
+
+DELETE FROM poll WHERE event_id = @cleanup_event_id;
 
 -- Lösche Event-User
-DELETE eu FROM event_user eu 
-JOIN event e ON eu.event_id = e.id 
-WHERE e.slug = 'lasttest-2025';
+DELETE FROM event_user WHERE event_id = @cleanup_event_id;
 
 -- Lösche Events
 DELETE FROM event WHERE slug = 'lasttest-2025';
