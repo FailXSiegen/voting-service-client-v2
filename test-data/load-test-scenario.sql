@@ -58,7 +58,8 @@ INSERT INTO `event` (
     multivote_type,
     delete_datetime,
     delete_planned,
-    styles
+    styles,
+    logo
 ) VALUES (
     @organizer_id,
     UNIX_TIMESTAMP(),
@@ -73,7 +74,8 @@ INSERT INTO `event` (
     2, -- Multiple votes erlaubt
     0,
     0,
-    '{}' -- Empty JSON for styles
+    '{}', -- Empty JSON for styles
+    '' -- Empty string for logo
 );
 
 SET @event_id = LAST_INSERT_ID();
