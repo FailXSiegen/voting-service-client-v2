@@ -123,13 +123,12 @@ import_test_data_server:
   script:
     - echo "📥 Importiere Testdaten (Server-Runner)..."
     - |
-      # Wechsle ins voting-tool Verzeichnis
-      cd /var/www/html/voting-tool
+      # Verwende SQL-Datei aus GitLab Runner Working Directory
+      echo "Current working directory: $(pwd)"
+      echo "Available files:"
+      ls -la
       
-      # Git Repository aktualisieren (falls Runner nicht automatisch pullt)
-      git pull origin main || echo "Git pull failed, using existing files"
-      
-      # Prüfe ob SQL-Datei existiert
+      # Prüfe ob SQL-Datei existiert (im Runner Working Directory)
       if [ ! -f "test-data/load-test-scenario.sql" ]; then
         echo "❌ SQL-Datei nicht gefunden!"
         echo "Verfügbare Dateien:"
@@ -137,13 +136,16 @@ import_test_data_server:
         exit 1
       fi
       
+      # Wechsle ins voting-tool Deployment-Verzeichnis für Docker-Compose
+      cd /var/www/html/voting-tool
+      
       # Docker Compose Status prüfen
       echo "Docker Compose Status:"
       docker compose ps
       
-      # Importiere Testdaten
+      # Importiere Testdaten (verwende SQL-Datei aus Runner Working Directory)
       echo "Importiere SQL-Daten..."
-      docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < test-data/load-test-scenario.sql
+      docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < ${CI_PROJECT_DIR}/test-data/load-test-scenario.sql
       
       if [ $? -eq 0 ]; then
         echo "✅ Testdaten erfolgreich importiert"
