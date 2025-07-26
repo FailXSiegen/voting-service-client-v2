@@ -99,24 +99,28 @@ BEGIN
     WHILE i <= 170 DO
         INSERT INTO event_user (
             event_id,
+            create_datetime,
             username,
+            email,
+            password,
             public_name,
-            online,
             allow_to_vote,
             vote_amount,
-            password,
-            username_changed,
-            consume_vote_amount
+            online,
+            coorganizer,
+            verified
         ) VALUES (
             @event_id,
+            UNIX_TIMESTAMP(),
             CONCAT('testuser', i),
+            CONCAT('testuser', i, '@test.local'),
+            '$2b$10$TestPasswordHash', -- Password: test123
             CONCAT('Testnutzer ', i),
-            0,
             1, -- Stimmberechtigt
             1, -- Eine Stimme
-            '$2b$10$TestPasswordHash', -- Password: test123
             0,
-            0
+            0,
+            1
         );
         SET i = i + 1;
     END WHILE;
@@ -128,24 +132,28 @@ BEGIN
         
         INSERT INTO event_user (
             event_id,
+            create_datetime,
             username,
+            email,
+            password,
             public_name,
-            online,
             allow_to_vote,
             vote_amount,
-            password,
-            username_changed,
-            consume_vote_amount
+            online,
+            coorganizer,
+            verified
         ) VALUES (
             @event_id,
+            UNIX_TIMESTAMP(),
             CONCAT('testuser', i),
+            CONCAT('testuser', i, '@test.local'),
+            '$2b$10$TestPasswordHash',
             CONCAT('Mehrfachstimmen-Nutzer ', i, ' (', vote_amount, ' Stimmen)'),
-            0,
             1, -- Stimmberechtigt
             vote_amount, -- 3-5 Stimmen
-            '$2b$10$TestPasswordHash',
             0,
-            0
+            0,
+            1
         );
         SET i = i + 1;
     END WHILE;
@@ -154,24 +162,28 @@ BEGIN
     WHILE i <= 200 DO
         INSERT INTO event_user (
             event_id,
+            create_datetime,
             username,
+            email,
+            password,
             public_name,
-            online,
             allow_to_vote,
             vote_amount,
-            password,
-            username_changed,
-            consume_vote_amount
+            online,
+            coorganizer,
+            verified
         ) VALUES (
             @event_id,
+            UNIX_TIMESTAMP(),
             CONCAT('testuser', i),
+            CONCAT('testuser', i, '@test.local'),
+            '$2b$10$TestPasswordHash',
             CONCAT('Beobachter ', i),
-            0,
             0, -- NICHT stimmberechtigt
             0, -- Keine Stimmen
-            '$2b$10$TestPasswordHash',
             0,
-            0
+            0,
+            1
         );
         SET i = i + 1;
     END WHILE;
