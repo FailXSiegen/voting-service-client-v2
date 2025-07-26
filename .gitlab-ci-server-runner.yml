@@ -40,12 +40,12 @@ backup_database_server:
           echo "Gefundene voting-relevante Container:"
           echo "$VOTING_CONTAINERS"
           
-          # Suche nach DB-Container (erweiterte Suche)
-          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | head -1)
+          # Suche nach DB-Container (spezifische Suche für voting_db)
+          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
           
-          # Fallback: Suche nach voting_db Container
+          # Fallback: Suche nach anderen DB-Containern
           if [ -z "$DB_CONTAINER" ]; then
-            DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
+            DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | grep -v client | head -1)
           fi
           if [ -n "$DB_CONTAINER" ]; then
             echo "✅ DB-Container gefunden: $DB_CONTAINER"
@@ -139,12 +139,12 @@ import_test_data_server:
       # Finde DB-Container direkt (läuft auf dem gleichen Server)
       echo "Suche nach Voting-Tool DB-Container..."
       
-      # Suche nach DB-Container (erweiterte Suche)
-      DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | head -1)
+      # Suche nach DB-Container (spezifische Suche für voting_db)
+      DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
       
-      # Fallback: Suche nach voting_db Container
+      # Fallback: Suche nach anderen DB-Containern
       if [ -z "$DB_CONTAINER" ]; then
-        DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
+        DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | grep -v client | head -1)
       fi
       
       if [ -z "$DB_CONTAINER" ]; then
@@ -204,10 +204,10 @@ restore_database_server:
       if [ -f "${BACKUP_FILE}" ]; then
         echo "Stelle Backup wieder her: ${BACKUP_FILE}"
         
-        # Finde DB-Container direkt
-        DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | head -1)
+        # Finde DB-Container direkt (spezifische Suche für voting_db)
+        DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
         if [ -z "$DB_CONTAINER" ]; then
-          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
+          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | grep -v client | head -1)
         fi
         
         if [ -z "$DB_CONTAINER" ]; then
