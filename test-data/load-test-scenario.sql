@@ -3,11 +3,47 @@
 -- ACHTUNG: Nur in Test-Umgebungen verwenden!
 
 -- ===================================================================
--- 1. ORGANIZER (Admin für manuelle Inspektion)
+-- 1. CLEANUP (Lösche alte Testdaten in korrekter Reihenfolge)
 -- ===================================================================
 
--- Lösche existierenden Test-Organizer falls vorhanden
+-- Lösche abhängige Daten zuerst (wegen Foreign Key Constraints)
+-- Lösche Poll-Votes
+DELETE pv FROM poll_vote pv 
+JOIN poll p ON pv.poll_id = p.id 
+JOIN event e ON p.event_id = e.id 
+WHERE e.slug = 'lasttest-2025';
+
+-- Lösche Poll-User
+DELETE pu FROM poll_user pu 
+JOIN poll p ON pu.poll_id = p.id 
+JOIN event e ON p.event_id = e.id 
+WHERE e.slug = 'lasttest-2025';
+
+-- Lösche Poll-Options
+DELETE po FROM poll_option po 
+JOIN poll p ON po.poll_id = p.id 
+JOIN event e ON p.event_id = e.id 
+WHERE e.slug = 'lasttest-2025';
+
+-- Lösche Polls
+DELETE p FROM poll p 
+JOIN event e ON p.event_id = e.id 
+WHERE e.slug = 'lasttest-2025';
+
+-- Lösche Event-User
+DELETE eu FROM event_user eu 
+JOIN event e ON eu.event_id = e.id 
+WHERE e.slug = 'lasttest-2025';
+
+-- Lösche Events
+DELETE FROM event WHERE slug = 'lasttest-2025';
+
+-- Jetzt kann der Organizer sicher gelöscht werden
 DELETE FROM organizer WHERE username = 'loadtest-admin';
+
+-- ===================================================================
+-- 2. ORGANIZER (Admin für manuelle Inspektion)
+-- ===================================================================
 
 -- Erstelle Test-Organizer (Password: TestAdmin123!)
 INSERT INTO organizer (
@@ -37,11 +73,8 @@ INSERT INTO organizer (
 SET @organizer_id = LAST_INSERT_ID();
 
 -- ===================================================================
--- 2. EVENT
+-- 3. EVENT
 -- ===================================================================
-
--- Lösche existierende Test-Events
-DELETE FROM `event` WHERE slug = 'lasttest-2025';
 
 -- Erstelle Test-Event
 INSERT INTO `event` (
@@ -81,7 +114,7 @@ INSERT INTO `event` (
 SET @event_id = LAST_INSERT_ID();
 
 -- ===================================================================
--- 3. EVENT USERS (200 Testnutzer)
+-- 4. EVENT USERS (200 Testnutzer)
 -- ===================================================================
 
 -- Lösche existierende Testnutzer für dieses Event
@@ -194,7 +227,7 @@ DELIMITER ;
 CALL CreateTestUsers();
 
 -- ===================================================================
--- 4. POLLS (2 Abstimmungen)
+-- 5. POLLS (2 Abstimmungen)
 -- ===================================================================
 
 -- Abstimmung 1: Geheime Ja/Nein/Enthaltung Abstimmung
