@@ -7,49 +7,73 @@ backup_database_server:
   script:
     - echo "📦 Erstelle Datenbank-Backup (Server-Runner)..."
     - |
-      # Debug: Finde voting-tool Installation
-      echo "Suche voting-tool Installation..."
-      echo "Mögliche Pfade:"
-      find /var/www -name "*voting*" -type d 2>/dev/null || echo "Keine voting Verzeichnisse in /var/www/"
-      find /opt -name "*voting*" -type d 2>/dev/null || echo "Keine voting Verzeichnisse in /opt/"
-      find /home -name "*voting*" -type d 2>/dev/null || echo "Keine voting Verzeichnisse in /home/"
+      # Verwende DEPLOY_PATH aus GitLab CI Variablen
+      DEPLOY_PATH="/var/www/html/voting-tool"
       
-      echo "Docker Container mit 'voting' im Namen:"
-      docker ps | grep voting || echo "Keine voting Container gefunden"
+      # Prüfe ob Verzeichnis existiert und zugänglich ist
+      if [ ! -d "$DEPLOY_PATH" ]; then
+        echo "⚠️ Deployment-Verzeichnis nicht gefunden: $DEPLOY_PATH"
+        echo "Erstelle Verzeichnis und setze Berechtigungen..."
+        
+        # Erstelle Verzeichnis-Struktur
+        sudo mkdir -p "$DEPLOY_PATH"
+        sudo mkdir -p /var/www/html/voting-tool-backups
+        
+        # Setze Berechtigungen für gitlab-runner
+        sudo chown -R gitlab-runner:gitlab-runner "$DEPLOY_PATH"
+        sudo chown -R gitlab-runner:gitlab-runner /var/www/html/voting-tool-backups
+        
+        echo "✅ Verzeichnis erstellt und Berechtigungen gesetzt"
+      fi
       
-      echo "Docker Networks:"
-      docker network ls | grep voting || echo "Keine voting Networks gefunden"
-      
-      echo "Docker Volumes:"
-      docker volume ls | grep voting || echo "Keine voting Volumes gefunden"
-      
-      # Versuche verschiedene Pfade
-      VOTING_PATHS=(
-        "/var/www/html/voting-tool"
-        "/var/www/voting-tool" 
-        "/opt/voting-tool"
-        "/home/*/voting-tool"
-        "$(pwd)"
-      )
-      
-      VOTING_DIR=""
-      for path in "${VOTING_PATHS[@]}"; do
-        if [ -d "$path" ] && [ -f "$path/docker-compose.yml" ]; then
-          VOTING_DIR="$path"
-          echo "✅ Gefunden: $VOTING_DIR"
-          break
+      # Prüfe ob docker-compose.yml existiert
+      if [ ! -f "$DEPLOY_PATH/docker-compose.yml" ]; then
+        echo "⚠️ docker-compose.yml nicht gefunden in $DEPLOY_PATH"
+        echo "Mögliche Lösungen:"
+        echo "1. Führe zuerst den 'deploy' Job in GitLab aus"
+        echo "2. Oder versuche direkte Docker-Container-Kommunikation"
+        
+        # Fallback: Versuche Docker-Container direkt anzusprechen
+        echo "Versuche Docker-Container direkt zu finden..."
+        VOTING_CONTAINERS=$(docker ps --format "{{.Names}}" | grep -E "(voting|db)" | head -5)
+        if [ -n "$VOTING_CONTAINERS" ]; then
+          echo "Gefundene voting-relevante Container:"
+          echo "$VOTING_CONTAINERS"
+          
+          # Suche nach DB-Container
+          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database)" | head -1)
+          if [ -n "$DB_CONTAINER" ]; then
+            echo "✅ DB-Container gefunden: $DB_CONTAINER"
+            
+            # Verwende Container-Namen statt docker-compose
+            BACKUP_DIR="/var/www/html/voting-tool-backups"
+            mkdir -p "$BACKUP_DIR"
+            
+            BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+            BACKUP_FILE="$BACKUP_DIR/voting-db-backup-${BACKUP_TIMESTAMP}.sql"
+            
+            echo "Erstelle Backup via Container: $DB_CONTAINER"
+            docker exec "$DB_CONTAINER" mysqldump -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} > "$BACKUP_FILE"
+            
+            if [ -s "$BACKUP_FILE" ]; then
+              echo "✅ Backup erfolgreich erstellt: $BACKUP_FILE"
+              echo "BACKUP_FILE=$BACKUP_FILE" > backup-info.env
+              echo "BACKUP_TIMESTAMP=$BACKUP_TIMESTAMP" >> backup-info.env
+              exit 0
+            else
+              echo "❌ Backup via Container fehlgeschlagen"
+              exit 1
+            fi
+          fi
         fi
-      done
-      
-      if [ -z "$VOTING_DIR" ]; then
-        echo "❌ voting-tool Verzeichnis nicht gefunden!"
-        echo "Aktuelle Directory-Struktur:"
-        ls -la /var/www/ 2>/dev/null || echo "/var/www/ nicht vorhanden"
+        
+        echo "❌ Keine voting-tool Installation oder Container gefunden!"
+        echo "Führe zuerst den 'deploy' Job aus oder prüfe Docker-Setup"
         exit 1
       fi
       
-      # Wechsle ins gefundene Verzeichnis
-      cd "$VOTING_DIR"
+      # Normalfall: Wechsle ins Deployment-Verzeichnis
+      cd "$DEPLOY_PATH"
       
       # Backup-Verzeichnis erstellen
       mkdir -p /var/www/html/voting-tool-backups
