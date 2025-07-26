@@ -127,7 +127,8 @@ DELETE FROM event_user WHERE event_id = @event_id;
 
 -- Prozedur zum Erstellen von Testnutzern
 DELIMITER $$
-CREATE PROCEDURE IF NOT EXISTS CreateTestUsers()
+DROP PROCEDURE IF EXISTS CreateTestUsers$$
+CREATE PROCEDURE CreateTestUsers()
 BEGIN
     DECLARE i INT DEFAULT 1;
     DECLARE vote_amount INT;
