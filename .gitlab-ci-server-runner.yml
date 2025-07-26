@@ -40,8 +40,13 @@ backup_database_server:
           echo "Gefundene voting-relevante Container:"
           echo "$VOTING_CONTAINERS"
           
-          # Suche nach DB-Container
-          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database)" | head -1)
+          # Suche nach DB-Container (erweiterte Suche)
+          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | head -1)
+          
+          # Fallback: Suche nach voting_db Container
+          if [ -z "$DB_CONTAINER" ]; then
+            DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
+          fi
           if [ -n "$DB_CONTAINER" ]; then
             echo "✅ DB-Container gefunden: $DB_CONTAINER"
             
