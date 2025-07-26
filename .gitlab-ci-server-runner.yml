@@ -136,22 +136,35 @@ import_test_data_server:
         exit 1
       fi
       
-      # Wechsle ins voting-tool Deployment-Verzeichnis für Docker-Compose
-      cd /var/www/html/voting-tool
+      # Finde DB-Container direkt (läuft auf dem gleichen Server)
+      echo "Suche nach Voting-Tool DB-Container..."
       
-      # Docker Compose Status prüfen
-      echo "Docker Compose Status:"
-      docker compose ps
+      # Suche nach DB-Container (erweiterte Suche)
+      DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | head -1)
       
-      # Importiere Testdaten (verwende SQL-Datei aus Runner Working Directory)
-      echo "Importiere SQL-Daten..."
-      docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < ${CI_PROJECT_DIR}/test-data/load-test-scenario.sql
+      # Fallback: Suche nach voting_db Container
+      if [ -z "$DB_CONTAINER" ]; then
+        DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
+      fi
+      
+      if [ -z "$DB_CONTAINER" ]; then
+        echo "❌ Kein DB-Container gefunden!"
+        echo "Verfügbare Container:"
+        docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+        exit 1
+      fi
+      
+      echo "✅ DB-Container gefunden: $DB_CONTAINER"
+      
+      # Importiere Testdaten direkt über Container
+      echo "Importiere SQL-Daten über Container: $DB_CONTAINER"
+      docker exec -i "$DB_CONTAINER" mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < ${CI_PROJECT_DIR}/test-data/load-test-scenario.sql
       
       if [ $? -eq 0 ]; then
         echo "✅ Testdaten erfolgreich importiert"
         
         # Prüfe importierte Daten
-        USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null)
+        USER_COUNT=$(docker exec "$DB_CONTAINER" mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null)
         echo "Importierte Testnutzer: ${USER_COUNT}"
         
         # Speichere Event-Informationen
@@ -180,9 +193,6 @@ restore_database_server:
   script:
     - echo "♻️ Stelle Datenbank wieder her (Server-Runner)..."
     - |
-      # Wechsle ins voting-tool Verzeichnis
-      cd /var/www/html/voting-tool
-      
       # Verwende Backup-File aus vorherigem Job oder suche neuestes
       if [ -z "${BACKUP_FILE}" ]; then
         echo "Suche nach neuestem Backup..."
@@ -194,18 +204,28 @@ restore_database_server:
       if [ -f "${BACKUP_FILE}" ]; then
         echo "Stelle Backup wieder her: ${BACKUP_FILE}"
         
-        # Docker Compose Status prüfen
-        echo "Docker Compose Status:"
-        docker compose ps
+        # Finde DB-Container direkt
+        DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep -E "(db|mysql|database|mariadb)" | head -1)
+        if [ -z "$DB_CONTAINER" ]; then
+          DB_CONTAINER=$(docker ps --format "{{.Names}}" | grep "voting.*db" | head -1)
+        fi
         
-        # Importiere Backup
-        docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < "${BACKUP_FILE}"
+        if [ -z "$DB_CONTAINER" ]; then
+          echo "❌ Kein DB-Container gefunden!"
+          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+          exit 1
+        fi
+        
+        echo "✅ DB-Container gefunden: $DB_CONTAINER"
+        
+        # Importiere Backup direkt über Container
+        docker exec -i "$DB_CONTAINER" mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < "${BACKUP_FILE}"
         
         if [ $? -eq 0 ]; then
           echo "✅ Datenbank erfolgreich wiederhergestellt"
           
           # Prüfe ob Testdaten entfernt wurden
-          USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null || echo "0")
+          USER_COUNT=$(docker exec "$DB_CONTAINER" mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null || echo "0")
           echo "Verbleibende Testnutzer: ${USER_COUNT}"
         else
           echo "❌ Wiederherstellung fehlgeschlagen!"
