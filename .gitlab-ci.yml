@@ -291,56 +291,55 @@ rollback:
 # TEST STAGE JOBS - Manuell triggerbare Tests
 # ============================================
 
-# Datenbank Backup erstellen (Shell-Executor notwendig!)
+# Datenbank Backup erstellen (mit temporärem Container)
 backup_database:
   stage: test-prepare
   script:
-    - echo "📦 Erstelle Datenbank-Backup..."
+    - echo "📦 Erstelle Datenbank-Backup mit temporärem Container..."
     - |
-      # Prüfe ob wir auf dem Deploy-Server sind
-      if [ ! -d "/var/www/html/voting-tool" ]; then
-        echo "❌ FEHLER: Deploy-Pfad nicht gefunden!"
-        echo "Dieser Job muss auf einem Shell-Executor mit Zugriff auf /var/www/html/ laufen."
-        echo "Aktueller Pfad: $(pwd)"
-        echo "Verfügbare Pfade:"
-        ls -la /var/www/ 2>/dev/null || echo "Kein /var/www/ Verzeichnis"
-        exit 1
-      fi
-      
-      # Variablen für Test-Umgebung
-      export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
-      export BACKUP_DIR="/var/www/html/voting-tool-backups"
-      
-      # Backup-Verzeichnis erstellen
-      mkdir -p ${BACKUP_DIR}
+      # Erstelle temporäres Volume für Backups
+      docker volume create voting-test-backups || true
       
       # Timestamp für Backup
       export BACKUP_TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-      export BACKUP_FILE="${BACKUP_DIR}/voting-db-backup-${BACKUP_TIMESTAMP}.sql"
+      export BACKUP_FILENAME="voting-db-backup-${BACKUP_TIMESTAMP}.sql"
       
-      # Datenbank-Backup erstellen
-      cd ${TEST_DEPLOY_PATH}
-      
-      # Prüfe ob Docker Compose läuft
-      if ! docker compose ps | grep -q "Up"; then
-        echo "❌ FEHLER: Docker Compose Services nicht aktiv!"
-        docker compose ps
-        exit 1
+      # Finde das voting-tool DB Network
+      VOTING_NETWORK=$(docker network ls --format "table {{.Name}}" | grep voting-tool | head -1)
+      if [ -z "$VOTING_NETWORK" ]; then
+        # Fallback: versuche häufige Namen
+        VOTING_NETWORK="voting-tool_default"
+        echo "Verwende Standard-Netzwerk: $VOTING_NETWORK"
+      else
+        echo "Gefundenes Netzwerk: $VOTING_NETWORK"
       fi
       
-      # Erstelle Backup
-      docker compose exec -T db mysqldump -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} > ${BACKUP_FILE}
+      # Starte temporären MySQL-Client Container für Backup
+      echo "Erstelle Backup über temporären Container..."
+      docker run --rm \
+        --network ${VOTING_NETWORK} \
+        -v voting-test-backups:/backups \
+        mysql:8.0 \
+        sh -c "
+          mysqldump -h db -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} > /backups/${BACKUP_FILENAME} 2>/dev/null
+          if [ -s /backups/${BACKUP_FILENAME} ]; then
+            echo 'Backup erfolgreich erstellt: ${BACKUP_FILENAME}'
+            ls -lah /backups/${BACKUP_FILENAME}
+            exit 0
+          else
+            echo 'Backup fehlgeschlagen!'
+            exit 1
+          fi
+        "
       
-      # Prüfe Backup-Größe
-      if [ -s ${BACKUP_FILE} ]; then
-        echo "✅ Backup erfolgreich erstellt: ${BACKUP_FILE}"
-        echo "Backup-Größe: $(du -h ${BACKUP_FILE} | cut -f1)"
-        
-        # Speichere Backup-Pfad für spätere Jobs
-        echo "BACKUP_FILE=${BACKUP_FILE}" > backup-info.env
+      if [ $? -eq 0 ]; then
+        # Speichere Backup-Info für spätere Jobs
+        echo "BACKUP_FILENAME=${BACKUP_FILENAME}" > backup-info.env
         echo "BACKUP_TIMESTAMP=${BACKUP_TIMESTAMP}" >> backup-info.env
+        echo "BACKUP_VOLUME=voting-test-backups" >> backup-info.env
+        echo "✅ Backup-Container erfolgreich ausgeführt"
       else
-        echo "❌ Backup fehlgeschlagen - Datei ist leer!"
+        echo "❌ Backup-Container fehlgeschlagen!"
         exit 1
       fi
   artifacts:
@@ -351,55 +350,75 @@ backup_database:
   only:
     - main
   tags:
-    - shell  # WICHTIG: Shell-Executor statt Docker!
+    - docker
+    - deploy
 
-# Testdaten importieren (Shell-Executor notwendig!)
+# Testdaten importieren (mit temporärem Container)
 import_test_data:
   stage: test-prepare
   script:
-    - echo "📥 Importiere Testdaten..."
+    - echo "📥 Importiere Testdaten mit temporärem Container..."
     - |
-      # Prüfe ob wir auf dem Deploy-Server sind
-      if [ ! -d "/var/www/html/voting-tool" ]; then
-        echo "❌ FEHLER: Deploy-Pfad nicht gefunden!"
-        echo "Dieser Job muss auf einem Shell-Executor mit Zugriff auf /var/www/html/ laufen."
-        exit 1
+      # Finde das voting-tool DB Network
+      VOTING_NETWORK=$(docker network ls --format "table {{.Name}}" | grep voting-tool | head -1)
+      if [ -z "$VOTING_NETWORK" ]; then
+        VOTING_NETWORK="voting-tool_default"
+        echo "Verwende Standard-Netzwerk: $VOTING_NETWORK"
+      else
+        echo "Gefundenes Netzwerk: $VOTING_NETWORK"
       fi
       
-      export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
+      # Erstelle temporäres Volume für SQL-Datei
+      docker volume create voting-test-sql || true
       
-      # Kopiere SQL-Datei zum Server
-      cp test-data/load-test-scenario.sql ${TEST_DEPLOY_PATH}/
+      # Kopiere SQL-Datei in Volume über temporären Container
+      echo "Kopiere SQL-Datei in temporären Container..."
+      docker run --rm \
+        -v "$(pwd)/test-data:/source:ro" \
+        -v voting-test-sql:/sql \
+        alpine:latest \
+        cp /source/load-test-scenario.sql /sql/
       
-      cd ${TEST_DEPLOY_PATH}
-      
-      # Prüfe ob Docker Compose läuft
-      if ! docker compose ps | grep -q "Up"; then
-        echo "❌ FEHLER: Docker Compose Services nicht aktiv!"
-        docker compose ps
-        exit 1
-      fi
-      
-      # Importiere Testdaten
-      echo "Importiere SQL-Daten..."
-      docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < load-test-scenario.sql
+      # Importiere Testdaten über temporären MySQL-Client
+      echo "Importiere SQL-Daten über temporären Container..."
+      docker run --rm \
+        --network ${VOTING_NETWORK} \
+        -v voting-test-sql:/sql \
+        mysql:8.0 \
+        sh -c "
+          echo 'Verbinde zur Datenbank...'
+          mysql -h db -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < /sql/load-test-scenario.sql
+          
+          if [ \$? -eq 0 ]; then
+            echo 'Import erfolgreich!'
+            
+            # Prüfe importierte Daten
+            USER_COUNT=\$(mysql -h db -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e \"SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');\" -N 2>/dev/null)
+            echo \"Importierte Testnutzer: \$USER_COUNT\"
+            echo \$USER_COUNT > /sql/user_count.txt
+            exit 0
+          else
+            echo 'Import fehlgeschlagen!'
+            exit 1
+          fi
+        "
       
       if [ $? -eq 0 ]; then
-        echo "✅ Testdaten erfolgreich importiert"
+        # Lese User-Count aus Container
+        USER_COUNT=$(docker run --rm -v voting-test-sql:/sql alpine:latest cat /sql/user_count.txt 2>/dev/null || echo "0")
         
-        # Prüfe ob Daten wirklich importiert wurden
-        USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N)
-        echo "Importierte Testnutzer: ${USER_COUNT}"
-        
-        # Aufräumen
-        rm -f load-test-scenario.sql
+        echo "✅ Testdaten erfolgreich importiert: ${USER_COUNT} Nutzer"
         
         # Speichere Event-Informationen
         echo "TEST_EVENT_SLUG=lasttest-2025" > test-info.env
         echo "TEST_EVENT_URL=https://${VOTING_DOMAIN:-voting.failx.de}/#/register/lasttest-2025" >> test-info.env
         echo "TEST_USER_COUNT=${USER_COUNT}" >> test-info.env
+        
+        # Cleanup temporäres Volume
+        docker volume rm voting-test-sql || true
       else
         echo "❌ Import der Testdaten fehlgeschlagen!"
+        docker volume rm voting-test-sql || true
         exit 1
       fi
   artifacts:
@@ -412,7 +431,8 @@ import_test_data:
   only:
     - main
   tags:
-    - shell  # WICHTIG: Shell-Executor statt Docker!
+    - docker
+    - deploy
 
 # Playwright Load Tests ausführen (Ressourcen-optimiert)
 run_load_tests:
@@ -522,61 +542,78 @@ run_performance_test:
     - docker
     - deploy
 
-# Datenbank wiederherstellen (Shell-Executor notwendig!)
+# Datenbank wiederherstellen (mit temporärem Container)
 restore_database:
   stage: test-cleanup
   script:
     - echo "♻️ Stelle Datenbank-Backup wieder her..."
     - |
-      # Prüfe ob wir auf dem Deploy-Server sind
-      if [ ! -d "/var/www/html/voting-tool" ]; then
-        echo "❌ FEHLER: Deploy-Pfad nicht gefunden!"
-        echo "Dieser Job muss auf einem Shell-Executor mit Zugriff auf /var/www/html/ laufen."
+      # Prüfe ob Backup-Volume existiert
+      if ! docker volume ls | grep -q "voting-test-backups"; then
+        echo "❌ FEHLER: Backup-Volume 'voting-test-backups' nicht gefunden!"
+        echo "Verfügbare Volumes:"
+        docker volume ls | grep voting
         exit 1
       fi
       
-      export TEST_DEPLOY_PATH="/var/www/html/voting-tool"
-      
-      cd ${TEST_DEPLOY_PATH}
-      
-      # Prüfe ob Docker Compose läuft
-      if ! docker compose ps | grep -q "Up"; then
-        echo "❌ FEHLER: Docker Compose Services nicht aktiv!"
-        docker compose ps
-        exit 1
+      # Finde das voting-tool DB Network  
+      VOTING_NETWORK=$(docker network ls --format "table {{.Name}}" | grep voting-tool | head -1)
+      if [ -z "$VOTING_NETWORK" ]; then
+        VOTING_NETWORK="voting-tool_default"
+        echo "Verwende Standard-Netzwerk: $VOTING_NETWORK"
+      else
+        echo "Gefundenes Netzwerk: $VOTING_NETWORK"
       fi
       
-      # Suche nach neuestem Backup falls BACKUP_FILE nicht gesetzt
-      if [ -z "${BACKUP_FILE}" ]; then
-        echo "Suche nach neuestem Backup..."
-        BACKUP_FILE=$(ls -t /var/www/html/voting-tool-backups/voting-db-backup-*.sql 2>/dev/null | head -1)
-        echo "Gefundenes Backup: ${BACKUP_FILE}"
-      fi
-      
-      # Prüfe ob Backup-Datei existiert
-      if [ -f "${BACKUP_FILE}" ]; then
-        echo "Stelle Backup wieder her: ${BACKUP_FILE}"
+      # Verwende Backup-Filename aus backup_database Job oder suche neuestes
+      if [ -z "${BACKUP_FILENAME}" ]; then
+        echo "Suche nach neuestem Backup im Volume..."
+        BACKUP_FILENAME=$(docker run --rm -v voting-test-backups:/backups alpine:latest \
+          sh -c "ls -t /backups/voting-db-backup-*.sql 2>/dev/null | head -1 | xargs basename" || echo "")
         
-        # Importiere Backup
-        docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < ${BACKUP_FILE}
-        
-        if [ $? -eq 0 ]; then
-          echo "✅ Datenbank erfolgreich wiederhergestellt"
-          
-          # Prüfe ob Testdaten entfernt wurden
-          USER_COUNT=$(docker compose exec -T db mysql -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e "SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');" -N 2>/dev/null || echo "0")
-          echo "Verbleibende Testnutzer: ${USER_COUNT}"
-          
-          # Optional: Backup-Datei behalten für Archivierung
-          echo "Backup-Datei bleibt erhalten: ${BACKUP_FILE}"
-        else
-          echo "❌ Wiederherstellung fehlgeschlagen!"
+        if [ -z "$BACKUP_FILENAME" ]; then
+          echo "❌ Keine Backup-Datei gefunden!"
+          docker run --rm -v voting-test-backups:/backups alpine:latest ls -la /backups/
           exit 1
         fi
+        echo "Gefundenes Backup: ${BACKUP_FILENAME}"
+      fi
+      
+      # Stelle Backup wieder her über temporären Container
+      echo "Stelle Backup wieder her: ${BACKUP_FILENAME}"
+      docker run --rm \
+        --network ${VOTING_NETWORK} \
+        -v voting-test-backups:/backups \
+        mysql:8.0 \
+        sh -c "
+          if [ -f /backups/${BACKUP_FILENAME} ]; then
+            echo 'Importiere Backup...'
+            mysql -h db -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} < /backups/${BACKUP_FILENAME}
+            
+            if [ \$? -eq 0 ]; then
+              echo 'Backup erfolgreich wiederhergestellt!'
+              
+              # Prüfe ob Testdaten entfernt wurden
+              USER_COUNT=\$(mysql -h db -u root -p${VOTING_DB_ROOT_PASSWORD:-root_password} ${VOTING_DB_NAME:-voting_db} -e \"SELECT COUNT(*) FROM event_user WHERE event_id = (SELECT id FROM event WHERE slug = 'lasttest-2025');\" -N 2>/dev/null || echo '0')
+              echo \"Verbleibende Testnutzer: \$USER_COUNT\"
+              
+              exit 0
+            else
+              echo 'Wiederherstellung fehlgeschlagen!'
+              exit 1
+            fi
+          else
+            echo 'Backup-Datei nicht gefunden: ${BACKUP_FILENAME}'
+            ls -la /backups/
+            exit 1
+          fi
+        "
+      
+      if [ $? -eq 0 ]; then
+        echo "✅ Datenbank erfolgreich wiederhergestellt"
+        echo "Backup-Volume bleibt für weitere Wiederherstellungen erhalten"
       else
-        echo "❌ Backup-Datei nicht gefunden: ${BACKUP_FILE}"
-        echo "Verfügbare Backups:"
-        ls -la /var/www/html/voting-tool-backups/ 2>/dev/null || echo "Keine Backups gefunden"
+        echo "❌ Wiederherstellung fehlgeschlagen!"
         exit 1
       fi
   needs:
@@ -585,4 +622,5 @@ restore_database:
   only:
     - main
   tags:
-    - shell  # WICHTIG: Shell-Executor statt Docker!
+    - docker
+    - deploy
