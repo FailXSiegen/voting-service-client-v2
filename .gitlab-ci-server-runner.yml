@@ -7,8 +7,49 @@ backup_database_server:
   script:
     - echo "📦 Erstelle Datenbank-Backup (Server-Runner)..."
     - |
-      # Wechsle ins voting-tool Verzeichnis
-      cd /var/www/html/voting-tool
+      # Debug: Finde voting-tool Installation
+      echo "Suche voting-tool Installation..."
+      echo "Mögliche Pfade:"
+      find /var/www -name "*voting*" -type d 2>/dev/null || echo "Keine voting Verzeichnisse in /var/www/"
+      find /opt -name "*voting*" -type d 2>/dev/null || echo "Keine voting Verzeichnisse in /opt/"
+      find /home -name "*voting*" -type d 2>/dev/null || echo "Keine voting Verzeichnisse in /home/"
+      
+      echo "Docker Container mit 'voting' im Namen:"
+      docker ps | grep voting || echo "Keine voting Container gefunden"
+      
+      echo "Docker Networks:"
+      docker network ls | grep voting || echo "Keine voting Networks gefunden"
+      
+      echo "Docker Volumes:"
+      docker volume ls | grep voting || echo "Keine voting Volumes gefunden"
+      
+      # Versuche verschiedene Pfade
+      VOTING_PATHS=(
+        "/var/www/html/voting-tool"
+        "/var/www/voting-tool" 
+        "/opt/voting-tool"
+        "/home/*/voting-tool"
+        "$(pwd)"
+      )
+      
+      VOTING_DIR=""
+      for path in "${VOTING_PATHS[@]}"; do
+        if [ -d "$path" ] && [ -f "$path/docker-compose.yml" ]; then
+          VOTING_DIR="$path"
+          echo "✅ Gefunden: $VOTING_DIR"
+          break
+        fi
+      done
+      
+      if [ -z "$VOTING_DIR" ]; then
+        echo "❌ voting-tool Verzeichnis nicht gefunden!"
+        echo "Aktuelle Directory-Struktur:"
+        ls -la /var/www/ 2>/dev/null || echo "/var/www/ nicht vorhanden"
+        exit 1
+      fi
+      
+      # Wechsle ins gefundene Verzeichnis
+      cd "$VOTING_DIR"
       
       # Backup-Verzeichnis erstellen
       mkdir -p /var/www/html/voting-tool-backups
