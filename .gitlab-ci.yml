@@ -59,6 +59,7 @@ build_client:
         --build-arg VITE_API_BASE_URL=https://${DOMAIN} \
         --build-arg VITE_SUBSCRIPTION_URL=wss://${DOMAIN}/graphql \
         --build-arg DOMAIN=${DOMAIN} \
+        --build-arg VITE_RECAPTCHA_SITE_KEY=${VOTING_RECAPTCHA_SITE_KEY} \
         -t ${CLIENT_IMAGE}:latest \
         -t ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} .
     - |
