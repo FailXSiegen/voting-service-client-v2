@@ -153,7 +153,7 @@ BEGIN
             UNIX_TIMESTAMP(),
             CONCAT('testuser', i),
             CONCAT('testuser', i, '@test.local'),
-            '$2b$10$TestPasswordHash', -- Password: test123
+            '$argon2i$v=19$m=4096,t=3,p=1$VaBFkbaMX7B0+rYCuX+cYQ$Ff2PfK3CReoOPKZ+WSqdgKrYCPmrRlM/4U7xSot1CvU', -- Password: test123
             CONCAT('Testnutzer ', i),
             1, -- Stimmberechtigt
             1, -- Eine Stimme
@@ -186,7 +186,7 @@ BEGIN
             UNIX_TIMESTAMP(),
             CONCAT('testuser', i),
             CONCAT('testuser', i, '@test.local'),
-            '$2b$10$TestPasswordHash',
+            '$argon2i$v=19$m=4096,t=3,p=1$VaBFkbaMX7B0+rYCuX+cYQ$Ff2PfK3CReoOPKZ+WSqdgKrYCPmrRlM/4U7xSot1CvU',
             CONCAT('Mehrfachstimmen-Nutzer ', i, ' (', vote_amount, ' Stimmen)'),
             1, -- Stimmberechtigt
             vote_amount, -- 3-5 Stimmen
@@ -216,7 +216,7 @@ BEGIN
             UNIX_TIMESTAMP(),
             CONCAT('testuser', i),
             CONCAT('testuser', i, '@test.local'),
-            '$2b$10$TestPasswordHash',
+            '$argon2i$v=19$m=4096,t=3,p=1$VaBFkbaMX7B0+rYCuX+cYQ$Ff2PfK3CReoOPKZ+WSqdgKrYCPmrRlM/4U7xSot1CvU',
             CONCAT('Beobachter ', i),
             0, -- NICHT stimmberechtigt
             0, -- Keine Stimmen
