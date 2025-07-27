@@ -11,8 +11,8 @@ const CONFIG = {
     BATCH_VOTE_DELAY: 500,          // Verzögerung zwischen Abstimmungsbatches (500ms)
     API_URL: process.env.TEST_BASE_URL || 'http://localhost:4000',
     CLIENT_URL: process.env.TEST_BASE_URL || 'http://localhost:5173',
-    EVENT_SLUG: process.env.TEST_EVENT_SLUG || 'loadtest-event',
-    EVENT_ID: parseInt(process.env.TEST_EVENT_ID) || 5, // Aus GitLab Pipeline oder Fallback
+    EVENT_SLUG: process.env.TEST_EVENT_SLUG || 'lasttest-2025',
+    EVENT_ID: parseInt(process.env.TEST_EVENT_ID) || null, // Wird dynamisch ermittelt
     ORGANIZER_USERNAME: 'loadtest-admin',  // Aus der DB
     ORGANIZER_EMAIL: 'loadtest-admin@test.local',
     ORGANIZER_PASSWORD: 'loadtest123',     // Aus der DB (load-test-scenario.sql)
