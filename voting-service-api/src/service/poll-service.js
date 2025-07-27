@@ -134,16 +134,9 @@ export async function existsPollUserVoted(
       // Repository-Funktion verwenden
       await createPollUserVoted(pollResultId, eventUserId, voteCycle);
 
-      // Bei MultiVote: Wenn genau die maximale Anzahl von Stimmen angefordert wurde, erlauben wir die Stimmabgabe
-      if (multiVote) {
-        if (voteCycle === maxVotes) {
-          return true; // Die letzte Stimme darf gezählt werden
-        } else if (voteCycle > 0) {
-          return true; // Auch Teilabstimmungen sind erlaubt
-        } else {
-          return false;
-        }
-      }
+      // WICHTIGER FIX: Entferne die problematische MultiVote-Logik
+      // Die einheitliche Behandlung über allowToCreateNewVote ist korrekt
+      // Egal ob multiVote oder nicht, die Logik sollte konsistent sein
 
       return true; // Bei normalem Modus: Erste Stimme erlauben
     }
