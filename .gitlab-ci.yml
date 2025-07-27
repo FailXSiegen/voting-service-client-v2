@@ -83,6 +83,10 @@ deploy:
   stage: deploy
   script:
     - echo "🚀 Deploying voting tool..."
+    - echo "Debug EMAIL Variables"
+    - echo "VOTING_EMAIL_HOST = ${VOTING_EMAIL_HOST}"
+    - echo "VOTING_EMAIL_PORT = ${VOTING_EMAIL_PORT}"
+    - echo "Length of VOTING_EMAIL_HOST = ${#VOTING_EMAIL_HOST}"
     
     # Backup erstellen
     - |
