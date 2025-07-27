@@ -123,15 +123,13 @@ export async function existsPollUserVoted(
       // Ein erster Vote-Cycle von 1 ist der Standardwert für neue Einträge
       // Falls multiVote aktiviert ist und der Client hat mehr angefordert, kann der Wert erhöht werden
 
-      // Das ist der Standardwert für neue Einträge
+      // WICHTIGER FIX: Setze immer 0 als initialen Wert
+      // Das ist der Standardwert für neue Einträge - wir starten immer bei 0
       let voteCycle = 0;
 
-      // Wenn multiVote aktiv ist, können wir einen höheren Wert setzen, aber maximal bis maxVotes
-      if (multiVote) {
-        // Der Client sendet die gewünschte Anzahl der Stimmen, aber wir begrenzen auf maxVotes
-        const requestedVotes = input?.voteCycle || 1;
-        voteCycle = Math.min(maxVotes, Math.max(1, requestedVotes));
-      }
+      // Für MultiVote und SingleVote verwenden wir konsistent den gleichen Ansatz:
+      // Der vote_cycle wird erst NACH erfolgreicher Stimmabgabe erhöht
+      console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] Neuer Eintrag für User ${eventUserId} mit voteCycle=0, maxVotes=${maxVotes}, multiVote=${multiVote}`);
 
       // Repository-Funktion verwenden
       await createPollUserVoted(pollResultId, eventUserId, voteCycle);
