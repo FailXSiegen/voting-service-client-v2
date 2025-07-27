@@ -54,8 +54,8 @@ build_client:
   stage: build
   script:
     - echo "🔨 Building Client image..."
-    - echo "Debug: VOTING_RECAPTCHA_SITE_KEY=${VOTING_RECAPTCHA_SITE_KEY}"
-    - echo "Debug: Masked value check - length: ${#VOTING_RECAPTCHA_SITE_KEY}"
+    - echo "Debug VOTING_RECAPTCHA_SITE_KEY=${VOTING_RECAPTCHA_SITE_KEY}"
+    - echo "Debug Masked value check - length ${#VOTING_RECAPTCHA_SITE_KEY}"
     - |
       docker build --no-cache -f docker/production/Dockerfile.client \
         --build-arg VITE_API_BASE_URL=https://${DOMAIN} \
