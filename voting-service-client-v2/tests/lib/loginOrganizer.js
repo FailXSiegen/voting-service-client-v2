@@ -127,7 +127,16 @@ async function loginAsOrganizer(page) {
                 console.log(`Organizer: URL deutet auf erfolgreichen Login hin: ${url}`);
                 loginSuccess = true;
             } else {
-                console.warn('Organizer: Kein Erfolgsindikator nach Login gefunden!');
+                console.error('❌ ORGANIZER LOGIN FEHLGESCHLAGEN!');
+                console.error('Aktuelle URL:', url);
+                console.error('Mögliche Ursachen:');
+                console.error('1. loadtest-admin User existiert nicht in der Datenbank');
+                console.error('2. load-test-scenario.sql wurde nicht ausgeführt');
+                console.error('3. Falsche Login-Credentials (loadtest-admin:loadtest123)');
+                console.error('4. SMTP/Email-Probleme bei der Organizer-Erstellung');
+                console.error('5. API-Server nicht erreichbar unter https://voting.failx.de');
+                
+                throw new Error(`ORGANIZER LOGIN FAILED: Kein Erfolgsindikator gefunden auf URL: ${url}. Bitte führen Sie erst load-test-scenario.sql gegen die Datenbank aus!`);
             }
         }
 
