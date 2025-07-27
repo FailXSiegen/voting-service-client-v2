@@ -19,7 +19,7 @@ echo "Event: $TEST_EVENT_SLUG"
 echo "Geplante Last: $MAX_USERS_PER_TEST Nutzer"
 
 # Ins richtige Verzeichnis wechseln
-cd voting-service-client-v2
+cd ../voting-service-client-v2
 
 # Dependencies installieren falls nötig
 if [ ! -d "node_modules" ]; then
