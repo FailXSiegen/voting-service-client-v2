@@ -43,6 +43,11 @@ DELETE FROM event_user WHERE event_id = @cleanup_event_id;
 -- Lösche Events
 DELETE FROM event WHERE slug = 'lasttest-2025';
 
+-- Lösche JWT Refresh Tokens für den Organizer (verhindert Foreign Key Constraint)
+DELETE FROM jwt_refresh_token WHERE organizer_id IN (
+    SELECT id FROM organizer WHERE username = 'loadtest-admin'
+);
+
 -- Jetzt kann der Organizer sicher gelöscht werden
 DELETE FROM organizer WHERE username = 'loadtest-admin';
 
