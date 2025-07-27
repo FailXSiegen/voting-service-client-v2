@@ -41,6 +41,20 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
     try {
       console.log("Organizer-Test: Versuche Login als Organizer...");
       const loginSuccess = await loginAsOrganizer(page);
+      
+      if (!loginSuccess) {
+        console.error("❌ ORGANIZER LOGIN FEHLGESCHLAGEN!");
+        console.error("Mögliche Ursachen:");
+        console.error("1. loadtest-admin User existiert nicht in der Datenbank");
+        console.error("2. load-test-scenario.sql wurde nicht ausgeführt");
+        console.error("3. Falsche Login-Credentials (loadtest-admin:loadtest123)");
+        console.error("4. SMTP/Email-Probleme bei der Organizer-Erstellung");
+        console.error("5. API-Server nicht erreichbar unter https://voting.failx.de");
+        
+        throw new Error("Organizer Login fehlgeschlagen - Test kann nicht fortgesetzt werden. Bitte führen Sie erst load-test-scenario.sql gegen die Datenbank aus!");
+      }
+      
+      console.log("✅ Organizer erfolgreich eingeloggt!");
       expect(loginSuccess).toBeTruthy();
 
       // Organizer ist eingeloggt, aber wartet auf die Benutzer-Logins
