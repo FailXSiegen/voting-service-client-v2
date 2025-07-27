@@ -11,10 +11,10 @@ async function loadEventInfo(baseUrl, eventSlug) {
     try {
         console.log(`[EVENT_LOADER] Lade Event für Slug: ${eventSlug}`);
         
-        // GraphQL Query um Event by Slug zu laden
+        // GraphQL Query um Event by Slug zu laden (ohne Auth für öffentliche Events)
         const query = `
-            query GetEventBySlug($slug: String!) {
-                eventBySlug(slug: $slug) {
+            query GetPublicEventBySlug($slug: String!) {
+                publicEventBySlug(slug: $slug) {
                     id
                     title
                     slug
@@ -47,7 +47,7 @@ async function loadEventInfo(baseUrl, eventSlug) {
             throw new Error(`GraphQL Error: ${data.errors.map(e => e.message).join(', ')}`);
         }
         
-        const eventData = data.data?.eventBySlug;
+        const eventData = data.data?.publicEventBySlug;
         if (!eventData) {
             throw new Error(`Kein Event mit Slug '${eventSlug}' gefunden`);
         }
@@ -86,7 +86,7 @@ async function loadEventIdIntoConfig(config) {
         return config;
     } catch (error) {
         console.error(`[EVENT_LOADER] ❌ Fallback auf Standard EVENT_ID`);
-        config.EVENT_ID = 5; // Fallback
+        config.EVENT_ID = 6; // Fallback auf aktuelle Event-ID
         return config;
     }
 }
