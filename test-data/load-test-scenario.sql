@@ -102,7 +102,7 @@ INSERT INTO `event` (
     @organizer_id,
     UNIX_TIMESTAMP(),
     UNIX_TIMESTAMP(),
-    UNIX_TIMESTAMP() + 86400, -- Morgen
+    UNIX_TIMESTAMP() - 3600, -- Vor 1 Stunde gestartet
     'Lasttest Event 2025',
     1, -- Lobby ist offen
     1, -- Event ist aktiv
