@@ -11,6 +11,7 @@ Folgende Variablen müssen in GitLab unter **Settings → CI/CD → Variables** 
 ## Sicherheit
 - `VOTING_JWT_SECRET` - JWT Secret für Token-Generierung (geschützt)
 - `VOTING_COOKIE_SIGN_SECRET` - Cookie Signatur Secret (geschützt)
+- `VOTING_RECAPTCHA_SITE_KEY` - Google reCAPTCHA Site Key (öffentlich)
 
 ## E-Mail (SMTP)
 - `VOTING_EMAIL_HOST` - SMTP Server (z.B. `smtp.gmail.com`, `mail.failx.de`)
@@ -22,3 +23,4 @@ Folgende Variablen müssen in GitLab unter **Settings → CI/CD → Variables** 
 - Alle Passwort-Variablen sollten als "Protected" und "Masked" markiert werden
 - Die E-Mail-Variablen werden automatisch auf das `MAIL_` Prefix gemappt
 - Standard-Absender ist `info@failx.de`
+- Die reCAPTCHA Site Key wird beim Build in den Client eingebaut

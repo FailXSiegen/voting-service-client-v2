@@ -16,6 +16,7 @@ COPY voting-service-client-v2/ ./
 ARG VITE_API_BASE_URL
 ARG VITE_SUBSCRIPTION_URL
 ARG DOMAIN
+ARG VITE_RECAPTCHA_SITE_KEY
 
 # Set production environment variables for build
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://digitalwahl.failx.de}
@@ -35,7 +36,7 @@ ENV VITE_REQUEST_ORGANIZER_EXPORT_RESULTS="/event/export-results"
 ENV VITE_REQUEST_EVENT_VERIFY_SLUG="/event/verify-slug"
 ENV VITE_REQUEST_EVENT_FETCH_BY_ID="/event"
 ENV VITE_REQUEST_ZOOM_AUTH="/zoom/auth/token"
-ENV VITE_RECAPTCHA_SITE_KEY=""
+ENV VITE_RECAPTCHA_SITE_KEY=${VITE_RECAPTCHA_SITE_KEY}
 
 # Build the application with debug info
 RUN echo "=== DEBUG: Building client application ===" && \
