@@ -77,9 +77,86 @@ test.describe('Gewichtete Stimmen Test', () => {
         voteDistribution: WEIGHTED_CONFIG.USER_DISTRIBUTION
       });
 
-      // Warte auf Nutzer
+      // Warte auf Nutzer-Bereitschafts-Datei
       console.log("Weighted Test: Warte auf Nutzer mit verschiedenen Stimmgewichten...");
-      await page.waitForTimeout(15000);
+      
+      // Warte dynamisch auf die User-Ready-Datei mit intelligentem Fallback
+      let userReady = false;
+      let waitTime = 0;
+      const maxWaitTime = 120000; // 2 Minuten max
+      
+      while (!userReady && waitTime < maxWaitTime) {
+        try {
+          const fs = require('fs');
+          const path = require('path');
+          const readyFile = path.join(process.cwd(), 'voting-results', 'weighted-users-ready.json');
+          
+          if (fs.existsSync(readyFile)) {
+            const data = JSON.parse(fs.readFileSync(readyFile, 'utf8'));
+            if (data.totalUsers >= 40) { // Mindestens 40 von 50 Usern
+              userReady = true;
+              console.log(`Weighted Test: ${data.totalUsers} Nutzer bereit, starte Abstimmung!`);
+            } else {
+              console.log(`Weighted Test: ${data.totalUsers} von 50 Nutzern bereit (warte auf mindestens 40)...`);
+            }
+          }
+          
+          // Fallback: Prüfe auch User-Count direkt auf der Seite
+          if (!userReady && waitTime > 60000) { // Nach 1 Minute
+            console.log("Weighted Test: Prüfe User-Count direkt auf Organizer-Seite als Fallback...");
+            
+            const pageUserCount = await page.evaluate(() => {
+              let foundElements = [];
+              
+              // Durchsuche alle Elemente nach Text-Pattern
+              const allElements = document.querySelectorAll('*');
+              for (const element of allElements) {
+                const text = element.textContent?.trim() || '';
+                
+                // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                const patterns = [
+                  /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                  /aktuelle\s*anzahl.*?(\d+)/i,
+                  /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                  /anwesende?\s*teilnehmer.*?(\d+)/i,
+                  /(\d+)\s*teilnehmer/i,
+                  /teilnehmer.*?(\d+)/i
+                ];
+                
+                for (const pattern of patterns) {
+                  const match = text.match(pattern);
+                  if (match) {
+                    foundElements.push({
+                      userCount: parseInt(match[1]) || 0
+                    });
+                  }
+                }
+              }
+              
+              return foundElements.length > 0 ? foundElements[0].userCount : 0;
+            });
+            
+            if (pageUserCount >= 40) {
+              console.log(`Weighted Test: FALLBACK ERFOLGREICH! Seite zeigt ${pageUserCount} User - starte Abstimmung!`);
+              userReady = true;
+            } else {
+              console.log(`Weighted Test: Fallback - Seite zeigt nur ${pageUserCount} User`);
+            }
+          }
+          
+        } catch (e) {
+          console.log("Weighted Test: Fehler bei User-Ready Prüfung:", e.message);
+        }
+        
+        if (!userReady) {
+          await page.waitForTimeout(2000); // 2 Sekunden warten
+          waitTime += 2000;
+        }
+      }
+      
+      if (!userReady) {
+        console.warn("Weighted Test: Timeout beim Warten auf User - fahre trotzdem fort");
+      }
 
       // Erstelle spezielle Multi-Choice Abstimmung
       console.log("Weighted Test: Erstelle Multiple-Choice Abstimmung...");
@@ -146,33 +223,76 @@ test.describe('Gewichtete Stimmen Test', () => {
     try {
       console.log("Weighted Test: Starte Login-Phase für gewichtete Nutzer...");
       
-      // Login für alle Nutzer-Typen
+      // Parallel Login für alle Nutzer-Typen in 10er Batches
+      const allLoginTasks = [];
+      
+      // Sammle alle Login-Tasks
       for (const [voteType, config] of Object.entries(WEIGHTED_CONFIG.USER_DISTRIBUTION)) {
-        console.log(`\nLogge ${config.end - config.start + 1} Nutzer mit ${config.votes} Stimme(n) ein...`);
+        console.log(`\nBereite ${config.end - config.start + 1} Nutzer mit ${config.votes} Stimme(n) vor...`);
         
         for (let userId = config.start; userId <= config.end; userId++) {
           const username = `testuser${userId}`;
           const displayName = `${voteType.replace('Vote', '')} User ${userId} (${config.votes} votes)`;
           
-          const context = await browser.newContext();
-          const page = await context.newPage();
-          
-          userContexts.push(context);
-          
-          const loginSuccess = await loginAsUser(page, username, CONFIG.USER_PASSWORD, displayName);
-          
-          if (loginSuccess) {
-            userPages.push({
-              page,
-              userIndex: userId,
-              username,
-              voteAmount: config.votes,
-              voteType
-            });
+          allLoginTasks.push({
+            username,
+            displayName,
+            userId,
+            voteAmount: config.votes,
+            voteType
+          });
+        }
+      }
+
+      // Führe Logins in 10er Batches parallel aus
+      const BATCH_SIZE = 10;
+      console.log(`\nStarte parallele Logins in ${BATCH_SIZE}er Batches für ${allLoginTasks.length} User...`);
+      
+      for (let i = 0; i < allLoginTasks.length; i += BATCH_SIZE) {
+        const batch = allLoginTasks.slice(i, i + BATCH_SIZE);
+        console.log(`Login Batch ${Math.floor(i/BATCH_SIZE) + 1}: User ${batch[0].username} bis ${batch[batch.length-1].username}`);
+        
+        // Parallel login für alle User im Batch
+        const batchPromises = batch.map(async (task) => {
+          try {
+            const context = await browser.newContext();
+            const page = await context.newPage();
+            
+            userContexts.push(context);
+            
+            const loginSuccess = await loginAsUser(page, task.username, CONFIG.USER_PASSWORD, task.displayName);
+            
+            if (loginSuccess) {
+              return {
+                page,
+                userIndex: task.userId,
+                username: task.username,
+                voteAmount: task.voteAmount,
+                voteType: task.voteType
+              };
+            }
+            return null;
+          } catch (error) {
+            console.error(`Login-Fehler für ${task.username}:`, error.message);
+            return null;
           }
-          
-          // Kleine Pause zwischen Logins
-          await sleep(200);
+        });
+        
+        // Warte auf alle Logins im Batch
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Sammle erfolgreiche Logins
+        batchResults.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            userPages.push(result.value);
+          }
+        });
+        
+        console.log(`Batch ${Math.floor(i/BATCH_SIZE) + 1} abgeschlossen: ${batchResults.filter(r => r.status === 'fulfilled' && r.value).length}/${batch.length} erfolgreich`);
+        
+        // Kurze Pause zwischen Batches
+        if (i + BATCH_SIZE < allLoginTasks.length) {
+          await sleep(1000);
         }
       }
 
@@ -212,8 +332,8 @@ test.describe('Gewichtete Stimmen Test', () => {
         let successfulVotes = 0;
         let totalVotesCast = 0;
 
-        // Simuliere Mehrfachauswahl basierend auf verfügbaren Stimmen
-        for (const user of users) {
+        // Simuliere Mehrfachauswahl parallel für alle User der Gruppe  
+        const votingPromises = users.map(async (user) => {
           try {
             const votingStart = Date.now();
             
@@ -258,28 +378,52 @@ test.describe('Gewichtete Stimmen Test', () => {
               totalVotesCast += voteSuccess.votesCast;
             }
 
-            groupVotingTimings.push({
+            // Pause zwischen Abstimmungen (nur für individuelle User)
+            await sleep(100 + Math.random() * 400); // Zufällige Pause 100-500ms
+            
+            return {
               user: user.userIndex,
               votingTime,
               success: voteSuccess.success,
               votesCast: voteSuccess.votesCast,
               maxVotes: user.voteAmount
-            });
+            };
 
           } catch (error) {
             console.error(`Fehler bei Nutzer ${user.username}:`, error.message);
-            groupVotingTimings.push({
+            return {
               user: user.userIndex,
               votingTime: 0,
               success: false,
               error: error.message,
               maxVotes: user.voteAmount
+            };
+          }
+        });
+
+        // Warte auf alle parallelen Voting-Operationen
+        const results = await Promise.allSettled(votingPromises);
+        
+        // Verarbeite die Ergebnisse
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const data = result.value;
+            if (data.success) {
+              successfulVotes++;
+              totalVotesCast += data.votesCast;
+            }
+            groupVotingTimings.push(data);
+          } else {
+            console.error(`Fehler bei Nutzer ${users[index].username}:`, result.reason?.message);
+            groupVotingTimings.push({
+              user: users[index].userIndex,
+              votingTime: 0,
+              success: false,
+              error: result.reason?.message,
+              maxVotes: users[index].voteAmount
             });
           }
-
-          // Pause zwischen Abstimmungen
-          await sleep(500);
-        }
+        });
 
         // Speichere Gruppen-Ergebnisse
         const groupResults = {

@@ -5,7 +5,7 @@ module.exports = defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: false,
-  workers: 2, // Limit concurrent test workers
+  workers: 6, // More workers for better browser distribution
   reporter: 'html',
   timeout: 3600000, // 60 minutes timeout for load tests
   expect: {

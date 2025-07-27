@@ -174,6 +174,21 @@ async function loginAsOrganizer(page) {
             }
         }
 
+        // Nach erfolgreichem Login zur Event-Seite navigieren
+        if (loginSuccess) {
+            console.log("Organizer: Navigiere zur Event-Abstimmungsseite...");
+            try {
+                await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`, { 
+                    waitUntil: 'networkidle',
+                    timeout: 30000 
+                });
+                console.log("Organizer: Event-Seite erfolgreich geladen");
+            } catch (error) {
+                console.error("Organizer: Fehler beim Navigieren zur Event-Seite:", error.message);
+                // Login war erfolgreich, auch wenn Navigation fehlschlägt
+            }
+        }
+
         return loginSuccess;
     } catch (error) {
         console.error('Fehler beim Login als Organizer:', error.message);
@@ -207,14 +222,28 @@ async function createAndStartPoll(page) {
                 totalLoggedInUsers = 0;
                 batchCount = 0;
                 
-                for (const file of files) {
-                    if (file.startsWith('user-batch-') && file.endsWith('-ready.json')) {
-                        try {
-                            const batchData = JSON.parse(fs.readFileSync(path.join(resultsDir, file)));
-                            totalLoggedInUsers += batchData.usersLoggedIn || 0;
-                            batchCount++;
-                        } catch (error) {
-                            console.error(`Organizer: Fehler beim Lesen von ${file}:`, error.message);
+                // Prüfe zuerst auf weighted-users-ready.json (für gewichtete Tests)
+                const weightedFile = path.join(resultsDir, 'weighted-users-ready.json');
+                if (fs.existsSync(weightedFile)) {
+                    try {
+                        const weightedData = JSON.parse(fs.readFileSync(weightedFile, 'utf8'));
+                        totalLoggedInUsers = weightedData.totalUsers || 0;
+                        batchCount = 1;
+                        console.log(`Organizer: Weighted test - ${totalLoggedInUsers} User aus weighted-users-ready.json`);
+                    } catch (error) {
+                        console.error(`Organizer: Fehler beim Lesen von weighted-users-ready.json:`, error.message);
+                    }
+                } else {
+                    // Fallback: Standard user-batch-* Dateien
+                    for (const file of files) {
+                        if (file.startsWith('user-batch-') && file.endsWith('-ready.json')) {
+                            try {
+                                const batchData = JSON.parse(fs.readFileSync(path.join(resultsDir, file)));
+                                totalLoggedInUsers += batchData.usersLoggedIn || 0;
+                                batchCount++;
+                            } catch (error) {
+                                console.error(`Organizer: Fehler beim Lesen von ${file}:`, error.message);
+                            }
                         }
                     }
                 }
@@ -226,19 +255,19 @@ async function createAndStartPoll(page) {
                     console.log(`Organizer: Insgesamt ${totalLoggedInUsers} Benutzer in ${batchCount} Batches sind bereit!`);
                 } else {
                     console.log(`Organizer: Warte auf mehr Benutzer... Aktuell: ${totalLoggedInUsers} von mindestens ${minUsers}`);
-                    await page.waitForTimeout(5000); // 5 Sekunden warten
+                    await page.waitForTimeout(1000); // Nur 1 Sekunde warten für schnellere Tests
                 }
             } catch (error) {
                 console.error("Organizer: Fehler bei der Benutzerprüfung:", error.message);
-                await page.waitForTimeout(2000);
+                await page.waitForTimeout(500); // Reduzierte Fehlerwartzeit
             }
         }
         
         if (!usersReady) {
             console.warn("Organizer: Warnung - Nicht genügend Benutzer bereit, fahre trotzdem fort...");
         } else {
-            console.log(`Organizer: ${totalLoggedInUsers} Benutzer sind eingeloggt. Warte zusätzlich 5 Sekunden, damit die PubSub-Verbindungen vollständig aufgebaut werden können...`);
-            await page.waitForTimeout(5000);
+            console.log(`Organizer: ${totalLoggedInUsers} Benutzer sind eingeloggt. Warte zusätzlich 1 Sekunde für PubSub-Verbindungen...`);
+            await page.waitForTimeout(1000);
         }
         
         // Generiere ein Timestamp für den Reload
@@ -376,13 +405,13 @@ async function createAndStartPoll(page) {
             }
             
             // Nach dem ersten Laden kurz warten und dann mehrere explizite Reloads durchführen
-            console.log("Organizer: Warte 3 Sekunden nach dem ersten Laden...");
-            await page.waitForTimeout(3000);
+            console.log("Organizer: Warte 1 Sekunde nach dem ersten Laden...");
+            await page.waitForTimeout(1000);
             
             // Erster expliziter Reload nach kurzem Warten
             console.log("Organizer: Führe ersten expliziten Reload durch...");
             await page.reload({ waitUntil: 'networkidle' });
-            await page.waitForTimeout(3000);
+            await page.waitForTimeout(1000);
             
             // Screenshot nach dem ersten Reload
             await page.screenshot({ 
@@ -392,25 +421,76 @@ async function createAndStartPoll(page) {
             
             // Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem ersten Reload
             console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem ersten Reload...");
-            const voterCountAfterFirstReload = await page.locator('p:has-text("Aktuelle Anzahl wahlberechtigter Teilnehmer")').innerText().catch(() => null);
-            if (voterCountAfterFirstReload) {
-                console.log(`Organizer: Nach erstem Reload: ${voterCountAfterFirstReload}`);
+            
+            // Robuste Suche nach User Count mit mehreren Selektoren
+            const userCountInfo = await page.evaluate(() => {
+                // Verschiedene Strategien zum Finden der User-Anzahl
+                const selectors = [
+                    'p:contains("Aktuelle Anzahl wahlberechtigter Teilnehmer")',
+                    '*:contains("wahlberechtigter Teilnehmer")',
+                    '*:contains("anwesende Teilnehmer")',
+                    '*:contains("Teilnehmer")',
+                    '*[data-testid*="user"], *[data-testid*="participant"]',
+                    '.user-count, .participant-count',
+                    'span:contains("von"), p:contains("von")'
+                ];
                 
-                // Versuche die Zahl zu extrahieren
-                const match = voterCountAfterFirstReload.match(/(\d+)/);
-                if (match && match[1]) {
-                    console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer nach erstem Reload: ${match[1]}`);
+                let foundElements = [];
+                
+                // Durchsuche alle Elemente nach Text-Pattern
+                const allElements = document.querySelectorAll('*');
+                for (const element of allElements) {
+                    const text = element.textContent?.trim() || '';
+                    
+                    // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                    const patterns = [
+                        /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                        /aktuelle\s*anzahl.*?(\d+)/i,
+                        /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                        /anwesende?\s*teilnehmer.*?(\d+)/i,
+                        /(\d+)\s*teilnehmer/i,
+                        /teilnehmer.*?(\d+)/i
+                    ];
+                    
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match) {
+                            foundElements.push({
+                                element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                                text: text,
+                                match: match[0],
+                                userCount: match[1] || match[2] || '0'
+                            });
+                        }
+                    }
                 }
+                
+                return {
+                    foundElements,
+                    pageContent: document.body.textContent?.substring(0, 2000) || '',
+                    allParagraphs: Array.from(document.querySelectorAll('p')).map(p => p.textContent?.trim()).filter(t => t && t.includes('Teilnehmer'))
+                };
+            });
+            
+            console.log(`Organizer: User Count Suche nach erstem Reload - Gefundene Elemente:`, JSON.stringify(userCountInfo.foundElements, null, 2));
+            
+            if (userCountInfo.foundElements.length > 0) {
+                const bestMatch = userCountInfo.foundElements[0];
+                console.log(`Organizer: Nach erstem Reload - Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+            } else {
+                console.log("Organizer: Nach erstem Reload - Keine User Count gefunden!");
+                console.log("Organizer: Verfügbare Paragraphen mit 'Teilnehmer':", userCountInfo.allParagraphs);
+                console.log("Organizer: Seiteninhalt (erste 500 Zeichen):", userCountInfo.pageContent.substring(0, 500));
             }
             
             // Nochmal warten und dann einen zweiten Reload durchführen
-            console.log("Organizer: Warte 10 Sekunden vor dem zweiten Reload...");
-            await page.waitForTimeout(10000);
+            console.log("Organizer: Warte 2 Sekunden vor dem zweiten Reload...");
+            await page.waitForTimeout(2000);
             
             // Zweiter expliziter Reload nach längerem Warten
             console.log("Organizer: Führe zweiten expliziten Reload durch...");
             await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`, { waitUntil: 'networkidle' });
-            await page.waitForTimeout(5000);
+            await page.waitForTimeout(1000);
             
             // Screenshot nach dem zweiten Reload
             await page.screenshot({ 
@@ -419,15 +499,82 @@ async function createAndStartPoll(page) {
             });
             
             // Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem zweiten Reload
-            console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem zweiten Reload...");
-            const voterCountAfterSecondReload = await page.locator('p:has-text("Aktuelle Anzahl wahlberechtigter Teilnehmer")').innerText().catch(() => null);
-            if (voterCountAfterSecondReload) {
-                console.log(`Organizer: Nach zweitem Reload: ${voterCountAfterSecondReload}`);
+            console.log("Organizer: Prüfe Anzahl der wahlberechtigter Teilnehmer nach dem zweiten Reload...");
+            
+            // Verwende dieselbe robuste Suche wie beim ersten Reload
+            const userCountInfoAfterSecond = await page.evaluate(() => {
+                let foundElements = [];
                 
-                // Versuche die Zahl zu extrahieren
-                const match = voterCountAfterSecondReload.match(/(\d+)/);
-                if (match && match[1]) {
-                    console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer nach zweitem Reload: ${match[1]}`);
+                // Durchsuche alle Elemente nach Text-Pattern
+                const allElements = document.querySelectorAll('*');
+                for (const element of allElements) {
+                    const text = element.textContent?.trim() || '';
+                    
+                    // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                    const patterns = [
+                        /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                        /aktuelle\s*anzahl.*?(\d+)/i,
+                        /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                        /anwesende?\s*teilnehmer.*?(\d+)/i,
+                        /(\d+)\s*teilnehmer/i,
+                        /teilnehmer.*?(\d+)/i
+                    ];
+                    
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match) {
+                            foundElements.push({
+                                element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                                text: text,
+                                match: match[0],
+                                userCount: match[1] || match[2] || '0'
+                            });
+                        }
+                    }
+                }
+                
+                return {
+                    foundElements,
+                    pageContent: document.body.textContent?.substring(0, 2000) || '',
+                    allParagraphs: Array.from(document.querySelectorAll('p')).map(p => p.textContent?.trim()).filter(t => t && t.includes('Teilnehmer'))
+                };
+            });
+            
+            console.log(`Organizer: User Count Suche nach zweitem Reload - Gefundene Elemente:`, JSON.stringify(userCountInfoAfterSecond.foundElements, null, 2));
+            
+            if (userCountInfoAfterSecond.foundElements.length > 0) {
+                const bestMatch = userCountInfoAfterSecond.foundElements[0];
+                console.log(`Organizer: Nach zweitem Reload - Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+                
+                // Entscheide basierend auf der echten User-Anzahl
+                const actualUserCount = parseInt(bestMatch.userCount);
+                if (actualUserCount >= totalLoggedInUsers * 0.8) { // Mindestens 80% der eingeloggten User
+                    console.log(`Organizer: GUTE NACHRICHTEN! User Count stimmt: ${actualUserCount} >= ${Math.floor(totalLoggedInUsers * 0.8)} (80% von ${totalLoggedInUsers})`);
+                } else {
+                    console.warn(`Organizer: WARNUNG! User Count niedrig: ${actualUserCount} < ${Math.floor(totalLoggedInUsers * 0.8)} (erwartet 80% von ${totalLoggedInUsers})`);
+                }
+            } else {
+                console.log("Organizer: Nach zweitem Reload - Keine User Count gefunden!");
+                console.log("Organizer: Verfügbare Paragraphen mit 'Teilnehmer':", userCountInfoAfterSecond.allParagraphs);
+                console.log("Organizer: Seiteninhalt (erste 500 Zeichen):", userCountInfoAfterSecond.pageContent.substring(0, 500));
+                
+                // Fallback: Prüfe weighted-users-ready.json File
+                console.log("Organizer: Fallback - prüfe weighted-users-ready.json...");
+                try {
+                    const fs = require('fs');
+                    const path = require('path');
+                    const readyFile = path.join(process.cwd(), 'voting-results', 'weighted-users-ready.json');
+                    
+                    if (fs.existsSync(readyFile)) {
+                        const data = JSON.parse(fs.readFileSync(readyFile, 'utf8'));
+                        console.log(`Organizer: Fallback-Datei zeigt ${data.totalUsers} bereite User - verwende diese Info!`);
+                        
+                        if (data.totalUsers >= totalLoggedInUsers * 0.8) {
+                            console.log(`Organizer: FALLBACK OK! ${data.totalUsers} User bereit (>= 80% von ${totalLoggedInUsers})`);
+                        }
+                    }
+                } catch (e) {
+                    console.log("Organizer: Fallback-Datei nicht lesbar:", e.message);
                 }
             }
         } catch (error) {
@@ -590,32 +737,38 @@ async function createAndStartPoll(page) {
             console.log("Organizer: Screenshot gespeichert als 'poll-creation-error.png'");
         }
 
-        // Prüfe ob Optionen hinzugefügt werden müssen
-        const optionsRequired = await page.locator('.form-check, .poll-options input[type="text"]').count() > 0;
-        if (optionsRequired) {
-            console.log("Organizer: Füge Abstimmungsoptionen hinzu...");
-            // Versuche die Optionen-Felder zu finden und auszufüllen
-            const optionSelectors = [
-                '.form-check input[type="text"]',
-                '.poll-options input[type="text"]',
-                'input[placeholder*="Option"]',
-                '.option-input'
-            ];
-
-            for (const selector of optionSelectors) {
+        // Vereinfachte und schnelle Optionen-Erstellung
+        console.log("Organizer: Füge Abstimmungsoptionen hinzu...");
+        try {
+            // Versuche alle Text-Input-Felder zu finden
+            const allTextInputs = await page.locator('input[type="text"]').all();
+            let optionsAdded = 0;
+            
+            for (const input of allTextInputs) {
                 try {
-                    const optionCount = await page.locator(selector).count();
-                    if (optionCount > 0) {
-                        // Fülle mindestens 3 Optionen aus
-                        for (let i = 0; i < Math.min(optionCount, 3); i++) {
-                            await page.locator(selector).nth(i).fill(`Option ${i + 1}`);
-                        }
-                        break;
+                    const placeholder = await input.getAttribute('placeholder') || '';
+                    const className = await input.getAttribute('class') || '';
+                    
+                    // Prüfe ob es ein Optionsfeld ist (anhand von Placeholder oder Klasse)
+                    if (placeholder.toLowerCase().includes('option') || 
+                        className.includes('option') || 
+                        placeholder.toLowerCase().includes('antwort')) {
+                        await input.fill(`Option ${optionsAdded + 1}`);
+                        optionsAdded++;
+                        if (optionsAdded >= 3) break; // Maximal 3 Optionen
                     }
                 } catch (e) {
-                    // Versuche den nächsten Selektor
+                    // Ignoriere Fehler bei einzelnen Inputs
                 }
             }
+            
+            if (optionsAdded === 0) {
+                console.log("Organizer: Keine Optionsfelder gefunden, überspringe...");
+            } else {
+                console.log(`Organizer: ${optionsAdded} Optionen hinzugefügt`);
+            }
+        } catch (e) {
+            console.log("Organizer: Fehler beim Hinzufügen von Optionen:", e.message);
         }
 
         // Abstimmung speichern
@@ -692,17 +845,52 @@ async function createAndStartPoll(page) {
             fullPage: true 
         });
         
-        // Prüfe den Text mit den wahlberechtigten Teilnehmern
+        // Prüfe den Text mit den wahlberechtigten Teilnehmern mit robuster Suche
         console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer...");
-        const voterCountText = await page.locator('p:has-text("Aktuelle Anzahl wahlberechtigter Teilnehmer")').innerText().catch(() => null);
-        if (voterCountText) {
-            console.log(`Organizer: ${voterCountText}`);
+        
+        // Robuste Suche in createAndStartPoll Funktion
+        const userCountInfo = await page.evaluate(() => {
+            let foundElements = [];
             
-            // Versuche die Zahl zu extrahieren
-            const match = voterCountText.match(/(\d+)/);
-            if (match && match[1]) {
-                console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer: ${match[1]}`);
+            // Durchsuche alle Elemente nach Text-Pattern
+            const allElements = document.querySelectorAll('*');
+            for (const element of allElements) {
+                const text = element.textContent?.trim() || '';
+                
+                // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                const patterns = [
+                    /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                    /aktuelle\s*anzahl.*?(\d+)/i,
+                    /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                    /anwesende?\s*teilnehmer.*?(\d+)/i,
+                    /(\d+)\s*teilnehmer/i,
+                    /teilnehmer.*?(\d+)/i
+                ];
+                
+                for (const pattern of patterns) {
+                    const match = text.match(pattern);
+                    if (match) {
+                        foundElements.push({
+                            element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                            text: text,
+                            match: match[0],
+                            userCount: match[1] || match[2] || '0'
+                        });
+                    }
+                }
             }
+            
+            return foundElements;
+        });
+        
+        console.log(`Organizer: User Count in createAndStartPoll - Gefundene Elemente:`, JSON.stringify(userCountInfo, null, 2));
+        
+        let userCount = 0;
+        if (userCountInfo.length > 0) {
+            const bestMatch = userCountInfo[0];
+            console.log(`Organizer: Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+            userCount = parseInt(bestMatch.userCount) || 0;
+            console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer: ${userCount}`);
         } else {
             console.log("Organizer: Keine Information über wahlberechtigte Teilnehmer gefunden");
         }
@@ -776,17 +964,50 @@ async function createAndStartPoll(page) {
                 fullPage: true 
             });
             
-            // Prüfe erneut Anzahl der wahlberechtigten Teilnehmer nach Reload
+            // Prüfe erneut Anzahl der wahlberechtigten Teilnehmer nach Reload mit robuster Suche
             console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer nach Reload...");
-            const voterCountTextAfterReload = await page.locator('p:has-text("Aktuelle Anzahl wahlberechtigter Teilnehmer")').innerText().catch(() => null);
-            if (voterCountTextAfterReload) {
-                console.log(`Organizer: Nach Reload: ${voterCountTextAfterReload}`);
+            
+            const userCountInfoAfterReload = await page.evaluate(() => {
+                let foundElements = [];
                 
-                // Versuche die Zahl zu extrahieren
-                const match = voterCountTextAfterReload.match(/(\d+)/);
-                if (match && match[1]) {
-                    console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer nach Reload: ${match[1]}`);
+                // Durchsuche alle Elemente nach Text-Pattern
+                const allElements = document.querySelectorAll('*');
+                for (const element of allElements) {
+                    const text = element.textContent?.trim() || '';
+                    
+                    // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                    const patterns = [
+                        /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                        /aktuelle\s*anzahl.*?(\d+)/i,
+                        /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                        /anwesende?\s*teilnehmer.*?(\d+)/i,
+                        /(\d+)\s*teilnehmer/i,
+                        /teilnehmer.*?(\d+)/i
+                    ];
+                    
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match) {
+                            foundElements.push({
+                                element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                                text: text,
+                                match: match[0],
+                                userCount: match[1] || match[2] || '0'
+                            });
+                        }
+                    }
                 }
+                
+                return foundElements;
+            });
+            
+            console.log(`Organizer: User Count nach Reload - Gefundene Elemente:`, JSON.stringify(userCountInfoAfterReload, null, 2));
+            
+            if (userCountInfoAfterReload.length > 0) {
+                const bestMatch = userCountInfoAfterReload[0];
+                console.log(`Organizer: Nach Reload - Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+                const reloadUserCount = parseInt(bestMatch.userCount) || 0;
+                console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer nach Reload: ${reloadUserCount}`);
             } else {
                 console.log("Organizer: Keine Information über wahlberechtigte Teilnehmer nach Reload gefunden");
             }
