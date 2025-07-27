@@ -16,8 +16,11 @@ Folgende Variablen müssen in GitLab unter **Settings → CI/CD → Variables** 
 ## E-Mail (SMTP)
 - `VOTING_EMAIL_HOST` - SMTP Server (z.B. `smtp.gmail.com`, `mail.failx.de`)
 - `VOTING_EMAIL_PORT` - SMTP Port (z.B. `587` für TLS, `465` für SSL)
-- `VOTING_EMAIL_USER` - SMTP Benutzername
+- `VOTING_EMAIL_USER` - SMTP Benutzername  
 - `VOTING_EMAIL_PASSWORD` - SMTP Passwort (geschützt)
+- `VOTING_EMAIL_USE_TLS` - TLS aktivieren (`1` für Port 587, `0` für unverschlüsselt) (optional, Standard: `1`)
+- `VOTING_EMAIL_USE_AUTH` - Authentifizierung aktivieren (`1` oder `0`) (optional, Standard: `1`)
+- `VOTING_EMAIL_USE_POOL` - Connection Pooling (`1` oder `0`) (optional, Standard: `0`)
 
 ## Wichtige Hinweise
 - Alle Passwort-Variablen sollten als "Protected" und "Masked" markiert werden
