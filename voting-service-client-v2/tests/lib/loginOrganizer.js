@@ -548,10 +548,76 @@ async function createAndStartPoll(page) {
                 
                 // Entscheide basierend auf der echten User-Anzahl
                 const actualUserCount = parseInt(bestMatch.userCount);
-                if (actualUserCount >= totalLoggedInUsers * 0.8) { // Mindestens 80% der eingeloggten User
-                    console.log(`Organizer: GUTE NACHRICHTEN! User Count stimmt: ${actualUserCount} >= ${Math.floor(totalLoggedInUsers * 0.8)} (80% von ${totalLoggedInUsers})`);
+                const requiredUserCount = Math.floor(totalLoggedInUsers * 0.8);
+                
+                if (actualUserCount >= requiredUserCount) {
+                    console.log(`Organizer: GUTE NACHRICHTEN! User Count stimmt: ${actualUserCount} >= ${requiredUserCount} (80% von ${totalLoggedInUsers})`);
                 } else {
-                    console.warn(`Organizer: WARNUNG! User Count niedrig: ${actualUserCount} < ${Math.floor(totalLoggedInUsers * 0.8)} (erwartet 80% von ${totalLoggedInUsers})`);
+                    console.warn(`Organizer: WARNUNG! User Count niedrig: ${actualUserCount} < ${requiredUserCount} (erwartet 80% von ${totalLoggedInUsers})`);
+                    
+                    // Warte auf mehr User mit intelligenter Warteschleife
+                    console.log("Organizer: Warte auf mehr User, bevor Abstimmung gestartet wird...");
+                    let waitAttempts = 0;
+                    const maxWaitAttempts = 30; // 30 * 3 = 90 Sekunden max
+                    
+                    while (waitAttempts < maxWaitAttempts) {
+                        console.log(`Organizer: Warteschleife ${waitAttempts + 1}/${maxWaitAttempts} - prüfe User Count erneut...`);
+                        await page.waitForTimeout(3000); // 3s warten
+                        
+                        // Erneute Prüfung der User Count
+                        const currentUserCount = await page.evaluate(() => {
+                            const allElements = document.querySelectorAll('*');
+                            for (const element of allElements) {
+                                const text = element.textContent?.trim() || '';
+                                const patterns = [
+                                    /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                                    /aktuelle\s*anzahl.*?(\d+)/i,
+                                    /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                                    /anwesende?\s*teilnehmer.*?(\d+)/i,
+                                    /(\d+)\s*teilnehmer/i,
+                                    /teilnehmer.*?(\d+)/i
+                                ];
+                                
+                                for (const pattern of patterns) {
+                                    const match = text.match(pattern);
+                                    if (match) {
+                                        return parseInt(match[1]) || 0;
+                                    }
+                                }
+                            }
+                            return 0;
+                        });
+                        
+                        console.log(`Organizer: Warteschleife - aktueller User Count: ${currentUserCount}, benötigt: ${requiredUserCount}`);
+                        
+                        if (currentUserCount >= requiredUserCount) {
+                            console.log(`Organizer: ERFOLG! Genügend User erreicht: ${currentUserCount} >= ${requiredUserCount}`);
+                            break;
+                        }
+                        
+                        // Fallback: Prüfe auch weighted-users-ready.json
+                        try {
+                            const fs = require('fs');
+                            const path = require('path');
+                            const readyFile = path.join(process.cwd(), 'voting-results', 'weighted-users-ready.json');
+                            
+                            if (fs.existsSync(readyFile)) {
+                                const data = JSON.parse(fs.readFileSync(readyFile, 'utf8'));
+                                if (data.totalUsers >= requiredUserCount) {
+                                    console.log(`Organizer: FALLBACK ERFOLG! weighted-users-ready.json zeigt ${data.totalUsers} User >= ${requiredUserCount}`);
+                                    break;
+                                }
+                            }
+                        } catch (e) {
+                            // Ignoriere Fallback-Fehler
+                        }
+                        
+                        waitAttempts++;
+                    }
+                    
+                    if (waitAttempts >= maxWaitAttempts) {
+                        console.warn(`Organizer: TIMEOUT! Starte trotz niedrigem User Count nach ${maxWaitAttempts * 3} Sekunden`);
+                    }
                 }
             } else {
                 console.log("Organizer: Nach zweitem Reload - Keine User Count gefunden!");

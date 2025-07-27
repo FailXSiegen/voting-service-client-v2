@@ -337,15 +337,70 @@ test.describe('Gewichtete Stimmen Test', () => {
           try {
             const votingStart = Date.now();
             
-            // Simuliere Abstimmung mit mehreren Optionen
-            // Bei Multiple-Choice würden hier mehrere Optionen gewählt
+            // Warte auf Abstimmung und simuliere dann Abstimmung mit mehreren Optionen
             const voteSuccess = await user.page.evaluate(async (voteAmount) => {
-              // Suche nach Abstimmungs-UI
-              const voteButtons = document.querySelectorAll('[data-vote-option], .vote-option, input[type="checkbox"]');
+              // Erweiterte Suche nach Abstimmungs-UI mit verschiedenen Selektoren
+              const selectors = [
+                '[data-vote-option]',
+                '.vote-option', 
+                'input[type="checkbox"]',
+                'input[type="radio"]',
+                'button[data-option]',
+                'button.btn[data-vote]',
+                '.voting-option',
+                '.poll-option',
+                'label input[type="checkbox"]',
+                'label input[type="radio"]',
+                // Weitere häufige Abstimmungsselektoren
+                '.option-button',
+                '[role="checkbox"]',
+                '[role="radio"]',
+                'button:contains("Option")',
+                'div[data-option-id]'
+              ];
+              
+              let voteButtons = [];
+              
+              // Warte bis zu 30 Sekunden auf Abstimmungsoptionen
+              let waitAttempts = 0;
+              const maxWaitAttempts = 30; // 30 * 1000ms = 30 Sekunden
+              
+              while (voteButtons.length === 0 && waitAttempts < maxWaitAttempts) {
+                // Durchsuche alle Selektoren
+                for (const selector of selectors) {
+                  const elements = document.querySelectorAll(selector);
+                  if (elements.length > 0) {
+                    voteButtons = Array.from(elements);
+                    console.log(\`Abstimmungsoptionen gefunden mit Selektor: \${selector} (\${elements.length} Optionen)\`);
+                    break;
+                  }
+                }
+                
+                // Falls immer noch nichts gefunden, warte 1 Sekunde
+                if (voteButtons.length === 0) {
+                  console.log(\`Warte auf Abstimmungsoptionen... Versuch \${waitAttempts + 1}/\${maxWaitAttempts}\`);
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  waitAttempts++;
+                }
+              }
               
               if (voteButtons.length === 0) {
-                console.log('Keine Abstimmungsoptionen gefunden');
-                return { success: false, votesCast: 0 };
+                // Debug: Zeige verfügbare Elemente
+                const allButtons = document.querySelectorAll('button');
+                const allInputs = document.querySelectorAll('input');
+                const allLabels = document.querySelectorAll('label');
+                
+                console.log(\`FEHLER: Keine Abstimmungsoptionen nach \${maxWaitAttempts} Sekunden gefunden!\`);
+                console.log(\`Verfügbare Buttons: \${allButtons.length}\`);
+                console.log(\`Verfügbare Inputs: \${allInputs.length}\`);
+                console.log(\`Verfügbare Labels: \${allLabels.length}\`);
+                
+                // Zeige ersten 5 Buttons für Debug
+                Array.from(allButtons).slice(0, 5).forEach((btn, i) => {
+                  console.log(\`Button \${i}: \${btn.textContent?.trim() || 'kein Text'} - Klassen: \${btn.className}\`);
+                });
+                
+                return { success: false, votesCast: 0, debug: { buttons: allButtons.length, inputs: allInputs.length } };
               }
 
               // Wähle zufällig bis zu voteAmount Optionen
@@ -361,14 +416,44 @@ test.describe('Gewichtete Stimmen Test', () => {
                 }
               }
 
-              // Suche und klicke Submit-Button
-              const submitButton = document.querySelector('[type="submit"], .submit-vote, button:has-text("Abstimmen")');
+              // Erweiterte Suche nach Submit-Button
+              const submitSelectors = [
+                '[type="submit"]',
+                '.submit-vote',
+                'button:contains("Abstimmen")',
+                'button:contains("Submit")',
+                'button:contains("Abschicken")',
+                'button:contains("Senden")',
+                'button.btn-primary',
+                'button.submit',
+                'input[type="submit"]',
+                '[data-submit]',
+                '.vote-submit'
+              ];
+              
+              let submitButton = null;
+              
+              for (const selector of submitSelectors) {
+                try {
+                  const element = document.querySelector(selector);
+                  if (element && element.offsetParent !== null) { // Element ist sichtbar
+                    submitButton = element;
+                    console.log(\`Submit-Button gefunden mit Selektor: \${selector}\`);
+                    break;
+                  }
+                } catch (e) {
+                  // Ignoriere ungültige Selektoren
+                }
+              }
+              
               if (submitButton) {
                 submitButton.click();
+                console.log(\`Erfolgreich abgestimmt: \${selectedCount} Stimme(n) abgegeben\`);
                 return { success: true, votesCast: selectedCount };
               }
 
-              return { success: false, votesCast: 0 };
+              console.log('Kein Submit-Button gefunden!');
+              return { success: false, votesCast: 0, error: 'No submit button found' };
             }, user.voteAmount);
 
             const votingTime = Date.now() - votingStart;
