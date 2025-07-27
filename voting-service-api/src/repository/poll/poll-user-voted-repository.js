@@ -112,9 +112,11 @@ export async function allowToCreateNewVote(pollResultId, eventUserId) {
       console.log(`[DEBUG:ALLOW_VOTE] Benutzer ${eventUserId}: currentVoteCycle=${currentVoteCycle}, maxVotes=${maxVotes}`);
       
       if (currentVoteCycle < maxVotes) {
+        console.log(`[DEBUG:ALLOW_VOTE] ✅ ERLAUBT: currentVoteCycle=${currentVoteCycle} < maxVotes=${maxVotes}`);
         await query("COMMIT");
         return true;
       } else {
+        console.log(`[DEBUG:ALLOW_VOTE] ❌ ABGELEHNT: currentVoteCycle=${currentVoteCycle} >= maxVotes=${maxVotes}`);
         await query("COMMIT");
         console.warn(`[WARN:VOTE_CYCLE] Benutzer ${eventUserId} hat Stimmenlimit erreicht: voteCycle=${currentVoteCycle}, maxVotes=${maxVotes}`);
         return false;
