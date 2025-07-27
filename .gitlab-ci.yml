@@ -72,6 +72,8 @@ build_client:
       else
         echo "⚠️  Registry not available, using local images"
       fi
+  environment:
+    name: production
   only:
     - main
     - merge_requests
