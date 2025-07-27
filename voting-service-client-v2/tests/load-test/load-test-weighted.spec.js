@@ -363,7 +363,7 @@ test.describe('Gewichtete Stimmen Test', () => {
                 '.option-button',
                 '[role="checkbox"]',
                 '[role="radio"]',
-                'button:contains("Option")',
+                'button',  // WICHTIGER FIX: Entferne :contains() - ist kein gültiger CSS Selektor
                 'div[data-option-id]'
               ];
               
