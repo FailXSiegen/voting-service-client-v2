@@ -460,8 +460,8 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
     }
   });
 
-  // Parallele Tests für die Benutzer (3 parallele Tests mit je 50 Benutzern = 150 insgesamt)
-  for (let testId = 1; testId <= 3; testId++) {
+  // Parallele Tests für die Benutzer (4 parallele Tests mit je 50 Benutzern = 200 insgesamt)
+  for (let testId = 1; testId <= 4; testId++) {
     test(`User batch ${testId} votes in poll`, async ({ browser }) => {
       const userContexts = [];
       const userPages = [];

@@ -5,28 +5,49 @@ module.exports = defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: false,
-  workers: undefined,
+  workers: 2, // Limit concurrent test workers
   reporter: 'html',
-  timeout: 300000, // 5 minutes timeout for load tests
+  timeout: 3600000, // 60 minutes timeout for load tests
+  expect: {
+    timeout: 30000, // 30 seconds for individual actions
+  },
 
   use: {
-    baseURL: 'http://192.168.178.142:5173',
+    baseURL: 'https://voting.failx.de',
     trace: 'on-first-retry',  // Only collect trace on retry to save space
     video: 'retain-on-failure', // Only keep videos for failed tests
     screenshot: 'only-on-failure',
+    navigationTimeout: 120000, // 2 minutes for navigation
+    actionTimeout: 60000, // 1 minute for actions
     launchOptions: {
       args: [
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--no-sandbox',
-        '--js-flags="--max-old-space-size=4096"'
+        '--js-flags="--max-old-space-size=4096"',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-hang-monitor',
+        '--disable-prompt-on-repost',
+        '--disable-client-side-phishing-detection',
+        '--disable-default-apps',
+        '--disable-extensions',
+        '--no-first-run',
+        '--disable-web-security',
+        '--aggressive-cache-discard',
+        '--disable-ipc-flooding-protection'
       ],
-      slowMo: 500, // Add small delays to improve stability
+      slowMo: 0, // No delay at all
+      headless: false, // Show browsers to keep them alive
     },
     contextOptions: {
       reducedMotion: 'reduce',
       forcedColors: 'none',
-      viewport: { width: 800, height: 600 }  // Smaller viewport = less memory
+      viewport: { width: 800, height: 600 },  // Smaller viewport = less memory
+      ignoreHTTPSErrors: true,
+      acceptDownloads: false,
+      locale: 'de-DE'
     }
   },
 
