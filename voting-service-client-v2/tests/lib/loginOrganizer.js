@@ -14,8 +14,13 @@ async function loginAsOrganizer(page) {
             '#organizer-login-username',
             '#username',
             'input[name="username"]',
+            'input[name="email"]',
+            'input[type="text"]',
+            'input[type="email"]',
             'input[placeholder*="Benutzername"]',
-            'input[placeholder*="Username"]'
+            'input[placeholder*="Username"]',
+            'input[placeholder*="E-Mail"]',
+            'input[placeholder*="Email"]'
         ];
 
         const passwordSelectors = [
@@ -42,8 +47,32 @@ async function loginAsOrganizer(page) {
             }
         }
 
+        // Fallback: Versuche alle Input-Felder im Organizer-Formular zu finden
         if (!foundUsername) {
-            console.warn('Organizer: Konnte Benutzernamefeld nicht finden!');
+            console.warn('Organizer: Konnte Benutzernamefeld mit Standard-Selektoren nicht finden, versuche Fallback...');
+            try {
+                // Suche nur innerhalb des Organizer-Formulars
+                const organizerForm = page.locator('#organizer-login-form, form:has-text("Als Organisator einloggen")');
+                const allInputs = await organizerForm.locator('input').all();
+                for (const input of allInputs) {
+                    const type = await input.getAttribute('type') || 'text';
+                    const id = await input.getAttribute('id') || '';
+                    const isVisible = await input.isVisible();
+                    console.log(`Organizer: Prüfe Input im Organizer-Formular - ID: ${id}, Type: ${type}, Visible: ${isVisible}`);
+                    if (isVisible && type !== 'password' && type !== 'hidden' && type !== 'submit') {
+                        console.log(`Organizer: Fallback - Benutzernamefeld im Organizer-Formular gefunden (ID: ${id}, type: ${type})`);
+                        await input.fill(CONFIG.ORGANIZER_USERNAME);
+                        foundUsername = true;
+                        break;
+                    }
+                }
+            } catch (e) {
+                console.error('Organizer: Fallback fehlgeschlagen:', e);
+            }
+        }
+
+        if (!foundUsername) {
+            console.warn('Organizer: Konnte Benutzernamefeld auch mit Fallback nicht finden!');
         }
 
         // Finde und fülle das Passwortfeld
@@ -64,6 +93,11 @@ async function loginAsOrganizer(page) {
 
         if (!foundPassword) {
             console.warn('Organizer: Konnte Passwortfeld nicht finden!');
+        }
+
+        // Nur fortfahren wenn beide Felder gefüllt wurden
+        if (!foundUsername || !foundPassword) {
+            throw new Error(`ORGANIZER LOGIN FAILED: Username gefunden: ${foundUsername}, Password gefunden: ${foundPassword}. Beide Felder müssen ausgefüllt werden!`);
         }
 
         // Versuche verschiedene Selektoren für den Submit-Button
