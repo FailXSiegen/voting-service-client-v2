@@ -45,6 +45,7 @@ RUN echo "=== DEBUG: Building client application ===" && \
     echo "Current directory: $(pwd)" && \
     echo "Environment variables:" && \
     env | grep -E "(NODE_ENV|API_URL|VITE_|VUE_)" || echo "No relevant env vars found" && \
+    echo "VITE_RECAPTCHA_SITE_KEY specifically: ${VITE_RECAPTCHA_SITE_KEY}" && \
     echo "Package.json scripts:" && \
     cat package.json | grep -A 10 '"scripts"' && \
     echo "=== Starting build ===" && \
