@@ -66,7 +66,7 @@ INSERT INTO organizer (
     UNIX_TIMESTAMP(),
     'loadtest-admin',
     'admin@loadtest.example.com',
-    '$2b$10$YourHashedPasswordHere', -- Muss mit bcrypt gehashed werden
+    '$argon2i$v=19$m=4096,t=3,p=1$ppvQXML++YDjeEBZCp4g6A$3DMa7gxmtyw39OQ9lko2p1PrLPbmb7tVv2Kcl3dRU6U', -- Password: loadtest123
     'Lasttest Administrator',
     'Test Organisation GmbH',
     1,
