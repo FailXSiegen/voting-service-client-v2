@@ -55,7 +55,7 @@ build_client:
   script:
     - echo "🔨 Building Client image..."
     - |
-      docker build -f docker/production/Dockerfile.client \
+      docker build --no-cache -f docker/production/Dockerfile.client \
         --build-arg VITE_API_BASE_URL=https://${DOMAIN} \
         --build-arg VITE_SUBSCRIPTION_URL=wss://${DOMAIN}/graphql \
         --build-arg DOMAIN=${DOMAIN} \
