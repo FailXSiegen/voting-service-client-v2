@@ -75,8 +75,11 @@ const props = defineProps({
 const inputValue = ref(props.value);
 
 function onChange() {
+  // WICHTIGER FIX: Defensive Programmierung - verhindere null reference errors
+  const conferences = videoConferences.value || [];
+  const foundConference = conferences.find(({ id }) => inputValue.value === id);
   emit("change", {
-    value: videoConferences.value.find(({ id }) => inputValue.value === id),
+    value: foundConference,
   });
 }
 
@@ -84,8 +87,12 @@ const coreStore = useCore();
 
 const { organizer } = storeToRefs(coreStore);
 const videoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
-// Watch changes to organizer in the store.
-watch(organizer, ({ zoomMeetings }) => {
-  videoConferences.value = zoomMeetings;
+// WICHTIGER FIX: Watch changes to organizer in the store - mit null safety
+watch(organizer, (newOrganizer) => {
+  if (newOrganizer && newOrganizer.zoomMeetings) {
+    videoConferences.value = newOrganizer.zoomMeetings;
+  } else {
+    videoConferences.value = [];
+  }
 });
 </script>
