@@ -54,10 +54,11 @@ test.describe('Gewichtete Stimmen Test', () => {
   test.beforeAll(async () => {
     console.log('=== WEIGHTED VOTE TEST SETUP ===');
     
-    // WICHTIG: Lade die aktuelle Event-ID dynamisch
+    // WICHTIG: Lade die aktuelle Event-ID dynamisch für beide Configs
     console.log('Lade Event-ID für Slug:', WEIGHTED_CONFIG.EVENT_SLUG);
     await loadEventIdIntoConfig(WEIGHTED_CONFIG);
-    console.log('✅ Event-ID geladen:', WEIGHTED_CONFIG.EVENT_ID);
+    await loadEventIdIntoConfig(CONFIG); // WICHTIG: Auch original CONFIG aktualisieren!
+    console.log('✅ Event-ID geladen:', WEIGHTED_CONFIG.EVENT_ID, '(auch in CONFIG aktualisiert)');
     
     cleanupResultsDirectory();
     console.log('Test mit verschiedenen Stimmgewichtungen:');
