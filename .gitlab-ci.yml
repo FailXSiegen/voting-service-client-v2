@@ -127,10 +127,18 @@ deploy:
       export DATABASE_ROOT_PASSWORD="${VOTING_DB_ROOT_PASSWORD:-root_password}"
       export JWT_SECRET="${VOTING_JWT_SECRET:-voting-jwt-secret-key}"
       export COOKIE_SIGN_SECRET="${VOTING_COOKIE_SIGN_SECRET:-voting-cookie-secret-key}"
-      export EMAIL_HOST="${VOTING_EMAIL_HOST:-smtp.example.com}"
-      export EMAIL_PORT="${VOTING_EMAIL_PORT:-587}"
-      export EMAIL_USER="${VOTING_EMAIL_USER:-noreply@example.com}"
-      export EMAIL_PASSWORD="${VOTING_EMAIL_PASSWORD:-email_password}"
+      export MAIL_HOST="${VOTING_EMAIL_HOST:-smtp.example.com}"
+      export MAIL_PORT="${VOTING_EMAIL_PORT:-587}"
+      export MAIL_USE_AUTH="1"
+      export MAIL_AUTH_USER="${VOTING_EMAIL_USER:-noreply@example.com}"
+      export MAIL_AUTH_PASS="${VOTING_EMAIL_PASSWORD:-email_password}"
+      export MAIL_USE_TLS="1"
+      export MAIL_USE_POOL="0"
+      export MAIL_DEFAULT_FROM="info@failx.de"
+      export MAIL_ADMIN_EMAIL="info@failx.de"
+      export MAIL_ADMIN_NAME="Voting Tool Admin"
+      export MAIL_LINK_IMPRINT="https://${DOMAIN}/impressum"
+      export MAIL_LINK_DATAPROTECTION="https://${DOMAIN}/datenschutz"
       
       # Create clean .env file manually (avoid env parsing issues)
       cat > ${DEPLOY_PATH}/.env << 'ENVEOF'
@@ -146,10 +154,18 @@ deploy:
       DATABASE_ROOT_PASSWORD=${DATABASE_ROOT_PASSWORD}
       JWT_SECRET=${JWT_SECRET}
       COOKIE_SIGN_SECRET=${COOKIE_SIGN_SECRET}
-      EMAIL_HOST=${EMAIL_HOST}
-      EMAIL_PORT=${EMAIL_PORT}
-      EMAIL_USER=${EMAIL_USER}
-      EMAIL_PASSWORD=${EMAIL_PASSWORD}
+      MAIL_HOST=${MAIL_HOST}
+      MAIL_PORT=${MAIL_PORT}
+      MAIL_USE_AUTH=${MAIL_USE_AUTH}
+      MAIL_AUTH_USER=${MAIL_AUTH_USER}
+      MAIL_AUTH_PASS=${MAIL_AUTH_PASS}
+      MAIL_USE_TLS=${MAIL_USE_TLS}
+      MAIL_USE_POOL=${MAIL_USE_POOL}
+      MAIL_DEFAULT_FROM=${MAIL_DEFAULT_FROM}
+      MAIL_ADMIN_EMAIL=${MAIL_ADMIN_EMAIL}
+      MAIL_ADMIN_NAME=${MAIL_ADMIN_NAME}
+      MAIL_LINK_IMPRINT=${MAIL_LINK_IMPRINT}
+      MAIL_LINK_DATAPROTECTION=${MAIL_LINK_DATAPROTECTION}
       ENVEOF
       
       # Deploy mit docker-compose
