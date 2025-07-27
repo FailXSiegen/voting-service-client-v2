@@ -110,10 +110,16 @@ eventQuery.onResult(({ data }) => {
   prefillData.publicVoteVisible = event.value?.publicVoteVisible ?? true;
   prefillData.endDatetime = event.value?.endDatetime ?? 0;
 
-  const resolvedVideoConferenceConfig = JSON.parse(
-    event.value?.videoConferenceConfig,
-  );
-  if (!resolvedVideoConferenceConfig.id) {
+  // WICHTIGER FIX: Defensive Programmierung für JSON.parse und null-safety
+  let resolvedVideoConferenceConfig;
+  try {
+    resolvedVideoConferenceConfig = JSON.parse(event.value?.videoConferenceConfig || "{}");
+  } catch (error) {
+    console.warn("Failed to parse videoConferenceConfig:", error);
+    resolvedVideoConferenceConfig = {};
+  }
+  
+  if (!resolvedVideoConferenceConfig || !resolvedVideoConferenceConfig.id) {
     // No config exist.
     loaded.value = true;
     return;

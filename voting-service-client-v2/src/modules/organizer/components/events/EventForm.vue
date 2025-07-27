@@ -384,9 +384,19 @@ function loadVideoConfigByType() {
 function onChangeVideoConference({ value }) {
   formData.videoConference = value;
 
-  // Update video conference id in config string.
-  const resolvedVideoConfig = JSON.parse(formData.videoConferenceConfig);
-  resolvedVideoConfig.id = formData.videoConference?.id;
+  // WICHTIGER FIX: Update video conference id in config string mit null safety
+  let resolvedVideoConfig;
+  try {
+    resolvedVideoConfig = JSON.parse(formData.videoConferenceConfig || "{}");
+  } catch (error) {
+    console.warn("Failed to parse videoConferenceConfig in EventForm:", error);
+    resolvedVideoConfig = {};
+  }
+  
+  // Sicher stellen dass das Objekt existiert bevor wir .id setzen
+  if (resolvedVideoConfig) {
+    resolvedVideoConfig.id = formData.videoConference?.id;
+  }
   formData.videoConferenceConfig = JSON.stringify(resolvedVideoConfig);
 
   loadVideoConfigByType();
