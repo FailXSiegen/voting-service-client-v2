@@ -134,8 +134,8 @@ BEGIN
     DECLARE vote_amount INT;
     DECLARE allow_vote INT;
     
-    -- 170 normale Stimmberechtigte (User 1-170)
-    WHILE i <= 170 DO
+    -- 30 Einzelstimmberechtigte (User 1-30) - für 1x Test
+    WHILE i <= 30 DO
         INSERT INTO event_user (
             event_id,
             create_datetime,
@@ -154,7 +154,7 @@ BEGIN
             CONCAT('testuser', i),
             CONCAT('testuser', i, '@test.local'),
             '$argon2i$v=19$m=4096,t=3,p=1$VaBFkbaMX7B0+rYCuX+cYQ$Ff2PfK3CReoOPKZ+WSqdgKrYCPmrRlM/4U7xSot1CvU', -- Password: test123
-            CONCAT('Testnutzer ', i),
+            CONCAT('single User ', i, ' (1 votes)'),
             1, -- Stimmberechtigt
             1, -- Eine Stimme
             0,
@@ -164,11 +164,8 @@ BEGIN
         SET i = i + 1;
     END WHILE;
     
-    -- 25 Mehrfach-Stimmberechtigte (User 171-195)
-    WHILE i <= 195 DO
-        -- Zufällige Stimmanzahl zwischen 3 und 5
-        SET vote_amount = 3 + FLOOR(RAND() * 3);
-        
+    -- 15 Dreifachstimmberechtigte (User 31-45) - für 3x Test
+    WHILE i <= 45 DO
         INSERT INTO event_user (
             event_id,
             create_datetime,
@@ -187,9 +184,9 @@ BEGIN
             CONCAT('testuser', i),
             CONCAT('testuser', i, '@test.local'),
             '$argon2i$v=19$m=4096,t=3,p=1$VaBFkbaMX7B0+rYCuX+cYQ$Ff2PfK3CReoOPKZ+WSqdgKrYCPmrRlM/4U7xSot1CvU',
-            CONCAT('Mehrfachstimmen-Nutzer ', i, ' (', vote_amount, ' Stimmen)'),
+            CONCAT('triple User ', i, ' (3 votes)'),
             1, -- Stimmberechtigt
-            vote_amount, -- 3-5 Stimmen
+            3, -- Drei Stimmen
             0,
             0,
             1
@@ -197,8 +194,38 @@ BEGIN
         SET i = i + 1;
     END WHILE;
     
-    -- 5 Nicht-Stimmberechtigte (User 196-200)
-    WHILE i <= 200 DO
+    -- 5 Fünffachstimmberechtigte (User 46-50) - für 5x Test
+    WHILE i <= 50 DO
+        INSERT INTO event_user (
+            event_id,
+            create_datetime,
+            username,
+            email,
+            password,
+            public_name,
+            allow_to_vote,
+            vote_amount,
+            online,
+            coorganizer,
+            verified
+        ) VALUES (
+            @event_id,
+            UNIX_TIMESTAMP(),
+            CONCAT('testuser', i),
+            CONCAT('testuser', i, '@test.local'),
+            '$argon2i$v=19$m=4096,t=3,p=1$VaBFkbaMX7B0+rYCuX+cYQ$Ff2PfK3CReoOPKZ+WSqdgKrYCPmrRlM/4U7xSot1CvU',
+            CONCAT('five User ', i, ' (5 votes)'),
+            1, -- Stimmberechtigt
+            5, -- Fünf Stimmen
+            0,
+            0,
+            1
+        );
+        SET i = i + 1;
+    END WHILE;
+    
+    -- 5 Nicht-Stimmberechtigte (User 51-55)
+    WHILE i <= 55 DO
         INSERT INTO event_user (
             event_id,
             create_datetime,
