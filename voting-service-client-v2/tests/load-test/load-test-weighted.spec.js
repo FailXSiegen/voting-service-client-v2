@@ -6,6 +6,7 @@ const path = require('path');
 
 // Importiere die Module
 const { CONFIG } = require('../lib/config');
+const { loadEventIdIntoConfig } = require('../lib/eventLoader');
 const {
   sleep,
   cleanupResultsDirectory,
@@ -52,6 +53,12 @@ function getVoteAmountForUser(userId) {
 test.describe('Gewichtete Stimmen Test', () => {
   test.beforeAll(async () => {
     console.log('=== WEIGHTED VOTE TEST SETUP ===');
+    
+    // WICHTIG: Lade die aktuelle Event-ID dynamisch
+    console.log('Lade Event-ID für Slug:', WEIGHTED_CONFIG.EVENT_SLUG);
+    await loadEventIdIntoConfig(WEIGHTED_CONFIG);
+    console.log('✅ Event-ID geladen:', WEIGHTED_CONFIG.EVENT_ID);
+    
     cleanupResultsDirectory();
     console.log('Test mit verschiedenen Stimmgewichtungen:');
     console.log('- 30 Nutzer mit 1 Stimme');
@@ -371,14 +378,14 @@ test.describe('Gewichtete Stimmen Test', () => {
                   const elements = document.querySelectorAll(selector);
                   if (elements.length > 0) {
                     voteButtons = Array.from(elements);
-                    console.log(\`Abstimmungsoptionen gefunden mit Selektor: \${selector} (\${elements.length} Optionen)\`);
+                    console.log(`Abstimmungsoptionen gefunden mit Selektor: ${selector} (${elements.length} Optionen)`);
                     break;
                   }
                 }
                 
                 // Falls immer noch nichts gefunden, warte 1 Sekunde
                 if (voteButtons.length === 0) {
-                  console.log(\`Warte auf Abstimmungsoptionen... Versuch \${waitAttempts + 1}/\${maxWaitAttempts}\`);
+                  console.log(`Warte auf Abstimmungsoptionen... Versuch ${waitAttempts + 1}/${maxWaitAttempts}`);
                   await new Promise(resolve => setTimeout(resolve, 1000));
                   waitAttempts++;
                 }
@@ -390,14 +397,14 @@ test.describe('Gewichtete Stimmen Test', () => {
                 const allInputs = document.querySelectorAll('input');
                 const allLabels = document.querySelectorAll('label');
                 
-                console.log(\`FEHLER: Keine Abstimmungsoptionen nach \${maxWaitAttempts} Sekunden gefunden!\`);
-                console.log(\`Verfügbare Buttons: \${allButtons.length}\`);
-                console.log(\`Verfügbare Inputs: \${allInputs.length}\`);
-                console.log(\`Verfügbare Labels: \${allLabels.length}\`);
+                console.log(`FEHLER: Keine Abstimmungsoptionen nach ${maxWaitAttempts} Sekunden gefunden!`);
+                console.log(`Verfügbare Buttons: ${allButtons.length}`);
+                console.log(`Verfügbare Inputs: ${allInputs.length}`);
+                console.log(`Verfügbare Labels: ${allLabels.length}`);
                 
                 // Zeige ersten 5 Buttons für Debug
                 Array.from(allButtons).slice(0, 5).forEach((btn, i) => {
-                  console.log(\`Button \${i}: \${btn.textContent?.trim() || 'kein Text'} - Klassen: \${btn.className}\`);
+                  console.log(`Button ${i}: ${btn.textContent?.trim() || 'kein Text'} - Klassen: ${btn.className}`);
                 });
                 
                 return { success: false, votesCast: 0, debug: { buttons: allButtons.length, inputs: allInputs.length } };
@@ -438,7 +445,7 @@ test.describe('Gewichtete Stimmen Test', () => {
                   const element = document.querySelector(selector);
                   if (element && element.offsetParent !== null) { // Element ist sichtbar
                     submitButton = element;
-                    console.log(\`Submit-Button gefunden mit Selektor: \${selector}\`);
+                    console.log(`Submit-Button gefunden mit Selektor: ${selector}`);
                     break;
                   }
                 } catch (e) {
@@ -448,7 +455,7 @@ test.describe('Gewichtete Stimmen Test', () => {
               
               if (submitButton) {
                 submitButton.click();
-                console.log(\`Erfolgreich abgestimmt: \${selectedCount} Stimme(n) abgegeben\`);
+                console.log(`Erfolgreich abgestimmt: ${selectedCount} Stimme(n) abgegeben`);
                 return { success: true, votesCast: selectedCount };
               }
 
