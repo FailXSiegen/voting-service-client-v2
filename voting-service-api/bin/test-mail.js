@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 // Test script for email configuration
-import dotenv from 'dotenv';
-import emailUtil from '../src/lib/email-util.js';
+const dotenv = require('dotenv');
+const emailUtil = require('../src/lib/email-util.js').default;
 
 dotenv.config();
 
