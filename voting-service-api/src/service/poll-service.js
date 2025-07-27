@@ -134,9 +134,26 @@ export async function existsPollUserVoted(
       // Repository-Funktion verwenden
       await createPollUserVoted(pollResultId, eventUserId, voteCycle);
 
-      // WICHTIGER FIX: Entferne die problematische MultiVote-Logik
-      // Die einheitliche Behandlung über allowToCreateNewVote ist korrekt
-      // Egal ob multiVote oder nicht, die Logik sollte konsistent sein
+      // KORRIGIERTE MultiVote-Logik: Behandle den Edge Case für Nutzer mit genau 1 Stimme
+      if (multiVote) {
+        // Spezielle Behandlung für Nutzer mit genau 1 Stimme in MultiVote-Modus
+        if (maxVotes === 1) {
+          // Bei Nutzern mit nur 1 Stimme: Erlaube die erste Stimme (voteCycle=0)
+          console.log(`[DEBUG:MULTIVOTE] User ${eventUserId} hat nur 1 Stimme - erlaube erste Abstimmung`);
+          return true;
+        }
+        
+        // Für Nutzer mit mehreren Stimmen: Normale MultiVote-Logik
+        if (voteCycle === maxVotes) {
+          return true; // Die letzte Stimme darf gezählt werden
+        } else if (voteCycle > 0) {
+          return true; // Auch Teilabstimmungen sind erlaubt
+        } else {
+          // Bei voteCycle=0 und maxVotes>1: Erste MultiVote-Runde erlauben
+          console.log(`[DEBUG:MULTIVOTE] User ${eventUserId} beginnt MultiVote (voteCycle=${voteCycle}, maxVotes=${maxVotes})`);
+          return true;
+        }
+      }
 
       return true; // Bei normalem Modus: Erste Stimme erlauben
     }
