@@ -9,11 +9,6 @@ volumes:
   uploads:
   portainer_data:
   logs_volume:
-    driver: local
-    driver_opts:
-      type: 'none'
-      o: 'bind'
-      device: './logs'
   rabbitmq_logs:
     driver: local
 

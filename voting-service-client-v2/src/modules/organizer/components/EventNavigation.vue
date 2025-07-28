@@ -148,23 +148,53 @@ eventUsersQuery.onResult(({ data }) => {
 
 // Computed.
 
-const verifiedUsersCount = computed(
-  () => eventUsers.value.filter((eventUser) => eventUser.verified)?.length ?? 0,
-);
-const pendingUsersCount = computed(
-  () =>
-    eventUsers.value.filter((eventUser) => !eventUser.verified)?.length ?? 0,
-);
+const verifiedUsersCount = computed(() => {
+  const count = eventUsers.value.filter((eventUser) => eventUser.verified)?.length ?? 0;
+  if (import.meta.env.DEV) {
+    console.log('[ORGANIZER DEBUG] EventNavigation - Verified users count:', count);
+  }
+  return count;
+});
+
+const pendingUsersCount = computed(() => {
+  const count = eventUsers.value.filter((eventUser) => !eventUser.verified)?.length ?? 0;
+  if (import.meta.env.DEV) {
+    console.log('[ORGANIZER DEBUG] EventNavigation - Pending users count:', count, 'Total users:', eventUsers.value.length);
+  }
+  return count;
+});
 
 // Subscriptions.
 
-const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
+const newEventUserSubscription = useSubscription(NEW_EVENT_USER, {
+  eventId
+});
 newEventUserSubscription.onResult(({ data }) => {
+  if (import.meta.env.DEV) {
+    console.log('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER received:', data);
+  }
+  
+  if (!data?.newEventUser) {
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] EventNavigation - No newEventUser in subscription data');
+    }
+    return;
+  }
+  
   if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(eventId, 10)) {
-    // This event user does not belong to our event.
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] EventNavigation - Event ID mismatch:', {
+        received: data?.newEventUser?.eventId,
+        expected: eventId
+      });
+    }
     return;
   }
 
+  if (import.meta.env.DEV) {
+    console.log('[ORGANIZER DEBUG] EventNavigation - Adding new user to list:', data?.newEventUser);
+  }
+  
   // We have to make a copy to add a new entry to the event users array.
   const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
   copyOfEventUsers.push({ ...data?.newEventUser });
@@ -172,12 +202,18 @@ newEventUserSubscription.onResult(({ data }) => {
   eventUsers.value = copyOfEventUsers;
 });
 
-const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, () => ({
-  variables: { eventId }
-}));
+const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
+  eventId
+});
 eventUserLifeCycleSubscription.onResult(({ data }) => {
+  if (import.meta.env.DEV) {
+    console.log('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE received:', data);
+  }
+  
   if (!data || !data.eventUserLifeCycle) {
-    console.warn('[ORGANIZER DEBUG] EventNavigation - No valid data in eventUserLifeCycle event');
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] EventNavigation - No valid data in eventUserLifeCycle event');
+    }
     return;
   }
   // We have to make a copy to add a new entry to the event users array.
@@ -190,9 +226,19 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
   });
   
   if (!eventUser) {
-    console.warn('[ORGANIZER DEBUG] EventNavigation - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] EventNavigation - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+    }
     return;
   }
+  
+  if (import.meta.env.DEV) {
+    console.log('[ORGANIZER DEBUG] EventNavigation - Updating user online status:', {
+      userId: eventUser.id,
+      online: data?.eventUserLifeCycle?.online
+    });
+  }
+  
   eventUser.online = data?.eventUserLifeCycle?.online;
   eventUsers.value = copyOfEventUsers;
 });

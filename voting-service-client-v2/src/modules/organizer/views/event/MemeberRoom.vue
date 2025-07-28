@@ -108,7 +108,9 @@ eventQuery.onResult(({ data }) => {
 });
 
 // Handle new users.
-const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
+const newEventUserSubscription = useSubscription(NEW_EVENT_USER, {
+  eventId: id
+});
 newEventUserSubscription.onResult(({ data }) => {
   if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
     // This event user does not belong to our event.
@@ -153,9 +155,9 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 });
 
 // Handle event user life cycle updates.
-const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, () => ({
-  variables: { eventId: id }
-}));
+const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
+  eventId: id
+});
 eventUserLifeCycleSubscription.onResult(({ data }) => {
   
   if (!data || !data.eventUserLifeCycle) {

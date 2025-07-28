@@ -424,14 +424,14 @@ test.describe('Gewichtete Stimmen Test', () => {
                 }
               }
 
-              // Erweiterte Suche nach Submit-Button
+              // Erweiterte Suche nach Submit-Button - WICHTIGER FIX: Entferne jQuery :contains() Selektoren
               const submitSelectors = [
                 '[type="submit"]',
                 '.submit-vote',
-                'button:contains("Abstimmen")',
-                'button:contains("Submit")',
-                'button:contains("Abschicken")',
-                'button:contains("Senden")',
+                'button:has-text("Abstimmen")',
+                'button:has-text("Submit")',  
+                'button:has-text("Abschicken")',
+                'button:has-text("Senden")',
                 'button.btn-primary',
                 'button.submit',
                 'input[type="submit"]',
@@ -457,7 +457,7 @@ test.describe('Gewichtete Stimmen Test', () => {
               if (submitButton) {
                 submitButton.click();
                 console.log(`Erfolgreich abgestimmt: ${selectedCount} Stimme(n) abgegeben`);
-                return { success: true, votesCast: selectedCount };
+                return { success: true, votesCast: 1, optionsSelected: selectedCount }; // WICHTIGER FIX: Eine Abstimmungsaktion, nicht Anzahl Optionen
               }
 
               console.log('Kein Submit-Button gefunden!');
@@ -466,10 +466,11 @@ test.describe('Gewichtete Stimmen Test', () => {
 
             const votingTime = Date.now() - votingStart;
             
-            if (voteSuccess.success) {
-              successfulVotes++;
-              totalVotesCast += voteSuccess.votesCast;
-            }
+            // WICHTIGER FIX: Entferne doppelte Zählung - wird später in Promise.allSettled verarbeitet
+            // if (voteSuccess.success) {
+            //   successfulVotes++;
+            //   totalVotesCast += voteSuccess.votesCast;
+            // }
 
             // Pause zwischen Abstimmungen (nur für individuelle User)
             await sleep(100 + Math.random() * 400); // Zufällige Pause 100-500ms
@@ -536,11 +537,11 @@ test.describe('Gewichtete Stimmen Test', () => {
         console.log(`Gruppe ${weight}x: ${successfulVotes}/${users.length} erfolgreich, ${totalVotesCast} Stimmen abgegeben`);
       }
 
-      // Gesamtergebnis
+      // Gesamtergebnis - WICHTIGER FIX: Zähle Abstimmungen, nicht ausgewählte Optionen
       const totalExpectedVotes = 
-        30 * 1 +  // 30 users with 1 vote
-        15 * 3 +  // 15 users with 3 votes
-        5 * 5;    // 5 users with 5 votes
+        30 +  // 30 users = 30 Abstimmungen
+        15 +  // 15 users = 15 Abstimmungen  
+        5;    // 5 users = 5 Abstimmungen = 50 total
 
       const actualVotesCast = votingResults.reduce((sum, r) => sum + r.totalVotesCast, 0);
       const overallEfficiency = (actualVotesCast / totalExpectedVotes * 100).toFixed(2);

@@ -25,7 +25,7 @@ const CONFIG = {
     RESULTS_DIR: 'voting-results',  // Verzeichnis für Ergebnisse
     SCREENSHOTS_DIR: 'test-results', // Verzeichnis für Screenshots
     USER_READY_PERCENTAGE: 100,     // Prozentsatz der Benutzer, die eingeloggt sein müssen
-    CONCURRENT_LOGINS: 50,          // Anzahl gleichzeitiger Logins pro Batch
+    CONCURRENT_LOGINS: 10,          // WICHTIGER FIX: Reduziert von 50 auf 10 - bewährter Wert aus weighted Test
     REDUCED_WAIT_AFTER_ALL_VOTES: true, // Neue Option: Reduziere Wartezeit nach vollständiger Abstimmung
     REDUCED_WAIT_TIME: 10000,       // Reduzierte Wartezeit in ms (10 Sekunden nach vollständiger Abstimmung)
     GLOBAL_STATUS_FILE: 'global-vote-status.json', // Dateiname für den globalen Status

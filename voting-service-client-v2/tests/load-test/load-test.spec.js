@@ -5,6 +5,7 @@ const path = require('path');
 
 // Importiere die Module
 const { CONFIG } = require('../lib/config');
+const { loadEventIdIntoConfig } = require('../lib/eventLoader'); // WICHTIGER FIX: Verwende loadEventIdIntoConfig statt loadEventInfo
 const {
   sleep,
   cleanupResultsDirectory,
@@ -16,7 +17,6 @@ const {
 const { loginAsOrganizer, createAndStartPoll } = require('../lib/loginOrganizer');
 const { loginAsUser } = require('../lib/loginUser');
 const { executeVotingInBatches } = require('../lib/votingFunctions');
-const { loadEventInfo } = require('../lib/eventLoader');
 
 // Haupttest-Funktion zum Laden von Benutzern
 test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
@@ -24,6 +24,11 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
   test.beforeAll(async () => {
     console.log('=== TEST SETUP: Lösche alle alten Ergebnisdateien ===');
     cleanupResultsDirectory();
+    
+    // WICHTIGER FIX: Lade die aktuelle Event-ID dynamisch
+    console.log('Lade Event-ID für Slug:', CONFIG.EVENT_SLUG);
+    await loadEventIdIntoConfig(CONFIG);
+    console.log('✅ Event-ID geladen:', CONFIG.EVENT_ID);
     
     // Event-Info ausgeben
     console.log('=== EVENT-INFO ===');
@@ -343,7 +348,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
                     titleSelectors = titleSelectors.concat([
                       '.card-header h5:has-text("Lasttest")',
                       '.card-header h5:has-text("geheim")',
-                      '.card-header h5:contains("2025")'
+                      '.card-header h5:has-text("2025")' // WICHTIGER FIX: Verwende :has-text() statt :contains() für Playwright
                     ]);
                   }
 
