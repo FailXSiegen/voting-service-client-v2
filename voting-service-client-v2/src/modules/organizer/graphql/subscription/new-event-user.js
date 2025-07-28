@@ -1,8 +1,8 @@
 import { gql } from "graphql-tag";
 
 export const NEW_EVENT_USER = gql`
-  subscription {
-    newEventUser {
+  subscription NewEventUser($eventId: ID!) {
+    newEventUser(eventId: $eventId) {
       eventId
       id
       publicName

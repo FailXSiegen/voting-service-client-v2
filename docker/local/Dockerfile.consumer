@@ -11,6 +11,8 @@ RUN npm install
 COPY voting-service-api/ ./
 COPY docker/local/healthcheck-simplified.js ./healthcheck.js
 COPY docker/local/docker-entrypoint.sh /docker-entrypoint.sh
+COPY docker/local/scripts/wait-for-it.sh /app/scripts/wait-for-it.sh
+RUN chmod +x /app/scripts/wait-for-it.sh
 
 # Build the application
 RUN npm run build

@@ -39,7 +39,7 @@ module.exports = defineConfig({
         '--disable-ipc-flooding-protection'
       ],
       slowMo: 0, // No delay at all
-      headless: false, // Show browsers to keep them alive
+      headless: true, // WICHTIGER FIX: Headless modus für bessere Performance
     },
     contextOptions: {
       reducedMotion: 'reduce',

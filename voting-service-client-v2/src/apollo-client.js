@@ -297,7 +297,7 @@ const errorLink = onError(async (error) => {
     for (const graphQLError of error.graphQLErrors) {
       handleError(new GraphQLError(graphQLError));
     }
-    return;
+    return null;
   }
 
   // Handle network errors.
@@ -310,11 +310,11 @@ const errorLink = onError(async (error) => {
       // Session is invalid, so return to main login.
       handleError(new NetworkError(error.networkError.message));
       await logout();
-      return;
+      return null;
     }
 
     handleError(new NetworkError(error.networkError.message));
-    return;
+    return null;
   }
 
   // Handle undefined errors.
