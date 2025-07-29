@@ -1,9 +1,5 @@
 <template>
   <form v-if="loaded" class="mutate-poll">
-    <!-- TEST: Diese Warnung wird IMMER angezeigt -->
-    <div class="alert alert-danger mb-3" role="alert">
-      <strong>TEST:</strong> Diese Warnung sollte IMMER sichtbar sein! Wenn du das siehst, funktioniert das Template.
-    </div>
     
     <!-- Warnung für asynchrone Events ohne Teilnehmer -->
     <div v-if="showAsyncEventWarning" class="alert alert-warning mb-3" role="alert">

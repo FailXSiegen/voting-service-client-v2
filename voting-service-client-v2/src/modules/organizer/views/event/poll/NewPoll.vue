@@ -10,10 +10,6 @@
       <EventNavigation />
     </template>
     <template #content>
-      <!-- TEST: Diese Warnung wird immer angezeigt -->
-      <div class="alert alert-info mb-3" role="alert">
-        <strong>TEST:</strong> Event geladen: {{ !!event }}, Async: {{ event?.async }}, User count: {{ eventUsersCount }}
-      </div>
       
       <!-- Warnung für asynchrone Events ohne Teilnehmer -->
       <div v-if="showAsyncWarning" class="alert alert-warning mb-3" role="alert">
