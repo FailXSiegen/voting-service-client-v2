@@ -280,7 +280,9 @@
             "replaceOnly": "Abstimmung ersetzen",
             "replaceAndStart": "Abstimmung ersetzen & sofort starten",
             "reset": "Abbrechen"
-          }
+          },
+          "asyncEventNoParticipantsWarning": "Hinweis: Für asynchrone Veranstaltungen (Briefwahl) muss mindestens ein Teilnehmer vorhanden sein, um Abstimmungen erstellen zu können.",
+          "asyncEventNoParticipantsError": "Abstimmungen können in asynchronen Veranstaltungen nur erstellt werden, wenn mindestens ein Teilnehmer vorhanden ist."
         },
         "listing": {
           "start": "Abstimmung starten",

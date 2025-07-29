@@ -74,7 +74,7 @@ const loaded = ref(false);
 const event = ref(null);
 const eventUsers = ref([]);
 const verifiedEventUsers = computed(() =>
-  eventUsers.value.filter((eventUser) => eventUser.verified),
+  (eventUsers.value || []).filter((eventUser) => eventUser.verified),
 );
 let eventUsersQuery;
 
@@ -118,7 +118,8 @@ newEventUserSubscription.onResult(({ data }) => {
   }
 
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   copyOfEventUsers.push({ ...data?.newEventUser });
 
   eventUsers.value = copyOfEventUsers;
@@ -138,7 +139,8 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   }
 
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   const eventUser = copyOfEventUsers.find((user) => {
     return user.id === eventUserId;
   });
@@ -167,7 +169,8 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
 
   
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   
   const eventUser = copyOfEventUsers.find((user) => {
     return (
@@ -212,7 +215,7 @@ async function onUpdateToGuest(eventUserId) {
 }
 
 async function onUnverfifyEventUser(eventUserId) {
-  const eventUser = eventUsers.value.find(
+  const eventUser = (eventUsers.value || []).find(
     (eventUser) => parseInt(eventUser?.id, 10) === parseInt(eventUserId, 10),
   );
   if (!eventUser) {

@@ -149,7 +149,7 @@ eventUsersQuery.onResult(({ data }) => {
 // Computed.
 
 const verifiedUsersCount = computed(() => {
-  const count = eventUsers.value.filter((eventUser) => eventUser.verified)?.length ?? 0;
+  const count = (eventUsers.value || []).filter((eventUser) => eventUser.verified)?.length ?? 0;
   if (import.meta.env.DEV) {
     console.log('[ORGANIZER DEBUG] EventNavigation - Verified users count:', count);
   }
@@ -157,19 +157,38 @@ const verifiedUsersCount = computed(() => {
 });
 
 const pendingUsersCount = computed(() => {
-  const count = eventUsers.value.filter((eventUser) => !eventUser.verified)?.length ?? 0;
+  const count = (eventUsers.value || []).filter((eventUser) => !eventUser.verified)?.length ?? 0;
   if (import.meta.env.DEV) {
-    console.log('[ORGANIZER DEBUG] EventNavigation - Pending users count:', count, 'Total users:', eventUsers.value.length);
+    console.log('[ORGANIZER DEBUG] EventNavigation - Pending users count:', count, 'Total users:', (eventUsers.value || []).length);
   }
   return count;
 });
 
 // Subscriptions.
 
-const newEventUserSubscription = useSubscription(NEW_EVENT_USER, {
-  eventId
-});
-newEventUserSubscription.onResult(({ data }) => {
+let newEventUserSubscription;
+try {
+  // Only create subscription if eventId is valid
+  if (eventId && eventId !== 'undefined' && eventId !== null) {
+    const subscriptionResult = useSubscription(NEW_EVENT_USER, {
+      eventId
+    }, {
+      // Add enabled option to control subscription lifecycle
+      enabled: !!eventId
+    });
+
+    // Defensive check: Ensure subscription result has expected methods
+    if (subscriptionResult && typeof subscriptionResult.onError === 'function' && typeof subscriptionResult.onResult === 'function') {
+      newEventUserSubscription = subscriptionResult;
+      
+      // Add error handling for subscription
+      newEventUserSubscription.onError((error) => {
+        if (import.meta.env.DEV) {
+          console.error('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER subscription error:', error);
+        }
+      });
+
+      newEventUserSubscription.onResult(({ data }) => {
   if (import.meta.env.DEV) {
     console.log('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER received:', data);
   }
@@ -196,16 +215,51 @@ newEventUserSubscription.onResult(({ data }) => {
   }
   
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   copyOfEventUsers.push({ ...data?.newEventUser });
 
   eventUsers.value = copyOfEventUsers;
-});
+      });
+    } else {
+      if (import.meta.env.DEV) {
+        console.error('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER subscription returned invalid object:', subscriptionResult);
+      }
+    }
+  } else {
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] EventNavigation - Skipping NEW_EVENT_USER subscription, invalid eventId:', eventId);
+    }
+  }
+} catch (error) {
+  if (import.meta.env.DEV) {
+    console.error('[ORGANIZER DEBUG] EventNavigation - Failed to create NEW_EVENT_USER subscription:', error);
+  }
+}
 
-const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
-  eventId
-});
-eventUserLifeCycleSubscription.onResult(({ data }) => {
+let eventUserLifeCycleSubscription;
+try {
+  // Only create subscription if eventId is valid
+  if (eventId && eventId !== 'undefined' && eventId !== null) {
+    const subscriptionResult = useSubscription(EVENT_USER_LIFE_CYCLE, {
+      eventId
+    }, {
+      // Add enabled option to control subscription lifecycle
+      enabled: !!eventId
+    });
+
+    // Defensive check: Ensure subscription result has expected methods
+    if (subscriptionResult && typeof subscriptionResult.onError === 'function' && typeof subscriptionResult.onResult === 'function') {
+      eventUserLifeCycleSubscription = subscriptionResult;
+      
+      // Add error handling for subscription
+      eventUserLifeCycleSubscription.onError((error) => {
+        if (import.meta.env.DEV) {
+          console.error('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE subscription error:', error);
+        }
+      });
+
+      eventUserLifeCycleSubscription.onResult(({ data }) => {
   if (import.meta.env.DEV) {
     console.log('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE received:', data);
   }
@@ -217,7 +271,8 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
     return;
   }
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   const eventUser = copyOfEventUsers.find((user) => {
     return (
       parseInt(user.id, 10) ===
@@ -241,7 +296,22 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
   
   eventUser.online = data?.eventUserLifeCycle?.online;
   eventUsers.value = copyOfEventUsers;
-});
+      });
+    } else {
+      if (import.meta.env.DEV) {
+        console.error('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE subscription returned invalid object:', subscriptionResult);
+      }
+    }
+  } else {
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] EventNavigation - Skipping EVENT_USER_LIFE_CYCLE subscription, invalid eventId:', eventId);
+    }
+  }
+} catch (error) {
+  if (import.meta.env.DEV) {
+    console.error('[ORGANIZER DEBUG] EventNavigation - Failed to create EVENT_USER_LIFE_CYCLE subscription:', error);
+  }
+}
 </script>
 
 <style lang="scss" scoped>

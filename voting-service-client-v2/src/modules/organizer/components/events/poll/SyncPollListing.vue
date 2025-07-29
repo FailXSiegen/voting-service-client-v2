@@ -255,10 +255,10 @@ pollsWithNoResultsQuery.onResult(({ data }) => {
 // computed.
 
 const verifiedUsersCountAllowToVoteOnline = computed(() => {
-  if (eventUsers.value?.length === 0) {
+  if (!eventUsers.value || eventUsers.value.length === 0) {
     return 0;
   }
-  return eventUsers.value.filter((eventUser) => {
+  return (eventUsers.value || []).filter((eventUser) => {
     return eventUser?.verified && eventUser?.online && eventUser?.allowToVote;
   }).length;
 });
@@ -349,7 +349,8 @@ newEventUserSubscription.onResult(({ data }) => {
   }
 
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   copyOfEventUsers.push({ ...data?.newEventUser });
   eventUsers.value = copyOfEventUsers;
 });
@@ -363,7 +364,8 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
     return;
   }
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   const eventUser = copyOfEventUsers.find((user) => {
     return (
       parseInt(user.id, 10) ===

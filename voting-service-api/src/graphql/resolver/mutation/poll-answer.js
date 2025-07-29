@@ -149,6 +149,7 @@ export default {
       throw Error("Missing related event record!");
     }
 
+
     input.pollResultId = pollResult.id; // fixme This is a quick fix because the following code relies on the now missing input.pollResultId.
     Object.assign(cloneAnswerObject, input);
     delete input.answerItemCount;
@@ -735,6 +736,7 @@ export default {
       console.error(`[ERROR:BULK_VOTE][${executionId}] Missing event for pollResultId ${pollResult.id}`);
       throw Error("Missing related event record!");
     }
+
 
     // Check if poll is already closed
     const pollStatusCheck = await query(
