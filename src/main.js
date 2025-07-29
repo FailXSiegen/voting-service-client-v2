@@ -3,7 +3,7 @@ import { DefaultApolloClient } from "@vue/apollo-composable";
 import { apolloClient } from "./apollo-client";
 import App from "./App.vue";
 import { router } from "./router/router";
-import i18n from "./l18n";
+import l18n, { reloadTranslations, translationsLoaded } from './l18n';
 import { createHead } from "@vueuse/head";
 import { version } from "./../package";
 import { createApolloProvider } from "@vue/apollo-option";
@@ -13,6 +13,7 @@ import VueDatePicker from "@vuepic/vue-datepicker";
 import { createPinia } from "pinia";
 import jQuery from "jquery";
 import Vue3Toastify, { toast } from 'vue3-toastify';
+import { watch } from 'vue';
 window.$ = window.jQuery = jQuery;
 
 import "vue3-easy-data-table/dist/style.css";
@@ -35,12 +36,12 @@ const head = createHead();
 
 app.use(router);
 app.use(createPinia());
-app.use(i18n);
+app.use(l18n);
 app.use(apolloProvider);
 app.use(head);
 app.use(ConfirmDialog);
 app.use(Vue3Toastify, {
-  autoClose: 3000, // Toasts schließen nach 3 Sekunden automatisch
+  autoClose: 3000,
   clearOnUrlChange: true,
   hideProgressBar: false,
   position: "top-right",
@@ -51,4 +52,37 @@ app.use(Vue3Toastify, {
 app.provide("appVersion", version);
 app.component("EasyDataTable", Vue3EasyDataTable);
 app.component("VueDatePicker", VueDatePicker);
-app.mount("#app");
+
+// Füge einen globalen Router-Guard hinzu
+router.beforeEach(async (to, from, next) => {
+  // Wenn wir nach dem Login zu einer anderen Route wechseln, Übersetzungen neu laden
+  if (from.path !== to.path && !translationsLoaded.value) {
+    try {
+      await reloadTranslations();
+    } catch (error) {
+      console.error('[router] Error loading translations:', error);
+    }
+  }
+
+  next();
+});
+
+// Warte auf die erste Übersetzungsladung, bevor die App gemountet wird
+if (translationsLoaded.value) {
+  app.mount('#app');
+} else {
+  watch(translationsLoaded, (isLoaded) => {
+    if (isLoaded) {
+      app.mount('#app');
+    }
+  });
+
+  // Fallback: Mount nach Timeout, falls Übersetzungen nicht geladen werden können
+  setTimeout(() => {
+    if (!translationsLoaded.value) {
+      app.mount('#app');
+    }
+  }, 5000);
+}
+
+// Force rebuild - Tue Jul 29 22:15:56 UTC 2025
