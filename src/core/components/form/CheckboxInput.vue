@@ -1,7 +1,7 @@
 <template>
   <div class="form-check">
     <input
-      :id="id"
+      :id="checkboxId"
       :name="name"
       :class="['form-check-input', hasErrors ? 'is-invalid' : null, ...classes]"
       :value="value ?? 1"
@@ -10,7 +10,7 @@
       type="checkbox"
       @input="(event) => $emit('update:checked', event.target.checked)"
     />
-    <label class="form-check-label" :for="id" v-html="label" />
+    <label class="form-check-label" :for="checkboxId" v-html="label" />
     <div v-if="helpText" class="form-text text-muted">
       <span v-html="helpText" />
     </div>
@@ -25,8 +25,11 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
+
 defineEmits(["update:checked"]);
-defineProps({
+
+const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
   label: String,
   // eslint-disable-next-line vue/require-default-prop
@@ -52,5 +55,17 @@ defineProps({
   disabled: Boolean,
   // eslint-disable-next-line vue/require-default-prop
   value: [String, Number],
+});
+
+// Generate a unique ID if none is provided
+const checkboxId = computed(() => {
+  if (props.id) {
+    return props.id;
+  }
+  // Generate a unique ID based on label or fallback to random
+  const baseId = props.label 
+    ? props.label.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+    : 'checkbox';
+  return `${baseId}-${Math.random().toString(36).substr(2, 9)}`;
 });
 </script>

@@ -1,5 +1,12 @@
 <template>
   <form v-if="loaded" class="mutate-poll">
+    
+    <!-- Warnung für asynchrone Events ohne Teilnehmer -->
+    <div v-if="showAsyncEventWarning" class="alert alert-warning mb-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong>Hinweis:</strong> Für asynchrone Veranstaltungen (Briefwahl) muss mindestens ein Teilnehmer vorhanden sein, um Abstimmungen erstellen zu können.
+    </div>
+    
     <div class="mb-3">
       <BaseInput
         :label="$t('view.polls.create.labels.title')"
@@ -133,6 +140,8 @@ import { useRoute } from "vue-router";
 import t from "@/core/util/l18n";
 import { useQuery } from "@vue/apollo-composable";
 import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
+import { EVENT } from "@/modules/organizer/graphql/queries/event";
+import { useCore } from "@/core/store/core";
 
 const emit = defineEmits(["submit", "submitAndStart"]);
 const props = defineProps({
@@ -156,30 +165,53 @@ onMounted(() => {
 });
 
 // Data.
+const coreStore = useCore();
 const route = useRoute();
 const id = route.params.id;
 const loaded = ref(false);
 const eventUsers = ref([]);
+const event = ref(null);
 const currentOnlineUserCount = computed(() => {
-  if (eventUsers.value?.length === 0) {
+  if (!eventUsers.value || eventUsers.value.length === 0) {
     return 0;
   }
-  return eventUsers.value.filter((eventUser) => {
+  return (eventUsers.value || []).filter((eventUser) => {
     return eventUser?.verified && eventUser?.online && eventUser?.allowToVote;
   }).length;
 });
 
-// Fetch event users.
-const eventUsersQuery = useQuery(
-  EVENT_USERS,
-  { eventId: id },
-  { fetchPolicy: "cache-and-network" },
+// Check if this is an async event without participants
+const showAsyncEventWarning = computed(() => {
+  return event.value?.async === true && (eventUsers.value || []).length === 0;
+});
+
+// Fetch event data first
+const eventQuery = useQuery(
+  EVENT,
+  { id, organizerId: coreStore.user.id },
+  { fetchPolicy: "no-cache" },
 );
-eventUsersQuery.onResult(({ data }) => {
-  if (data?.eventUsers) {
-    eventUsers.value = data?.eventUsers;
+eventQuery.onResult(({ data }) => {
+  if (data?.event) {
+    event.value = data.event;
+    console.log('[PollForm] Event loaded:', data.event);
+    
+    // Load event users
+    const eventUsersQuery = useQuery(
+      EVENT_USERS,
+      { eventId: id },
+      { fetchPolicy: "cache-and-network" },
+    );
+    eventUsersQuery.onResult(({ data: usersData }) => {
+      if (usersData?.eventUsers) {
+        eventUsers.value = usersData.eventUsers;
+        console.log('[PollForm] Event users loaded:', usersData.eventUsers.length);
+      }
+      loaded.value = true;
+    });
+  } else {
+    loaded.value = true;
   }
-  loaded.value = true;
 });
 
 // Form and validation setup.

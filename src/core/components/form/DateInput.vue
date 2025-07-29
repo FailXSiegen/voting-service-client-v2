@@ -73,8 +73,14 @@ const format = (date) => {
   const month = date.getMonth() + 1;
   const year = date.getFullYear();
   const hour = date.getHours();
-  const minutes = date.getUTCMinutes();
+  const minutes = date.getMinutes();
 
-  return `${day}.${month}.${year} - ${hour}:${minutes}`;
+  // Pad with leading zeros for consistent display
+  const paddedMonth = month.toString().padStart(2, '0');
+  const paddedDay = day.toString().padStart(2, '0');
+  const paddedHour = hour.toString().padStart(2, '0');
+  const paddedMinutes = minutes.toString().padStart(2, '0');
+
+  return `${paddedDay}.${paddedMonth}.${year} - ${paddedHour}:${paddedMinutes}`;
 };
 </script>

@@ -255,10 +255,10 @@ pollsWithNoResultsQuery.onResult(({ data }) => {
 // computed.
 
 const verifiedUsersCountAllowToVoteOnline = computed(() => {
-  if (eventUsers.value?.length === 0) {
+  if (!eventUsers.value || eventUsers.value.length === 0) {
     return 0;
   }
-  return eventUsers.value.filter((eventUser) => {
+  return (eventUsers.value || []).filter((eventUser) => {
     return eventUser?.verified && eventUser?.online && eventUser?.allowToVote;
   }).length;
 });
@@ -339,7 +339,9 @@ function onStartPoll(pollId) {
 
 // Subscriptions.
 
-const newEventUserSubscription = useSubscription(NEW_EVENT_USER);
+const newEventUserSubscription = useSubscription(NEW_EVENT_USER, {
+  eventId: id
+});
 newEventUserSubscription.onResult(({ data }) => {
   if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
     // This event user does not belong to our event.
@@ -347,13 +349,14 @@ newEventUserSubscription.onResult(({ data }) => {
   }
 
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   copyOfEventUsers.push({ ...data?.newEventUser });
   eventUsers.value = copyOfEventUsers;
 });
 
 const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
-  variables: { eventId: props.event.id }
+  eventId: props.event.id
 });
 eventUserLifeCycleSubscription.onResult(({ data }) => {
   if (!data || !data.eventUserLifeCycle) {
@@ -361,7 +364,8 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
     return;
   }
   // We have to make a copy to add a new entry to the event users array.
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value));
+  // Ensure eventUsers.value is an array before copying
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   const eventUser = copyOfEventUsers.find((user) => {
     return (
       parseInt(user.id, 10) ===
