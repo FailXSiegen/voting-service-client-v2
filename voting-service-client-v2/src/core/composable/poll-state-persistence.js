@@ -416,6 +416,40 @@ export function usePollStatePersistence() {
     persistence.setItem(stateKey, JSON.stringify(voteState));
   }
 
+  /**
+   * Markiert eine Abstimmung als abgeschlossen und speichert den finalen Vote-State
+   * @param {number} pollId 
+   * @param {object} eventUser - Der Event-User der abgestimmt hat
+   * @param {object} event - Das Event zu dem die Abstimmung gehört
+   */
+  function saveVote(pollId, eventUser, event) {
+    if (!pollId || !eventUser || !event) {
+      console.warn('[Storage] saveVote: Ungültige Parameter', { pollId, eventUser, event });
+      return;
+    }
+
+    const eventId = event.id || (typeof event === 'object' && event.value ? event.value.id : null);
+    if (!eventId) {
+      console.warn('[Storage] saveVote: Keine Event-ID gefunden', { event });
+      return;
+    }
+
+    const stateKey = generateVoteStateKey(pollId, eventId);
+    const voteAmount = parseInt(eventUser.voteAmount || 1, 10);
+    
+    // Markiere alle Stimmen als verwendet (vollständige Abstimmung)
+    const voteState = {
+      counter: 99999, // Spezialwert für "vollständig abgestimmt"
+      used: voteAmount, // Alle verfügbaren Stimmen wurden verwendet
+      maxVotesToUse: voteAmount,
+      voteAmount: voteAmount,
+      completed: true, // Markiere als abgeschlossen
+      updatedAt: Date.now()
+    };
+    
+    persistence.setItem(stateKey, JSON.stringify(voteState));
+  }
+
   return {
     canVote,
     upsertPollState,
@@ -424,6 +458,7 @@ export function usePollStatePersistence() {
     resetVoteState,
     resetVoteStateButKeepMaxVotes,  // Neue Funktion zum Export hinzufügen
     getMaxVotesToUse,
-    setMaxVotesToUse
+    setMaxVotesToUse,
+    saveVote  // Neue saveVote Funktion hinzufügen
   };
 }
