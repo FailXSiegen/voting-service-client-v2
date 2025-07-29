@@ -96,14 +96,25 @@ export async function existsPollUserVoted(
   input = {}
 ) {
   try {
+    console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] Starting check for user ${eventUserId}, pollResult ${pollResultId}, multiVote ${multiVote}`);
+    
     // Prüfe, ob der Benutzer bereits in dieser Abstimmung abgestimmt hat
     const userExists = await existInCurrentVote(pollResultId, eventUserId);
+    console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] userExists result:`, userExists);
+    
     // Benutzerinformationen abrufen
     const eventUser = await findOneById(eventUserId);
     if (!eventUser) {
       console.error(`[ERROR] existsPollUserVoted: Benutzer mit ID ${eventUserId} nicht gefunden`);
       return false;
     }
+    
+    console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] eventUser:`, {
+      id: eventUser.id,
+      verified: eventUser.verified,
+      allowToVote: eventUser.allowToVote,
+      voteAmount: eventUser.voteAmount
+    });
 
     // Sicherstellen, dass der Benutzer überhaupt abstimmen darf
     if (!eventUser.verified || !eventUser.allowToVote) {
@@ -120,6 +131,8 @@ export async function existsPollUserVoted(
 
     // Neuen Eintrag erstellen, wenn es der erste ist
     if (!userExists) {
+      console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] User ${eventUserId} hat noch keinen poll_user_voted Eintrag - erstelle neuen`);
+      
       // Ein erster Vote-Cycle von 1 ist der Standardwert für neue Einträge
       // Falls multiVote aktiviert ist und der Client hat mehr angefordert, kann der Wert erhöht werden
 
@@ -133,6 +146,7 @@ export async function existsPollUserVoted(
 
       // Repository-Funktion verwenden
       await createPollUserVoted(pollResultId, eventUserId, voteCycle);
+      console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] poll_user_voted Eintrag erstellt für User ${eventUserId}`);
 
       // KORRIGIERTE MultiVote-Logik: Behandle den Edge Case für Nutzer mit genau 1 Stimme
       if (multiVote) {
@@ -155,11 +169,15 @@ export async function existsPollUserVoted(
         }
       }
 
+      console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] Returning TRUE for new user ${eventUserId} (single vote mode)`);
       return true; // Bei normalem Modus: Erste Stimme erlauben
     }
 
+    console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] User ${eventUserId} hat bereits poll_user_voted Eintrag - prüfe allowToCreateNewVote`);
     // Existierenden Eintrag aktualisieren - hier verwenden wir die Repository-Funktion
-    return await allowToCreateNewVote(pollResultId, eventUserId);
+    const result = await allowToCreateNewVote(pollResultId, eventUserId);
+    console.log(`[DEBUG:EXISTS_POLL_USER_VOTED] allowToCreateNewVote result for user ${eventUserId}:`, result);
+    return result;
   } catch (error) {
     console.error(`[ERROR] existsPollUserVoted: Fehler bei der Prüfung:`, error);
     return false;
