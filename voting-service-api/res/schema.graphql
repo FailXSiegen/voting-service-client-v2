@@ -258,6 +258,7 @@ type Poll {
   minVotes: Int
   maxVotes: Int
   allowAbstain: Boolean
+  userVoteCycle(eventUserId: ID!): UserVoteCycleResult
 }
 type OpenPollWithResult {
   id: ID!

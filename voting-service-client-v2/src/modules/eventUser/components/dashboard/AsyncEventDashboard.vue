@@ -15,7 +15,6 @@
       <PollList
         v-if="availablePolls?.length > 0"
         :polls="availablePolls"
-        :completed-polls="completedPolls"
         @play="onClickPlayPoll"
       />
       <PollModal
@@ -68,7 +67,7 @@ import { useQuery, useSubscription } from "@vue/apollo-composable";
 import { toast } from "vue3-toastify";
 import l18n from "@/l18n";
 
-import { POLLS } from "@/modules/eventUser/graphql/queries/polls";
+import { POLLS_WITH_VOTE_STATUS } from "@/modules/eventUser/graphql/queries/polls-with-vote-status";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 import {
@@ -92,7 +91,6 @@ const activePoll = ref(null);
 const pollModal = ref(null);
 const highlightStatusChange = ref(false);
 const availablePolls = ref([]);
-const completedPolls = ref([]);
 const pollResults = ref([]);
 const pollStatePersistence = usePollStatePersistence();
 const { canVote } = pollStatePersistence;
@@ -119,8 +117,8 @@ const eventStartTime = computed(() =>
 );
 
 const pollsQuery = useQuery(
-  POLLS,
-  { eventId: props.event.id },
+  POLLS_WITH_VOTE_STATUS,
+  { eventId: props.event.id, eventUserId: eventUser.value.id },
   { fetchPolicy: "cache-and-network" },
 );
 pollsQuery.onResult(({ data }) => {
@@ -133,12 +131,7 @@ pollsQuery.onResult(({ data }) => {
     votingProcess.resetVoteCounts && votingProcess.resetVoteCounts();
   }
 
-  completedPolls.value = [];
-  availablePolls.value.forEach((availablePoll) => {
-    if (!canVote(availablePoll.id, eventUser.value, props.event)) {
-      completedPolls.value.push(availablePoll);
-    }
-  });
+  // Keine completedPolls mehr - Vote-Status wird direkt aus userVoteCycle gelesen
 });
 
 const pollResultsQuery = useQuery(
@@ -202,17 +195,16 @@ async function onSubmitPoll(pollFormData) {
 
 async function onVotingCompleted() {
   if (activePoll.value) {
-    if (!completedPolls.value.some(poll => poll.id === activePoll.value.id)) {
-      completedPolls.value.push(activePoll.value);
-    }
-    
     pollStatePersistence.saveVote(activePoll.value.id, eventUser.value, props.event);
     
     pollModal.value.hideModal();
     activePoll.value = null;
+    
+    // Polls neu laden, um aktuellen Vote-Status zu holen
+    pollsQuery.refetch();
   }
 
-  toast(l18n.global.tc("view.user.verified.voted"), {
+  toast(l18n.global.t("view.user.verified.voted"), {
     type: "success",
     autoClose: 3000,
     hideProgressBar: false,
