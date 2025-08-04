@@ -14,6 +14,8 @@ import activateEventUserAuthToken from "../request/login/activate-event-user-aut
 import loginByEventUserAuthToken from "../request/login/login-by-event-user-auth-token";
 import zoomAuthToken from "../request/zoom/zoom-auth-token";
 import uploadMedia from "../request/media/upload-media";
+import express from "express";
+import path from "path";
 
 export default function (app) {
   app.post("/login", async (req, res) => {
@@ -64,4 +66,8 @@ export default function (app) {
   app.post("/media/upload", async (req, res) => {
     await uploadMedia(req, res);
   });
+  
+  // Static file serving für uploads (über persistentes Volume)
+  const uploadBasePath = process.env.UPLOAD_BASE_PATH || '/app/uploads';
+  app.use('/uploads', express.static(uploadBasePath));
 }

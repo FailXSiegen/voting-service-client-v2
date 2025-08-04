@@ -42,6 +42,8 @@ services:
       - APP_PORT=4000
       - GRAPHQL_ENDPOINT=/graphql
       - WEBSOCKET_ENDPOINT=/graphql
+      # Upload-Konfiguration
+      - UPLOAD_BASE_PATH=/app/uploads
     depends_on:
       - db
     deploy:
@@ -59,7 +61,7 @@ services:
         max-file: "5"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vereinswahl-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/logout`))"
+      - "traefik.http.routers.vereinswahl-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/uploads`) || PathPrefix(`/logout`))"
       - "traefik.http.routers.vereinswahl-api.priority=100"
       - "traefik.http.routers.vereinswahl-api.entrypoints=websecure"
       - "traefik.http.routers.vereinswahl-api.tls.certresolver=letsencrypt"
