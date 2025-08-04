@@ -1,8 +1,6 @@
-'use strict';
-
-const TranslationRepository = require('../../repository/translation-repository');
-const organizerRepository = require('../../repository/organizer-repository');
-const AuthenticationError = require('../../errors/AuthenticationError');
+import TranslationRepository from '../../repository/translation-repository';
+import organizerRepository from '../../repository/organizer-repository';
+import AuthenticationError from '../../errors/AuthenticationError';
 
 /**
  * Resolver for translation operations
@@ -91,4 +89,4 @@ const resolvers = {
   },
 };
 
-module.exports = resolvers;
+export default resolvers;

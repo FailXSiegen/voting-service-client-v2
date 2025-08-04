@@ -1,12 +1,10 @@
-'use strict';
-
-const SystemSettingsRepository = require('../../repository/system-settings-repository');
-const { findOneById } = require('../../repository/organizer-repository');
+import SystemSettingsRepository from '../../repository/system-settings-repository';
+import { findOneById } from '../../repository/organizer-repository';
 
 /**
  * System Settings resolver
  */
-module.exports = {
+const resolvers = {
   Query: {
     /**
      * Get the global system settings - this is a public query that works without authentication
@@ -156,3 +154,5 @@ module.exports = {
     }
   }
 };
+
+export default resolvers;
