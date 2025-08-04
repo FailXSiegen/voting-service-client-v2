@@ -78,6 +78,36 @@ build_client:
     - main
     - merge_requests
 
+# Build Client Image for Vereinswahl
+build_client_vereinswahl:
+  extends: .docker_job
+  stage: build
+  script:
+    - echo "🔨 Building Vereinswahl Client image..."
+    - echo "Debug VEREINSWAHL_RECAPTCHA_SITE_KEY=${VEREINSWAHL_RECAPTCHA_SITE_KEY}"
+    - export VEREINSWAHL_DOMAIN="vereinswahl.vielwerth-junginger.de"
+    - |
+      docker build --no-cache -f docker/production/Dockerfile.client \
+        --build-arg VITE_API_BASE_URL=https://${VEREINSWAHL_DOMAIN} \
+        --build-arg VITE_SUBSCRIPTION_URL=wss://${VEREINSWAHL_DOMAIN}/graphql \
+        --build-arg DOMAIN=${VEREINSWAHL_DOMAIN} \
+        --build-arg VITE_RECAPTCHA_SITE_KEY=${VEREINSWAHL_RECAPTCHA_SITE_KEY:-${VOTING_RECAPTCHA_SITE_KEY}} \
+        -t ${CLIENT_IMAGE}:vereinswahl-latest \
+        -t ${CLIENT_IMAGE}:vereinswahl-${CI_COMMIT_SHORT_SHA} .
+    - |
+      if docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${REGISTRY} 2>/dev/null; then
+        docker push ${CLIENT_IMAGE}:vereinswahl-latest || echo "⚠️ Push failed, continuing with local image"
+        docker push ${CLIENT_IMAGE}:vereinswahl-${CI_COMMIT_SHORT_SHA} || echo "⚠️ Push failed, continuing with local image"
+        echo "✅ Vereinswahl Client image build completed"
+      else
+        echo "⚠️  Registry not available, using local images"
+      fi
+  environment:
+    name: vereinswahl-production
+  only:
+    - main
+    - merge_requests
+
 # Deploy to Production (auf dem gleichen Server)
 deploy:
   stage: deploy
@@ -216,14 +246,14 @@ deploy_vereinswahl:
       # Check if registry images are available, otherwise use local images
       if docker pull ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} 2>/dev/null; then
         export API_IMAGE="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        export CLIENT_IMAGE="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export CLIENT_IMAGE="${CLIENT_IMAGE}:vereinswahl-${CI_COMMIT_SHORT_SHA}"
         echo "✅ Using registry images with SHA tags"
       else
         # Tag local images with SHA for deployment
         docker tag ${API_IMAGE}:latest ${API_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag API image"
-        docker tag ${CLIENT_IMAGE}:latest ${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag Client image"
+        docker tag ${CLIENT_IMAGE}:vereinswahl-latest ${CLIENT_IMAGE}:vereinswahl-${CI_COMMIT_SHORT_SHA} || echo "⚠️ Failed to tag Client image"
         export API_IMAGE="${API_IMAGE}:${CI_COMMIT_SHORT_SHA}"
-        export CLIENT_IMAGE="${CLIENT_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+        export CLIENT_IMAGE="${CLIENT_IMAGE}:vereinswahl-${CI_COMMIT_SHORT_SHA}"
         echo "✅ Using locally tagged images with SHA"
       fi
       
@@ -280,7 +310,7 @@ deploy_vereinswahl:
     - main
   needs:
     - build_api
-    - build_client
+    - build_client_vereinswahl
   tags:
     - docker
     - deploy
