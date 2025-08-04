@@ -1,9 +1,7 @@
-'use strict';
-
-const mediaRepository = require('../../repository/media/media-repository');
-const organizerRepository = require('../../repository/organizer-repository');
-const AuthenticationError = require('../../errors/AuthenticationError');
-const RecordNotFoundError = require('../../errors/RecordNotFoundError');
+import mediaRepository from '../../repository/media/media-repository';
+import organizerRepository from '../../repository/organizer-repository';
+import AuthenticationError from '../../errors/AuthenticationError';
+import RecordNotFoundError from '../../errors/RecordNotFoundError';
 
 /**
  * Resolver für Media Operationen
@@ -142,4 +140,4 @@ const resolvers = {
   }
 };
 
-module.exports = resolvers;
+export default resolvers;
