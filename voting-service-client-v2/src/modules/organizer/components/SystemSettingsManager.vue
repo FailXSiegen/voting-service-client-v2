@@ -176,7 +176,9 @@ async function onSave() {
   saving.value = true;
   
   try {
-    await updateSystemSettings({
+    console.log('Saving system settings:', formData);
+    
+    const result = await updateSystemSettings({
       input: {
         useDirectStaticPaths: formData.useDirectStaticPaths,
         useDbFooterNavigation: formData.useDbFooterNavigation,
@@ -185,13 +187,28 @@ async function onSave() {
       }
     });
     
-    await refetch();
+    console.log('Mutation result:', result);
+    
+    try {
+      await refetch();
+      console.log('Refetch completed successfully');
+    } catch (refetchError) {
+      console.error('Refetch error:', refetchError);
+      // Continue anyway, the save was successful
+    }
     
     toast($t('success.systemSettings.saved'), {
       type: 'success'
     });
     
   } catch (error) {
+    console.error('Error in onSave:', error);
+    console.error('Error details:', {
+      message: error.message,
+      graphQLErrors: error.graphQLErrors,
+      networkError: error.networkError,
+      stack: error.stack
+    });
     handleError(error);
   } finally {
     saving.value = false;
