@@ -8,10 +8,7 @@
     </template>
     <template #content>
       <!-- System Settings -->
-      <SystemSettingsManager class="mb-4" />
-      
-      <!-- Static Content Manager -->
-      <StaticContentManager />
+      <SystemSettingsManager />
     </template>
   </PageLayout>
 </template>
@@ -20,7 +17,6 @@
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import SystemSettingsManager from "@/modules/organizer/components/SystemSettingsManager.vue";
-import StaticContentManager from "@/modules/organizer/components/StaticContentManager.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
