@@ -74,6 +74,8 @@ class SystemSettingsRepository {
           id INT AUTO_INCREMENT PRIMARY KEY,
           use_direct_static_paths BOOLEAN NOT NULL DEFAULT false,
           use_db_footer_navigation BOOLEAN NOT NULL DEFAULT false,
+          favicon_url VARCHAR(500) NULL,
+          title_suffix VARCHAR(255) NULL DEFAULT 'digitalwahl.org',
           updated_by INT,
           updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
           created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -221,6 +223,14 @@ class SystemSettingsRepository {
         
         if (data.useDbFooterNavigation !== undefined) {
           updateData.useDbFooterNavigation = data.useDbFooterNavigation;
+        }
+        
+        if (data.faviconUrl !== undefined) {
+          updateData.faviconUrl = data.faviconUrl;
+        }
+        
+        if (data.titleSuffix !== undefined) {
+          updateData.titleSuffix = data.titleSuffix;
         }
         
         try {

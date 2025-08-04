@@ -38,6 +38,8 @@ const resolvers = {
               settings.useDirectStaticPaths : true,
             useDbFooterNavigation: settings.useDbFooterNavigation !== undefined ?
               settings.useDbFooterNavigation : true,
+            faviconUrl: settings.faviconUrl || null,
+            titleSuffix: settings.titleSuffix || 'digitalwahl.org',
             updatedAt: settings.updatedAt ? new Date(settings.updatedAt).toISOString() :
               new Date().toISOString()
           };
@@ -101,6 +103,14 @@ const resolvers = {
           updateData.useDbFooterNavigation = input.useDbFooterNavigation;
         }
 
+        if (input.faviconUrl !== undefined) {
+          updateData.faviconUrl = input.faviconUrl;
+        }
+
+        if (input.titleSuffix !== undefined) {
+          updateData.titleSuffix = input.titleSuffix;
+        }
+
         // If we have current settings with a valid ID, try to update them
         let organizerId = null;
         if (context && context.user && context.user.id) {
@@ -121,6 +131,12 @@ const resolvers = {
             useDbFooterNavigation: updatedSettings.useDbFooterNavigation !== undefined ?
               updatedSettings.useDbFooterNavigation :
               (input.useDbFooterNavigation !== undefined ? input.useDbFooterNavigation : true),
+            faviconUrl: updatedSettings.faviconUrl !== undefined ?
+              updatedSettings.faviconUrl :
+              (input.faviconUrl !== undefined ? input.faviconUrl : null),
+            titleSuffix: updatedSettings.titleSuffix !== undefined ?
+              updatedSettings.titleSuffix :
+              (input.titleSuffix !== undefined ? input.titleSuffix : 'digitalwahl.org'),
             updatedAt: updatedSettings.updatedAt ? new Date(updatedSettings.updatedAt).toISOString() :
               new Date().toISOString()
           };
