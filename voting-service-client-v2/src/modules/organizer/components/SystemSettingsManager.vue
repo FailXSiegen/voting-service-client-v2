@@ -139,9 +139,13 @@ import { handleError } from '@/core/error/error-handler';
 import MediaManager from '@/modules/organizer/components/MediaManager.vue';
 import { SYSTEM_SETTINGS_QUERY } from '@/modules/organizer/graphql/queries/system-settings';
 import { UPDATE_SYSTEM_SETTINGS } from '@/modules/organizer/graphql/mutation/update-system-settings';
+import { useI18n } from 'vue-i18n';
 
 const saving = ref(false);
 const showMediaManager = ref(false);
+
+// Use i18n
+const { t } = useI18n();
 
 const formData = reactive({
   useDirectStaticPaths: true,
@@ -197,7 +201,7 @@ async function onSave() {
       // Continue anyway, the save was successful
     }
     
-    toast($t('success.systemSettings.saved'), {
+    toast(t('success.systemSettings.saved'), {
       type: 'success'
     });
     
