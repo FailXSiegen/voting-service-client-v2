@@ -1,8 +1,8 @@
-import staticContentRepository from '../../repository/static-content-repository';
-import organizerRepository from '../../repository/organizer-repository';
-import staticPageSlugRepository from '../../repository/static-page-slug-repository';
-import AuthenticationError from '../../errors/AuthenticationError';
-import RecordNotFoundError from '../../errors/RecordNotFoundError';
+const staticContentRepository = require('../../repository/static-content-repository');
+const organizerRepository = require('../../repository/organizer-repository');
+const staticPageSlugRepository = require('../../repository/static-page-slug-repository');
+const AuthenticationError = require('../../errors/AuthenticationError');
+const RecordNotFoundError = require('../../errors/RecordNotFoundError');
 
 /**
  * Resolver for static content operations
@@ -444,4 +444,4 @@ const resolvers = {
   }
 };
 
-export default resolvers;
+module.exports = resolvers;
