@@ -6,9 +6,9 @@ async function testTranslationsSimple() {
   console.log('=== Simple Translations Resolver Test ===\n');
   
   try {
-    // Import the resolver directly
-    const translationsResolver = require('../src/graphql/resolver/translations-resolver');
-    const TranslationRepository = require('../src/repository/translation-repository');
+    // Import the resolver directly (relative path to dist)
+    const translationsResolver = require('../dist/graphql/resolver/translations-resolver');
+    const TranslationRepository = require('../dist/repository/translation-repository');
     
     console.log('1. Testing resolver import...');
     console.log('   Resolver imported:', typeof translationsResolver);
