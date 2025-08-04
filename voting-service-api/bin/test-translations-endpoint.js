@@ -1,36 +1,49 @@
 #!/usr/bin/env node
 
 require('dotenv/config');
-const { ApolloClient, InMemoryCache, createHttpLink, gql } = require('@apollo/client/core');
-const fetch = require('cross-fetch');
 
-// GraphQL Client Setup
-const httpLink = createHttpLink({
-  uri: process.env.GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql',
-  fetch: fetch
-});
+// Simple HTTP GraphQL client without external dependencies
+function makeGraphQLRequest(query, variables = {}) {
+  return new Promise((resolve, reject) => {
+    const postData = JSON.stringify({
+      query: query,
+      variables: variables
+    });
 
-const client = new ApolloClient({
-  link: httpLink,
-  cache: new InMemoryCache(),
-  defaultOptions: {
-    watchQuery: { errorPolicy: 'all' },
-    query: { errorPolicy: 'all' }
-  }
-});
+    const options = {
+      hostname: 'localhost',
+      port: 4000,
+      path: '/graphql',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
 
-// Test Mutations
-const SAVE_TRANSLATIONS_MUTATION = gql`
-  mutation SaveTranslations($translations: [SaveTranslationInput!]!) {
-    saveTranslations(translations: $translations)
-  }
-`;
+    const req = require('http').request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const response = JSON.parse(data);
+          resolve(response);
+        } catch (error) {
+          reject(new Error('Invalid JSON response: ' + data));
+        }
+      });
+    });
 
-const GET_TRANSLATIONS_QUERY = gql`
-  query GetTranslationsByLocale($locale: String!) {
-    translationsByLocale(locale: $locale)
-  }
-`;
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.write(postData);
+    req.end();
+  });
+}
 
 async function testTranslationsEndpoint() {
   console.log('=== Testing Translations GraphQL Endpoint ===\n');
@@ -38,16 +51,31 @@ async function testTranslationsEndpoint() {
   try {
     // 1. Test GET translations first
     console.log('1. Testing GET translations...');
-    const getResult = await client.query({
-      query: GET_TRANSLATIONS_QUERY,
-      variables: { locale: 'de' }
-    });
+    const getQuery = `
+      query GetTranslationsByLocale($locale: String!) {
+        translationsByLocale(locale: $locale)
+      }
+    `;
+    
+    const getResult = await makeGraphQLRequest(getQuery, { locale: 'de' });
+    
+    if (getResult.errors) {
+      console.error('   ❌ GET translations failed:');
+      getResult.errors.forEach(error => console.error('     ', error.message));
+      return;
+    }
     
     console.log('   ✅ GET translations successful');
     console.log('   Response type:', typeof getResult.data.translationsByLocale);
     
     // 2. Test SAVE translations (this is where the error occurs)
     console.log('\n2. Testing SAVE translations...');
+    
+    const saveQuery = `
+      mutation SaveTranslations($translations: [SaveTranslationInput!]!) {
+        saveTranslations(translations: $translations)
+      }
+    `;
     
     const testTranslations = [
       {
@@ -57,23 +85,32 @@ async function testTranslationsEndpoint() {
       }
     ];
     
-    const saveResult = await client.mutate({
-      mutation: SAVE_TRANSLATIONS_MUTATION,
-      variables: {
-        translations: testTranslations
-      }
+    const saveResult = await makeGraphQLRequest(saveQuery, {
+      translations: testTranslations
     });
+    
+    if (saveResult.errors) {
+      console.error('   ❌ SAVE translations failed:');
+      saveResult.errors.forEach(error => {
+        console.error('     Error:', error.message);
+        if (error.extensions) {
+          console.error('     Extensions:', error.extensions);
+        }
+      });
+      return;
+    }
     
     console.log('   ✅ SAVE translations successful!');
     console.log('   Result:', saveResult.data.saveTranslations);
     
     // 3. Verify the saved translation
     console.log('\n3. Verifying saved translation...');
-    const verifyResult = await client.query({
-      query: GET_TRANSLATIONS_QUERY,
-      variables: { locale: 'de' },
-      fetchPolicy: 'network-only' // Force fresh fetch
-    });
+    const verifyResult = await makeGraphQLRequest(getQuery, { locale: 'de' });
+    
+    if (verifyResult.errors) {
+      console.error('   ❌ Verify failed:', verifyResult.errors);
+      return;
+    }
     
     const translations = JSON.parse(verifyResult.data.translationsByLocale);
     const testValue = translations?.test?.endpoint?.test;
@@ -89,38 +126,9 @@ async function testTranslationsEndpoint() {
   } catch (error) {
     console.error('\n❌ Error testing translations endpoint:');
     console.error('Error message:', error.message);
-    
-    if (error.graphQLErrors && error.graphQLErrors.length > 0) {
-      console.error('GraphQL Errors:');
-      error.graphQLErrors.forEach((gqlError, index) => {
-        console.error(`  ${index + 1}. ${gqlError.message}`);
-        if (gqlError.extensions) {
-          console.error('     Extensions:', gqlError.extensions);
-        }
-      });
-    }
-    
-    if (error.networkError) {
-      console.error('Network Error:', error.networkError.message);
-      if (error.networkError.result) {
-        console.error('Network Error Details:', error.networkError.result);
-      }
-    }
-    
-    console.error('\nFull error object:');
-    console.error(error);
+    console.error('Full error:', error);
   }
 }
-
-// Get GraphQL endpoint from command line or environment
-const endpoint = process.argv[2] || process.env.GRAPHQL_ENDPOINT || 'http://localhost:4000/graphql';
-console.log(`Testing endpoint: ${endpoint}`);
-
-// Update client with provided endpoint
-client.setLink(createHttpLink({
-  uri: endpoint,
-  fetch: fetch
-}));
 
 // Run the test
 testTranslationsEndpoint().then(() => {
