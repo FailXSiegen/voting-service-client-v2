@@ -81,6 +81,8 @@ services:
       - RABBITMQ_USER=guest
       - RABBITMQ_PASSWORD=guest
       - RABBITMQ_VHOST=/
+      # Upload-Konfiguration
+      - UPLOAD_BASE_PATH=/app/uploads
     volumes:
       - uploads:/app/uploads
     depends_on:
@@ -90,7 +92,7 @@ services:
       - voting_network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=Host(`local.digitalwahl.org`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/logout`))"
+      - "traefik.http.routers.api.rule=Host(`local.digitalwahl.org`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/uploads`) || PathPrefix(`/logout`))"
       - "traefik.http.routers.api.priority=1"
       - "traefik.http.routers.api.entrypoints=web"
       - "traefik.http.services.api.loadbalancer.server.port=4000"
