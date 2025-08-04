@@ -1,5 +1,5 @@
-import SystemSettingsRepository from '../../repository/system-settings-repository';
-import { findOneById } from '../../repository/organizer-repository';
+const SystemSettingsRepository = require('../../repository/system-settings-repository');
+const { findOneById } = require('../../repository/organizer-repository');
 
 /**
  * System Settings resolver
@@ -155,4 +155,4 @@ const resolvers = {
   }
 };
 
-export default resolvers;
+module.exports = resolvers;

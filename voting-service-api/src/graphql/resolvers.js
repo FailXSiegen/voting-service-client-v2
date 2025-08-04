@@ -22,11 +22,11 @@ import pollSubscriptionResolvers from "./resolver/subscription/poll";
 import eventUserSubscriptionResolvers from "./resolver/subscription/event-user";
 import poolAnswerSubscriptionResolvers from "./resolver/subscription/poll-answer";
 import votingDetailsSubscriptionResolvers from "./resolver/subscription/voting-details";
-import staticContentResolvers from "./resolver/static-content-resolver";
-import pageSlugResolvers from "./resolver/page-slug-resolver";
-import mediaResolvers from "./resolver/media-resolver";
-import systemSettingsResolvers from "./resolver/system-settings-resolver";
-import translationsResolvers from "./resolver/translations-resolver";
+const staticContentResolvers = require("./resolver/static-content-resolver");
+const pageSlugResolvers = require("./resolver/page-slug-resolver");
+const mediaResolvers = require("./resolver/media-resolver");
+const systemSettingsResolvers = require("./resolver/system-settings-resolver");
+const translationsResolvers = require("./resolver/translations-resolver");
 
 export default {
   VideoConferenceType: {

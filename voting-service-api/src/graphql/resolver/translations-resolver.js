@@ -1,6 +1,6 @@
-import TranslationRepository from '../../repository/translation-repository';
-import organizerRepository from '../../repository/organizer-repository';
-import AuthenticationError from '../../errors/AuthenticationError';
+const TranslationRepository = require('../../repository/translation-repository');
+const organizerRepository = require('../../repository/organizer-repository');
+const AuthenticationError = require('../../errors/AuthenticationError');
 
 /**
  * Resolver for translation operations
@@ -89,4 +89,4 @@ const resolvers = {
   },
 };
 
-export default resolvers;
+module.exports = resolvers;

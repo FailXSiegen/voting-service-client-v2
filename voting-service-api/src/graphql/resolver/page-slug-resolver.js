@@ -1,6 +1,6 @@
-import staticPageSlugRepository from '../../repository/static-page-slug-repository';
-import AuthenticationError from '../../errors/AuthenticationError';
-import RecordNotFoundError from '../../errors/RecordNotFoundError';
+const staticPageSlugRepository = require('../../repository/static-page-slug-repository');
+const AuthenticationError = require('../../errors/AuthenticationError');
+const RecordNotFoundError = require('../../errors/RecordNotFoundError');
 
 /**
  * Resolver for page slug operations
@@ -125,4 +125,4 @@ const resolvers = {
   }
 };
 
-export default resolvers;
+module.exports = resolvers;
