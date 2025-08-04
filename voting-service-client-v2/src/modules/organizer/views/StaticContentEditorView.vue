@@ -38,7 +38,8 @@ import {
   RouteOrganizerManagement,
   RouteOrganizerMessageEditor,
   RouteOrganizerVideoConference,
-  RouteOrganizerStaticContentEditor
+  RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 
@@ -50,7 +51,8 @@ const routes = getRoutesByName([
   RouteOrganizerManagement,
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
-  RouteOrganizerStaticContentEditor
+  RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings
 ]);
 </script>
 

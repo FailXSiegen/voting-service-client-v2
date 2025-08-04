@@ -51,6 +51,7 @@ import {
   RouteOrganizerEventsNew,
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings,
 } from "@/router/routes";
 import { UPCOMING_EVENTS } from "@/modules/organizer/graphql/queries/upcoming-events";
 import { EXPIRED_EVENTS } from "@/modules/organizer/graphql/queries/expired-events";
@@ -71,6 +72,7 @@ const routes = getRoutesByName([
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings,
 ]);
 
 const upcomingEvents = ref([]);
