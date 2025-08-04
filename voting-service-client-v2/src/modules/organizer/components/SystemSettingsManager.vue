@@ -112,7 +112,7 @@
       <!-- Last Updated Info -->
       <div v-if="systemSettings?.updatedAt" class="mt-3 text-muted small">
         {{ $t('view.systemSettings.lastUpdated') }}: 
-        {{ createFormattedDateFromTimeStamp(systemSettings.updatedAt) }}
+        {{ formatDate(systemSettings.updatedAt) }}
         <span v-if="systemSettings.updatedBy">
           {{ $t('view.systemSettings.updatedBy') }} {{ systemSettings.updatedBy.username }}
         </span>
@@ -136,7 +136,6 @@ import { ref, reactive, onMounted, computed, watch } from 'vue';
 import { useQuery, useMutation } from '@vue/apollo-composable';
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/core/error/error-handler';
-import { createFormattedDateFromTimeStamp } from '@/core/util/time-stamp';
 import MediaManager from '@/modules/organizer/components/MediaManager.vue';
 import { SYSTEM_SETTINGS_QUERY } from '@/modules/organizer/graphql/queries/system-settings';
 import { UPDATE_SYSTEM_SETTINGS } from '@/modules/organizer/graphql/mutation/update-system-settings';
@@ -206,6 +205,23 @@ function onMediaSelected(media) {
 
 function onFaviconError() {
   console.warn('Favicon could not be loaded:', formData.faviconUrl);
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '';
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleString('de-DE', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.warn('Error formatting date:', error);
+    return dateString;
+  }
 }
 </script>
 
