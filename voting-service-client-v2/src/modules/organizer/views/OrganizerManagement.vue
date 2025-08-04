@@ -7,6 +7,9 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
+      <!-- System Settings -->
+      <SystemSettingsManager class="mb-4" />
+      
       <!-- Inhaltsbereich -->
       <div>
         <div v-if="organizers?.length > 0" class="mb-3">
@@ -108,6 +111,7 @@
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import OrganizerEventsModal from "@/modules/organizer/components/OrganizerEventsModal.vue";
+import SystemSettingsManager from "@/modules/organizer/components/SystemSettingsManager.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,

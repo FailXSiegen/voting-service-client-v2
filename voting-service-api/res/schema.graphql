@@ -618,6 +618,8 @@ type SystemSettings {
   id: ID!
   useDirectStaticPaths: Boolean!
   useDbFooterNavigation: Boolean!
+  faviconUrl: String
+  titleSuffix: String
   updatedAt: String
   updatedBy: Organizer
 }
@@ -626,6 +628,8 @@ type SystemSettings {
 input SystemSettingsInput {
   useDirectStaticPaths: Boolean
   useDbFooterNavigation: Boolean
+  faviconUrl: String
+  titleSuffix: String
 }
 
 # Input for translation updates

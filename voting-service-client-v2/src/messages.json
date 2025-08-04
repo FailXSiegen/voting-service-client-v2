@@ -26,6 +26,33 @@
           "actions": "Aktionen"
         }
       },
+      "systemSettings": {
+        "title": "Globale Systemeinstellungen",
+        "titleSuffix": {
+          "label": "Title-Suffix (Browser-Tab)",
+          "placeholder": "z.B. digitalwahl.org oder vereinswahl.vielwerth-junginger.de",
+          "help": "Wird als Suffix im Browser-Tab angezeigt: \"Seitentitel - Ihr Suffix\""
+        },
+        "favicon": {
+          "label": "Favicon (Browser-Symbol)",
+          "placeholder": "https://example.com/favicon.png",
+          "help": "URL zu einem 32x32px PNG/ICO-Bild für das Browser-Symbol",
+          "upload": "Upload",
+          "preview": "Vorschau"
+        },
+        "useDirectStaticPaths": {
+          "label": "Direkte statische Pfade verwenden",
+          "help": "Aktiviert direkte Pfade für statische Inhalte"
+        },
+        "useDbFooterNavigation": {
+          "label": "Datenbank-Footer-Navigation verwenden",
+          "help": "Navigation im Footer aus der Datenbank laden"
+        },
+        "save": "Speichern",
+        "saving": "Wird gespeichert...",
+        "lastUpdated": "Zuletzt geändert",
+        "updatedBy": "von"
+      },
       "login": {
         "label": {
           "username": "Benutzername, E-Mail oder Mitgliedsnummer *",
@@ -555,6 +582,9 @@
           "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
         },
+        "systemSettings": {
+          "saved": "Systemeinstellungen erfolgreich gespeichert."
+        },
         "events": {
           "createdSuccessfully": "Die Veranstaltung wurde erfolgreich erstellt.",
           "updatedSuccessfully": "Die Veranstaltung wurde erfolgreich aktualisiert.",
@@ -619,6 +649,33 @@
   },
   "en": {
     "view": {
+      "systemSettings": {
+        "title": "Global System Settings",
+        "titleSuffix": {
+          "label": "Title Suffix (Browser Tab)",
+          "placeholder": "e.g. digitalwahl.org or vereinswahl.vielwerth-junginger.de",
+          "help": "Displayed as suffix in browser tab: \"Page Title - Your Suffix\""
+        },
+        "favicon": {
+          "label": "Favicon (Browser Icon)",
+          "placeholder": "https://example.com/favicon.png",
+          "help": "URL to a 32x32px PNG/ICO image for the browser icon",
+          "upload": "Upload",
+          "preview": "Preview"
+        },
+        "useDirectStaticPaths": {
+          "label": "Use direct static paths",
+          "help": "Enables direct paths for static content"
+        },
+        "useDbFooterNavigation": {
+          "label": "Use database footer navigation",
+          "help": "Load navigation in footer from database"
+        },
+        "save": "Save",
+        "saving": "Saving...",
+        "lastUpdated": "Last updated",
+        "updatedBy": "by"
+      },
       "results": {
         "percentageOfValidVotes": "% of Valid Votes",
         "percentageOfPotentialVotes": "% of Potential Votes",
