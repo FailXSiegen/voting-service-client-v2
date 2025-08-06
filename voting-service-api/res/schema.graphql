@@ -622,6 +622,9 @@ type SystemSettings {
   useDbFooterNavigation: Boolean!
   faviconUrl: String
   titleSuffix: String
+  recaptchaEnabled: Boolean
+  recaptchaSiteKey: String
+  recaptchaSecretKey: String
   updatedAt: String
   updatedBy: Organizer
 }
@@ -632,6 +635,9 @@ input SystemSettingsInput {
   useDbFooterNavigation: Boolean
   faviconUrl: String
   titleSuffix: String
+  recaptchaEnabled: Boolean
+  recaptchaSiteKey: String
+  recaptchaSecretKey: String
 }
 
 # Input for translation updates
