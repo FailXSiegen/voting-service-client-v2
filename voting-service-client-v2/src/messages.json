@@ -439,6 +439,14 @@
           "placeholder": "Suche nach Benutzername, E-Mail oder Organisation",
           "reset": "Filter zurücksetzen"
         },
+        "create": {
+          "button": "Neuer Organisator",
+          "title": "Neuen Organisator anlegen",
+          "submit": "Organisator anlegen",
+          "success": "Organisator wurde erfolgreich angelegt",
+          "skipEmailVerification": "E-Mail-Verifizierung überspringen",
+          "autoVerify": "Automatisch aktivieren"
+        },
         "events": {
           "title": "Veranstaltungen",
           "show": "Veranstaltungen anzeigen",
