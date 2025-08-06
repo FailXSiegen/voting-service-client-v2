@@ -109,6 +109,9 @@
               v-model="formData.recaptchaEnabled"
               class="form-check-input"
               type="checkbox"
+              :true-value="true"
+              :false-value="false"
+              @change="onRecaptchaEnabledChange"
             />
             <label class="form-check-label" for="recaptchaEnabled">
               {{ $t('view.systemSettings.recaptcha.enabled.label') }}
@@ -129,6 +132,7 @@
               type="text"
               class="form-control"
               :placeholder="$t('view.systemSettings.recaptcha.siteKey.placeholder')"
+              @input="onSiteKeyChange"
             />
             <div class="form-text">
               {{ $t('view.systemSettings.recaptcha.siteKey.help') }}
@@ -144,6 +148,7 @@
               type="password"
               class="form-control"
               :placeholder="$t('view.systemSettings.recaptcha.secretKey.placeholder')"
+              @input="onSecretKeyChange"
             />
             <div class="form-text">
               {{ $t('view.systemSettings.recaptcha.secretKey.help') }}
@@ -224,36 +229,57 @@ const systemSettings = computed(() => systemSettingsResult.value?.systemSettings
 
 // Update form data when query loads
 watch(systemSettings, (settings) => {
+  console.log('Received system settings:', JSON.stringify(settings, null, 2));
   if (settings) {
     formData.useDirectStaticPaths = settings.useDirectStaticPaths;
     formData.useDbFooterNavigation = settings.useDbFooterNavigation;
     formData.faviconUrl = settings.faviconUrl;
     formData.titleSuffix = settings.titleSuffix || 'digitalwahl.org';
-    formData.recaptchaEnabled = settings.recaptchaEnabled || false;
+    formData.recaptchaEnabled = Boolean(settings.recaptchaEnabled);
     formData.recaptchaSiteKey = settings.recaptchaSiteKey || '';
     formData.recaptchaSecretKey = settings.recaptchaSecretKey || '';
+    console.log('Updated form data:', JSON.stringify(formData, null, 2));
   }
 }, { immediate: true });
 
 // Save mutation
 const { mutate: updateSystemSettings } = useMutation(UPDATE_SYSTEM_SETTINGS);
 
+function onRecaptchaEnabledChange(event) {
+  console.log('reCAPTCHA enabled changed:', event.target.checked);
+  formData.recaptchaEnabled = event.target.checked;
+}
+
+function onSiteKeyChange(event) {
+  console.log('Site key changed:', event.target.value);
+  formData.recaptchaSiteKey = event.target.value;
+}
+
+function onSecretKeyChange(event) {
+  console.log('Secret key changed:', event.target.value);
+  formData.recaptchaSecretKey = event.target.value;
+}
+
 async function onSave() {
   saving.value = true;
   
   try {
-    console.log('Saving system settings:', formData);
+    console.log('Saving system settings:', JSON.stringify(formData, null, 2));
+    
+    const inputData = {
+      useDirectStaticPaths: formData.useDirectStaticPaths,
+      useDbFooterNavigation: formData.useDbFooterNavigation,
+      faviconUrl: formData.faviconUrl,
+      titleSuffix: formData.titleSuffix,
+      recaptchaEnabled: Boolean(formData.recaptchaEnabled),
+      recaptchaSiteKey: formData.recaptchaSiteKey || '',
+      recaptchaSecretKey: formData.recaptchaSecretKey || ''
+    };
+    
+    console.log('Input data being sent:', JSON.stringify(inputData, null, 2));
     
     const result = await updateSystemSettings({
-      input: {
-        useDirectStaticPaths: formData.useDirectStaticPaths,
-        useDbFooterNavigation: formData.useDbFooterNavigation,
-        faviconUrl: formData.faviconUrl,
-        titleSuffix: formData.titleSuffix,
-        recaptchaEnabled: formData.recaptchaEnabled,
-        recaptchaSiteKey: formData.recaptchaSiteKey,
-        recaptchaSecretKey: formData.recaptchaSecretKey
-      }
+      input: inputData
     });
     
     console.log('Mutation result:', result);
