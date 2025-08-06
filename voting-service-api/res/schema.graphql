@@ -351,6 +351,8 @@ input CreateOrganizerInput {
   password: String!
   publicName: String!
   publicOrganisation: String!
+  confirmedEmail: Boolean
+  verified: Boolean
 }
 input UpdateOrganizerInput {
   id: ID!
