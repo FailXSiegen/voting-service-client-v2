@@ -9,11 +9,25 @@
     <template #content>
       <!-- Inhaltsbereich -->
       <div>
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <div v-if="organizers?.length > 0" class="flex-grow-1 me-3">
-            <label for="organizer-filter">
-              {{ $t("view.organizers.filter.label") }}
-            </label>
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div v-if="organizers?.length > 0" class="flex-grow-1">
+              <label for="organizer-filter">
+                {{ $t("view.organizers.filter.label") }}
+              </label>
+            </div>
+            <div>
+              <button 
+                v-if="isSuperAdmin"
+                class="btn btn-primary"
+                @click="showCreateModal = true"
+              >
+                <i class="bi-plus-circle me-2"></i>
+                {{ $t("view.organizers.create.button") }}
+              </button>
+            </div>
+          </div>
+          <div v-if="organizers?.length > 0" class="mt-2">
             <div class="input-group">
               <input
                 id="organizer-filter"
@@ -28,16 +42,6 @@
                 </button>
               </div>
             </div>
-          </div>
-          <div class="ms-auto">
-            <button 
-              v-if="isSuperAdmin"
-              class="btn btn-primary"
-              @click="showCreateModal = true"
-            >
-              <i class="bi-plus-circle me-2"></i>
-              {{ $t("view.organizers.create.button") }}
-            </button>
           </div>
         </div>
         <EasyDataTable
