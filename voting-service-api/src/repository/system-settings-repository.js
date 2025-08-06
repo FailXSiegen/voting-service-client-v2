@@ -249,6 +249,18 @@ class SystemSettingsRepository {
           updateData.titleSuffix = data.titleSuffix;
         }
         
+        if (data.recaptchaEnabled !== undefined) {
+          updateData.recaptchaEnabled = data.recaptchaEnabled;
+        }
+        
+        if (data.recaptchaSiteKey !== undefined) {
+          updateData.recaptchaSiteKey = data.recaptchaSiteKey;
+        }
+        
+        if (data.recaptchaSecretKey !== undefined) {
+          updateData.recaptchaSecretKey = data.recaptchaSecretKey;
+        }
+        
         try {
           // Update the settings
           await db.update('system_settings', updateData);
@@ -279,6 +291,11 @@ class SystemSettingsRepository {
                              (settings.useDirectStaticPaths || false),
         useDbFooterNavigation: data.useDbFooterNavigation !== undefined ? data.useDbFooterNavigation : 
                               (settings.useDbFooterNavigation || false),
+        faviconUrl: data.faviconUrl !== undefined ? data.faviconUrl : (settings.faviconUrl || null),
+        titleSuffix: data.titleSuffix !== undefined ? data.titleSuffix : (settings.titleSuffix || 'digitalwahl.org'),
+        recaptchaEnabled: data.recaptchaEnabled !== undefined ? data.recaptchaEnabled : (settings.recaptchaEnabled || false),
+        recaptchaSiteKey: data.recaptchaSiteKey !== undefined ? data.recaptchaSiteKey : (settings.recaptchaSiteKey || ''),
+        recaptchaSecretKey: data.recaptchaSecretKey !== undefined ? data.recaptchaSecretKey : (settings.recaptchaSecretKey || ''),
         updatedAt: new Date()
       };
     } catch (error) {
@@ -288,6 +305,11 @@ class SystemSettingsRepository {
         id: 0,
         useDirectStaticPaths: data.useDirectStaticPaths !== undefined ? data.useDirectStaticPaths : false,
         useDbFooterNavigation: data.useDbFooterNavigation !== undefined ? data.useDbFooterNavigation : false,
+        faviconUrl: data.faviconUrl !== undefined ? data.faviconUrl : null,
+        titleSuffix: data.titleSuffix !== undefined ? data.titleSuffix : 'digitalwahl.org',
+        recaptchaEnabled: data.recaptchaEnabled !== undefined ? data.recaptchaEnabled : false,
+        recaptchaSiteKey: data.recaptchaSiteKey !== undefined ? data.recaptchaSiteKey : '',
+        recaptchaSecretKey: data.recaptchaSecretKey !== undefined ? data.recaptchaSecretKey : '',
         updatedAt: new Date()
       };
     }
