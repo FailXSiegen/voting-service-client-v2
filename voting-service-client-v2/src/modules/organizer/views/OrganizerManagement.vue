@@ -18,7 +18,6 @@
             </div>
             <div>
               <button 
-                v-if="isSuperAdmin"
                 class="btn btn-primary"
                 @click="showCreateModal = true"
               >
