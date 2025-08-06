@@ -88,6 +88,19 @@ class SystemSettingsRepository {
       
       await db.query(createTableQuery);
       
+      // Try to add reCAPTCHA columns if they don't exist (for existing tables)
+      try {
+        await db.query(`
+          ALTER TABLE system_settings 
+          ADD COLUMN IF NOT EXISTS recaptcha_enabled BOOLEAN NOT NULL DEFAULT false,
+          ADD COLUMN IF NOT EXISTS recaptcha_site_key VARCHAR(255) NULL,
+          ADD COLUMN IF NOT EXISTS recaptcha_secret_key VARCHAR(255) NULL
+        `);
+        console.log('Added reCAPTCHA columns to existing system_settings table');
+      } catch (alterError) {
+        console.log('reCAPTCHA columns may already exist or ALTER failed:', alterError.message);
+      }
+      
       // Don't try to add the foreign key constraint here, as it might fail
       // if the organizer table doesn't exist or has a different structure
       

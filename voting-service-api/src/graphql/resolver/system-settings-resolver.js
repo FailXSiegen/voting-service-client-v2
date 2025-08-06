@@ -17,6 +17,11 @@ const resolvers = {
         id: 0,
         useDirectStaticPaths: true,  // Enable direct paths by default
         useDbFooterNavigation: true, // Enable DB footer navigation by default
+        faviconUrl: null,
+        titleSuffix: 'digitalwahl.org',
+        recaptchaEnabled: false,
+        recaptchaSiteKey: '',
+        recaptchaSecretKey: '',
         updatedAt: new Date().toISOString()
       };
 
@@ -71,6 +76,11 @@ const resolvers = {
         id: 0,
         useDirectStaticPaths: input.useDirectStaticPaths !== undefined ? input.useDirectStaticPaths : true,
         useDbFooterNavigation: input.useDbFooterNavigation !== undefined ? input.useDbFooterNavigation : true,
+        faviconUrl: input.faviconUrl !== undefined ? input.faviconUrl : null,
+        titleSuffix: input.titleSuffix !== undefined ? input.titleSuffix : 'digitalwahl.org',
+        recaptchaEnabled: input.recaptchaEnabled !== undefined ? input.recaptchaEnabled : false,
+        recaptchaSiteKey: input.recaptchaSiteKey !== undefined ? input.recaptchaSiteKey : '',
+        recaptchaSecretKey: input.recaptchaSecretKey !== undefined ? input.recaptchaSecretKey : '',
         updatedAt: new Date().toISOString()
       };
 

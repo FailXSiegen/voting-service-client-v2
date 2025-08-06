@@ -203,6 +203,17 @@ deploy:
       docker compose pull || echo "⚠️ Pull failed, using local images"
       docker compose up -d --remove-orphans
       
+      # Warte bis API Container bereit ist
+      echo "⏳ Warte bis API Container bereit ist..."
+      sleep 10
+      
+      # Führe Database Migrations aus
+      echo "🗃️ Führe Database Migrations aus..."
+      docker compose exec -T api npm run db:migrate || {
+        echo "⚠️ Migration failed, versuche alternative Methode..."
+        docker compose exec -T api node_modules/.bin/db-migrate up || echo "⚠️ Alternative Migration auch fehlgeschlagen"
+      }
+      
       # Status anzeigen
       docker ps | grep voting
       echo "✅ Voting tool deployment completed"
@@ -297,6 +308,17 @@ deploy_vereinswahl:
       cd ${VEREINSWAHL_DEPLOY_PATH}
       docker compose pull || echo "⚠️ Pull failed, using local images"
       docker compose up -d --remove-orphans
+      
+      # Warte bis API Container bereit ist
+      echo "⏳ Warte bis API Container bereit ist..."
+      sleep 10
+      
+      # Führe Database Migrations aus
+      echo "🗃️ Führe Database Migrations aus..."
+      docker compose exec -T api npm run db:migrate || {
+        echo "⚠️ Migration failed, versuche alternative Methode..."
+        docker compose exec -T api node_modules/.bin/db-migrate up || echo "⚠️ Alternative Migration auch fehlgeschlagen"
+      }
       
       # Status anzeigen
       docker ps | grep vereinswahl
