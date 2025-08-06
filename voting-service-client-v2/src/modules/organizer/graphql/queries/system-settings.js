@@ -8,6 +8,9 @@ export const SYSTEM_SETTINGS_QUERY = gql`
       useDbFooterNavigation
       faviconUrl
       titleSuffix
+      recaptchaEnabled
+      recaptchaSiteKey
+      recaptchaSecretKey
       updatedAt
       updatedBy {
         id

@@ -95,6 +95,62 @@
           </div>
         </div>
 
+        <!-- Google reCAPTCHA Settings -->
+        <hr class="my-4">
+        <h6 class="mb-3">
+          <i class="bi bi-shield-check me-2"></i>
+          {{ $t('view.systemSettings.recaptcha.label') }}
+        </h6>
+        
+        <div class="mb-3">
+          <div class="form-check">
+            <input
+              id="recaptchaEnabled"
+              v-model="formData.recaptchaEnabled"
+              class="form-check-input"
+              type="checkbox"
+            />
+            <label class="form-check-label" for="recaptchaEnabled">
+              {{ $t('view.systemSettings.recaptcha.enabled.label') }}
+            </label>
+          </div>
+          <div class="form-text">
+            {{ $t('view.systemSettings.recaptcha.enabled.help') }}
+          </div>
+        </div>
+
+        <div v-if="formData.recaptchaEnabled" class="ms-3">
+          <div class="mb-3">
+            <label class="form-label">
+              {{ $t('view.systemSettings.recaptcha.siteKey.label') }}
+            </label>
+            <input
+              v-model="formData.recaptchaSiteKey"
+              type="text"
+              class="form-control"
+              :placeholder="$t('view.systemSettings.recaptcha.siteKey.placeholder')"
+            />
+            <div class="form-text">
+              {{ $t('view.systemSettings.recaptcha.siteKey.help') }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              {{ $t('view.systemSettings.recaptcha.secretKey.label') }}
+            </label>
+            <input
+              v-model="formData.recaptchaSecretKey"
+              type="password"
+              class="form-control"
+              :placeholder="$t('view.systemSettings.recaptcha.secretKey.placeholder')"
+            />
+            <div class="form-text">
+              {{ $t('view.systemSettings.recaptcha.secretKey.help') }}
+            </div>
+          </div>
+        </div>
+
         <!-- Save Button -->
         <div class="d-flex justify-content-end">
           <button 
@@ -151,7 +207,10 @@ const formData = reactive({
   useDirectStaticPaths: true,
   useDbFooterNavigation: true,
   faviconUrl: null,
-  titleSuffix: 'digitalwahl.org'
+  titleSuffix: 'digitalwahl.org',
+  recaptchaEnabled: false,
+  recaptchaSiteKey: '',
+  recaptchaSecretKey: ''
 });
 
 // Query system settings
@@ -170,6 +229,9 @@ watch(systemSettings, (settings) => {
     formData.useDbFooterNavigation = settings.useDbFooterNavigation;
     formData.faviconUrl = settings.faviconUrl;
     formData.titleSuffix = settings.titleSuffix || 'digitalwahl.org';
+    formData.recaptchaEnabled = settings.recaptchaEnabled || false;
+    formData.recaptchaSiteKey = settings.recaptchaSiteKey || '';
+    formData.recaptchaSecretKey = settings.recaptchaSecretKey || '';
   }
 }, { immediate: true });
 
@@ -187,7 +249,10 @@ async function onSave() {
         useDirectStaticPaths: formData.useDirectStaticPaths,
         useDbFooterNavigation: formData.useDbFooterNavigation,
         faviconUrl: formData.faviconUrl,
-        titleSuffix: formData.titleSuffix
+        titleSuffix: formData.titleSuffix,
+        recaptchaEnabled: formData.recaptchaEnabled,
+        recaptchaSiteKey: formData.recaptchaSiteKey,
+        recaptchaSecretKey: formData.recaptchaSecretKey
       }
     });
     

@@ -40,6 +40,9 @@ const resolvers = {
               settings.useDbFooterNavigation : true,
             faviconUrl: settings.faviconUrl || null,
             titleSuffix: settings.titleSuffix || 'digitalwahl.org',
+            recaptchaEnabled: settings.recaptchaEnabled || false,
+            recaptchaSiteKey: settings.recaptchaSiteKey || '',
+            recaptchaSecretKey: settings.recaptchaSecretKey || '',
             updatedAt: settings.updatedAt ? new Date(settings.updatedAt).toISOString() :
               new Date().toISOString()
           };
@@ -111,6 +114,18 @@ const resolvers = {
           updateData.titleSuffix = input.titleSuffix;
         }
 
+        if (input.recaptchaEnabled !== undefined) {
+          updateData.recaptchaEnabled = input.recaptchaEnabled;
+        }
+
+        if (input.recaptchaSiteKey !== undefined) {
+          updateData.recaptchaSiteKey = input.recaptchaSiteKey;
+        }
+
+        if (input.recaptchaSecretKey !== undefined) {
+          updateData.recaptchaSecretKey = input.recaptchaSecretKey;
+        }
+
         // If we have current settings with a valid ID, try to update them
         let organizerId = null;
         if (context && context.user && context.user.id) {
@@ -137,6 +152,15 @@ const resolvers = {
             titleSuffix: updatedSettings.titleSuffix !== undefined ?
               updatedSettings.titleSuffix :
               (input.titleSuffix !== undefined ? input.titleSuffix : 'digitalwahl.org'),
+            recaptchaEnabled: updatedSettings.recaptchaEnabled !== undefined ?
+              updatedSettings.recaptchaEnabled :
+              (input.recaptchaEnabled !== undefined ? input.recaptchaEnabled : false),
+            recaptchaSiteKey: updatedSettings.recaptchaSiteKey !== undefined ?
+              updatedSettings.recaptchaSiteKey :
+              (input.recaptchaSiteKey !== undefined ? input.recaptchaSiteKey : ''),
+            recaptchaSecretKey: updatedSettings.recaptchaSecretKey !== undefined ?
+              updatedSettings.recaptchaSecretKey :
+              (input.recaptchaSecretKey !== undefined ? input.recaptchaSecretKey : ''),
             updatedAt: updatedSettings.updatedAt ? new Date(updatedSettings.updatedAt).toISOString() :
               new Date().toISOString()
           };

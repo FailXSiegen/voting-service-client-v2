@@ -48,6 +48,23 @@
           "label": "Datenbank-Footer-Navigation verwenden",
           "help": "Navigation im Footer aus der Datenbank laden"
         },
+        "recaptcha": {
+          "label": "Google reCAPTCHA Einstellungen",
+          "siteKey": {
+            "label": "reCAPTCHA Site Key",
+            "placeholder": "6Lc1234567890abcdefghijklmnopqrstuvwxyz",
+            "help": "Der öffentliche Site Key von Google reCAPTCHA v2"
+          },
+          "secretKey": {
+            "label": "reCAPTCHA Secret Key",
+            "placeholder": "6Lc1234567890abcdefghijklmnopqrstuvwxyz",
+            "help": "Der geheime Secret Key von Google reCAPTCHA v2 (wird sicher gespeichert)"
+          },
+          "enabled": {
+            "label": "reCAPTCHA aktivieren",
+            "help": "Aktiviert Google reCAPTCHA für Registrierungsformulare"
+          }
+        },
         "save": "Speichern",
         "saving": "Wird gespeichert...",
         "lastUpdated": "Zuletzt geändert",
