@@ -61,7 +61,7 @@ services:
         max-file: "5"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vereinswahl-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/uploads`) || PathPrefix(`/logout`))"
+      - "traefik.http.routers.vereinswahl-api.rule=Host(`${DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/graphql`) || PathPrefix(`/subscriptions`) || PathPrefix(`/login`) || PathPrefix(`/organizer`) || PathPrefix(`/event/verify-slug`) || PathPrefix(`/event/export-results`) || PathRegexp(`/event/[0-9]+(/export-vote-adjustments)?$`) || PathPrefix(`/zoom`) || PathPrefix(`/media`) || PathPrefix(`/uploads`) || PathPrefix(`/logout`))"
       - "traefik.http.routers.vereinswahl-api.priority=100"
       - "traefik.http.routers.vereinswahl-api.entrypoints=websecure"
       - "traefik.http.routers.vereinswahl-api.tls.certresolver=letsencrypt"
