@@ -1,6 +1,7 @@
-import { findOneById, update } from "../../../repository/event-user-repository";
+import { findOneById, update, addPollHint } from "../../../repository/event-user-repository";
 import { pubsub } from "../../../server/graphql";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "../subscription/subscription-types";
+import { logVoteTransfer } from "../../../lib/vote-adjustment-logger.js";
 // import { getAuditLogger, ACTION_TYPES, PRIVACY_LEVELS } from "../../../lib/audit-logger.js"; // TEMPORARILY DISABLED
 
 export default {
@@ -70,34 +71,66 @@ export default {
       allowToVote: true, // Automatically set to participant if receiving votes
     });
 
-    // Fetch updated users
-    const updatedSourceUser = await findOneById(sourceUserId);
-    const updatedTargetUser = await findOneById(targetUserId);
+    // Add poll hints first
+    await Promise.all([
+      addPollHint(
+        targetUserId,
+        voteAmount,
+        sourceUser.publicName || sourceUser.username,
+        'received'
+      ),
+      addPollHint(
+        sourceUserId,
+        voteAmount,
+        targetUser.publicName || targetUser.username,
+        'transferred'
+      )
+    ]);
+
+    // Fetch updated users with poll_hints after adding hints
+    const finalSourceUser = await findOneById(sourceUserId);
+    const finalTargetUser = await findOneById(targetUserId);
 
     // Notify source user about vote change
     pubsub.publish(UPDATE_EVENT_USER_ACCESS_RIGHTS, {
-      eventId: updatedSourceUser.eventId,
-      eventUserId: updatedSourceUser.id,
-      verified: updatedSourceUser.verified,
-      allowToVote: updatedSourceUser.allowToVote,
-      voteAmount: updatedSourceUser.voteAmount,
+      eventId: finalSourceUser.eventId,
+      eventUserId: finalSourceUser.id,
+      verified: finalSourceUser.verified,
+      allowToVote: finalSourceUser.allowToVote,
+      voteAmount: finalSourceUser.voteAmount,
+      pollHints: finalSourceUser.pollHints,
     });
 
     // Notify target user about vote change
     pubsub.publish(UPDATE_EVENT_USER_ACCESS_RIGHTS, {
-      eventId: updatedTargetUser.eventId,
-      eventUserId: updatedTargetUser.id,
-      verified: updatedTargetUser.verified,
-      allowToVote: updatedTargetUser.allowToVote,
-      voteAmount: updatedTargetUser.voteAmount,
+      eventId: finalTargetUser.eventId,
+      eventUserId: finalTargetUser.id,
+      verified: finalTargetUser.verified,
+      allowToVote: finalTargetUser.allowToVote,
+      voteAmount: finalTargetUser.voteAmount,
+      pollHints: finalTargetUser.pollHints,
     });
 
-    // Async audit logging (non-blocking) - TEMPORARILY DISABLED FOR TESTING
-    console.log('[DEBUG] Vote transfer completed - audit logging disabled for testing');
+
+    // Log the vote transfer
+    try {
+      await logVoteTransfer({
+        eventId: sourceUser.eventId,
+        organizerId: context?.user?.id || null,
+        sourceUserId,
+        targetUserId,
+        voteAmount,
+        sourceUserName: sourceUser.publicName || sourceUser.username,
+        targetUserName: targetUser.publicName || targetUser.username,
+        sourceUserRemainingVotes: newSourceVoteAmount
+      });
+    } catch (logError) {
+      console.error('[ERROR] Failed to log vote transfer:', logError);
+    }
 
     return {
-      sourceUser: updatedSourceUser,
-      targetUser: updatedTargetUser,
+      sourceUser: finalSourceUser,
+      targetUser: finalTargetUser,
       transferredVotes: voteAmount,
       success: true,
     };

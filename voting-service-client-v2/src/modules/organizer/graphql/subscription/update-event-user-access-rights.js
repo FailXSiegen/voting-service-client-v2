@@ -8,6 +8,7 @@ export const UPDATE_EVENT_USER_ACCESS_RIGHTS = gql`
       verified
       allowToVote
       voteAmount
+      pollHints
     }
   }
 `;
