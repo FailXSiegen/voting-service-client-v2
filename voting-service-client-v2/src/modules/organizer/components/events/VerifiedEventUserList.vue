@@ -190,48 +190,64 @@ function onTransferVotes(user) {
   emit("transferVotes", user);
 }
 
-async function copyUserLink(user) {
+function copyUserLink(user) {
+  // Basis-URL erstellen
+  const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
+
+  // Parameter hinzufügen, falls vorhanden
+  const params = new URLSearchParams();
+  if (user.publicName) {
+    params.append('publicname', user.publicName);
+  }
+  if (user.username) {
+    params.append('username', user.username);
+  }
+
+  // Vollständige URL zusammensetzen
+  const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+  // Erste Versuch: Moderne Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      console.log('Link kopiert (moderne API):', fullUrl);
+      // Optional: Visuelles Feedback
+      alert('Link wurde in die Zwischenablage kopiert!');
+    }).catch(err => {
+      console.warn('Moderne Clipboard API fehlgeschlagen:', err);
+      // Fallback verwenden
+      fallbackCopyText(fullUrl);
+    });
+  } else {
+    // Fallback für ältere Browser
+    fallbackCopyText(fullUrl);
+  }
+}
+
+function fallbackCopyText(text) {
   try {
-    // Basis-URL erstellen
-    const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
+    // Textarea-Fallback
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
 
-    // Parameter hinzufügen, falls vorhanden
-    const params = new URLSearchParams();
-    if (user.publicName) {
-      params.append('publicname', user.publicName);
-    }
-    if (user.username) {
-      params.append('username', user.username);
-    }
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
 
-    // Vollständige URL zusammensetzen
-    const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
-
-    // Clipboard API prüfen und verwenden
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(fullUrl);
+    if (successful) {
+      console.log('Link kopiert (Fallback):', text);
+      alert('Link wurde in die Zwischenablage kopiert!');
     } else {
-      // Fallback für unsichere Kontexte
-      const textArea = document.createElement('textarea');
-      textArea.value = fullUrl;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      document.execCommand('copy');
-      textArea.remove();
+      throw new Error('execCommand copy failed');
     }
-
-    // Erfolg-Feedback
-    console.log('Link kopiert:', fullUrl);
-
   } catch (err) {
-    console.error('Fehler beim Kopieren:', err);
-    // Fallback: URL in Alert anzeigen
-    const fullUrl = `${window.location.origin}/event/${props.eventSlug}${user.publicName || user.username ? '?' : ''}${new URLSearchParams(Object.fromEntries([user.publicName && ['publicname', user.publicName], user.username && ['username', user.username]].filter(Boolean))).toString()}`;
-    alert(`Link kopieren fehlgeschlagen. Bitte manuell kopieren:\n${fullUrl}`);
+    console.error('Alle Kopier-Methoden fehlgeschlagen:', err);
+    // Letzte Option: URL anzeigen
+    alert(`Automatisches Kopieren fehlgeschlagen. Bitte manuell kopieren:\n\n${text}`);
   }
 }
 </script>
