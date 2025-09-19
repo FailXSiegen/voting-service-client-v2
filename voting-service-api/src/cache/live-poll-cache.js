@@ -33,6 +33,7 @@ class LivePollCache {
 
   /**
    * Startet globalen Background-Service für alle aktiven PUBLIC polls
+   * Läuft wie Cronjob alle 15 Sekunden auf volle Sekunden (0, 15, 30, 45)
    */
   startGlobalCaching() {
     if (this.globalTimer) {
@@ -40,15 +41,29 @@ class LivePollCache {
       return;
     }
 
-    console.log('[LivePollCache] Starte globalen Background-Service');
+    console.log('[LivePollCache] Starte globalen Background-Service (Cronjob-Pattern)');
 
     // Sofortiges erstes Update
     this.updateAllActivePublicPolls();
 
-    // Timer für regelmäßige Updates
-    this.globalTimer = setInterval(() => {
+    // Berechne Delay bis zur nächsten vollen 15-Sekunden-Marke
+    const now = new Date();
+    const currentSeconds = now.getSeconds();
+    const nextInterval = Math.ceil(currentSeconds / 15) * 15;
+    const delayMs = (nextInterval - currentSeconds) * 1000;
+
+    console.log(`[LivePollCache] Sync auf nächste 15s-Marke in ${delayMs}ms`);
+
+    // Initial-Delay bis zur Synchronisation
+    setTimeout(() => {
+      // Erstes synchronisiertes Update
       this.updateAllActivePublicPolls();
-    }, this.updateInterval);
+
+      // Timer für regelmäßige Updates alle 15 Sekunden
+      this.globalTimer = setInterval(() => {
+        this.updateAllActivePublicPolls();
+      }, this.updateInterval);
+    }, delayMs);
   }
 
   /**
