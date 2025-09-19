@@ -130,9 +130,9 @@ const urlParams = new URLSearchParams(window.location.search);
 
 // Set username readonly, if it is set in the url.
 const readOnlyUsername = urlParams.get("username") !== null ?? false;
-// Set publicName readonly if event setting is enabled or if passed as parameter
+// Set publicName readonly if event setting is enabled AND parameter is passed
 const publicNameFromUrl = urlParams.get("publicname") || urlParams.get("publicName") || "";
-const readOnlyPublicName = (props.event?.publicnameReadonly === true || props.event?.publicnameReadonly === 1) || publicNameFromUrl !== "";
+const readOnlyPublicName = (props.event?.publicnameReadonly === true || props.event?.publicnameReadonly === 1) && publicNameFromUrl !== "";
 // Form and validation setup.
 const formData = reactive({
   username: urlParams.get("username") ?? "",
