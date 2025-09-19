@@ -136,22 +136,28 @@ const eventUserFiltered = computed(() =>
     ? eventUsersCopy.value
     : JSON.parse(JSON.stringify(props.eventUsers)),
 );
-const filter = reactive({ username: "" });
+const filter = reactive({ search: "" });
 
 function formatTimestamp(timestamp) {
   return createFormattedDateFromTimeStamp(timestamp);
 }
 
 function onFilter() {
+  const searchTerm = filter.search.toLowerCase().trim();
+  if (!searchTerm) {
+    eventUsersCopy.value = JSON.parse(JSON.stringify(props.eventUsers));
+    return;
+  }
+
   eventUsersCopy.value = props.eventUsers.filter(
     (eventUser) =>
-      eventUser.username.includes(filter.search) ||
-      eventUser.publicName.includes(filter.search),
+      eventUser.username?.toLowerCase().includes(searchTerm) ||
+      eventUser.publicName?.toLowerCase().includes(searchTerm),
   );
 }
 
 function onResetFilter() {
-  filter.username = "";
+  filter.search = "";
   eventUsersCopy.value = JSON.parse(JSON.stringify(props.eventUsers));
 }
 
