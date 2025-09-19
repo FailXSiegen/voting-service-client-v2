@@ -46,7 +46,7 @@
           <button
             v-if="eventSlug"
             class="btn btn-outline-primary me-2"
-            :title="$t('view.event.user.copyLink') || 'Link kopieren'"
+            title="Link kopieren"
             @click="copyUserLink(item)"
           >
             <i class="bi-link-45deg" />
