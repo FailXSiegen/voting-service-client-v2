@@ -4,7 +4,6 @@ import pollQueries from "./resolver/queries/poll";
 import pollResultQueries from "./resolver/queries/poll-result";
 import organizerQueries from "./resolver/queries/organizer";
 import zoomMeetingQueries from "./resolver/queries/zoom-meeting";
-import userVoteCycleQueries from "./resolver/queries/user-vote-cycle";
 import organizerMutations from "./resolver/mutation/organizer";
 import eventMutations from "./resolver/mutation/event";
 import eventUserMutations from "./resolver/mutation/event-user";
@@ -13,6 +12,7 @@ import pollAnswerMutations from "./resolver/mutation/poll-answer";
 import pollUserVotedMutations from "./resolver/mutation/poll-user-voted";
 import zoomMeetingMutations from "./resolver/mutation/zoom-meeting";
 import eventUserAuthTokenMutations from "./resolver/mutation/event-user-auth-token";
+import transferVotesMutations from "./resolver/mutation/transfer-votes";
 import activePollEventUser from "./resolver/active-poll-event-user/active-poll-event-user";
 import pollResolvers from "./resolver/poll/poll";
 import eventResolvers from "./resolver/event/event";
@@ -39,7 +39,6 @@ export default {
     ...pollResultQueries,
     ...organizerQueries,
     ...zoomMeetingQueries,
-    ...userVoteCycleQueries,
     ...staticContentResolvers.Query,
     ...pageSlugResolvers.Query,
     ...mediaResolvers.Query,
@@ -55,6 +54,7 @@ export default {
     ...pollUserVotedMutations,
     ...zoomMeetingMutations,
     ...eventUserAuthTokenMutations,
+    ...transferVotesMutations,
     ...staticContentResolvers.Mutation,
     ...pageSlugResolvers.Mutation,
     ...mediaResolvers.Mutation,

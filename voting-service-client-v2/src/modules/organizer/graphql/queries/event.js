@@ -21,6 +21,7 @@ export const EVENT = gql`
       publicVoteVisible
       finished
       endDatetime
+      publicnameReadonly
     }
   }
 `;

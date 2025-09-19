@@ -198,6 +198,16 @@
               @update="({ value }) => { formData.publicVoteVisible = value; }"
             />
           </div>
+
+          <div class="mb-3 d-flex mt-4">
+            <CheckboxInput
+              v-model:checked="formData.publicnameReadonly"
+              :label="$t('view.event.create.labels.publicnameReadonly')"
+              :errors="v$.publicnameReadonly?.$errors"
+              :has-errors="v$.publicnameReadonly?.$errors?.length > 0"
+              @update="({ value }) => { formData.publicnameReadonly = value; }"
+            />
+          </div>
         </div>
 
         <!-- Styling Tab -->
@@ -346,6 +356,7 @@ const formData = reactive({
   allowMagicLink: props.prefillData?.allowMagicLink ?? false,
   publicVoteVisible: props.prefillData?.publicVoteVisible ?? true,
   endDatetime: props.prefillData?.endDatetime ?? Math.floor(Date.now() / 1000),
+  publicnameReadonly: props.prefillData?.publicnameReadonly ?? false,
 });
 
 const rules = computed(() => {

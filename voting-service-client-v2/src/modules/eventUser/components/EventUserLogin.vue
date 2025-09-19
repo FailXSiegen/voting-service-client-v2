@@ -78,6 +78,9 @@
               :value="formData.publicName"
               :help-text="$t('view.login.label.publicNameHelp')"
               :autocomplete="off"
+              :readonly="readOnlyPublicName"
+              :classes="[readOnlyPublicName ? 'form-control-plaintext' : '']"
+              :disabled="readOnlyPublicName"
               @change="
                 ({ value }) => {
                   formData.publicName = value;
@@ -127,6 +130,9 @@ const urlParams = new URLSearchParams(window.location.search);
 
 // Set username readonly, if it is set in the url.
 const readOnlyUsername = urlParams.get("username") !== null ?? false;
+// Set publicName readonly if event setting is enabled or if passed as parameter
+const publicNameFromUrl = urlParams.get("publicname") || urlParams.get("publicName") || "";
+const readOnlyPublicName = (props.event?.publicnameReadonly === true || props.event?.publicnameReadonly === 1) || publicNameFromUrl !== "";
 // Form and validation setup.
 const formData = reactive({
   username: urlParams.get("username") ?? "",
@@ -134,7 +140,7 @@ const formData = reactive({
     readOnlyUsername && props.event.allowMagicLink
       ? hashString(urlParams.get("username") + props.event.createDatetime)
       : "",
-  publicName: urlParams.get("publicname") ?? "",
+  publicName: publicNameFromUrl || "",
 });
 const rules = computed(() => {
   return {

@@ -65,6 +65,14 @@
             {{ $t("view.event.user.setTo") }}
             {{ $t("view.event.user.visitor") }}
           </button>
+          <button
+            v-if="item.allowToVote && item.voteAmount > 0"
+            class="btn btn-info"
+            :title="$t('voteTransfer.transferVotes')"
+            @click="onTransferVotes(item)"
+          >
+            <i class="bi-arrow-left-right align-middle" />
+          </button>
           <router-link
             :to="{
               name: RouteOrganizerEventUserEdit,
@@ -99,6 +107,7 @@ const emit = defineEmits([
   "updateToGuest",
   "updateToParticipant",
   "unverfifyEventUser",
+  "transferVotes",
 ]);
 
 const props = defineProps({
@@ -156,6 +165,10 @@ function onUpdateToGuest(eventUserId) {
 
 function onUnverfifyEventUser(eventUserId) {
   emit("unverfifyEventUser", eventUserId);
+}
+
+function onTransferVotes(user) {
+  emit("transferVotes", user);
 }
 </script>
 

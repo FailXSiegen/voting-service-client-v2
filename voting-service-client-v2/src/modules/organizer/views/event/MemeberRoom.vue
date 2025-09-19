@@ -34,6 +34,15 @@
         @update-to-guest="onUpdateToGuest"
         @update-to-participant="onUpdateToParticipant"
         @unverfify-event-user="onUnverfifyEventUser"
+        @transfer-votes="onOpenTransferModal"
+      />
+
+      <!-- Vote Transfer Modal -->
+      <VoteTransferModal
+        ref="voteTransferModal"
+        :source-user="selectedUserForTransfer"
+        :available-users="verifiedEventUsers"
+        @transfer="onTransferVotes"
       />
     </template>
   </PageLayout>
@@ -43,6 +52,7 @@
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
 import VerifiedEventUserList from "@/modules/organizer/components/events/VerifiedEventUserList.vue";
+import VoteTransferModal from "@/modules/organizer/components/events/VoteTransferModal.vue";
 import {
   RouteOrganizerDashboard,
   RouteOrganizerEventUserNew,
@@ -62,6 +72,7 @@ import { createConfirmDialog } from "vuejs-confirm-dialog";
 import ConfirmModal from "@/core/components/ConfirmModal.vue";
 import t from "@/core/util/l18n";
 import { UPDATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/update-event-user";
+import { TRANSFER_VOTES } from "@/modules/organizer/graphql/mutation/transfer-votes";
 import { NEW_EVENT_USER } from "@/modules/organizer/graphql/subscription/new-event-user";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
 import { EVENT_USER_LIFE_CYCLE } from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
@@ -73,6 +84,8 @@ const id = route.params.id;
 const loaded = ref(false);
 const event = ref(null);
 const eventUsers = ref([]);
+const selectedUserForTransfer = ref(null);
+const voteTransferModal = ref(null);
 const verifiedEventUsers = computed(() =>
   (eventUsers.value || []).filter((eventUser) => eventUser.verified),
 );
@@ -243,5 +256,51 @@ async function onUnverfifyEventUser(eventUserId) {
 
   // Show confirm dialog.
   dialog.reveal();
+}
+
+// Vote Transfer Functions
+function onOpenTransferModal(user) {
+  selectedUserForTransfer.value = user;
+  if (voteTransferModal.value) {
+    voteTransferModal.value.openModal();
+  }
+}
+
+async function onTransferVotes(transferData) {
+  try {
+    const { mutate: transferVotes } = useMutation(TRANSFER_VOTES, {
+      variables: {
+        input: {
+          sourceUserId: transferData.sourceUserId,
+          targetUserId: transferData.targetUserId,
+          voteAmount: transferData.voteAmount,
+        },
+      },
+    });
+
+    const result = await transferVotes();
+
+    if (result?.data?.transferVotes?.success) {
+      // Refetch event users to show updated data
+      await eventUsersQuery.refetch();
+
+      // Show success message
+      const sourceUserName = result.data.transferVotes.sourceUser.publicName;
+      const targetUserName = result.data.transferVotes.targetUser.publicName;
+      const transferredVotes = result.data.transferVotes.transferredVotes;
+
+      const successMessage = t("voteTransfer.success", {
+        votes: transferredVotes,
+        source: sourceUserName,
+        target: targetUserName,
+      });
+
+      // You can use a toast notification here
+      console.log(successMessage);
+    }
+  } catch (error) {
+    console.error("Vote transfer failed:", error);
+    // Handle error - show error message to user
+  }
 }
 </script>
