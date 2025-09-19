@@ -66,6 +66,8 @@ services:
       - "traefik.http.routers.vereinswahl-api.entrypoints=websecure"
       - "traefik.http.routers.vereinswahl-api.tls.certresolver=letsencrypt"
       - "traefik.http.routers.vereinswahl-api.service=vereinswahl-api@docker"
+      - "traefik.http.middlewares.vereinswahl-api-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.vereinswahl-api.middlewares=vereinswahl-api-stripprefix@docker"
       - "traefik.http.services.vereinswahl-api.loadbalancer.server.port=4000"
       - "traefik.docker.network=gitlab-setup_traefik"
 
