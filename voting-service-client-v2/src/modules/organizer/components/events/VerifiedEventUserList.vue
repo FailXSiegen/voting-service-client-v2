@@ -110,6 +110,7 @@ import t from "@/core/util/l18n";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import VerifiedEventUserLegend from "@/modules/organizer/components/events/VerifiedEventUserLegend.vue";
 import { RouteOrganizerEventUserEdit } from "@/router/routes";
+import { toast } from "vue3-toastify";
 
 const emit = defineEmits([
   "updateToGuest",
@@ -210,8 +211,11 @@ function copyUserLink(user) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(fullUrl).then(() => {
       console.log('Link kopiert (moderne API):', fullUrl);
-      // Optional: Visuelles Feedback
-      alert('Link wurde in die Zwischenablage kopiert!');
+      // Toast mit kopiertem Link anzeigen
+      toast(`Link in Zwischenablage kopiert: ${fullUrl}`, {
+        type: "success",
+        autoClose: 5000
+      });
     }).catch(err => {
       console.warn('Moderne Clipboard API fehlgeschlagen:', err);
       // Fallback verwenden
@@ -240,14 +244,21 @@ function fallbackCopyText(text) {
 
     if (successful) {
       console.log('Link kopiert (Fallback):', text);
-      alert('Link wurde in die Zwischenablage kopiert!');
+      // Toast mit kopiertem Link anzeigen
+      toast(`Link in Zwischenablage kopiert: ${text}`, {
+        type: "success",
+        autoClose: 5000
+      });
     } else {
       throw new Error('execCommand copy failed');
     }
   } catch (err) {
     console.error('Alle Kopier-Methoden fehlgeschlagen:', err);
-    // Letzte Option: URL anzeigen
-    alert(`Automatisches Kopieren fehlgeschlagen. Bitte manuell kopieren:\n\n${text}`);
+    // Toast mit Fehlermeldung und URL zum manuellen Kopieren
+    toast(`Automatisches Kopieren fehlgeschlagen. Bitte manuell kopieren: ${text}`, {
+      type: "error",
+      autoClose: 10000
+    });
   }
 }
 </script>
