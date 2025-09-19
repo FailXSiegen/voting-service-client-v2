@@ -89,22 +89,38 @@ const startCountdown = () => {
     clearInterval(countdownInterval.value);
   }
 
-  // Timer zurücksetzen
-  countdownSeconds.value = 15;
+  // Synchronisation mit Server-Cache: 1 Sekunde nach Server-Update
+  const now = new Date();
+  const currentSeconds = now.getSeconds();
+
+  // Berechne nächste 15s-Marke + 1 Sekunde (Server läuft auf 0,15,30,45 - wir auf 1,16,31,46)
+  const nextServerUpdate = Math.ceil(currentSeconds / 15) * 15;
+  const nextClientUpdate = (nextServerUpdate + 1) % 60;
+
+  // Sekunden bis zum nächsten Client-Update
+  let secondsUntilUpdate;
+  if (nextClientUpdate > currentSeconds) {
+    secondsUntilUpdate = nextClientUpdate - currentSeconds;
+  } else {
+    secondsUntilUpdate = (60 - currentSeconds) + nextClientUpdate;
+  }
+
+  // Timer auf synchronisierten Wert setzen
+  countdownSeconds.value = secondsUntilUpdate;
 
   // Neuen Timer starten
   countdownInterval.value = setInterval(async () => {
     countdownSeconds.value--;
 
     if (countdownSeconds.value <= 0) {
-      // WICHTIG: Daten abrufen wenn Counter bei 0 ankommt
+      // WICHTIG: Daten abrufen wenn Counter bei 0 ankommt (1 Sekunde nach Server-Update)
       try {
         await activePollDetailsQuery.refetch();
       } catch (error) {
         console.error('[VotingDetails] Auto-refresh error via countdown:', error);
       }
 
-      // Counter zurücksetzen
+      // Counter zurücksetzen auf 15 Sekunden
       countdownSeconds.value = 15;
     }
   }, 1000);
@@ -277,8 +293,6 @@ import { CACHED_ACTIVE_POLL_DETAILS_QUERY } from '@/modules/eventUser/graphql/qu
 provideApolloClient(apolloClient);
 
 // Eigener Query für VotingDetails - fragt nur die benötigten Daten ab, ohne das Form zu beeinflussen
-const intervalRefreshTime = 15000; // 15 Sekunden für automatische Aktualisierung
-
 // State für manuellen Refresh
 const refreshing = ref(false);
 
