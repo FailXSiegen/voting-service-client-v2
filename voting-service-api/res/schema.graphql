@@ -81,6 +81,9 @@ type Query {
   # Get translations for a specific locale
   # If includeDefaults is true, returns both default and custom translations
   translationsByLocale(locale: String!, includeDefaults: Boolean): String!
+
+  # Fetches the current vote cycle for a user in a specific poll
+  userVoteCycle(eventUserId: ID!, pollId: ID!): UserVoteCycleResult
 }
 type Mutation {
   # Create a new organizer.

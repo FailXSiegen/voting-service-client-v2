@@ -1,9 +1,10 @@
 import { ref, watch } from "vue";
 import l18n from "@/l18n";
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
-import { useMutation } from "@vue/apollo-composable";
+import { useMutation, useApolloClient } from "@vue/apollo-composable";
 import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
 import { CREATE_BULK_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer";
+import { USER_VOTE_CYCLE } from "@/modules/eventUser/graphql/queries/user-vote-cycle";
 
 // Erstelle ein Symbol als eindeutigen Key für Browser-Isolation
 const instanceKey = Symbol('voting-process-instance');
@@ -32,6 +33,9 @@ export function useVotingProcess(eventUser, event) {
   const onVotingCompleted = ref(() => { });
   const currentPollId = ref(null);
   const isProcessingVotes = ref(false);
+
+  // Apollo client für direkte Queries
+  const apolloClient = useApolloClient();
 
   // Zähler für den aktuellen Batch
   const currentlySubmittedInBatch = ref(0);
@@ -282,10 +286,6 @@ export function useVotingProcess(eventUser, event) {
       const maxAllowedVotes = eventUser.value.voteAmount;
       const remainingVotes = maxAllowedVotes - usedVotesCount.value;
 
-      // Hole den Server-Zyklus - dies ist die primäre Wahrheitsquelle für abgegebene Stimmen
-      // Bei Reload oder Seitenwechsel enthält dies den aktuellen Stand auf dem Server
-      // Beim ersten Aufruf enthält dies 0, da noch keine Stimmen abgegeben wurden
-      const serverVoteCycle = eventUser.value?.userVoteCycle?.voteCycle || 0;
 
       // KRITISCH: Prüfe ob es bereits eine gespeicherte maximale Stimmanzahl gibt
       // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
@@ -375,6 +375,28 @@ export function useVotingProcess(eventUser, event) {
       // OPTIMIERUNG: Batch-Verarbeitung mit kleinen Gruppen paralleler Anfragen
       // Wir teilen die Stimmen in kleine Batches auf und verarbeiten diese parallel
       // So vermeiden wir Datenbankfehler und behalten die Geschwindigkeitsvorteile
+
+      // Hole den Server-Zyklus FRÜH - dies ist die primäre Wahrheitsquelle für abgegebene Stimmen
+      let serverVoteCycle = 0;
+      try {
+        if (eventUser.value?.id && poll.value?.id) {
+          const result = await apolloClient.client.query({
+            query: USER_VOTE_CYCLE,
+            variables: {
+              eventUserId: eventUser.value.id.toString(),
+              pollId: poll.value.id.toString()
+            },
+            fetchPolicy: "network-only",
+            errorPolicy: "all"
+          });
+
+          serverVoteCycle = result.data?.userVoteCycle?.voteCycle || 0;
+          console.log(`[DEBUG:VOTING] Server-Vote-Cycle abgerufen: ${serverVoteCycle} für User ${eventUser.value.id}, Poll ${poll.value.id}`);
+        }
+      } catch (error) {
+        console.error(`[DEBUG:VOTING] Fehler beim Abrufen des Server-Vote-Cycles:`, error);
+        serverVoteCycle = 0;
+      }
 
       // LÖSUNG FÜR DAS RELOAD-PROBLEM: Explizite Prüfung für Reload-Zustand
       // Wir sind in einem Reload-Zustand, wenn eine der folgenden Bedingungen zutrifft:
