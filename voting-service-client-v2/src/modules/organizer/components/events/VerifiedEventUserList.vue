@@ -190,29 +190,49 @@ function onTransferVotes(user) {
   emit("transferVotes", user);
 }
 
-function copyUserLink(user) {
-  // Basis-URL erstellen
-  const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
+async function copyUserLink(user) {
+  try {
+    // Basis-URL erstellen
+    const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
 
-  // Parameter hinzufügen, falls vorhanden
-  const params = new URLSearchParams();
-  if (user.publicName) {
-    params.append('publicname', user.publicName);
-  }
-  if (user.username) {
-    params.append('username', user.username);
-  }
+    // Parameter hinzufügen, falls vorhanden
+    const params = new URLSearchParams();
+    if (user.publicName) {
+      params.append('publicname', user.publicName);
+    }
+    if (user.username) {
+      params.append('username', user.username);
+    }
 
-  // Vollständige URL zusammensetzen
-  const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+    // Vollständige URL zusammensetzen
+    const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 
-  // In die Zwischenablage kopieren
-  navigator.clipboard.writeText(fullUrl).then(() => {
-    // Optional: Feedback für den Benutzer
+    // Clipboard API prüfen und verwenden
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(fullUrl);
+    } else {
+      // Fallback für unsichere Kontexte
+      const textArea = document.createElement('textarea');
+      textArea.value = fullUrl;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      textArea.remove();
+    }
+
+    // Erfolg-Feedback
     console.log('Link kopiert:', fullUrl);
-  }).catch(err => {
+
+  } catch (err) {
     console.error('Fehler beim Kopieren:', err);
-  });
+    // Fallback: URL in Alert anzeigen
+    const fullUrl = `${window.location.origin}/event/${props.eventSlug}${user.publicName || user.username ? '?' : ''}${new URLSearchParams(Object.fromEntries([user.publicName && ['publicname', user.publicName], user.username && ['username', user.username]].filter(Boolean))).toString()}`;
+    alert(`Link kopieren fehlgeschlagen. Bitte manuell kopieren:\n${fullUrl}`);
+  }
 }
 </script>
 
