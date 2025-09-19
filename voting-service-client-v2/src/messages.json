@@ -10,6 +10,30 @@
       "close": "Schließen",
       "loading": "Wird geladen..."
     },
+    "voteTransfer": {
+      "modal": {
+        "title": "Stimmrecht übertragen"
+      },
+      "transferVotes": "Stimmrecht übertragen",
+      "sourceUser": "Von Benutzer",
+      "selectTargetUser": "An Benutzer übertragen",
+      "searchUserPlaceholder": "Benutzer suchen (Name oder Benutzername)...",
+      "noUsersFound": "Keine Benutzer gefunden",
+      "selectedUser": "Ausgewählter Benutzer",
+      "selectUser": "Bitte Benutzer auswählen",
+      "selectVoteAmount": "Anzahl Stimmen",
+      "transferOne": "1 Stimme",
+      "transferAll": "Alle Stimmen",
+      "currentVotes": "{count} Stimme(n)",
+      "remainingVotes": "Verbleibende Stimmen: {count}",
+      "resultPreview": "Vorschau nach Übertragung",
+      "afterTransfer": "Nach Übertragung",
+      "votes": "Stimme(n)",
+      "willBecomeVisitor": "Wird zum Besucher ohne Stimmrecht",
+      "willBecomeParticipant": "Wird zum Teilnehmer mit Stimmrecht",
+      "confirmTransfer": "Übertragung bestätigen",
+      "success": "{votes} Stimme(n) erfolgreich von {source} an {target} übertragen"
+    },
     "view": {
       "messageEditor": {
         "title": "Übersetzungs-Editor",
@@ -208,6 +232,7 @@
             "async": "Die Abstimmungen der Veranstaltung finden asynchron statt (Briefwahl).",
             "allowMagicLink": "Zugang über Magic-Link erlauben",
             "publicVoteVisible": "Stimmenabgabe bei öffentlichen Abstimmungen für alle sichtbar darstellen",
+            "publicnameReadonly": "Öffentlicher Name ist schreibgeschützt (kann nicht vom Teilnehmer geändert werden)",
             "magicLink": {
               "popover": {
                 "title": "Was ist ein Magic-Link?",

@@ -43,9 +43,7 @@ type Query {
   zoomMeeting(id: ID!): ZoomMeeting
   # Fetches a poll by  id.
   poll(id: ID): Poll
-  # Fetches the current vote cycle for a user in a specific poll
-  userVoteCycle(eventUserId: ID!, pollId: ID!): UserVoteCycleResult
-  
+
   # Get all static content
   staticContents: [StaticContent]
   # Get static content by page key
@@ -129,6 +127,8 @@ type Mutation {
   updateUserToGuest(eventUserId: ID!): EventUser!
   # Updates an event user to participant (verfied: true, allowToVote: true).
   updateUserToParticipant(eventUserId: ID!): EventUser!
+  # Transfers votes from one event user to another.
+  transferVotes(input: TransferVotesInput!): TransferVotesResult!
   # Creates a pollUserVoted entry for each voting cycle an eventuser has
   createPollUserVoted(input: PollUserVotedInput!): Boolean
   # Creates a new zoom meeting.
@@ -222,6 +222,7 @@ type Event {
   publicVoteVisible: Boolean!
   finished: Boolean!
   endDatetime: Int
+  publicnameReadonly: Boolean!
 }
 type EventUser {
   id: ID!
@@ -309,6 +310,7 @@ type UserVoteCycleResult {
   voteCycle: Int!
   maxVotes: Int!
 }
+
 type PollAnswer {
   id: ID!
   pollResultId: ID!
@@ -381,6 +383,7 @@ input CreateEventInput {
   publicVoteVisible: Boolean!
   finished: Boolean
   endDatetime: Int
+  publicnameReadonly: Boolean
 }
 input UpdateEventInput {
   id: ID!
@@ -399,6 +402,7 @@ input UpdateEventInput {
   publicVoteVisible: Boolean!
   finished: Boolean
   endDatetime: Int
+  publicnameReadonly: Boolean
 }
 input UpdateEventStatusInput {
   id: ID!
@@ -427,6 +431,17 @@ input CreateEventUserAuthTokenInput {
   verified: Boolean!
   allowToVote: Boolean!
   voteAmount: Int!
+}
+input TransferVotesInput {
+  sourceUserId: ID!
+  targetUserId: ID!
+  voteAmount: Int!
+}
+type TransferVotesResult {
+  sourceUser: EventUser!
+  targetUser: EventUser!
+  transferredVotes: Int!
+  success: Boolean!
 }
 input CreateNewPollInput {
   eventId: ID!
