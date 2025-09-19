@@ -26,6 +26,8 @@
       v-if="poll?.type === 'PUBLIC' && existActivePoll && event.publicVoteVisible"
       :active-poll-event-user="activePollEventUser"
       :event-id="event.id"
+      :event="event"
+      :poll="poll"
     />
     <ResultListing
       v-if="event && pollResults?.length > 0"

@@ -80,6 +80,8 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
               <VotingDetailsWithSubscription
                 :active-poll-event-user="activePollEventUser"
                 :event-id="event.id"
+                :event="event"
+                :poll="poll"
               />
             </div>
             

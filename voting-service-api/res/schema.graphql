@@ -37,6 +37,10 @@ type Query {
   activePoll(eventId: ID): OpenPollWithResult
   #fetch active poll for eventUser
   activePollEventUser(eventId: ID): ActivePollEventUser
+  #fetch active poll for eventUser - cached version
+  cachedActivePollEventUser(eventId: ID): ActivePollEventUser
+  #debug: cache statistics
+  pollCacheStats: PollCacheStats
   # Fetches all poll results by event id.
   pollResult(eventId: ID, page: Int, pageSize: Int): [PollResult]
   # Fetches a zoom meeting by id
@@ -664,3 +668,12 @@ input SaveTranslationInput {
   key: String!
   value: String!
 }
+
+# Cache statistics type
+type PollCacheStats {
+  cachedPollKeys: [String]
+  activeTimers: [String]
+  cacheEntries: Int
+  updateInterval: Int
+}
+

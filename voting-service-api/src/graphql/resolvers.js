@@ -2,6 +2,7 @@ import eventQueries from "./resolver/queries/event";
 import eventUserQueries from "./resolver/queries/event-user";
 import pollQueries from "./resolver/queries/poll";
 import pollResultQueries from "./resolver/queries/poll-result";
+import cachedPollResultQueries from "./resolver/queries/cached-poll-result";
 import organizerQueries from "./resolver/queries/organizer";
 import zoomMeetingQueries from "./resolver/queries/zoom-meeting";
 import organizerMutations from "./resolver/mutation/organizer";
@@ -37,6 +38,7 @@ export default {
     ...eventUserQueries,
     ...pollQueries,
     ...pollResultQueries,
+    ...cachedPollResultQueries,
     ...organizerQueries,
     ...zoomMeetingQueries,
     ...staticContentResolvers.Query,
