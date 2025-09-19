@@ -31,6 +31,7 @@
       <hr />
       <VerifiedEventUserList
         :event-users="verifiedEventUsers"
+        :event-slug="event?.slug"
         @update-to-guest="onUpdateToGuest"
         @update-to-participant="onUpdateToParticipant"
         @unverfify-event-user="onUnverfifyEventUser"
