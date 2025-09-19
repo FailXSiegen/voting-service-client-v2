@@ -17,6 +17,7 @@ import transferVotesMutations from "./resolver/mutation/transfer-votes";
 import activePollEventUser from "./resolver/active-poll-event-user/active-poll-event-user";
 import pollResolvers from "./resolver/poll/poll";
 import eventResolvers from "./resolver/event/event";
+import eventUserResolvers from "./resolver/event-user/event-user";
 import organizerResolvers from "./resolver/organizer/organizer";
 import pollResultResolvers from "./resolver/poll-result/poll-result";
 import pollSubscriptionResolvers from "./resolver/subscription/poll";
@@ -71,6 +72,9 @@ export default {
   },
   Event: {
     ...eventResolvers,
+  },
+  EventUser: {
+    ...eventUserResolvers,
   },
   Organizer: {
     ...organizerResolvers,

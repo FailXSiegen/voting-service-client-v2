@@ -1,5 +1,49 @@
 <template>
   <form id="poll-form" class="needs-validation" @submit.prevent="onSubmit">
+    <!-- Combined poll hints -->
+    <div v-if="(pollHints && pollHints.length > 0) || (transferredVoteHints && transferredVoteHints.length > 0)" class="alert alert-info mb-3">
+      <div class="fw-bold mb-2">
+        <i class="bi bi-info-circle me-2"></i>
+        Stimmenhinweise:
+      </div>
+
+      <!-- Received votes -->
+      <div
+        v-for="hint in pollHints"
+        :key="hint.fromUserName + '-received-' + hint.timestamp"
+        class="mb-1"
+      >
+        <button
+          v-if="hasMultipleVotes && props.event.multivoteType !== 2"
+          type="button"
+          class="btn btn-link p-0 text-decoration-none fw-bold"
+          :class="{ 'text-muted': hint.voteAmount > remainingVotes }"
+          :disabled="hint.voteAmount > remainingVotes"
+          @click="setVotesToUse(hint.voteAmount)"
+        >
+          {{ hint.voteAmount }} Stimme(n)
+        </button>
+        <span v-else class="fw-bold">
+          {{ hint.voteAmount }} Stimme(n)
+        </span>
+        von {{ hint.fromUserName }} erhalten
+        <small class="text-muted ms-2">{{ formatTimestamp(hint.timestamp) }}</small>
+        <span v-if="hint.voteAmount > remainingVotes" class="text-muted small">
+          (nicht genügend Stimmen übrig)
+        </span>
+      </div>
+
+      <!-- Transferred votes -->
+      <div
+        v-for="hint in transferredVoteHints"
+        :key="hint.fromUserName + '-transferred-' + hint.timestamp"
+        class="mb-1"
+      >
+        <span class="fw-bold">{{ hint.voteAmount }} Stimme(n)</span> an {{ hint.fromUserName }} übertragen
+        <small class="text-muted ms-2">{{ formatTimestamp(hint.timestamp) }}</small>
+      </div>
+    </div>
+
     <!-- Vote allocation controls for users with multiple votes -->
     <fieldset v-if="hasMultipleVotes" class="alert alert-info">
       <div class="mb-3">
@@ -262,6 +306,42 @@ const votingProcess = useVotingProcess(props.eventUser, props.event);
 const isSubmitting = ref(false);
 const safariCompatibilityMode = ref(false);
 const storageFunctional = ref(true);
+
+// Poll hints berechnen
+const pollHints = computed(() => {
+  if (!props.eventUser.pollHints) {
+    return [];
+  }
+
+  try {
+    const hints = JSON.parse(props.eventUser.pollHints);
+    const hintsArray = Array.isArray(hints) ? hints : [];
+
+    // Filtere nur 'received' Hints
+    return hintsArray.filter(hint => hint.type === 'received' || !hint.type);
+  } catch (e) {
+    console.warn('Konnte pollHints nicht parsen:', e);
+    return [];
+  }
+});
+
+// Poll hints für abgegebene Stimmen berechnen
+const transferredVoteHints = computed(() => {
+  if (!props.eventUser.pollHints) {
+    return [];
+  }
+
+  try {
+    const hints = JSON.parse(props.eventUser.pollHints);
+    const hintsArray = Array.isArray(hints) ? hints : [];
+
+    // Filtere nur 'transferred' Hints
+    return hintsArray.filter(hint => hint.type === 'transferred');
+  } catch (e) {
+    console.warn('Konnte pollHints nicht parsen:', e);
+    return [];
+  }
+});
 
 const voteType = computed(() => {
   if (props.poll.maxVotes === 1) {
@@ -546,13 +626,20 @@ function setVotePercentage(percentage) {
     remainingVotes.value,
     Math.round((remainingVotes.value * percentage) / 100)
   ));
-  
+
   formData.votesToUse = votesToUse;
-  
+
   if (percentage === 100) {
     formData.useAllAvailableVotes = true;
   } else {
     formData.useAllAvailableVotes = false;
+  }
+}
+
+function setVotesToUse(amount) {
+  if (amount <= remainingVotes.value && amount > 0) {
+    formData.votesToUse = amount;
+    formData.useAllAvailableVotes = (amount === remainingVotes.value);
   }
 }
 
@@ -846,6 +933,27 @@ function reset(keepSelection = false) {
   // Stelle sicher, dass auch der Button-Text und die Overlay-Anzeige aktualisiert werden
   // Sofort nochmal setzen, um eine bessere Reaktivität zu gewährleisten
   isSubmitting.value = false;
+}
+
+// Funktion zur Formatierung von Unix-Timestamps
+function formatTimestamp(timestamp) {
+  if (!timestamp) return '';
+
+  try {
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+  } catch (e) {
+    console.warn('Fehler beim Formatieren des Timestamps:', e);
+    return '';
+  }
 }
 
 defineExpose({

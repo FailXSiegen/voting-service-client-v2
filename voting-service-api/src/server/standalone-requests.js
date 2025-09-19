@@ -3,6 +3,7 @@ import loginRefreshRequest from "../request/login/refresh";
 import requestVerifyPassword from "../request/login/verify-password";
 import verifySlug from "../request/event/verify-slug";
 import downloadPollResultCsv from "../request/event/export-results";
+import downloadVoteAdjustmentsCsv from "../request/event/export-vote-adjustments";
 import validateOrganizerHashRequest from "../request/organizer/validate-hash";
 import requestPasswordForgot from "../request/organizer/password-forgot";
 import updateOrganizerPassword from "../request/organizer/update-password";
@@ -41,6 +42,9 @@ export default function (app) {
   });
   app.post("/event/export-results", async (req, res) => {
     await downloadPollResultCsv(req, res);
+  });
+  app.get("/event/:eventId/export-vote-adjustments", async (req, res) => {
+    await downloadVoteAdjustmentsCsv(req, res);
   });
   app.post("/organizer/validate-hash", async (req, res) => {
     await validateOrganizerHashRequest(req, res);

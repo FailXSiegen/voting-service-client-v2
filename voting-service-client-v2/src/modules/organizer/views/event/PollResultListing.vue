@@ -123,6 +123,10 @@ const exportButtons = [
     label: "Teilnehmer mit abgegebener Stimmenanzahl",
     onClick: exportPollEventUsersVoted,
   },
+  {
+    label: "Stimmen-Anpassungen Log",
+    onClick: exportVoteAdjustments,
+  },
 ];
 
 let pollResultsQuery;
@@ -273,6 +277,48 @@ async function exportPollResultsDetail() {
 async function exportPollEventUsersVoted() {
   const response = await exportPollResultsCsv(id, "pollEventUsersVoted");
   await downloadCsv(await response.text(), "pollEventUsersVoted.csv");
+}
+
+async function exportVoteAdjustments() {
+  try {
+    const response = await fetch(
+      `/api/event/${id}/export-vote-adjustments`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${coreStore.authToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Export fehlgeschlagen');
+    }
+
+    // Get filename from Content-Disposition header or create default
+    const contentDisposition = response.headers.get('Content-Disposition');
+    let filename = 'vote-adjustments.csv';
+    if (contentDisposition) {
+      const matches = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (matches && matches[1]) {
+        filename = matches[1];
+      }
+    }
+
+    const blob = await response.blob();
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    toast(l18n.global.tc("common.success"), { type: "success" });
+  } catch (error) {
+    console.error('Export error:', error);
+    toast(error.message || l18n.global.tc("common.error"), { type: "error" });
+  }
 }
 
 async function downloadCsv(responseText, filename) {
