@@ -44,6 +44,14 @@
       <template #item-id="item">
         <div class="btn-group float-end" role="group">
           <button
+            v-if="eventSlug"
+            class="btn btn-outline-primary me-2"
+            :title="$t('view.event.user.copyLink') || 'Link kopieren'"
+            @click="copyUserLink(item)"
+          >
+            <i class="bi-link-45deg" />
+          </button>
+          <button
             class="btn btn-success me-2"
             @click="onUpdateToParticipant(item.id)"
           >
@@ -83,6 +91,11 @@ const props = defineProps({
   eventUsers: {
     type: Array,
     required: true,
+  },
+  eventSlug: {
+    type: String,
+    required: false,
+    default: "",
   },
 });
 
@@ -141,6 +154,31 @@ function onDelete(eventUserId) {
 
   // Show confirm dialog.
   dialog.reveal();
+}
+
+function copyUserLink(user) {
+  // Basis-URL erstellen
+  const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
+
+  // Parameter hinzufügen, falls vorhanden
+  const params = new URLSearchParams();
+  if (user.publicName) {
+    params.append('publicname', user.publicName);
+  }
+  if (user.username) {
+    params.append('username', user.username);
+  }
+
+  // Vollständige URL zusammensetzen
+  const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+  // In die Zwischenablage kopieren
+  navigator.clipboard.writeText(fullUrl).then(() => {
+    // Optional: Feedback für den Benutzer
+    console.log('Link kopiert:', fullUrl);
+  }).catch(err => {
+    console.error('Fehler beim Kopieren:', err);
+  });
 }
 </script>
 
