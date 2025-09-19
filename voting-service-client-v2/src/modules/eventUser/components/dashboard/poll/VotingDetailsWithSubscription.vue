@@ -93,9 +93,18 @@ const startCountdown = () => {
   countdownSeconds.value = 15;
 
   // Neuen Timer starten
-  countdownInterval.value = setInterval(() => {
+  countdownInterval.value = setInterval(async () => {
     countdownSeconds.value--;
+
     if (countdownSeconds.value <= 0) {
+      // WICHTIG: Daten abrufen wenn Counter bei 0 ankommt
+      try {
+        await activePollDetailsQuery.refetch();
+      } catch (error) {
+        console.error('[VotingDetails] Auto-refresh error via countdown:', error);
+      }
+
+      // Counter zurücksetzen
       countdownSeconds.value = 15;
     }
   }, 1000);
@@ -273,32 +282,6 @@ const intervalRefreshTime = 15000; // 15 Sekunden für automatische Aktualisieru
 // State für manuellen Refresh
 const refreshing = ref(false);
 
-// Automatisches Polling-Interval für Live-Updates
-const autoRefreshInterval = ref(null);
-
-// Funktion für automatische Aktualisierung
-const startAutoRefresh = () => {
-  // Bestehende Intervalle stoppen
-  if (autoRefreshInterval.value) {
-    clearInterval(autoRefreshInterval.value);
-  }
-
-  // Neues Intervall starten
-  autoRefreshInterval.value = setInterval(async () => {
-    if (shouldShowLiveResults.value) {
-      console.log('[VotingDetails] Automatische Aktualisierung...');
-      await activePollDetailsQuery.refetch();
-    }
-  }, intervalRefreshTime);
-};
-
-const stopAutoRefresh = () => {
-  if (autoRefreshInterval.value) {
-    clearInterval(autoRefreshInterval.value);
-    autoRefreshInterval.value = null;
-  }
-};
-
 // Performance-optimierte Query mit Server-Side Caching
 // Der Server macht alle 15 Sek EINE SQL-Abfrage, alle Clients lesen nur den Cache
 const activePollDetailsQuery = useQuery(
@@ -312,18 +295,17 @@ const activePollDetailsQuery = useQuery(
   }
 );
 
-// Timer und Auto-Refresh starten/stoppen basierend auf shouldShowLiveResults
+// Timer starten/stoppen basierend auf shouldShowLiveResults
 watch(shouldShowLiveResults, (newValue) => {
   if (newValue) {
-    console.log('[VotingDetails] Live-Updates aktiviert');
     startCountdown();
-    startAutoRefresh();
   } else {
-    console.log('[VotingDetails] Live-Updates deaktiviert');
     stopCountdown();
-    stopAutoRefresh();
   }
 }, { immediate: true });
+
+// Temporärer Debug: Timer immer starten für Tests
+startCountdown();
 
 // Timer zurücksetzen wenn automatisches Polling erfolgt
 watch(() => activePollDetailsQuery.loading.value, (loading) => {
@@ -336,26 +318,25 @@ watch(() => activePollDetailsQuery.loading.value, (loading) => {
 // Cleanup beim Unmount
 onUnmounted(() => {
   stopCountdown();
-  stopAutoRefresh();
 });
 
 // Manuelle Aktualisierung
 async function refreshManually() {
-  if (refreshing.value) return;
+  if (refreshing.value) {
+    return;
+  }
 
   try {
     refreshing.value = true;
-    // Timer und Auto-Refresh stoppen während manueller Aktualisierung
+
+    // Timer stoppen während manueller Aktualisierung
     stopCountdown();
-    stopAutoRefresh();
 
     await activePollDetailsQuery.refetch();
 
-    // Timer und Auto-Refresh nach erfolgreicher Aktualisierung neu starten
-    if (shouldShowLiveResults.value) {
-      startCountdown();
-      startAutoRefresh();
-    }
+    // Timer nach erfolgreicher Aktualisierung neu starten
+    startCountdown();
+
   } catch (error) {
     console.error('Fehler beim manuellen Refresh:', error);
   } finally {
