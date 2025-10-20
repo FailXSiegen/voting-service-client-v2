@@ -12,6 +12,7 @@
     <template #content>
       <PendingEventUserList
         :event-users="pendingEventUsers"
+        :event-slug="event?.slug"
         @delete="onDelete"
         @update-to-guest="onUpdateToGuest"
         @update-to-participant="onUpdateToParticipant"

@@ -152,9 +152,9 @@ const updateEventUserAccessRightsSubscription = useSubscription(
 );
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
-    const { verified, voteAmount, allowToVote } =
+    const { verified, voteAmount, allowToVote, pollHints } =
       data.updateEventUserAccessRights;
-    coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote);
+    coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote, pollHints);
     toast(l18n.global.tc("view.polls.userUpdate"), {
       type: "info",
       autoClose: false,

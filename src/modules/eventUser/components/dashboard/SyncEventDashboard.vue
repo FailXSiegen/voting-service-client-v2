@@ -26,6 +26,8 @@
       v-if="poll?.type === 'PUBLIC' && existActivePoll && event.publicVoteVisible"
       :active-poll-event-user="activePollEventUser"
       :event-id="event.id"
+      :event="event"
+      :poll="poll"
     />
     <ResultListing
       v-if="event && pollResults?.length > 0"
@@ -499,15 +501,15 @@ const updateEventUserAccessRightsSubscription = useSubscription(
 );
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
-    const { verified, voteAmount, allowToVote } =
+    const { verified, voteAmount, allowToVote, pollHints } =
       data.updateEventUserAccessRights;
-    
+
     // Vorherige Werte speichern, um Änderungen erkennen zu können
     const previousVoteAmount = eventUser.value?.voteAmount || 0;
     const previousAllowToVote = eventUser.value?.allowToVote || false;
-    
+
     // Update der Benutzerrechte im Core-Store
-    coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote);
+    coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote, pollHints);
     
     // Spezifischere Nachricht je nach Art der Änderung
     let updateMessage;

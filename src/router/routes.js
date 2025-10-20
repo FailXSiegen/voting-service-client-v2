@@ -25,6 +25,7 @@ export const RouteOrganizerManagement = "organizerManagement";
 export const RouteOrganizerAllEvents = "organizerAllEvents";
 export const RouteOrganizerMessageEditor = "organizerMessageEditor";
 export const RouteOrganizerStaticContentEditor = "organizerStaticContentEditor";
+export const RouteOrganizerGlobalSettings = "organizerGlobalSettings";
 export const RouteOrganizerVideoConference = "organizerVideoConference";
 export const RouteOrganizerVideoConferenceNew = "organizerVideoConferenceNew";
 export const RouteOrganizerVideoConferenceEdit = "organizerVideoConferenceEdit";

@@ -18,6 +18,7 @@ export const UPDATE_EVENT = gql`
       allowMagicLink
       publicVoteVisible
       endDatetime
+      publicnameReadonly
     }
   }
 `;

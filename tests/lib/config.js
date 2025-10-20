@@ -4,18 +4,18 @@ const fs = require('fs');
 
 // Globale Konfiguration für den Lasttest
 const CONFIG = {
-    MAX_USERS_PER_TEST: 150,        // Gesamtanzahl der Teilnehmer (3 Tests mit je 50 Benutzern)
-    USERS_PER_BATCH: 50,            // Anzahl der Benutzer pro Test-Batch (3 Batches zu je 50)
+    MAX_USERS_PER_TEST: parseInt(process.env.MAX_USERS_PER_TEST) || 200,       // 200 User für Load Test
+    USERS_PER_BATCH: parseInt(process.env.USERS_PER_BATCH) || 50,           // 50 Benutzer pro Batch
     ORGANIZER: 1,                   // Anzahl der Organisatoren
-    VOTE_BATCH_SIZE: 50,            // Erhöht: Anzahl der gleichzeitigen Abstimmungen pro Batch
-    BATCH_VOTE_DELAY: 500,          // Stark reduziert: Verzögerung zwischen Abstimmungsbatches (500ms)
-    API_URL: 'http://localhost:4000',
-    CLIENT_URL: 'http://localhost:5173',
-    EVENT_SLUG: 'loadtest-event',
-    EVENT_ID: 976,
-    ORGANIZER_USERNAME: 'loadtest',
-    ORGANIZER_EMAIL: 'loadtest@example.org',
-    ORGANIZER_PASSWORD: 'TestPassword123!',
+    VOTE_BATCH_SIZE: parseInt(process.env.VOTE_BATCH_SIZE) || 5,            // Kleine Batches für schnelle Tests
+    BATCH_VOTE_DELAY: 500,          // Verzögerung zwischen Abstimmungsbatches (500ms)
+    API_URL: process.env.TEST_BASE_URL || 'http://localhost:4000',
+    CLIENT_URL: process.env.TEST_BASE_URL || 'http://localhost:5173',
+    EVENT_SLUG: process.env.TEST_EVENT_SLUG || 'lasttest-2025',
+    EVENT_ID: parseInt(process.env.TEST_EVENT_ID) || null, // Wird dynamisch ermittelt
+    ORGANIZER_USERNAME: 'loadtest-admin',  // Aus der DB
+    ORGANIZER_EMAIL: 'loadtest-admin@test.local',
+    ORGANIZER_PASSWORD: 'loadtest123',     // Aus der DB (load-test-scenario.sql)
     USER_PASSWORD: 'test123',
     VOTING_DELAY: 1000,             // Reduziert: Wartezeit nach Öffnen der Abstimmung
     MAX_RETRIES: 3,                 // Reduziert: Anzahl der Abstimmungsversuche pro Teilnehmer
@@ -25,7 +25,7 @@ const CONFIG = {
     RESULTS_DIR: 'voting-results',  // Verzeichnis für Ergebnisse
     SCREENSHOTS_DIR: 'test-results', // Verzeichnis für Screenshots
     USER_READY_PERCENTAGE: 100,     // Prozentsatz der Benutzer, die eingeloggt sein müssen
-    CONCURRENT_LOGINS: 25,          // Anzahl gleichzeitiger Logins pro Batch
+    CONCURRENT_LOGINS: 10,          // WICHTIGER FIX: Reduziert von 50 auf 10 - bewährter Wert aus weighted Test
     REDUCED_WAIT_AFTER_ALL_VOTES: true, // Neue Option: Reduziere Wartezeit nach vollständiger Abstimmung
     REDUCED_WAIT_TIME: 10000,       // Reduzierte Wartezeit in ms (10 Sekunden nach vollständiger Abstimmung)
     GLOBAL_STATUS_FILE: 'global-vote-status.json', // Dateiname für den globalen Status
@@ -36,7 +36,7 @@ const CONFIG = {
     ORGANIZER_TOTAL_WAIT_TIME: 45 * 60000, // 45 Minuten Gesamtwartezeit für Organizer
     
     // Verbesserte Konfiguration für Keep-Alive Mechanismus
-    KEEP_ALIVE_INTERVAL: 2000,       // 2 Sekunden Intervall für Keep-Alive Aktionen (schnellere Aktualisierung)
+    KEEP_ALIVE_INTERVAL: 500,        // 500ms Intervall für Keep-Alive Aktionen (sehr schnelle Aktualisierung)
     CONNECTION_POLLING_INTERVAL: 3000, // 3 Sekunden Intervall zur Überprüfung des Verbindungsstatus
     VOTE_TRACKING_ENABLED: true,     // Aktiviert das Tracking von Stimmen auch nach Browser-Schließung
     LOGIN_KEEP_ALIVE_ENABLED: true,  // Aktiviert den Keep-Alive-Mechanismus bereits während des Logins

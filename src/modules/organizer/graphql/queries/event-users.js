@@ -12,6 +12,7 @@ export const EVENT_USERS = gql`
       username
       voteAmount
       createDatetime
+      pollHints
     }
   }
 `;

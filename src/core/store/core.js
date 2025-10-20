@@ -411,13 +411,16 @@ export const useCore = defineStore("core", {
      * @param {boolean} allowToVote
      * @returns void
      */
-    updateEventUserAccessRights(verified, voteAmount, allowToVote) {
+    updateEventUserAccessRights(verified, voteAmount, allowToVote, pollHints) {
       if (!this.eventUser.value?.id) {
         return;
       }
       this.eventUser.value.verified = verified;
       this.eventUser.value.voteAmount = voteAmount;
       this.eventUser.value.allowToVote = allowToVote;
+      if (pollHints !== undefined) {
+        this.eventUser.value.pollHints = pollHints;
+      }
     },
 
     /**

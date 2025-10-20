@@ -5,6 +5,7 @@ const path = require('path');
 
 // Importiere die Module
 const { CONFIG } = require('../lib/config');
+const { loadEventIdIntoConfig } = require('../lib/eventLoader'); // WICHTIGER FIX: Verwende loadEventIdIntoConfig statt loadEventInfo
 const {
   sleep,
   cleanupResultsDirectory,
@@ -19,10 +20,21 @@ const { executeVotingInBatches } = require('../lib/votingFunctions');
 
 // Haupttest-Funktion zum Laden von Benutzern
 test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
-  // VOR BEGINN DER TESTS: Lösche alle alten Ergebnisdateien
+  // VOR BEGINN DER TESTS: Lösche alle alten Ergebnisdateien und lade Event-Info
   test.beforeAll(async () => {
     console.log('=== TEST SETUP: Lösche alle alten Ergebnisdateien ===');
     cleanupResultsDirectory();
+    
+    // WICHTIGER FIX: Lade die aktuelle Event-ID dynamisch
+    console.log('Lade Event-ID für Slug:', CONFIG.EVENT_SLUG);
+    await loadEventIdIntoConfig(CONFIG);
+    console.log('✅ Event-ID geladen:', CONFIG.EVENT_ID);
+    
+    // Event-Info ausgeben
+    console.log('=== EVENT-INFO ===');
+    console.log(`Event-ID: ${CONFIG.EVENT_ID}, Slug: ${CONFIG.EVENT_SLUG}`);
+    console.log(`Test-Umfang: ${CONFIG.MAX_USERS_PER_TEST} Nutzer in ${CONFIG.MAX_USERS_PER_TEST / CONFIG.USERS_PER_BATCH} Batches`);
+    
     console.log('=== TEST SETUP ABGESCHLOSSEN ===');
   });
 
@@ -34,6 +46,20 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
     try {
       console.log("Organizer-Test: Versuche Login als Organizer...");
       const loginSuccess = await loginAsOrganizer(page);
+      
+      if (!loginSuccess) {
+        console.error("❌ ORGANIZER LOGIN FEHLGESCHLAGEN!");
+        console.error("Mögliche Ursachen:");
+        console.error("1. loadtest-admin User existiert nicht in der Datenbank");
+        console.error("2. load-test-scenario.sql wurde nicht ausgeführt");
+        console.error("3. Falsche Login-Credentials (loadtest-admin:loadtest123)");
+        console.error("4. SMTP/Email-Probleme bei der Organizer-Erstellung");
+        console.error("5. API-Server nicht erreichbar unter https://voting.failx.de");
+        
+        throw new Error("Organizer Login fehlgeschlagen - Test kann nicht fortgesetzt werden. Bitte führen Sie erst load-test-scenario.sql gegen die Datenbank aus!");
+      }
+      
+      console.log("✅ Organizer erfolgreich eingeloggt!");
       expect(loginSuccess).toBeTruthy();
 
       // Organizer ist eingeloggt, aber wartet auf die Benutzer-Logins
@@ -322,7 +348,7 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
                     titleSelectors = titleSelectors.concat([
                       '.card-header h5:has-text("Lasttest")',
                       '.card-header h5:has-text("geheim")',
-                      '.card-header h5:contains("2025")'
+                      '.card-header h5:has-text("2025")' // WICHTIGER FIX: Verwende :has-text() statt :contains() für Playwright
                     ]);
                   }
 
@@ -439,8 +465,8 @@ test.describe('Load testing mit gestaffelten Benutzer-Batches', () => {
     }
   });
 
-  // Parallele Tests für die Benutzer (3 parallele Tests mit je 50 Benutzern = 150 insgesamt)
-  for (let testId = 1; testId <= 3; testId++) {
+  // Parallele Tests für die Benutzer (4 parallele Tests mit je 50 Benutzern = 200 insgesamt)
+  for (let testId = 1; testId <= 4; testId++) {
     test(`User batch ${testId} votes in poll`, async ({ browser }) => {
       const userContexts = [];
       const userPages = [];
