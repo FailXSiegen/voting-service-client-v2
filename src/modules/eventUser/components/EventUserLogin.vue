@@ -55,7 +55,7 @@
               type="hidden"
             />
             <BaseInput
-              v-if="!readOnlyUsername"
+              v-if="!(event.allowMagicLink && readOnlyUsername)"
               :label="$t('view.login.label.password')"
               :errors="v$.password?.$errors"
               :has-errors="v$.password?.$errors?.length > 0"
