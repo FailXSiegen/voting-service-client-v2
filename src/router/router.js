@@ -42,6 +42,7 @@ import {
   RouteOrganizerPollsCopy,
   RouteEventUserFrame,
   RouteActivateAuthToken,
+  RouteShortlinkRedirect,
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 import { USER_ROLE_ORGANIZER } from "@/core/auth/login";
@@ -79,6 +80,7 @@ import EditEventUser from "@/modules/organizer/views/event/event-user/EditEventU
 
 import EventUserFrame from "@/modules/eventUser/views/EventUserFrame.vue";
 import ActivateAuthToken from "@/modules/eventUser/views/ActivateAuthToken.vue";
+import ShortlinkRedirect from "@/modules/shortlink/views/ShortlinkRedirect.vue";
 
 import StaticPageImprint from "@/core/views/staticPages/StaticPageImprint.vue";
 import StaticPageDataProtection from "@/core/views/staticPages/StaticPageDataProtection.vue";
@@ -274,7 +276,7 @@ const routes = [
       const reservedPaths = [
         'admin', 'event', 'passwort-aendern', 'register', 'impressum',
         'datenschutz', 'haeufige-fragen', 'nutzervereinbarung', 'anleitung',
-        'funktionen-planung', 'activate-user', 'static-page', '404'
+        'funktionen-planung', 'activate-user', 'static-page', '404', 's'
       ];
 
       // Zusätzliche Überprüfung für Pfade, die mit "static-page/" beginnen
@@ -578,6 +580,16 @@ const routes = [
     "/activate-user/:eventId/:token",
     RouteActivateAuthToken,
     ActivateAuthToken,
+  ),
+
+  // Shortlink redirect route
+  new Route(
+    "/s/:shortCode",
+    RouteShortlinkRedirect,
+    ShortlinkRedirect,
+    null,
+    null,
+    true,
   ),
 
   // Catch-All Route für 404 (muss immer ganz am Ende stehen)
