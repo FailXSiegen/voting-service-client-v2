@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* Grundlegende CKEditor-Styles */
+.ck-editor__editable {
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+  padding: 0 1rem;
+  line-height: 1.6;
+  font-family: 'Lato', sans-serif;
+}
+
+/* Inhaltsstile */
+.ck-content {
+  font-family: 'Lato', sans-serif;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+/* Bildstile */
+.ck-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Bildgrößenänderung */
+.ck-content .image {
+  position: relative;
+  margin: 1em 0;
+}
+
+.ck-content .image.image_resized {
+  box-sizing: border-box;
+  display: block;
+  max-width: 100%;
+}
+
+.ck-content .image.image_resized img {
+  width: 100%;
+}
+
+/* Werkzeugleiste */
+.ck-toolbar {
+  background: white;
+  border: 1px solid #c4c4c4;
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+}
+
+/* Editor-Container-Styling */
+.editor-container {
+  margin-bottom: 1.5rem;
+}
+
+/* Benutzerdefinierte Stile für Inhalte */
+.ck-content h3.category {
+  font-family: 'Oswald', sans-serif;
+  font-size: 20px;
+  font-weight: bold;
+  color: #555;
+  letter-spacing: 10px;
+  margin: 0;
+  padding: 0;
+}
+
+.ck-content h2.document-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 50px;
+  font-weight: bold;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ck-content h3.document-subtitle {
+  font-family: 'Oswald', sans-serif;
+  font-size: 20px;
+  color: #555;
+  margin: 0 0 1em;
+  font-weight: bold;
+  padding: 0;
+}
+
+.ck-content p.info-box {
+  --background-size: 30px;
+  --background-color: #e91e63;
+  padding: 1.2em 2em;
+  border: 1px solid var(--background-color);
+  background:
+      linear-gradient(135deg, var(--background-color) 0%, var(--background-color) var(--background-size), transparent var(--background-size)),
+      linear-gradient(
+          135deg,
+          transparent calc(100% - var(--background-size)),
+          var(--background-color) calc(100% - var(--background-size)),
+          var(--background-color)
+      );
+  border-radius: 10px;
+  margin: 1.5em 2em;
+  box-shadow: 5px 5px 0 #ffe6ef;
+}
+
+.ck-content span.marker {
+  background: yellow;
+}
+
+.ck-content span.spoiler {
+  background: #000;
+  color: #000;
+}
+
+.ck-content span.spoiler:hover {
+  background: #000;
+  color: #fff;
+}
+
+.ck-content .button {
+  display: inline-block;
+  width: 260px;
+  border-radius: 8px;
+  margin: 0 auto;
+  padding: 12px;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.ck-content .button--green {
+  background-color: #406b1e;
+}
+
+.ck-content .button--black {
+  background-color: #141517;
+}
+
+/* Tabellen-Styling */
+.ck-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+.ck-content table th,
+.ck-content table td {
+  border: 1px solid #d9d9d9;
+  padding: 0.5em;
+}
+
+.ck-content table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+/* Link-Styling */
+.ck-content a {
+  color: #0066cc;
+  text-decoration: underline;
+}
+
+/* Listen-Styling */
+.ck-content ul, .ck-content ol {
+  padding-left: 2em;
+  margin: 1em 0;
+}
+
+/* Blockquote-Styling */
+.ck-content blockquote {
+  margin: 1em 0;
+  padding: 0.5em 1em;
+  border-left: 5px solid #ccc;
+  background-color: #f8f8f8;
+  font-style: italic;
+}
+
+/* Druckoptimierung */
+@media print {
+  body {
+    margin: 0 !important;
+  }
+  
+  .ck-content {
+    font-size: 12pt;
+  }
+}
+
+/* Resize-Handles für Bilder */
+.ck-widget__resizer {
+  display: block !important;
+}
+
+.ck-widget.ck-widget_with-selection-handle.image {
+  position: relative;
+}
+
+.ck-widget__selection-handle {
+  display: block !important;
+}
+
+/* Fullscreen-Modus */
+.ck-editor__editable_fullscreen {
+  min-height: calc(100vh - 130px);
+  max-height: calc(100vh - 130px);
+}
+
+/* Spezielles Styling für Bildunterschriften */
+.ck-content .image > figcaption {
+  background-color: #f7f7f7;
+  caption-side: bottom;
+  color: #333;
+  font-size: .9em;
+  font-style: italic;
+  padding: .6em;
+  text-align: center;
+  word-break: break-word;
+}
