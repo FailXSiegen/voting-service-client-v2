@@ -31,15 +31,13 @@
       <template v-else>
         <div>
           <template v-if="pollResults?.length > 0">
-            <KeepAlive>
-              <ResultListing
-                :key="'poll-results'"
-                :poll-results="pollResults"
-                :event-record="event"
-                :show-hidden-controls="true"
-                class="poll-results-container"
-              />
-            </KeepAlive>
+            <ResultListing
+              :key="'poll-results'"
+              :poll-results="pollResults"
+              :event-record="event"
+              :show-hidden-controls="true"
+              class="poll-results-container"
+            />
 
             <button
               v-if="showMoreEnabled"
