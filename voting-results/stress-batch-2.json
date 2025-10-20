@@ -1,0 +1,67 @@
+{
+  "batchId": 2,
+  "totalUsers": 100,
+  "successfulVotes": 100,
+  "failedVotes": 0,
+  "votingTimings": [
+    {
+      "user": 139,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 119,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 142,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 121,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 133,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 137,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 138,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 150,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 128,
+      "votingTime": 0,
+      "attempt": 1
+    },
+    {
+      "user": 126,
+      "votingTime": 0,
+      "attempt": 1
+    }
+  ],
+  "totalVotingTime": 243260,
+  "performance": {
+    "avgLoginTime": 15580.49,
+    "avgVotingTime": 0,
+    "throughput": {
+      "loginsPerSecond": "0.81",
+      "votesPerSecond": "0.41"
+    }
+  }
+}

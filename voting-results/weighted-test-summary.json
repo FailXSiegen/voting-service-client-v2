@@ -1,0 +1,395 @@
+{
+  "testType": "weighted",
+  "timestamp": "2025-07-28T20:52:02.266Z",
+  "totalUsers": 50,
+  "expectedVotes": 50,
+  "actualVotesCast": 50,
+  "efficiency": "100.00%",
+  "groupResults": [
+    {
+      "voteWeight": 1,
+      "totalUsers": 30,
+      "successfulVotes": 30,
+      "totalVotesCast": 30,
+      "expectedVotes": 30,
+      "efficiency": "100.00%",
+      "timings": [
+        {
+          "user": 1,
+          "votingTime": 116,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 2,
+          "votingTime": 115,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 3,
+          "votingTime": 115,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 4,
+          "votingTime": 116,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 5,
+          "votingTime": 123,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 6,
+          "votingTime": 123,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 7,
+          "votingTime": 123,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 8,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 9,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 10,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 11,
+          "votingTime": 131,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 12,
+          "votingTime": 130,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 13,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 14,
+          "votingTime": 125,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 15,
+          "votingTime": 128,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 16,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 17,
+          "votingTime": 126,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 18,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 19,
+          "votingTime": 133,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 20,
+          "votingTime": 128,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 21,
+          "votingTime": 128,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 22,
+          "votingTime": 127,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 23,
+          "votingTime": 127,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 24,
+          "votingTime": 126,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 25,
+          "votingTime": 130,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 26,
+          "votingTime": 125,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 27,
+          "votingTime": 125,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 28,
+          "votingTime": 128,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 29,
+          "votingTime": 129,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        },
+        {
+          "user": 30,
+          "votingTime": 128,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 1
+        }
+      ]
+    },
+    {
+      "voteWeight": 3,
+      "totalUsers": 15,
+      "successfulVotes": 15,
+      "totalVotesCast": 15,
+      "expectedVotes": 45,
+      "efficiency": "33.33%",
+      "timings": [
+        {
+          "user": 31,
+          "votingTime": 311,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 32,
+          "votingTime": 310,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 33,
+          "votingTime": 312,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 34,
+          "votingTime": 313,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 35,
+          "votingTime": 314,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 36,
+          "votingTime": 317,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 37,
+          "votingTime": 316,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 38,
+          "votingTime": 320,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 39,
+          "votingTime": 320,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 40,
+          "votingTime": 320,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 41,
+          "votingTime": 320,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 42,
+          "votingTime": 318,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 43,
+          "votingTime": 317,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 44,
+          "votingTime": 317,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        },
+        {
+          "user": 45,
+          "votingTime": 317,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 3
+        }
+      ]
+    },
+    {
+      "voteWeight": 5,
+      "totalUsers": 5,
+      "successfulVotes": 5,
+      "totalVotesCast": 5,
+      "expectedVotes": 25,
+      "efficiency": "20.00%",
+      "timings": [
+        {
+          "user": 46,
+          "votingTime": 305,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 5
+        },
+        {
+          "user": 47,
+          "votingTime": 305,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 5
+        },
+        {
+          "user": 48,
+          "votingTime": 307,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 5
+        },
+        {
+          "user": 49,
+          "votingTime": 308,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 5
+        },
+        {
+          "user": 50,
+          "votingTime": 306,
+          "success": true,
+          "votesCast": 1,
+          "maxVotes": 5
+        }
+      ]
+    }
+  ],
+  "analysis": {
+    "singleVoteEfficiency": "100.00%",
+    "tripleVoteEfficiency": "33.33%",
+    "fiveVoteEfficiency": "20.00%"
+  }
+}

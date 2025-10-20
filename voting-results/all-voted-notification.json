@@ -1,0 +1,9 @@
+{
+  "allVoted": true,
+  "successfulVotes": 100,
+  "totalParticipants": 100,
+  "timestamp": "2025-07-27T20:12:02.913Z",
+  "reducedWaitTime": 10000,
+  "source": "batch_completion",
+  "note": "Notification created at end of batch processing"
+}

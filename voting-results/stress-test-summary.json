@@ -1,0 +1,19 @@
+{
+  "testType": "stress",
+  "timestamp": "2025-07-27T20:08:19.347Z",
+  "targetUsers": 200,
+  "results": {
+    "totalLogins": 0,
+    "successfulLogins": 0,
+    "failedLogins": 0,
+    "totalVotes": 0,
+    "successfulVotes": 0,
+    "failedVotes": 0
+  },
+  "performance": {
+    "avgLoginTime": 0,
+    "avgVotingTime": 0,
+    "maxConcurrentUsers": 0
+  },
+  "batches": []
+}

@@ -1,0 +1,9 @@
+{
+  "totalUsers": 50,
+  "usersByType": {
+    "singleVote": 30,
+    "tripleVote": 15,
+    "fiveVote": 5
+  },
+  "timestamp": "2025-07-28T20:51:49.939Z"
+}
