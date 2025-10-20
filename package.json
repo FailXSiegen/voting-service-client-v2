@@ -46,7 +46,7 @@
   "devDependencies": {
     "@playwright/test": "^1.52.0",
     "@rollup/plugin-inject": "^5.0.5",
-    "@vitejs/plugin-vue": "^6.0.1",
+    "@vitejs/plugin-vue": "^5.1.4",
     "@vue/test-utils": "^2.4.3",
     "csv-parser": "^3.2.0",
     "cypress": "^13.6.1",
@@ -59,8 +59,8 @@
     "prettier": "3.1.0",
     "sass": "^1.69.5",
     "start-server-and-test": "^2.0.3",
-    "vite": "^7.1.11",
-    "vite-plugin-static-copy": "^3.1.4",
+    "vite": "^5.4.11",
+    "vite-plugin-static-copy": "^0.17.1",
     "vitest": "^3.2.4"
   },
   "engines": {
