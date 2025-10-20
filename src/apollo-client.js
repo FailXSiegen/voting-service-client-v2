@@ -164,7 +164,8 @@ wsLink.client.on("connected", () => {
   }
 
   // Start eines Ping-Intervalls zum Halten der Verbindung
-  startWebSocketKeepAlive();
+  // DISABLED: Causes issues on Safari/Mac with race conditions during voting
+  // startWebSocketKeepAlive();
 });
 
 // VERBESSERT: Zusätzliche Ereignisbehandlung für Fehler
@@ -426,25 +427,27 @@ export async function reconnectWebsocketClient() {
     }
 
     // 5. Sende sofort ein Keep-Alive-Signal, um den Online-Status zu aktualisieren
-    try {
-      await apolloClient.query({
-        query: gql`
-          query KeepAlive {
-            __typename
-          }
-        `,
-        fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
-        context: {
-          credentials: 'include', // Sicherstellen, dass Cookies bei der HTTP-Anfrage gesendet werden
-        }
-      });
-      console.info("[Websocket] Sofortiges Keep-Alive nach Verbindungsaufbau gesendet");
-    } catch (keepAliveError) {
-      console.error("[Websocket] Fehler beim Senden des sofortigen Keep-Alive:", keepAliveError);
-    }
+    // DISABLED: Causes issues on Safari/Mac with race conditions during voting
+    // try {
+    //   await apolloClient.query({
+    //     query: gql`
+    //       query KeepAlive {
+    //         __typename
+    //       }
+    //     `,
+    //     fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+    //     context: {
+    //       credentials: 'include', // Sicherstellen, dass Cookies bei der HTTP-Anfrage gesendet werden
+    //     }
+    //   });
+    //   console.info("[Websocket] Sofortiges Keep-Alive nach Verbindungsaufbau gesendet");
+    // } catch (keepAliveError) {
+    //   console.error("[Websocket] Fehler beim Senden des sofortigen Keep-Alive:", keepAliveError);
+    // }
 
     // 6. Starte ein neues Keep-Alive-Intervall für zukünftige Pings
-    startWebSocketKeepAlive();
+    // DISABLED: Causes issues on Safari/Mac with race conditions during voting
+    // startWebSocketKeepAlive();
 
     // 7. Aktualisiere den Apollo-Store, um sicherzustellen, dass alle Abonnements wieder aktiv sind
     await apolloClient.resetStore();
