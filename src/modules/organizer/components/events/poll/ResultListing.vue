@@ -7,6 +7,7 @@
         :key="pollResult.id"
         :event-record="eventRecord"
         :poll-result="pollResult"
+        :show-hidden-controls="showHiddenControls"
         @result-hidden="onResultHidden"
       />
     </div>
@@ -26,6 +27,11 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  // Show hide/show controls (only for organizers)
+  showHiddenControls: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // Local copy of poll results that can be filtered

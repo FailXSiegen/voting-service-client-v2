@@ -36,6 +36,7 @@
                 :key="'poll-results'"
                 :poll-results="pollResults"
                 :event-record="event"
+                :show-hidden-controls="true"
                 class="poll-results-container"
               />
             </KeepAlive>

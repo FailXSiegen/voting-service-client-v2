@@ -2,9 +2,9 @@
   <div
     v-if="pollResult && pollResult.poll"
     class="card mb-3"
-    :class="{ 'hidden-result': isHidden }"
+    :class="{ 'hidden-result': showHiddenControls && isHidden }"
   >
-    <div class="card-header" :class="{ 'bg-light text-muted': isHidden }">
+    <div class="card-header" :class="{ 'bg-light text-muted': showHiddenControls && isHidden }">
       <div class="d-flex justify-content-between align-items-start">
         <div class="flex-grow-1">
           <h5 class="h4 mb-1">
@@ -12,13 +12,14 @@
               $t("view.results.type." + pollResult.type)
             }}) -
             {{ getCreateDatetime }}
-            <span v-if="isHidden" class="badge bg-secondary ms-2">
+            <span v-if="showHiddenControls && isHidden" class="badge bg-secondary ms-2">
               <i class="bi bi-eye-slash me-1"></i>
               Ausgeblendet
             </span>
           </h5>
         </div>
         <button
+          v-if="showHiddenControls"
           class="btn btn-sm d-print-none ms-2"
           :class="isHidden ? 'btn-outline-success' : 'btn-outline-secondary'"
           type="button"
@@ -293,6 +294,11 @@ const props = defineProps({
   initialPercentageType: {
     type: String,
     default: "maxPerOption"
+  },
+  // Show toggle button and hidden badge (only for organizers)
+  showHiddenControls: {
+    type: Boolean,
+    default: false
   }
 });
 
