@@ -118,4 +118,3 @@ acme.json
 docker-compose.override.yml
 
 # Generated files
-src/messages.js
