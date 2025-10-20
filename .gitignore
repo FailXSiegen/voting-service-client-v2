@@ -80,6 +80,11 @@ playwright-report/
 cypress/screenshots/
 cypress/videos/
 
+# Live test configuration (contains sensitive data)
+tests/live/config.js
+tests/live/event_user.csv
+tests/live/*.csv
+
 # Certificates and keys
 *.pem
 *.key
