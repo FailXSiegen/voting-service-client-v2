@@ -50,6 +50,14 @@
       <template #item-id="item">
         <div class="btn-group float-end" role="group">
           <button
+            v-if="eventSlug"
+            class="btn btn-outline-primary"
+            title="Link kopieren"
+            @click="copyUserLink(item)"
+          >
+            <i class="bi-link-45deg" />
+          </button>
+          <button
             v-if="!item.allowToVote"
             class="h-100 btn btn-success"
             @click="onUpdateToParticipant(item.id)"
@@ -64,6 +72,14 @@
           >
             {{ $t("view.event.user.setTo") }}
             {{ $t("view.event.user.visitor") }}
+          </button>
+          <button
+            v-if="item.allowToVote && item.voteAmount > 0"
+            class="btn btn-info"
+            :title="$t('voteTransfer.transferVotes')"
+            @click="onTransferVotes(item)"
+          >
+            <i class="bi-arrow-left-right align-middle" />
           </button>
           <router-link
             :to="{
@@ -94,17 +110,24 @@ import t from "@/core/util/l18n";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import VerifiedEventUserLegend from "@/modules/organizer/components/events/VerifiedEventUserLegend.vue";
 import { RouteOrganizerEventUserEdit } from "@/router/routes";
+import { toast } from "vue3-toastify";
 
 const emit = defineEmits([
   "updateToGuest",
   "updateToParticipant",
   "unverfifyEventUser",
+  "transferVotes",
 ]);
 
 const props = defineProps({
   eventUsers: {
     type: Array,
     required: true,
+  },
+  eventSlug: {
+    type: String,
+    required: false,
+    default: "",
   },
 });
 
@@ -127,22 +150,28 @@ const eventUserFiltered = computed(() =>
     ? eventUsersCopy.value
     : JSON.parse(JSON.stringify(props.eventUsers)),
 );
-const filter = reactive({ username: "" });
+const filter = reactive({ search: "" });
 
 function formatTimestamp(timestamp) {
   return createFormattedDateFromTimeStamp(timestamp);
 }
 
 function onFilter() {
+  const searchTerm = filter.search.toLowerCase().trim();
+  if (!searchTerm) {
+    eventUsersCopy.value = JSON.parse(JSON.stringify(props.eventUsers));
+    return;
+  }
+
   eventUsersCopy.value = props.eventUsers.filter(
     (eventUser) =>
-      eventUser.username.includes(filter.search) ||
-      eventUser.publicName.includes(filter.search),
+      eventUser.username?.toLowerCase().includes(searchTerm) ||
+      eventUser.publicName?.toLowerCase().includes(searchTerm),
   );
 }
 
 function onResetFilter() {
-  filter.username = "";
+  filter.search = "";
   eventUsersCopy.value = JSON.parse(JSON.stringify(props.eventUsers));
 }
 
@@ -156,6 +185,81 @@ function onUpdateToGuest(eventUserId) {
 
 function onUnverfifyEventUser(eventUserId) {
   emit("unverfifyEventUser", eventUserId);
+}
+
+function onTransferVotes(user) {
+  emit("transferVotes", user);
+}
+
+function copyUserLink(user) {
+  // Basis-URL erstellen
+  const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
+
+  // Parameter hinzufügen, falls vorhanden
+  const params = new URLSearchParams();
+  if (user.publicName) {
+    params.append('publicname', user.publicName);
+  }
+  if (user.username) {
+    params.append('username', user.username);
+  }
+
+  // Vollständige URL zusammensetzen
+  const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
+
+  // Erste Versuch: Moderne Clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      console.log('Link kopiert (moderne API):', fullUrl);
+      // Toast mit kopiertem Link anzeigen
+      toast(`Link in Zwischenablage kopiert: ${fullUrl}`, {
+        type: "success",
+        autoClose: 5000
+      });
+    }).catch(err => {
+      console.warn('Moderne Clipboard API fehlgeschlagen:', err);
+      // Fallback verwenden
+      fallbackCopyText(fullUrl);
+    });
+  } else {
+    // Fallback für ältere Browser
+    fallbackCopyText(fullUrl);
+  }
+}
+
+function fallbackCopyText(text) {
+  try {
+    // Textarea-Fallback
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+
+    if (successful) {
+      console.log('Link kopiert (Fallback):', text);
+      // Toast mit kopiertem Link anzeigen
+      toast(`Link in Zwischenablage kopiert: ${text}`, {
+        type: "success",
+        autoClose: 5000
+      });
+    } else {
+      throw new Error('execCommand copy failed');
+    }
+  } catch (err) {
+    console.error('Alle Kopier-Methoden fehlgeschlagen:', err);
+    // Toast mit Fehlermeldung und URL zum manuellen Kopieren
+    toast(`Automatisches Kopieren fehlgeschlagen. Bitte manuell kopieren: ${text}`, {
+      type: "error",
+      autoClose: 10000
+    });
+  }
 }
 </script>
 

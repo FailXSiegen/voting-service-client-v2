@@ -9,22 +9,37 @@
     <template #content>
       <!-- Inhaltsbereich -->
       <div>
-        <div v-if="organizers?.length > 0" class="mb-3">
-          <label for="organizer-filter">
-            {{ $t("view.organizers.filter.label") }}
-          </label>
-          <div class="input-group">
-            <input
-              id="organizer-filter"
-              v-model="searchFilter"
-              class="form-control"
-              :placeholder="$t('view.organizers.filter.placeholder')"
-              @input="onFilter"
-            />
-            <div class="input-group-text p-0">
-              <button class="btn btn-transparent" @click.prevent="onResetFilter">
-                {{ $t("view.organizers.filter.reset") }}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div v-if="organizers?.length > 0" class="flex-grow-1">
+              <label for="organizer-filter">
+                {{ $t("view.organizers.filter.label") }}
+              </label>
+            </div>
+            <div>
+              <button 
+                class="btn btn-primary"
+                @click="showCreateModal = true"
+              >
+                <i class="bi-plus-circle me-2"></i>
+                {{ $t("view.organizers.create.button") }}
               </button>
+            </div>
+          </div>
+          <div v-if="organizers?.length > 0" class="mt-2">
+            <div class="input-group">
+              <input
+                id="organizer-filter"
+                v-model="searchFilter"
+                class="form-control"
+                :placeholder="$t('view.organizers.filter.placeholder')"
+                @input="onFilter"
+              />
+              <div class="input-group-text p-0">
+                <button class="btn btn-transparent" @click.prevent="onResetFilter">
+                  {{ $t("view.organizers.filter.reset") }}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -102,12 +117,20 @@
     :organizer="selectedOrganizer" 
     :show="showModal"
   />
+  
+  <!-- Create Organizer Modal -->
+  <CreateOrganizerModal 
+    v-if="showCreateModal"
+    @close="showCreateModal = false"
+    @created="onOrganizerCreated"
+  />
 </template>
 
 <script setup>
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import OrganizerEventsModal from "@/modules/organizer/components/OrganizerEventsModal.vue";
+import CreateOrganizerModal from "@/modules/organizer/components/CreateOrganizerModal.vue";
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -116,6 +139,7 @@ import {
   RouteOrganizerManagement,
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings,
   RouteOrganizerVideoConference,
 } from "@/router/routes";
 import { useMutation, useQuery, useLazyQuery } from "@vue/apollo-composable";
@@ -148,6 +172,7 @@ const routes = getRoutesByName([
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings,
 ]);
 
 const headers = [
@@ -178,6 +203,7 @@ const searchFilter = ref("");
 const organizersWithEvents = ref([]);
 const selectedOrganizer = ref(null);
 const showModal = ref(false);
+const showCreateModal = ref(false);
 
 
 const organizersFiltered = computed(() =>
@@ -368,6 +394,14 @@ function onDelete({ id }) {
 
   // Show confirm dialog.
   dialog.reveal();
+}
+
+function onOrganizerCreated() {
+  showCreateModal.value = false;
+  refetch();
+  toast(t("view.organizers.create.success"), {
+    type: "success",
+  });
 }
 </script>
 

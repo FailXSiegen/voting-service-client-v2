@@ -19,6 +19,7 @@ export const CREATE_EVENT = gql`
       allowMagicLink
       publicVoteVisible
       endDatetime
+      publicnameReadonly
     }
   }
 `;

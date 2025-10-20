@@ -10,6 +10,30 @@
       "close": "Schließen",
       "loading": "Wird geladen..."
     },
+    "voteTransfer": {
+      "modal": {
+        "title": "Stimmrecht übertragen"
+      },
+      "transferVotes": "Stimmrecht übertragen",
+      "sourceUser": "Von Benutzer",
+      "selectTargetUser": "An Benutzer übertragen",
+      "searchUserPlaceholder": "Benutzer suchen (Name oder Benutzername)...",
+      "noUsersFound": "Keine Benutzer gefunden",
+      "selectedUser": "Ausgewählter Benutzer",
+      "selectUser": "Bitte Benutzer auswählen",
+      "selectVoteAmount": "Anzahl Stimmen",
+      "transferOne": "1 Stimme",
+      "transferAll": "Alle Stimmen",
+      "currentVotes": "{count} Stimme(n)",
+      "remainingVotes": "Verbleibende Stimmen: {count}",
+      "resultPreview": "Vorschau nach Übertragung",
+      "afterTransfer": "Nach Übertragung",
+      "votes": "Stimme(n)",
+      "willBecomeVisitor": "Wird zum Besucher ohne Stimmrecht",
+      "willBecomeParticipant": "Wird zum Teilnehmer mit Stimmrecht",
+      "confirmTransfer": "Übertragung bestätigen",
+      "success": "{votes} Stimme(n) erfolgreich von {source} an {target} übertragen"
+    },
     "view": {
       "messageEditor": {
         "title": "Übersetzungs-Editor",
@@ -25,6 +49,50 @@
           "customValue": "Angepasster Wert",
           "actions": "Aktionen"
         }
+      },
+      "systemSettings": {
+        "title": "Globale Systemeinstellungen",
+        "titleSuffix": {
+          "label": "Title-Suffix (Browser-Tab)",
+          "placeholder": "z.B. digitalwahl.org oder vereinswahl.vielwerth-junginger.de",
+          "help": "Wird als Suffix im Browser-Tab angezeigt: \"Seitentitel - Ihr Suffix\""
+        },
+        "favicon": {
+          "label": "Favicon (Browser-Symbol)",
+          "placeholder": "https://example.com/favicon.png",
+          "help": "URL zu einem 32x32px PNG/ICO-Bild für das Browser-Symbol",
+          "upload": "Upload",
+          "preview": "Vorschau"
+        },
+        "useDirectStaticPaths": {
+          "label": "Direkte statische Pfade verwenden",
+          "help": "Aktiviert direkte Pfade für statische Inhalte"
+        },
+        "useDbFooterNavigation": {
+          "label": "Datenbank-Footer-Navigation verwenden",
+          "help": "Navigation im Footer aus der Datenbank laden"
+        },
+        "recaptcha": {
+          "label": "Google reCAPTCHA Einstellungen",
+          "siteKey": {
+            "label": "reCAPTCHA Site Key",
+            "placeholder": "6Lc1234567890abcdefghijklmnopqrstuvwxyz",
+            "help": "Der öffentliche Site Key von Google reCAPTCHA v2"
+          },
+          "secretKey": {
+            "label": "reCAPTCHA Secret Key",
+            "placeholder": "6Lc1234567890abcdefghijklmnopqrstuvwxyz",
+            "help": "Der geheime Secret Key von Google reCAPTCHA v2 (wird sicher gespeichert)"
+          },
+          "enabled": {
+            "label": "reCAPTCHA aktivieren",
+            "help": "Aktiviert Google reCAPTCHA für Registrierungsformulare"
+          }
+        },
+        "save": "Speichern",
+        "saving": "Wird gespeichert...",
+        "lastUpdated": "Zuletzt geändert",
+        "updatedBy": "von"
       },
       "login": {
         "label": {
@@ -135,6 +203,7 @@
           "offline": "Offline",
           "all": "Gesamt",
           "allVoteAmount": "Gesamtstimmen",
+          "copyLink": "Link kopieren",
           "info": "Benutzer müssen im Warteraum sein um sie zu löschen. <br />Editieren -> Haken bei \"Freigeschaltet\" entfernen. Benutzer erscheint wieder im Warteraum",
           "confirm": {
             "unverify": "Freischaltung deaktivieren? Nutzer wird in den Warteraum verschoben.",
@@ -164,6 +233,7 @@
             "async": "Die Abstimmungen der Veranstaltung finden asynchron statt (Briefwahl).",
             "allowMagicLink": "Zugang über Magic-Link erlauben",
             "publicVoteVisible": "Stimmenabgabe bei öffentlichen Abstimmungen für alle sichtbar darstellen",
+            "publicnameReadonly": "Öffentlicher Name ist schreibgeschützt (kann nicht vom Teilnehmer geändert werden)",
             "magicLink": {
               "popover": {
                 "title": "Was ist ein Magic-Link?",
@@ -323,7 +393,8 @@
           "details": "Abstimmungsdetails",
           "alreadyVoted": "Bisherige Stimmenabgabe",
           "voteStatus": "Abgegebene Stimmen {votes} von maximal {maxVotes}<br>Personen: {users} von {maxUsers}",
-          "refresh": "Aktualisieren"
+          "refresh": "Aktualisieren",
+          "noVote": "Keine Stimme"
         },
         "userUpdate": "Ihr Status wurde aktualisiert.",
         "voteIncrease": "Ihre Stimmenanzahl wurde von {previousVoteAmount} auf {voteAmount} erhöht (+ {difference} Stimmen).",
@@ -412,6 +483,14 @@
           "placeholder": "Suche nach Benutzername, E-Mail oder Organisation",
           "reset": "Filter zurücksetzen"
         },
+        "create": {
+          "button": "Neuer Organisator",
+          "title": "Neuen Organisator anlegen",
+          "submit": "Organisator anlegen",
+          "success": "Organisator wurde erfolgreich angelegt",
+          "skipEmailVerification": "E-Mail-Verifizierung überspringen",
+          "autoVerify": "Automatisch aktivieren"
+        },
         "events": {
           "title": "Veranstaltungen",
           "show": "Veranstaltungen anzeigen",
@@ -484,6 +563,8 @@
         "organizerManagement": "Organisatoren",
         "organizerAllEvents": "Alle Veranstaltungen",
         "organizerMessageEditor": "Übersetzungs-Editor",
+        "organizerStaticContentEditor": "Statische Inhalte",
+        "organizerGlobalSettings": "Globale Einstellungen",
         "staticContentEditor": "Statische Inhalte",
         "organizerMemberRoom": "Teilnehmer",
         "organizerLobbyRoom": "Warteraum",
@@ -555,6 +636,9 @@
           "updatedSuccessfully": "Der Datensatz wurde erfolgreich aktualisiert.",
           "deletedSuccessfully": "Der Datensatz wurde erfolgreich entfernt."
         },
+        "systemSettings": {
+          "saved": "Systemeinstellungen erfolgreich gespeichert."
+        },
         "events": {
           "createdSuccessfully": "Die Veranstaltung wurde erfolgreich erstellt.",
           "updatedSuccessfully": "Die Veranstaltung wurde erfolgreich aktualisiert.",
@@ -619,6 +703,33 @@
   },
   "en": {
     "view": {
+      "systemSettings": {
+        "title": "Global System Settings",
+        "titleSuffix": {
+          "label": "Title Suffix (Browser Tab)",
+          "placeholder": "e.g. digitalwahl.org or vereinswahl.vielwerth-junginger.de",
+          "help": "Displayed as suffix in browser tab: \"Page Title - Your Suffix\""
+        },
+        "favicon": {
+          "label": "Favicon (Browser Icon)",
+          "placeholder": "https://example.com/favicon.png",
+          "help": "URL to a 32x32px PNG/ICO image for the browser icon",
+          "upload": "Upload",
+          "preview": "Preview"
+        },
+        "useDirectStaticPaths": {
+          "label": "Use direct static paths",
+          "help": "Enables direct paths for static content"
+        },
+        "useDbFooterNavigation": {
+          "label": "Use database footer navigation",
+          "help": "Load navigation in footer from database"
+        },
+        "save": "Save",
+        "saving": "Saving...",
+        "lastUpdated": "Last updated",
+        "updatedBy": "by"
+      },
       "results": {
         "percentageOfValidVotes": "% of Valid Votes",
         "percentageOfPotentialVotes": "% of Potential Votes",
@@ -654,8 +765,10 @@
           "organizerVideoConferenceEdit": "Videokonferenzsysteme Bearbeiten",
           "organizerManagement": "Organisatoren",
           "organizerAllEvents": "Alle Veranstaltungen",
-          "organizerMessageEditor": "Übersetzungs-Editor",
-          "staticContentEditor": "Statische Inhalte",
+          "organizerMessageEditor": "Translation Editor",
+          "organizerStaticContentEditor": "Static Content",
+          "organizerGlobalSettings": "Global Settings",
+          "staticContentEditor": "Static Content",
           "organizerMemberRoom": "Teilnehmer",
           "organizerLobbyRoom": "Warteraum",
           "organizerPolls": "Abstimmungen",

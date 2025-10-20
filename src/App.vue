@@ -36,11 +36,79 @@ import { provideApolloClient, useSubscription } from "@vue/apollo-composable";
 import { TOKEN_REFRESH_REQUIRED_SUBSCRIPTION } from "@/core/graphql/subscription/token-refresh-required";
 import { refreshLogin } from "@/core/auth/login";
 import { handleError } from "@/core/error/error-handler";
+import { useHead } from "@vueuse/head";
 
 const loaded = ref(false);
 const browserCompatible = ref(true);
 const browserCompatibilityWarningDismissed = ref(false);
 const coreStore = useCore();
+
+// Dynamic favicon and title based on system settings
+const faviconUrl = ref('/favicon.ico');
+const titleSuffix = ref('digitalwahl.org');
+
+const loadSystemSettings = async () => {
+  try {
+    // Try to load system settings from API
+    const response = await fetch('/graphql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
+          query SystemSettings {
+            systemSettings {
+              faviconUrl
+              titleSuffix
+            }
+          }
+        `
+      })
+    });
+    
+    const result = await response.json();
+    if (result.data?.systemSettings) {
+      const settings = result.data.systemSettings;
+      
+      // Update favicon if set
+      if (settings.faviconUrl) {
+        faviconUrl.value = settings.faviconUrl;
+      }
+      
+      // Update title suffix if set
+      if (settings.titleSuffix) {
+        titleSuffix.value = settings.titleSuffix;
+      }
+      
+      // Store in localStorage for PageLayouts
+      localStorage.setItem('systemSettings', JSON.stringify(settings));
+    }
+  } catch (error) {
+    console.warn('Could not load system settings:', error);
+    // Fallback to domain-based logic
+    const hostname = window.location.hostname;
+    if (hostname === 'vereinswahl.vielwerth-junginger.de') {
+      faviconUrl.value = 'https://vielwerth-junginger.de/wp-content/uploads/2023/07/cropped-vielwerth-junginger-favicon-32x32.png';
+      titleSuffix.value = 'vereinswahl.vielwerth-junginger.de';
+      localStorage.setItem('systemSettings', JSON.stringify({
+        faviconUrl: faviconUrl.value,
+        titleSuffix: titleSuffix.value
+      }));
+    }
+  }
+};
+
+// Set favicon
+useHead({
+  link: [
+    {
+      rel: 'icon',
+      href: faviconUrl,
+      type: 'image/png'
+    }
+  ]
+});
 
 // Provide Apollo client for this component
 provideApolloClient(apolloClient);
@@ -49,6 +117,7 @@ provideApolloClient(apolloClient);
 (async () => {
   try {
     await coreStore.init();
+    await loadSystemSettings(); // Load system settings and set favicon/title
     loaded.value = true;
     
     // Browser-Kompatibilität überprüfen

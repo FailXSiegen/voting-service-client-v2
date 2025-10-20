@@ -7,12 +7,26 @@
       <h5 class="card-title mb-0">
         {{ $t("view.polls.active.title") }}
       </h5>
-      <button 
-        class="btn btn-sm btn-outline-secondary" 
-        @click="isCollapsed = !isCollapsed"
-      >
-        <i :class="isCollapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up'"></i>
-      </button>
+      <div class="d-flex gap-2 align-items-center">
+        <small v-if="!refreshing" class="text-muted me-2">
+          <i class="bi bi-clock"></i> {{ countdownSeconds }}s
+          <span v-if="shouldShowLiveResults" class="text-success ms-1">(Live)</span>
+        </small>
+        <button
+          class="btn btn-sm btn-outline-primary"
+          @click="refreshManually"
+          :disabled="refreshing"
+          :title="$t('view.polls.active.refresh')"
+        >
+          <i :class="refreshing ? 'bi bi-arrow-clockwise spinning' : 'bi bi-arrow-clockwise'"></i>
+        </button>
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          @click="isCollapsed = !isCollapsed"
+        >
+          <i :class="isCollapsed ? 'bi bi-chevron-down' : 'bi bi-chevron-up'"></i>
+        </button>
+      </div>
     </div>
     <div v-show="!isCollapsed" class="card-body">
       <div class="row">
@@ -23,23 +37,28 @@
             class="d-flex align-items-center px-3 mb-3"
             :class="{ 'border-end border-secondary': index < sortedPollUsers.length - 1 }"
           >
-            <span v-html="hasVoted(pollUser) ? '<i class=\'bi bi-check-square text-success\'></i>' : '<i class=\'bi bi-x-square text-danger\'></i>'"></span>
-            <span class="mx-2">{{ pollUser.publicName }}</span>
-            <template v-if="getPollUserAnswers(pollUser.id).length">
-              <span
-                v-for="(count, answer) in groupUserAnswers(pollUser.id)"
-                :key="answer"
-                class="badge rounded-pill mt-0 me-1 mb-1"
-                :class="{
-                  'bg-success': answer === 'Ja',
-                  'bg-danger': answer === 'Nein',
-                  'bg-secondary': answer !== 'Ja' && answer !== 'Nein'
-                }"
-              >
-                {{ answer }} <template v-if="count > 1">x{{ count }}</template>
-              </span>
-            </template>
-            <span v-else class="badge rounded-pill bg-secondary mt-0">?</span>
+            <div class="d-flex align-items-center">
+              <span v-html="hasVoted(pollUser) ? '<i class=\'bi bi-check-square text-success\'></i>' : '<i class=\'bi bi-x-square text-danger\'></i>'"></span>
+              <span class="mx-2 fw-medium">{{ pollUser.publicName }}</span>
+            </div>
+            <div class="ms-2">
+              <template v-if="getPollUserAnswers(pollUser.id).length">
+                <span
+                  v-for="(count, answer) in groupUserAnswers(pollUser.id)"
+                  :key="answer"
+                  class="badge rounded-pill me-1 fs-6"
+                  :class="{
+                    'bg-success text-white': answer === 'Ja',
+                    'bg-danger text-white': answer === 'Nein',
+                    'bg-warning text-dark': answer === 'Enthaltung',
+                    'bg-secondary text-white': answer !== 'Ja' && answer !== 'Nein' && answer !== 'Enthaltung'
+                  }"
+                >
+                  {{ answer }}<template v-if="count > 1"> ({{ count }}x)</template>
+                </span>
+              </template>
+              <span v-else class="badge rounded-pill bg-light text-dark border">{{ $t("view.polls.active.noVote") }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -48,7 +67,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 
 const STORAGE_KEY = 'active_poll_collapsed';
 
@@ -59,6 +78,65 @@ watch(isCollapsed, (newValue) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(newValue));
 });
 
+// Countdown-Timer für automatische Aktualisierung
+const countdownSeconds = ref(15);
+const countdownInterval = ref(null);
+
+// Timer-Funktionen
+const startCountdown = () => {
+  // Bestehenden Timer stoppen falls vorhanden
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value);
+  }
+
+  // Synchronisation mit Server-Cache: 1 Sekunde nach Server-Update
+  const now = new Date();
+  const currentSeconds = now.getSeconds();
+
+  // Berechne nächste 15s-Marke + 1 Sekunde (Server läuft auf 0,15,30,45 - wir auf 1,16,31,46)
+  const nextServerUpdate = Math.ceil(currentSeconds / 15) * 15;
+  const nextClientUpdate = (nextServerUpdate + 1) % 60;
+
+  // Sekunden bis zum nächsten Client-Update
+  let secondsUntilUpdate;
+  if (nextClientUpdate > currentSeconds) {
+    secondsUntilUpdate = nextClientUpdate - currentSeconds;
+  } else {
+    secondsUntilUpdate = (60 - currentSeconds) + nextClientUpdate;
+  }
+
+  // Timer auf synchronisierten Wert setzen
+  countdownSeconds.value = secondsUntilUpdate;
+
+  // Neuen Timer starten
+  countdownInterval.value = setInterval(async () => {
+    countdownSeconds.value--;
+
+    if (countdownSeconds.value <= 0) {
+      // WICHTIG: Daten abrufen wenn Counter bei 0 ankommt (1 Sekunde nach Server-Update)
+      try {
+        await activePollDetailsQuery.refetch();
+      } catch (error) {
+        console.error('[VotingDetails] Auto-refresh error via countdown:', error);
+      }
+
+      // Counter zurücksetzen auf 15 Sekunden
+      countdownSeconds.value = 15;
+    }
+  }, 1000);
+};
+
+const stopCountdown = () => {
+  if (countdownInterval.value) {
+    clearInterval(countdownInterval.value);
+    countdownInterval.value = null;
+  }
+};
+
+const resetCountdown = () => {
+  countdownSeconds.value = 15;
+};
+
 const props = defineProps({
   activePollEventUser: {
     type: Object,
@@ -67,6 +145,16 @@ const props = defineProps({
   eventId: {
     type: [String, Number],
     required: true
+  },
+  event: {
+    type: Object,
+    required: false,
+    default: () => ({})
+  },
+  poll: {
+    type: Object,
+    required: false,
+    default: () => ({})
   }
 });
 
@@ -174,55 +262,124 @@ watch(() => props.activePollEventUser?.state, (newState, oldState) => {
 const isSubscriptionEnabled = ref(false);
 
 // Nur Subscription aktivieren, wenn wir ein vollständiges activePollEventUser haben
+// UND wenn es sich um eine öffentliche Abstimmung handelt UND das Event-Setting aktiviert ist
+const shouldShowLiveResults = computed(() => {
+  return props.poll?.type === 'PUBLIC' && props.event?.publicVoteVisible === true;
+});
+
 watch(() => props.activePollEventUser, (newValue) => {
-  if (newValue && newValue.poll && newValue.poll.id) {
+  if (newValue && newValue.poll && newValue.poll.id && shouldShowLiveResults.value) {
     isSubscriptionEnabled.value = true;
   } else {
     isSubscriptionEnabled.value = false;
   }
 }, { immediate: true });
 
+// Auch auf Änderungen der Poll- und Event-Daten reagieren
+watch([() => props.poll, () => props.event], () => {
+  if (props.activePollEventUser && props.activePollEventUser.poll && props.activePollEventUser.poll.id && shouldShowLiveResults.value) {
+    isSubscriptionEnabled.value = true;
+  } else {
+    isSubscriptionEnabled.value = false;
+  }
+});
+
 // Direkte GraphQL-Query für VotingDetails implementieren - ohne das SyncEventDashboard-Form zu beeinflussen
 import { provideApolloClient, useQuery } from '@vue/apollo-composable';
 import { apolloClient } from '@/apollo-client';
-import { ACTIVE_POLL_DETAILS_QUERY } from '@/modules/eventUser/graphql/queries/active-poll-details';
+import { CACHED_ACTIVE_POLL_DETAILS_QUERY } from '@/modules/eventUser/graphql/queries/cached-active-poll-details';
 
 // Apollo-Client für die Komponente bereitstellen
 provideApolloClient(apolloClient);
 
 // Eigener Query für VotingDetails - fragt nur die benötigten Daten ab, ohne das Form zu beeinflussen
-const intervalRefreshTime = 5000; // 5 Sekunden
+// State für manuellen Refresh
+const refreshing = ref(false);
+
+// Performance-optimierte Query mit Server-Side Caching
+// Der Server macht alle 15 Sek EINE SQL-Abfrage, alle Clients lesen nur den Cache
 const activePollDetailsQuery = useQuery(
-  ACTIVE_POLL_DETAILS_QUERY,
+  CACHED_ACTIVE_POLL_DETAILS_QUERY,
   { eventId: props.eventId },
   {
-    pollInterval: intervalRefreshTime, // Automatisches Polling alle 5 Sekunden
-    fetchPolicy: 'network-only', // Immer vom Server abrufen
-    nextFetchPolicy: 'network-only' // Auch bei nachfolgenden Abfragen immer vom Server
+    fetchPolicy: 'no-cache', // Komplett ohne Apollo-Cache
+    nextFetchPolicy: 'no-cache', // Auch bei nachfolgenden Abfragen ohne Cache
+    enabled: true, // Query immer aktivieren
+    errorPolicy: 'all' // Auch bei Fehlern Daten zurückgeben falls verfügbar
   }
 );
 
+// Timer starten/stoppen basierend auf shouldShowLiveResults
+watch(shouldShowLiveResults, (newValue) => {
+  if (newValue) {
+    startCountdown();
+  } else {
+    stopCountdown();
+  }
+}, { immediate: true });
+
+// Temporärer Debug: Timer immer starten für Tests
+startCountdown();
+
+// Timer zurücksetzen wenn automatisches Polling erfolgt
+watch(() => activePollDetailsQuery.loading.value, (loading) => {
+  if (!loading && shouldShowLiveResults.value) {
+    // Query abgeschlossen, Timer neu starten
+    resetCountdown();
+  }
+});
+
+// Cleanup beim Unmount
+onUnmounted(() => {
+  stopCountdown();
+});
+
+// Manuelle Aktualisierung
+async function refreshManually() {
+  if (refreshing.value) {
+    return;
+  }
+
+  try {
+    refreshing.value = true;
+
+    // Timer stoppen während manueller Aktualisierung
+    stopCountdown();
+
+    await activePollDetailsQuery.refetch();
+
+    // Timer nach erfolgreicher Aktualisierung neu starten
+    startCountdown();
+
+  } catch (error) {
+    console.error('Fehler beim manuellen Refresh:', error);
+  } finally {
+    refreshing.value = false;
+  }
+}
+
 // Bei neuen Daten vom Server die lokalen Daten updaten, aber ohne Formular-Reset
 activePollDetailsQuery.onResult(({ data, loading }) => {
-  if (loading || !data?.activePollDetails) return;
-  
+  if (loading || !data?.cachedActivePollEventUser) return;
+
   // Poll-ID für Vergleich mit aktueller Poll
-  const newPollId = data.activePollDetails.poll?.id;
+  const newPollId = data.cachedActivePollEventUser.poll?.id;
   const currentPollId = localActivePollEventUser.value?.poll?.id;
-  
-  // Keine Aktion, wenn wir keine Daten haben 
-  if (!newPollId || !currentPollId) return;
-  
-  // Bei gleicher Poll ID: Nur die Arrays aktualisieren, nicht die Formulardaten
-  if (newPollId === currentPollId) {
-    // Aktuelle Arrays mit neuen Daten aktualisieren
+
+  // Keine neuen Daten vom Server - nichts zu tun
+  if (!newPollId) return;
+
+  // Wenn keine aktuelle Poll-ID oder gleiche Poll-ID: Daten aktualisieren
+  if (!currentPollId || newPollId === currentPollId) {
+    // Arrays mit neuen Daten aktualisieren
     localActivePollEventUser.value = {
       ...localActivePollEventUser.value,
+      // Poll-Daten vollständig übernehmen
+      ...data.cachedActivePollEventUser,
       // Arrays aktualisieren
-      pollAnswers: data.activePollDetails.pollAnswers || [],
-      pollUser: data.activePollDetails.pollUser || [],
-      pollUserVoted: data.activePollDetails.pollUserVoted || [],
-      // Poll-Objekt und Status unverändert belassen, um Formular nicht zu stören
+      pollAnswers: data.cachedActivePollEventUser.pollAnswers || [],
+      pollUser: data.cachedActivePollEventUser.pollUser || [],
+      pollUserVoted: data.cachedActivePollEventUser.pollUserVoted || [],
     };
   }
 });
@@ -282,3 +439,14 @@ function hasVoted(pollUser) {
   });
 }
 </script>
+
+<style scoped>
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

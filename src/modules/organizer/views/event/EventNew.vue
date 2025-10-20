@@ -74,6 +74,7 @@ async function onSubmit({ formData, action }) {
           allowMagicLink: formData.allowMagicLink,
           publicVoteVisible: formData.publicVoteVisible,
           endDatetime: formData.endDatetime,
+          publicnameReadonly: formData.publicnameReadonly,
         },
       },
     });

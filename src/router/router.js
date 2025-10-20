@@ -24,6 +24,7 @@ import {
   RouteOrganizerAllEvents,
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
+  RouteOrganizerGlobalSettings,
   RouteOrganizerVideoConference,
   RouteOrganizerVideoConferenceNew,
   RouteOrganizerVideoConferenceEdit,
@@ -528,6 +529,11 @@ const routes = [
   }),
   new Route("/admin/static-content-editor", RouteOrganizerStaticContentEditor, StaticContentEditorView, {
     bootstrapIcon: "bi-file-earmark-text",
+    requireOrganizerRole: true,
+    requireSuperOrganizerRole: true,
+  }),
+  new Route("/admin/global-settings", RouteOrganizerGlobalSettings, () => import("@/modules/organizer/views/OrganizerGlobalSettings.vue"), {
+    bootstrapIcon: "bi-gear-fill",
     requireOrganizerRole: true,
     requireSuperOrganizerRole: true,
   }),

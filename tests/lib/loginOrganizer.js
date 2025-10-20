@@ -14,8 +14,13 @@ async function loginAsOrganizer(page) {
             '#organizer-login-username',
             '#username',
             'input[name="username"]',
+            'input[name="email"]',
+            'input[type="text"]',
+            'input[type="email"]',
             'input[placeholder*="Benutzername"]',
-            'input[placeholder*="Username"]'
+            'input[placeholder*="Username"]',
+            'input[placeholder*="E-Mail"]',
+            'input[placeholder*="Email"]'
         ];
 
         const passwordSelectors = [
@@ -42,8 +47,32 @@ async function loginAsOrganizer(page) {
             }
         }
 
+        // Fallback: Versuche alle Input-Felder im Organizer-Formular zu finden
         if (!foundUsername) {
-            console.warn('Organizer: Konnte Benutzernamefeld nicht finden!');
+            console.warn('Organizer: Konnte Benutzernamefeld mit Standard-Selektoren nicht finden, versuche Fallback...');
+            try {
+                // Suche nur innerhalb des Organizer-Formulars
+                const organizerForm = page.locator('#organizer-login-form, form:has-text("Als Organisator einloggen")');
+                const allInputs = await organizerForm.locator('input').all();
+                for (const input of allInputs) {
+                    const type = await input.getAttribute('type') || 'text';
+                    const id = await input.getAttribute('id') || '';
+                    const isVisible = await input.isVisible();
+                    console.log(`Organizer: Prüfe Input im Organizer-Formular - ID: ${id}, Type: ${type}, Visible: ${isVisible}`);
+                    if (isVisible && type !== 'password' && type !== 'hidden' && type !== 'submit') {
+                        console.log(`Organizer: Fallback - Benutzernamefeld im Organizer-Formular gefunden (ID: ${id}, type: ${type})`);
+                        await input.fill(CONFIG.ORGANIZER_USERNAME);
+                        foundUsername = true;
+                        break;
+                    }
+                }
+            } catch (e) {
+                console.error('Organizer: Fallback fehlgeschlagen:', e);
+            }
+        }
+
+        if (!foundUsername) {
+            console.warn('Organizer: Konnte Benutzernamefeld auch mit Fallback nicht finden!');
         }
 
         // Finde und fülle das Passwortfeld
@@ -64,6 +93,11 @@ async function loginAsOrganizer(page) {
 
         if (!foundPassword) {
             console.warn('Organizer: Konnte Passwortfeld nicht finden!');
+        }
+
+        // Nur fortfahren wenn beide Felder gefüllt wurden
+        if (!foundUsername || !foundPassword) {
+            throw new Error(`ORGANIZER LOGIN FAILED: Username gefunden: ${foundUsername}, Password gefunden: ${foundPassword}. Beide Felder müssen ausgefüllt werden!`);
         }
 
         // Versuche verschiedene Selektoren für den Submit-Button
@@ -127,7 +161,31 @@ async function loginAsOrganizer(page) {
                 console.log(`Organizer: URL deutet auf erfolgreichen Login hin: ${url}`);
                 loginSuccess = true;
             } else {
-                console.warn('Organizer: Kein Erfolgsindikator nach Login gefunden!');
+                console.error('❌ ORGANIZER LOGIN FEHLGESCHLAGEN!');
+                console.error('Aktuelle URL:', url);
+                console.error('Mögliche Ursachen:');
+                console.error('1. loadtest-admin User existiert nicht in der Datenbank');
+                console.error('2. load-test-scenario.sql wurde nicht ausgeführt');
+                console.error('3. Falsche Login-Credentials (loadtest-admin:loadtest123)');
+                console.error('4. SMTP/Email-Probleme bei der Organizer-Erstellung');
+                console.error('5. API-Server nicht erreichbar unter https://voting.failx.de');
+                
+                throw new Error(`ORGANIZER LOGIN FAILED: Kein Erfolgsindikator gefunden auf URL: ${url}. Bitte führen Sie erst load-test-scenario.sql gegen die Datenbank aus!`);
+            }
+        }
+
+        // Nach erfolgreichem Login zur Event-Seite navigieren
+        if (loginSuccess) {
+            console.log("Organizer: Navigiere zur Event-Abstimmungsseite...");
+            try {
+                await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`, { 
+                    waitUntil: 'networkidle',
+                    timeout: 30000 
+                });
+                console.log("Organizer: Event-Seite erfolgreich geladen");
+            } catch (error) {
+                console.error("Organizer: Fehler beim Navigieren zur Event-Seite:", error.message);
+                // Login war erfolgreich, auch wenn Navigation fehlschlägt
             }
         }
 
@@ -141,14 +199,450 @@ async function loginAsOrganizer(page) {
 // Öffne einen neuen Poll als Organizer
 async function createAndStartPoll(page) {
     try {
-        // Navigiere zum Event
-        console.log("Organizer: Navigiere zur Abstimmungsseite...");
+        // Prüfe, ob Benutzer bereit sind, bevor wir die Abstimmung starten
+        console.log("Organizer: Prüfe, ob bereits genug Teilnehmer online sind...");
+        
+        // Starte eine aktive Prüfung der Teilnehmer mit Timeout
+        let usersReady = false;
+        const maxCheckTime = 60000; // 1 Minute maximal warten
+        const startTime = Date.now();
+        
+        // Variablen für die Anzeige des aktuellen Status
+        let totalLoggedInUsers = 0;
+        let batchCount = 0;
+        
+        while (!usersReady && (Date.now() - startTime) < maxCheckTime) {
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const resultsDir = path.join(process.cwd(), 'voting-results');
+                
+                // Prüfe alle Batch-Dateien nach eingeloggten Benutzern
+                const files = fs.readdirSync(resultsDir);
+                totalLoggedInUsers = 0;
+                batchCount = 0;
+                
+                // Prüfe zuerst auf weighted-users-ready.json (für gewichtete Tests)
+                const weightedFile = path.join(resultsDir, 'weighted-users-ready.json');
+                if (fs.existsSync(weightedFile)) {
+                    try {
+                        const weightedData = JSON.parse(fs.readFileSync(weightedFile, 'utf8'));
+                        totalLoggedInUsers = weightedData.totalUsers || 0;
+                        batchCount = 1;
+                        console.log(`Organizer: Weighted test - ${totalLoggedInUsers} User aus weighted-users-ready.json`);
+                    } catch (error) {
+                        console.error(`Organizer: Fehler beim Lesen von weighted-users-ready.json:`, error.message);
+                    }
+                } else {
+                    // Fallback: Standard user-batch-* Dateien
+                    for (const file of files) {
+                        if (file.startsWith('user-batch-') && file.endsWith('-ready.json')) {
+                            try {
+                                const batchData = JSON.parse(fs.readFileSync(path.join(resultsDir, file)));
+                                totalLoggedInUsers += batchData.usersLoggedIn || 0;
+                                batchCount++;
+                            } catch (error) {
+                                console.error(`Organizer: Fehler beim Lesen von ${file}:`, error.message);
+                            }
+                        }
+                    }
+                }
+                
+                const minUsers = 5; // Mindestens 5 Benutzer sollten bereit sein
+                usersReady = totalLoggedInUsers >= minUsers && batchCount > 0;
+                
+                if (usersReady) {
+                    console.log(`Organizer: Insgesamt ${totalLoggedInUsers} Benutzer in ${batchCount} Batches sind bereit!`);
+                } else {
+                    console.log(`Organizer: Warte auf mehr Benutzer... Aktuell: ${totalLoggedInUsers} von mindestens ${minUsers}`);
+                    await page.waitForTimeout(1000); // Nur 1 Sekunde warten für schnellere Tests
+                }
+            } catch (error) {
+                console.error("Organizer: Fehler bei der Benutzerprüfung:", error.message);
+                await page.waitForTimeout(500); // Reduzierte Fehlerwartzeit
+            }
+        }
+        
+        if (!usersReady) {
+            console.warn("Organizer: Warnung - Nicht genügend Benutzer bereit, fahre trotzdem fort...");
+        } else {
+            console.log(`Organizer: ${totalLoggedInUsers} Benutzer sind eingeloggt. Warte zusätzlich 1 Sekunde für PubSub-Verbindungen...`);
+            await page.waitForTimeout(1000);
+        }
+        
+        // Generiere ein Timestamp für den Reload
+        const reloadTimestamp = new Date().toISOString();
+        
+        // Navigiere direkt zum Event - explizit die URL neu laden
+        console.log(`Organizer: Lade Abstimmungsseite neu um ${reloadTimestamp}...`);
         const screenshotsDir = ensureScreenshotsDirectory();
+        
+        // Screenshot vor dem Reload
+        await page.screenshot({ 
+            path: path.join(screenshotsDir, `before-explicit-reload-${reloadTimestamp.substring(11, 19).replace(/:/g, '-')}.png`),
+            fullPage: true 
+        });
 
         await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`);
 
         try {
-            await page.waitForSelector('h1 div:has-text("Abstimmungen")', { timeout: 30000 });
+            // Warte auf den Selektor und überprüfe gleichzeitig auf leere Seite
+            const whiteScreenTimeout = 10000; // Timeout für Überprüfung
+            const startTime = Date.now();
+            let isWhiteScreen = true;
+            let headerFound = false;
+            
+            // Warte auf den Header, überprüfe dabei in Intervallen auf leere Seite
+            while ((Date.now() - startTime) < 30000) { // 30 Sekunden Gesamttimeout
+                try {
+                    // Versuche den Header zu finden
+                    headerFound = await page.locator('h1 div:has-text("Abstimmungen")').isVisible({ timeout: 1000 });
+                    if (headerFound) {
+                        console.log("Organizer: Abstimmungsüberschrift gefunden.");
+                        break;
+                    }
+                    
+                    // Überprüfe, ob die Seite eine leere weiße Seite ist
+                    const elementsCount = await page.evaluate(() => {
+                        return {
+                            bodyChildCount: document.body?.childElementCount || 0,
+                            visibleElements: document.querySelectorAll('div, span, p, h1, h2, h3, button, a, input').length,
+                            hasContent: !!document.body?.textContent?.trim()
+                        };
+                    });
+                    
+                    isWhiteScreen = elementsCount.bodyChildCount < 3 && 
+                                    elementsCount.visibleElements < 5 && 
+                                    !elementsCount.hasContent;
+                    
+                    if (isWhiteScreen) {
+                        console.warn("Organizer: WARNUNG - Leere weiße Seite erkannt!");
+                        
+                        // Mache einen Screenshot der leeren Seite
+                        await page.screenshot({ 
+                            path: path.join(screenshotsDir, `white-screen-detected-${Date.now()}.png`),
+                            fullPage: true 
+                        });
+                        
+                        // Sammle weitere Diagnoseinformationen
+                        const diagnostics = await page.evaluate(() => {
+                            return {
+                                url: window.location.href,
+                                documentReadyState: document.readyState,
+                                htmlContent: document.documentElement.innerHTML.substring(0, 500), // Ersten 500 Zeichen
+                                hasConsoleErrors: typeof window.hasConsoleErrors !== 'undefined' ? window.hasConsoleErrors : 'nicht verfügbar',
+                                bodyStyles: window.getComputedStyle(document.body).cssText
+                            };
+                        });
+                        
+                        console.log("Organizer: White Screen Diagnostics:", JSON.stringify(diagnostics, null, 2));
+                        
+                        // Versuche die Seite neu zu laden
+                        console.log("Organizer: Versuche die Seite neu zu laden, um die weiße Seite zu beheben...");
+                        await page.reload({ waitUntil: 'domcontentloaded' });
+                        await page.waitForTimeout(2000);
+                    } else {
+                        // Gefundene Elemente protokollieren
+                        const visibleElements = await page.evaluate(() => {
+                            const elements = Array.from(document.querySelectorAll('div, h1, h2, button, a'));
+                            return elements.slice(0, 10).map(el => ({
+                                tagName: el.tagName,
+                                id: el.id,
+                                className: el.className,
+                                textContent: el.textContent?.substring(0, 50) || ''
+                            }));
+                        });
+                        
+                        console.log(`Organizer: Seite lädt... (Elemente gefunden: ${visibleElements.length})`);
+                    }
+                    
+                    // Kurz warten und erneut prüfen
+                    await page.waitForTimeout(2000);
+                } catch (e) {
+                    // Fehler ignorieren und weiter warten
+                    await page.waitForTimeout(1000);
+                }
+            }
+            
+            if (!headerFound) {
+                console.error("Organizer: Abstimmungsüberschrift wurde nicht gefunden!");
+                
+                // Finaler Check auf weiße Seite
+                const finalCheck = await page.evaluate(() => {
+                    return {
+                        bodyChildCount: document.body?.childElementCount || 0,
+                        visibleElements: document.querySelectorAll('div, span, p, h1, h2, h3, button, a, input').length,
+                        hasContent: !!document.body?.textContent?.trim(),
+                        htmlContent: document.documentElement.innerHTML.substring(0, 1000) // Ersten 1000 Zeichen
+                    };
+                });
+                
+                console.log("Organizer: Finaler Seitencheck:", JSON.stringify(finalCheck, null, 2));
+                
+                // Mache einen Screenshot
+                await page.screenshot({ 
+                    path: path.join(screenshotsDir, `header-not-found-page-state.png`),
+                    fullPage: true 
+                });
+                
+                // Füge JavaScript-Hilfscode ein, um Console-Errors zu erfassen
+                await page.evaluate(() => {
+                    window.consoleErrors = [];
+                    const originalConsoleError = console.error;
+                    console.error = function() {
+                        window.consoleErrors.push(Array.from(arguments).join(' '));
+                        originalConsoleError.apply(console, arguments);
+                    };
+                });
+                
+                // Versuche erneut zu laden mit anderer Strategie
+                console.log("Organizer: Versuche erneuten Reload mit networkidle2 Strategie...");
+                await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`, { 
+                    waitUntil: ['networkidle', 'domcontentloaded']
+                });
+            } else {
+                console.log("Organizer: Abstimmungsseite erfolgreich geladen.");
+            }
+            
+            // Nach dem ersten Laden kurz warten und dann mehrere explizite Reloads durchführen
+            console.log("Organizer: Warte 1 Sekunde nach dem ersten Laden...");
+            await page.waitForTimeout(1000);
+            
+            // Erster expliziter Reload nach kurzem Warten
+            console.log("Organizer: Führe ersten expliziten Reload durch...");
+            await page.reload({ waitUntil: 'networkidle' });
+            await page.waitForTimeout(1000);
+            
+            // Screenshot nach dem ersten Reload
+            await page.screenshot({ 
+                path: path.join(screenshotsDir, `after-first-explicit-reload.png`),
+                fullPage: true 
+            });
+            
+            // Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem ersten Reload
+            console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem ersten Reload...");
+            
+            // Robuste Suche nach User Count mit mehreren Selektoren
+            const userCountInfo = await page.evaluate(() => {
+                // Verschiedene Strategien zum Finden der User-Anzahl
+                const selectors = [
+                    'p:contains("Aktuelle Anzahl wahlberechtigter Teilnehmer")',
+                    '*:contains("wahlberechtigter Teilnehmer")',
+                    '*:contains("anwesende Teilnehmer")',
+                    '*:contains("Teilnehmer")',
+                    '*[data-testid*="user"], *[data-testid*="participant"]',
+                    '.user-count, .participant-count',
+                    'span:contains("von"), p:contains("von")'
+                ];
+                
+                let foundElements = [];
+                
+                // Durchsuche alle Elemente nach Text-Pattern
+                const allElements = document.querySelectorAll('*');
+                for (const element of allElements) {
+                    const text = element.textContent?.trim() || '';
+                    
+                    // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                    const patterns = [
+                        /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                        /aktuelle\s*anzahl.*?(\d+)/i,
+                        /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                        /anwesende?\s*teilnehmer.*?(\d+)/i,
+                        /(\d+)\s*teilnehmer/i,
+                        /teilnehmer.*?(\d+)/i
+                    ];
+                    
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match) {
+                            foundElements.push({
+                                element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                                text: text,
+                                match: match[0],
+                                userCount: match[1] || match[2] || '0'
+                            });
+                        }
+                    }
+                }
+                
+                return {
+                    foundElements,
+                    pageContent: document.body.textContent?.substring(0, 2000) || '',
+                    allParagraphs: Array.from(document.querySelectorAll('p')).map(p => p.textContent?.trim()).filter(t => t && t.includes('Teilnehmer'))
+                };
+            });
+            
+            console.log(`Organizer: User Count Suche nach erstem Reload - Gefundene Elemente:`, JSON.stringify(userCountInfo.foundElements, null, 2));
+            
+            if (userCountInfo.foundElements.length > 0) {
+                const bestMatch = userCountInfo.foundElements[0];
+                console.log(`Organizer: Nach erstem Reload - Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+            } else {
+                console.log("Organizer: Nach erstem Reload - Keine User Count gefunden!");
+                console.log("Organizer: Verfügbare Paragraphen mit 'Teilnehmer':", userCountInfo.allParagraphs);
+                console.log("Organizer: Seiteninhalt (erste 500 Zeichen):", userCountInfo.pageContent.substring(0, 500));
+            }
+            
+            // Nochmal warten und dann einen zweiten Reload durchführen
+            console.log("Organizer: Warte 2 Sekunden vor dem zweiten Reload...");
+            await page.waitForTimeout(2000);
+            
+            // Zweiter expliziter Reload nach längerem Warten
+            console.log("Organizer: Führe zweiten expliziten Reload durch...");
+            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`, { waitUntil: 'networkidle' });
+            await page.waitForTimeout(1000);
+            
+            // Screenshot nach dem zweiten Reload
+            await page.screenshot({ 
+                path: path.join(screenshotsDir, `after-second-explicit-reload.png`),
+                fullPage: true 
+            });
+            
+            // Prüfe Anzahl der wahlberechtigten Teilnehmer nach dem zweiten Reload
+            console.log("Organizer: Prüfe Anzahl der wahlberechtigter Teilnehmer nach dem zweiten Reload...");
+            
+            // Verwende dieselbe robuste Suche wie beim ersten Reload
+            const userCountInfoAfterSecond = await page.evaluate(() => {
+                let foundElements = [];
+                
+                // Durchsuche alle Elemente nach Text-Pattern
+                const allElements = document.querySelectorAll('*');
+                for (const element of allElements) {
+                    const text = element.textContent?.trim() || '';
+                    
+                    // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                    const patterns = [
+                        /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                        /aktuelle\s*anzahl.*?(\d+)/i,
+                        /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                        /anwesende?\s*teilnehmer.*?(\d+)/i,
+                        /(\d+)\s*teilnehmer/i,
+                        /teilnehmer.*?(\d+)/i
+                    ];
+                    
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match) {
+                            foundElements.push({
+                                element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                                text: text,
+                                match: match[0],
+                                userCount: match[1] || match[2] || '0'
+                            });
+                        }
+                    }
+                }
+                
+                return {
+                    foundElements,
+                    pageContent: document.body.textContent?.substring(0, 2000) || '',
+                    allParagraphs: Array.from(document.querySelectorAll('p')).map(p => p.textContent?.trim()).filter(t => t && t.includes('Teilnehmer'))
+                };
+            });
+            
+            console.log(`Organizer: User Count Suche nach zweitem Reload - Gefundene Elemente:`, JSON.stringify(userCountInfoAfterSecond.foundElements, null, 2));
+            
+            if (userCountInfoAfterSecond.foundElements.length > 0) {
+                const bestMatch = userCountInfoAfterSecond.foundElements[0];
+                console.log(`Organizer: Nach zweitem Reload - Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+                
+                // Entscheide basierend auf der echten User-Anzahl
+                const actualUserCount = parseInt(bestMatch.userCount);
+                const requiredUserCount = Math.floor(totalLoggedInUsers * 0.8);
+                
+                if (actualUserCount >= requiredUserCount) {
+                    console.log(`Organizer: GUTE NACHRICHTEN! User Count stimmt: ${actualUserCount} >= ${requiredUserCount} (80% von ${totalLoggedInUsers})`);
+                } else {
+                    console.warn(`Organizer: WARNUNG! User Count niedrig: ${actualUserCount} < ${requiredUserCount} (erwartet 80% von ${totalLoggedInUsers})`);
+                    
+                    // Warte auf mehr User mit intelligenter Warteschleife
+                    console.log("Organizer: Warte auf mehr User, bevor Abstimmung gestartet wird...");
+                    let waitAttempts = 0;
+                    const maxWaitAttempts = 30; // 30 * 3 = 90 Sekunden max
+                    
+                    while (waitAttempts < maxWaitAttempts) {
+                        console.log(`Organizer: Warteschleife ${waitAttempts + 1}/${maxWaitAttempts} - prüfe User Count erneut...`);
+                        await page.waitForTimeout(3000); // 3s warten
+                        
+                        // Erneute Prüfung der User Count
+                        const currentUserCount = await page.evaluate(() => {
+                            const allElements = document.querySelectorAll('*');
+                            for (const element of allElements) {
+                                const text = element.textContent?.trim() || '';
+                                const patterns = [
+                                    /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                                    /aktuelle\s*anzahl.*?(\d+)/i,
+                                    /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                                    /anwesende?\s*teilnehmer.*?(\d+)/i,
+                                    /(\d+)\s*teilnehmer/i,
+                                    /teilnehmer.*?(\d+)/i
+                                ];
+                                
+                                for (const pattern of patterns) {
+                                    const match = text.match(pattern);
+                                    if (match) {
+                                        return parseInt(match[1]) || 0;
+                                    }
+                                }
+                            }
+                            return 0;
+                        });
+                        
+                        console.log(`Organizer: Warteschleife - aktueller User Count: ${currentUserCount}, benötigt: ${requiredUserCount}`);
+                        
+                        if (currentUserCount >= requiredUserCount) {
+                            console.log(`Organizer: ERFOLG! Genügend User erreicht: ${currentUserCount} >= ${requiredUserCount}`);
+                            break;
+                        }
+                        
+                        // Fallback: Prüfe auch weighted-users-ready.json
+                        try {
+                            const fs = require('fs');
+                            const path = require('path');
+                            const readyFile = path.join(process.cwd(), 'voting-results', 'weighted-users-ready.json');
+                            
+                            if (fs.existsSync(readyFile)) {
+                                const data = JSON.parse(fs.readFileSync(readyFile, 'utf8'));
+                                if (data.totalUsers >= requiredUserCount) {
+                                    console.log(`Organizer: FALLBACK ERFOLG! weighted-users-ready.json zeigt ${data.totalUsers} User >= ${requiredUserCount}`);
+                                    break;
+                                }
+                            }
+                        } catch (e) {
+                            // Ignoriere Fallback-Fehler
+                        }
+                        
+                        waitAttempts++;
+                    }
+                    
+                    if (waitAttempts >= maxWaitAttempts) {
+                        console.warn(`Organizer: TIMEOUT! Starte trotz niedrigem User Count nach ${maxWaitAttempts * 3} Sekunden`);
+                    }
+                }
+            } else {
+                console.log("Organizer: Nach zweitem Reload - Keine User Count gefunden!");
+                console.log("Organizer: Verfügbare Paragraphen mit 'Teilnehmer':", userCountInfoAfterSecond.allParagraphs);
+                console.log("Organizer: Seiteninhalt (erste 500 Zeichen):", userCountInfoAfterSecond.pageContent.substring(0, 500));
+                
+                // Fallback: Prüfe weighted-users-ready.json File
+                console.log("Organizer: Fallback - prüfe weighted-users-ready.json...");
+                try {
+                    const fs = require('fs');
+                    const path = require('path');
+                    const readyFile = path.join(process.cwd(), 'voting-results', 'weighted-users-ready.json');
+                    
+                    if (fs.existsSync(readyFile)) {
+                        const data = JSON.parse(fs.readFileSync(readyFile, 'utf8'));
+                        console.log(`Organizer: Fallback-Datei zeigt ${data.totalUsers} bereite User - verwende diese Info!`);
+                        
+                        if (data.totalUsers >= totalLoggedInUsers * 0.8) {
+                            console.log(`Organizer: FALLBACK OK! ${data.totalUsers} User bereit (>= 80% von ${totalLoggedInUsers})`);
+                        }
+                    }
+                } catch (e) {
+                    console.log("Organizer: Fallback-Datei nicht lesbar:", e.message);
+                }
+            }
         } catch (error) {
             console.error("Organizer: Fehler beim Warten auf Abstimmungsüberschrift:", error.message);
 
@@ -156,6 +650,65 @@ async function createAndStartPoll(page) {
             await page.screenshot({
                 path: path.join(screenshotsDir, `error-organizer-polls-page-timeout.png`)
             });
+            
+            // Sammle Informationen über den Zustand der Seite
+            try {
+                const pageState = await page.evaluate(() => {
+                    return {
+                        url: window.location.href,
+                        documentState: document.readyState,
+                        bodyEmpty: document.body.childElementCount === 0,
+                        elements: document.body.childElementCount,
+                        whiteScreen: document.body.childElementCount < 3 && !document.body.textContent.trim(),
+                        htmlLength: document.documentElement.innerHTML.length,
+                        networkInfo: performance.getEntriesByType('resource').length,
+                        jsErrors: window.consoleErrors || 'not captured'
+                    };
+                });
+                console.error("Organizer: Seite konnte nicht geladen werden. Aktueller Seitenzustand:", JSON.stringify(pageState, null, 2));
+                
+                // Wenn eine weiße Seite erkannt wurde
+                if (pageState.whiteScreen) {
+                    console.error("Organizer: WEISSE SEITE ERKANNT! Versuche erneuten Reload mit anderen Parametern...");
+                    
+                    // Speichere spezifischen Screenshot für weiße Seite
+                    await page.screenshot({
+                        path: path.join(screenshotsDir, `white-screen-detected-on-timeout.png`)
+                    });
+                    
+                    // Versuche verschiedene Strategien zum Neuladen
+                    for (const strategy of ['domcontentloaded', 'networkidle', 'load']) {
+                        try {
+                            console.log(`Organizer: Versuche Reload mit Strategie '${strategy}'...`);
+                            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}`, { 
+                                waitUntil: strategy, 
+                                timeout: 30000 
+                            });
+                            await page.waitForTimeout(5000);
+                            
+                            // Überprüfe, ob die Seite jetzt geladen ist
+                            const newState = await page.evaluate(() => ({
+                                elements: document.body.childElementCount,
+                                whiteScreen: document.body.childElementCount < 3 && !document.body.textContent.trim()
+                            }));
+                            
+                            if (!newState.whiteScreen && newState.elements > 5) {
+                                console.log(`Organizer: Reload mit Strategie '${strategy}' war erfolgreich! Seite geladen.`);
+                                await page.screenshot({
+                                    path: path.join(screenshotsDir, `reload-success-${strategy}.png`)
+                                });
+                                break;
+                            } else {
+                                console.log(`Organizer: Reload mit Strategie '${strategy}' war nicht erfolgreich.`);
+                            }
+                        } catch (reloadError) {
+                            console.error(`Organizer: Fehler beim Reload mit Strategie '${strategy}':`, reloadError.message);
+                        }
+                    }
+                }
+            } catch (evalError) {
+                console.error("Organizer: Fehler beim Auswerten des Seitenzustands:", evalError.message);
+            }
 
             // Versuche trotzdem fortzufahren
         }
@@ -250,32 +803,38 @@ async function createAndStartPoll(page) {
             console.log("Organizer: Screenshot gespeichert als 'poll-creation-error.png'");
         }
 
-        // Prüfe ob Optionen hinzugefügt werden müssen
-        const optionsRequired = await page.locator('.form-check, .poll-options input[type="text"]').count() > 0;
-        if (optionsRequired) {
-            console.log("Organizer: Füge Abstimmungsoptionen hinzu...");
-            // Versuche die Optionen-Felder zu finden und auszufüllen
-            const optionSelectors = [
-                '.form-check input[type="text"]',
-                '.poll-options input[type="text"]',
-                'input[placeholder*="Option"]',
-                '.option-input'
-            ];
-
-            for (const selector of optionSelectors) {
+        // Vereinfachte und schnelle Optionen-Erstellung
+        console.log("Organizer: Füge Abstimmungsoptionen hinzu...");
+        try {
+            // Versuche alle Text-Input-Felder zu finden
+            const allTextInputs = await page.locator('input[type="text"]').all();
+            let optionsAdded = 0;
+            
+            for (const input of allTextInputs) {
                 try {
-                    const optionCount = await page.locator(selector).count();
-                    if (optionCount > 0) {
-                        // Fülle mindestens 3 Optionen aus
-                        for (let i = 0; i < Math.min(optionCount, 3); i++) {
-                            await page.locator(selector).nth(i).fill(`Option ${i + 1}`);
-                        }
-                        break;
+                    const placeholder = await input.getAttribute('placeholder') || '';
+                    const className = await input.getAttribute('class') || '';
+                    
+                    // Prüfe ob es ein Optionsfeld ist (anhand von Placeholder oder Klasse)
+                    if (placeholder.toLowerCase().includes('option') || 
+                        className.includes('option') || 
+                        placeholder.toLowerCase().includes('antwort')) {
+                        await input.fill(`Option ${optionsAdded + 1}`);
+                        optionsAdded++;
+                        if (optionsAdded >= 3) break; // Maximal 3 Optionen
                     }
                 } catch (e) {
-                    // Versuche den nächsten Selektor
+                    // Ignoriere Fehler bei einzelnen Inputs
                 }
             }
+            
+            if (optionsAdded === 0) {
+                console.log("Organizer: Keine Optionsfelder gefunden, überspringe...");
+            } else {
+                console.log(`Organizer: ${optionsAdded} Optionen hinzugefügt`);
+            }
+        } catch (e) {
+            console.log("Organizer: Fehler beim Hinzufügen von Optionen:", e.message);
         }
 
         // Abstimmung speichern
@@ -341,9 +900,117 @@ async function createAndStartPoll(page) {
             console.log("Organizer: Kein Bestätigungsdialog gefunden, fahre fort...");
         }
 
-        // Warte kurz, damit die Änderungen wirksam werden
-        await page.waitForTimeout(3000);
+        // Längere Wartezeit nach der Abstimmungserstellung
+        console.log("Organizer: Warte 5 Sekunden nach dem Speichern der Abstimmung...");
+        await page.waitForTimeout(5000);
 
+        // Screenshot der aktuellen Seite machen
+        console.log("Organizer: Erstelle Screenshot der Abstimmungsseite...");
+        await page.screenshot({ 
+            path: path.join(screenshotsDir, `poll-creation-before-check.png`),
+            fullPage: true 
+        });
+        
+        // Prüfe den Text mit den wahlberechtigten Teilnehmern mit robuster Suche
+        console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer...");
+        
+        // Robuste Suche in createAndStartPoll Funktion
+        const userCountInfo = await page.evaluate(() => {
+            let foundElements = [];
+            
+            // Durchsuche alle Elemente nach Text-Pattern
+            const allElements = document.querySelectorAll('*');
+            for (const element of allElements) {
+                const text = element.textContent?.trim() || '';
+                
+                // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                const patterns = [
+                    /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                    /aktuelle\s*anzahl.*?(\d+)/i,
+                    /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                    /anwesende?\s*teilnehmer.*?(\d+)/i,
+                    /(\d+)\s*teilnehmer/i,
+                    /teilnehmer.*?(\d+)/i
+                ];
+                
+                for (const pattern of patterns) {
+                    const match = text.match(pattern);
+                    if (match) {
+                        foundElements.push({
+                            element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                            text: text,
+                            match: match[0],
+                            userCount: match[1] || match[2] || '0'
+                        });
+                    }
+                }
+            }
+            
+            return foundElements;
+        });
+        
+        console.log(`Organizer: User Count in createAndStartPoll - Gefundene Elemente:`, JSON.stringify(userCountInfo, null, 2));
+        
+        let userCount = 0;
+        if (userCountInfo.length > 0) {
+            const bestMatch = userCountInfo[0];
+            console.log(`Organizer: Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+            userCount = parseInt(bestMatch.userCount) || 0;
+            console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer: ${userCount}`);
+        } else {
+            console.log("Organizer: Keine Information über wahlberechtigte Teilnehmer gefunden");
+        }
+        
+        // Prüfe, ob der Button zum Erstellen oder Speichern disabled ist
+        console.log("Organizer: Prüfe Status der Abstimmungs-Buttons...");
+        
+        // Prüfe mehrere mögliche Button-Texte
+        const buttonSelectors = [
+            'button:has-text("Neue Abstimmung erstellen")',
+            'button:has-text("Abstimmung erstellen")',
+            'button:has-text("Abstimmung speichern")',
+            'button:has-text("Abstimmung speichern & sofort starten")',
+            'button:has-text("speichern & sofort starten")',
+            'button.btn-primary:has-text("speichern")',
+            'button[type="submit"]'
+        ];
+        
+        // Überprüfe jeden möglichen Button
+        for (const selector of buttonSelectors) {
+            const buttonCount = await page.locator(selector).count().catch(() => 0);
+            if (buttonCount > 0) {
+                console.log(`Organizer: Gefunden: ${buttonCount} Buttons mit Selektor "${selector}"`);
+                
+                // Prüfe, ob der Button deaktiviert ist
+                const isDisabled = await page.locator(selector).isDisabled().catch(() => null);
+                if (isDisabled !== null) {
+                    console.log(`Organizer: Button "${selector}" ist ${isDisabled ? 'deaktiviert' : 'aktiviert'}`);
+                    
+                    if (isDisabled) {
+                        console.log(`Organizer: WARNUNG - Button "${selector}" ist deaktiviert. Teilnehmer werden möglicherweise nicht erkannt!`);
+                        
+                        // Versuche den Tooltip oder Hilfetext zu finden
+                        const tooltipText = await page.locator(`${selector}[title]`).getAttribute("title").catch(() => null);
+                        if (tooltipText) {
+                            console.log(`Organizer: Tooltip-Text des Buttons: "${tooltipText}"`);
+                        }
+                    }
+                    
+                    // Versuche den Text des Buttons auszulesen
+                    const buttonText = await page.locator(selector).innerText().catch(() => null);
+                    if (buttonText) {
+                        console.log(`Organizer: Button-Text: "${buttonText}"`);
+                    }
+                }
+            }
+        }
+                
+        // Suche nach Fehlermeldungen oder Hilfetexten auf der Seite
+        const errorMessages = await page.locator('.alert, .error-message, .warning, .info-text').innerText().catch(() => null);
+        if (errorMessages) {
+            console.log(`Organizer: Gefundene Fehlermeldungen oder Hilfetexte: "${errorMessages}"`);
+        }
+        
         // Überprüfe, ob die Abstimmung tatsächlich erstellt und aktiv ist
         console.log("Organizer: Überprüfe, ob die Abstimmung aktiv ist...");
         const hasActivePoll = await page.locator('.active-poll, .poll-active, [data-poll-status="active"]').isVisible().catch(() => false);
@@ -355,7 +1022,100 @@ async function createAndStartPoll(page) {
             console.log("Organizer: Lade die Seite neu, um nach der Abstimmung zu suchen...");
             await page.reload();
             await page.waitForLoadState('networkidle');
-            await page.waitForTimeout(2000);
+            await page.waitForTimeout(5000); // Längeres Warten nach dem Reload
+            
+            // Screenshot nach Reload
+            await page.screenshot({ 
+                path: path.join(screenshotsDir, `poll-creation-after-reload.png`),
+                fullPage: true 
+            });
+            
+            // Prüfe erneut Anzahl der wahlberechtigten Teilnehmer nach Reload mit robuster Suche
+            console.log("Organizer: Prüfe Anzahl der wahlberechtigten Teilnehmer nach Reload...");
+            
+            const userCountInfoAfterReload = await page.evaluate(() => {
+                let foundElements = [];
+                
+                // Durchsuche alle Elemente nach Text-Pattern
+                const allElements = document.querySelectorAll('*');
+                for (const element of allElements) {
+                    const text = element.textContent?.trim() || '';
+                    
+                    // Pattern: "X von mindestens Y" oder "Aktuelle Anzahl: X"
+                    const patterns = [
+                        /(\d+)\s*von\s*mindestens\s*(\d+)/i,
+                        /aktuelle\s*anzahl.*?(\d+)/i,
+                        /wahlberechtigter?\s*teilnehmer.*?(\d+)/i,
+                        /anwesende?\s*teilnehmer.*?(\d+)/i,
+                        /(\d+)\s*teilnehmer/i,
+                        /teilnehmer.*?(\d+)/i
+                    ];
+                    
+                    for (const pattern of patterns) {
+                        const match = text.match(pattern);
+                        if (match) {
+                            foundElements.push({
+                                element: element.tagName + (element.className ? `.${element.className}` : '') + (element.id ? `#${element.id}` : ''),
+                                text: text,
+                                match: match[0],
+                                userCount: match[1] || match[2] || '0'
+                            });
+                        }
+                    }
+                }
+                
+                return foundElements;
+            });
+            
+            console.log(`Organizer: User Count nach Reload - Gefundene Elemente:`, JSON.stringify(userCountInfoAfterReload, null, 2));
+            
+            if (userCountInfoAfterReload.length > 0) {
+                const bestMatch = userCountInfoAfterReload[0];
+                console.log(`Organizer: Nach Reload - Bestes Match: ${bestMatch.match} (User Count: ${bestMatch.userCount})`);
+                const reloadUserCount = parseInt(bestMatch.userCount) || 0;
+                console.log(`Organizer: Erkannte Anzahl wahlberechtigter Teilnehmer nach Reload: ${reloadUserCount}`);
+            } else {
+                console.log("Organizer: Keine Information über wahlberechtigte Teilnehmer nach Reload gefunden");
+            }
+            
+            // Prüfe, ob der Button zum Erstellen disabled ist nach Reload
+            console.log("Organizer: Prüfe Status der Abstimmungs-Buttons nach Reload...");
+            
+            // Prüfe mehrere mögliche Button-Texte
+            for (const selector of buttonSelectors) {
+                const buttonCount = await page.locator(selector).count().catch(() => 0);
+                if (buttonCount > 0) {
+                    console.log(`Organizer: Nach Reload gefunden: ${buttonCount} Buttons mit Selektor "${selector}"`);
+                    
+                    // Prüfe, ob der Button deaktiviert ist
+                    const isDisabled = await page.locator(selector).isDisabled().catch(() => null);
+                    if (isDisabled !== null) {
+                        console.log(`Organizer: Nach Reload - Button "${selector}" ist ${isDisabled ? 'deaktiviert' : 'aktiviert'}`);
+                        
+                        if (isDisabled) {
+                            console.log(`Organizer: WARNUNG - Button "${selector}" ist nach Reload deaktiviert!`);
+                            
+                            // Versuche den Tooltip oder Hilfetext zu finden
+                            const tooltipText = await page.locator(`${selector}[title]`).getAttribute("title").catch(() => null);
+                            if (tooltipText) {
+                                console.log(`Organizer: Tooltip-Text des Buttons nach Reload: "${tooltipText}"`);
+                            }
+                        }
+                        
+                        // Versuche den Text des Buttons auszulesen
+                        const buttonText = await page.locator(selector).innerText().catch(() => null);
+                        if (buttonText) {
+                            console.log(`Organizer: Button-Text nach Reload: "${buttonText}"`);
+                        }
+                    }
+                }
+            }
+            
+            // Suche nach Fehlermeldungen oder Hilfetexten auf der Seite nach Reload
+            const errorMessagesAfterReload = await page.locator('.alert, .error-message, .warning, .info-text').innerText().catch(() => null);
+            if (errorMessagesAfterReload) {
+                console.log(`Organizer: Gefundene Fehlermeldungen oder Hilfetexte nach Reload: "${errorMessagesAfterReload}"`);
+            }
 
             // Prüfe erneut nach dem Reload
             const pollActiveAfterReload = await page.locator('.active-poll, .poll-active, [data-poll-status="active"]').isVisible().catch(() => false);
@@ -364,9 +1124,65 @@ async function createAndStartPoll(page) {
                 console.log("Organizer: Aktive Abstimmung nach Reload gefunden!");
             } else {
                 console.error("Organizer: FEHLER - Keine aktive Abstimmung nach Reload gefunden!");
+                
+                // Zusätzliche Diagnoseinformationen
+                console.log("Organizer: Versuche weitere UI-Elemente zu finden...");
+                
+                // Versuche verschiedene UI-Elemente zu finden, die auf eine erfolgreiche Abstimmungserstellung hindeuten könnten
+                const selectors = [
+                    '.poll-list-item', 
+                    '.poll-item', 
+                    '[data-poll-id]',
+                    '.poll-card',
+                    '.dashboard-item',
+                    '.btn:has-text("Abstimmung")',
+                    '.event-polls'
+                ];
+                
+                for (const selector of selectors) {
+                    try {
+                        const count = await page.locator(selector).count();
+                        if (count > 0) {
+                            console.log(`Organizer: Gefunden: ${count} Elemente mit Selektor "${selector}"`);
+                        }
+                    } catch (e) {
+                        // Ignoriere Fehler bei Selektoren
+                    }
+                }
+                
+                // Mache einen Screenshot der aktuellen Seite
+                const screenshotsDir = ensureScreenshotsDirectory();
+                await page.screenshot({ 
+                    path: path.join(screenshotsDir, `poll-creation-current-state.png`),
+                    fullPage: true 
+                });
             }
         } else {
             console.log("Organizer: Aktive Abstimmung erfolgreich erstellt!");
+        }
+        
+        // Speichere Informationen über die aktive Abstimmung
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const resultsDir = path.join(process.cwd(), 'voting-results');
+            
+            // Speichere die Organizer-Ergebnisdatei
+            const organizerData = {
+                pollStarted: true,
+                timestamp: new Date().toISOString(),
+                pollVisible: hasActivePoll,
+                // Versuche, die Poll-ID aus der UI zu extrahieren (falls möglich)
+                pollId: await page.evaluate(() => {
+                    const pollElement = document.querySelector('[data-poll-id]');
+                    return pollElement ? pollElement.getAttribute('data-poll-id') : null;
+                }).catch(() => null)
+            };
+            
+            fs.writeFileSync(path.join(resultsDir, 'organizer.json'), JSON.stringify(organizerData, null, 2));
+            console.log("Organizer: Poll-Status in organizer.json gespeichert");
+        } catch (error) {
+            console.error("Organizer: Fehler beim Speichern des Poll-Status:", error.message);
         }
 
         return true;

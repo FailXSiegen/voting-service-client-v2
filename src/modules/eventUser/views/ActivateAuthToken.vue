@@ -41,6 +41,7 @@
             :errors="v$.publicName?.$errors"
             :has-errors="v$.publicName?.$errors?.length > 0"
             :value="formData.publicName"
+            :disabled="event?.publicnameReadonly === true || event?.publicnameReadonly === 1"
             @change="
               ({ value }) => {
                 formData.publicName = value;
@@ -77,15 +78,22 @@ const eventId = route.params.eventId;
 const token = route.params.token;
 const event = ref(null);
 
+// Check if publicName is passed as query parameter
+const publicNameFromQuery = route.query.publicname || route.query.publicName || "";
+
 // Ftech the related event.
 fetchEventById(eventId).then((response) => {
   event.value = response;
+  // If publicName is readonly and provided via query, set it
+  if ((response?.publicnameReadonly === true || response?.publicnameReadonly === 1) && publicNameFromQuery) {
+    formData.publicName = publicNameFromQuery;
+  }
 });
 
 // Form and validation setup.
 const formData = reactive({
   username: "",
-  publicName: "",
+  publicName: publicNameFromQuery || "",
 });
 const rules = computed(() => {
   return {

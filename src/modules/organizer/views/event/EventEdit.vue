@@ -77,6 +77,7 @@ const prefillData = reactive({
   multivoteType: 1,
   videoConferenceConfig: "{}",
   videoConference: null,
+  readOnlyUsername: false
 });
 
 // Try to fetch event by id and organizer id.
@@ -109,6 +110,8 @@ eventQuery.onResult(({ data }) => {
   prefillData.allowMagicLink = event.value?.allowMagicLink ?? false;
   prefillData.publicVoteVisible = event.value?.publicVoteVisible ?? true;
   prefillData.endDatetime = event.value?.endDatetime ?? 0;
+  prefillData.publicnameReadonly = event.value?.publicnameReadonly ?? false;
+
 
   // WICHTIGER FIX: Defensive Programmierung für JSON.parse und null-safety
   let resolvedVideoConferenceConfig;
@@ -159,6 +162,7 @@ async function onSubmit({ formData, action }) {
         allowMagicLink: formData.allowMagicLink,
         publicVoteVisible: formData.publicVoteVisible,
         endDatetime: formData.endDatetime,
+        publicnameReadonly: formData.publicnameReadonly,
       },
     },
   });

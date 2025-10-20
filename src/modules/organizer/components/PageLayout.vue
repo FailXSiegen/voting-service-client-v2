@@ -29,7 +29,11 @@ const props = defineProps({
 
 useHead({
   title: props.metaTitle ?? "Einfach die Wahl haben",
-  titleTemplate: "%s - digitalwahl.org",
+  titleTemplate: (title) => {
+    const settings = JSON.parse(localStorage.getItem('systemSettings') || '{}');
+    const suffix = settings.titleSuffix || 'digitalwahl.org';
+    return `${title} - ${suffix}`;
+  },
   htmlAttrs: {
     lang: "de",
   },
