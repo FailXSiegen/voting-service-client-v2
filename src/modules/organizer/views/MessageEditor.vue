@@ -205,7 +205,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import defaultMessages from '@/messages.json';
+import defaultMessages from '@/messages.js';
 import { toast } from 'vue3-toastify';
 import { deepMerge } from '@/core/util/deep-merge';
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
@@ -337,11 +337,8 @@ const loadMessages = async (locale = currentLocale.value) => {
     localMessages.value = {};
     messages.value = [];
 
-    // Wir müssen das Original-messages.json neu laden, um die unveränderten Werte zu bekommen
-    // Use a relative path that works in both development and production
-    const messagesPath = import.meta.env.DEV ? '/src/messages.json' : '/src/messages.json';
-    const response = await fetch(messagesPath);
-    const originalMessages = (await response.json())[locale] || {};
+    // Verwende die bereits importierten defaultMessages statt fetch
+    const originalMessages = defaultMessages[locale] || {};
     // Die benutzerdefinierten Übersetzungen vom Server holen
     let customMessages = {};
     try {

@@ -1,5 +1,5 @@
 import { createI18n } from "vue-i18n";
-import defaultMessages from "@/messages.json";
+import defaultMessages from "@/messages.js";
 import gql from "graphql-tag";
 import { ref } from "vue";
 
