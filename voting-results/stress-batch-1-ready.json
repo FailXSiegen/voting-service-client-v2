@@ -1,0 +1,60 @@
+{
+  "batchId": 1,
+  "usersLoggedIn": 100,
+  "failedLogins": 0,
+  "loginTimings": [
+    {
+      "user": 2,
+      "loginTime": 1663,
+      "success": true
+    },
+    {
+      "user": 4,
+      "loginTime": 1670,
+      "success": true
+    },
+    {
+      "user": 1,
+      "loginTime": 1689,
+      "success": true
+    },
+    {
+      "user": 13,
+      "loginTime": 2661,
+      "success": true
+    },
+    {
+      "user": 3,
+      "loginTime": 2906,
+      "success": true
+    },
+    {
+      "user": 31,
+      "loginTime": 3114,
+      "success": true
+    },
+    {
+      "user": 14,
+      "loginTime": 3160,
+      "success": true
+    },
+    {
+      "user": 5,
+      "loginTime": 4343,
+      "success": true
+    },
+    {
+      "user": 8,
+      "loginTime": 4545,
+      "success": true
+    },
+    {
+      "user": 16,
+      "loginTime": 4743,
+      "success": true
+    }
+  ],
+  "totalLoginTime": 74254,
+  "timestamp": "2025-07-27T20:09:30.696Z",
+  "batchComplete": true
+}

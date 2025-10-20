@@ -1,0 +1,115 @@
+{
+  "voteWeight": 3,
+  "totalUsers": 15,
+  "successfulVotes": 15,
+  "totalVotesCast": 15,
+  "expectedVotes": 45,
+  "efficiency": "33.33%",
+  "timings": [
+    {
+      "user": 31,
+      "votingTime": 311,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 32,
+      "votingTime": 310,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 33,
+      "votingTime": 312,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 34,
+      "votingTime": 313,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 35,
+      "votingTime": 314,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 36,
+      "votingTime": 317,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 37,
+      "votingTime": 316,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 38,
+      "votingTime": 320,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 39,
+      "votingTime": 320,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 40,
+      "votingTime": 320,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 41,
+      "votingTime": 320,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 42,
+      "votingTime": 318,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 43,
+      "votingTime": 317,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 44,
+      "votingTime": 317,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    },
+    {
+      "user": 45,
+      "votingTime": 317,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 3
+    }
+  ]
+}

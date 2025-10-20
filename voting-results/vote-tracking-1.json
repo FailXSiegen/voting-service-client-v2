@@ -1,0 +1,15 @@
+{
+  "batchId": 1,
+  "eventId": 6,
+  "pollId": 0,
+  "totalVotes": 50,
+  "userCount": 50,
+  "started": true,
+  "startTimestamp": "2025-07-27T20:10:46.752Z",
+  "timestamp": "2025-07-27T20:10:46.752Z",
+  "pendingVerification": false,
+  "completed": true,
+  "successfulVotes": 50,
+  "completedTimestamp": "2025-07-27T20:11:23.240Z",
+  "lastUpdated": "2025-07-27T20:11:23.244Z"
+}

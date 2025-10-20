@@ -1,0 +1,22 @@
+{
+  "organizerReady": true,
+  "timestamp": "2025-07-28T20:51:38.012Z",
+  "testType": "weighted",
+  "voteDistribution": {
+    "singleVote": {
+      "start": 1,
+      "end": 30,
+      "votes": 1
+    },
+    "tripleVote": {
+      "start": 31,
+      "end": 45,
+      "votes": 3
+    },
+    "fiveVote": {
+      "start": 46,
+      "end": 50,
+      "votes": 5
+    }
+  }
+}

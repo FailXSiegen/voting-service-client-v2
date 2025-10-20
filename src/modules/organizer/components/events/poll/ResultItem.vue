@@ -539,13 +539,13 @@ function isAbsoluteMajority(answerLength) {
 
 // Toggle hidden status
 const isTogglingHidden = ref(false);
-const isHidden = ref(props.pollResult?.hidden === 1);
+const isHidden = ref(!!props.pollResult?.hidden);
 const { mutate: togglePollResultHiddenMutation } = useMutation(TOGGLE_POLL_RESULT_HIDDEN);
 
 // Watch for prop changes
 watch(() => props.pollResult?.hidden, (newValue) => {
-  isHidden.value = newValue === 1;
-});
+  isHidden.value = !!newValue;
+}, { immediate: true });
 
 async function toggleHidden() {
   if (!props.pollResult?.id) return;

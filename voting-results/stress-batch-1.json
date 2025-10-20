@@ -1,0 +1,77 @@
+{
+  "batchId": 1,
+  "totalUsers": 100,
+  "successfulVotes": 100,
+  "failedVotes": 0,
+  "votingTimings": [
+    {
+      "user": 24,
+      "votingTime": 3687,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 6,
+      "votingTime": 3698,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 33,
+      "votingTime": 3689,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 49,
+      "votingTime": 3754,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 5,
+      "votingTime": 3772,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 1,
+      "votingTime": 3789,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 25,
+      "votingTime": 3763,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 30,
+      "votingTime": 3887,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 18,
+      "votingTime": 3897,
+      "attempt": 1,
+      "type": "successful-interaction"
+    },
+    {
+      "user": 4,
+      "votingTime": 3947,
+      "attempt": 1,
+      "type": "successful-interaction"
+    }
+  ],
+  "totalVotingTime": 267059,
+  "performance": {
+    "avgLoginTime": 17677.39,
+    "avgVotingTime": 3368.36,
+    "throughput": {
+      "loginsPerSecond": "1.35",
+      "votesPerSecond": "0.37"
+    }
+  }
+}

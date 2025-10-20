@@ -1,0 +1,45 @@
+{
+  "voteWeight": 5,
+  "totalUsers": 5,
+  "successfulVotes": 5,
+  "totalVotesCast": 5,
+  "expectedVotes": 25,
+  "efficiency": "20.00%",
+  "timings": [
+    {
+      "user": 46,
+      "votingTime": 305,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 5
+    },
+    {
+      "user": 47,
+      "votingTime": 305,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 5
+    },
+    {
+      "user": 48,
+      "votingTime": 307,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 5
+    },
+    {
+      "user": 49,
+      "votingTime": 308,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 5
+    },
+    {
+      "user": 50,
+      "votingTime": 306,
+      "success": true,
+      "votesCast": 1,
+      "maxVotes": 5
+    }
+  ]
+}
