@@ -116,3 +116,6 @@ acme.json
 
 # Local configuration overrides
 docker-compose.override.yml
+
+# Generated files
+src/messages.js
