@@ -32,6 +32,7 @@
       <VerifiedEventUserList
         :event-users="verifiedEventUsers"
         :event-slug="event?.slug"
+        :event-id="event?.id"
         @update-to-guest="onUpdateToGuest"
         @update-to-participant="onUpdateToParticipant"
         @unverfify-event-user="onUnverfifyEventUser"

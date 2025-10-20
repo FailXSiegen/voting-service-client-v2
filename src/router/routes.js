@@ -44,6 +44,7 @@ export const RouteOrganizerEventUserMultipleNew =
   "organizerEventUserMultipleNew";
 export const RouteEventUserFrame = "eventUserFrame";
 export const RouteActivateAuthToken = "eventUserActivateAuthToken";
+export const RouteShortlinkRedirect = "shortlinkRedirect";
 
 /**
  * @param {String[]} routeNames Use constants in router.js

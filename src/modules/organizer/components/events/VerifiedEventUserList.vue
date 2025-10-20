@@ -22,10 +22,30 @@
     <hr />
     <VerifiedEventUserLegend :event-users="eventUsers" />
     <hr />
-    <small
-      class="d-inline-block text-muted mb-3"
-      v-html="$t('view.event.user.info')"
-    />
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <small
+        class="d-inline-block text-muted"
+        v-html="$t('view.event.user.info')"
+      />
+      <button
+        class="btn btn-primary"
+        :disabled="isExporting"
+        @click="onExportWithShortlinks"
+      >
+        <span v-if="isExporting">
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Exportiere...
+        </span>
+        <span v-else>
+          <i class="bi-download me-2"></i>
+          CSV mit Login-Links exportieren
+        </span>
+      </button>
+    </div>
     <EasyDataTable
       buttons-pagination
       :headers="headers"
@@ -111,6 +131,8 @@ import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import VerifiedEventUserLegend from "@/modules/organizer/components/events/VerifiedEventUserLegend.vue";
 import { RouteOrganizerEventUserEdit } from "@/router/routes";
 import { toast } from "vue3-toastify";
+import { exportPollResultsCsv } from "@/modules/organizer/requests/export-results-csv";
+import { handleError } from "@/core/error/error-handler";
 
 const emit = defineEmits([
   "updateToGuest",
@@ -128,6 +150,10 @@ const props = defineProps({
     type: String,
     required: false,
     default: "",
+  },
+  eventId: {
+    type: Number,
+    required: true,
   },
 });
 
@@ -151,6 +177,7 @@ const eventUserFiltered = computed(() =>
     : JSON.parse(JSON.stringify(props.eventUsers)),
 );
 const filter = reactive({ search: "" });
+const isExporting = ref(false);
 
 function formatTimestamp(timestamp) {
   return createFormattedDateFromTimeStamp(timestamp);
@@ -189,6 +216,39 @@ function onUnverfifyEventUser(eventUserId) {
 
 function onTransferVotes(user) {
   emit("transferVotes", user);
+}
+
+async function onExportWithShortlinks() {
+  try {
+    isExporting.value = true;
+    const response = await exportPollResultsCsv(
+      props.eventId,
+      "eventUsersWithShortlinks"
+    );
+
+    // Download the file
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = url;
+    a.download = `event-users-shortlinks-${props.eventId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+
+    toast("CSV-Export mit Login-Links erfolgreich heruntergeladen", {
+      type: "success",
+    });
+  } catch (error) {
+    handleError(error);
+    toast("Fehler beim Export der CSV-Datei", {
+      type: "error",
+    });
+  } finally {
+    isExporting.value = false;
+  }
 }
 
 function copyUserLink(user) {
