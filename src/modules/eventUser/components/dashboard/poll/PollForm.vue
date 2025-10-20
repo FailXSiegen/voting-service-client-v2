@@ -68,8 +68,8 @@
           </div>
         </div>
 
-        <!-- Quick selection buttons -->
-        <div class="btn-group w-100 mb-2">
+        <!-- Quick selection buttons - only show if user has more than 3 votes -->
+        <div v-if="props.eventUser.voteAmount > 3" class="btn-group w-100 mb-2">
           <button
             type="button"
             class="btn btn-outline-primary"
