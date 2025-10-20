@@ -1,12 +1,34 @@
 <template>
-  <div v-if="pollResult && pollResult.poll" class="card mb-3">
-    <div class="card-header">
-      <h5 class="h4 mb-1">
-        {{ pollResult.poll.title }} ({{
-          $t("view.results.type." + pollResult.type)
-        }}) -
-        {{ getCreateDatetime }}
-      </h5>
+  <div
+    v-if="pollResult && pollResult.poll"
+    class="card mb-3"
+    :class="{ 'hidden-result': isHidden }"
+  >
+    <div class="card-header" :class="{ 'bg-light text-muted': isHidden }">
+      <div class="d-flex justify-content-between align-items-start">
+        <div class="flex-grow-1">
+          <h5 class="h4 mb-1">
+            {{ pollResult.poll.title }} ({{
+              $t("view.results.type." + pollResult.type)
+            }}) -
+            {{ getCreateDatetime }}
+            <span v-if="isHidden" class="badge bg-secondary ms-2">
+              <i class="bi bi-eye-slash me-1"></i>
+              Ausgeblendet
+            </span>
+          </h5>
+        </div>
+        <button
+          class="btn btn-sm d-print-none ms-2"
+          :class="isHidden ? 'btn-outline-success' : 'btn-outline-secondary'"
+          type="button"
+          @click="toggleHidden"
+          :disabled="isTogglingHidden"
+          :title="isHidden ? $t('view.results.showResult') : $t('view.results.hideResult')"
+        >
+          <i :class="isHidden ? 'bi bi-eye' : 'bi bi-eye-slash'" />
+        </button>
+      </div>
       <p class="small text-muted">
         {{ $t("view.event.user.member") }}: {{ pollResult.pollUser?.length || 0 }} |
         <template v-if="hasAbstentions">
@@ -240,6 +262,10 @@ v-else
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
+import { useMutation } from "@vue/apollo-composable";
+import { TOGGLE_POLL_RESULT_HIDDEN } from "@/modules/organizer/graphql/mutation/toggle-poll-result-hidden";
+import { toast } from "vue3-toastify";
+import t from "@/core/util/l18n";
 
 // Bootstrap Tooltips initialisieren
 onMounted(() => {
@@ -271,7 +297,7 @@ const props = defineProps({
 });
 
 // Definiere Emits für die Kommunikation mit dem Modal
-const emit = defineEmits(['percentage-type-change']);
+const emit = defineEmits(['percentage-type-change', 'result-hidden']);
 
 // Berechne zunächst alle erforderlichen Werte
 const totalValidVotes = computed(() => {
@@ -510,6 +536,47 @@ function isAbsoluteMajority(answerLength) {
   // Default fallback zum neuen Standard - Maximalstimmen pro Option (ohne Enthaltungen)
   return (answerLength / maxVotesPerOptionNoAbstention.value) > 0.5;
 }
+
+// Toggle hidden status
+const isTogglingHidden = ref(false);
+const isHidden = ref(props.pollResult?.hidden === 1);
+const { mutate: togglePollResultHiddenMutation } = useMutation(TOGGLE_POLL_RESULT_HIDDEN);
+
+// Watch for prop changes
+watch(() => props.pollResult?.hidden, (newValue) => {
+  isHidden.value = newValue === 1;
+});
+
+async function toggleHidden() {
+  if (!props.pollResult?.id) return;
+
+  const wasHidden = isHidden.value;
+  isTogglingHidden.value = true;
+
+  try {
+    const result = await togglePollResultHiddenMutation({
+      pollResultId: props.pollResult.id
+    });
+
+    if (result?.data?.togglePollResultHidden) {
+      // Update local state
+      isHidden.value = !wasHidden;
+
+      const successMessage = wasHidden
+        ? "Abstimmung wird wieder angezeigt"
+        : "Abstimmung wurde ausgeblendet";
+
+      toast(successMessage, { type: "success" });
+    } else {
+      toast("Fehler beim Ändern der Sichtbarkeit", { type: "error" });
+    }
+  } catch (error) {
+    console.error("Error toggling poll result hidden status:", error);
+    toast("Fehler beim Ändern der Sichtbarkeit", { type: "error" });
+  } finally {
+    isTogglingHidden.value = false;
+  }
+}
 </script>
 
 <style scoped>
@@ -527,6 +594,21 @@ function isAbsoluteMajority(answerLength) {
   text-decoration: underline dotted;
 }
 
+/* Hidden result styling */
+.hidden-result {
+  opacity: 0.6;
+  border: 2px dashed #6c757d !important;
+  background-color: #f8f9fa;
+}
+
+.hidden-result .card-body {
+  background-color: #f8f9fa;
+}
+
+.hidden-result .card-header {
+  border-bottom: 1px dashed #dee2e6;
+}
+
 @media print {
   .collapse {
     display: block !important;
@@ -541,6 +623,17 @@ function isAbsoluteMajority(answerLength) {
     position: relative;
     page-break-inside: avoid;
     page-break-after: always;
+  }
+
+  /* Don't show hidden styling when printing */
+  .hidden-result {
+    opacity: 1;
+    border: 1px solid #dee2e6 !important;
+    background-color: white;
+  }
+
+  .hidden-result .card-body {
+    background-color: white;
   }
 }
 </style>

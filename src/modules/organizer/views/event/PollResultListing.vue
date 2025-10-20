@@ -174,6 +174,7 @@ function setupPollResultsQuery() {
       eventId: event.value?.id,
       page: page.value,
       pageSize: pageSize.value,
+      includeHidden: true, // Organizers see all results including hidden ones
     },
     {
       fetchPolicy: "network-only",
@@ -223,6 +224,7 @@ async function showMorePollResults() {
         eventId: event.value?.id,
         page: nextPage,
         pageSize: pageSize.value,
+        includeHidden: true, // Organizers see all results including hidden ones
       },
       updateQuery: (prev, { fetchMoreResult }) => {
         if (!fetchMoreResult?.pollResult?.length) {
