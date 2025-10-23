@@ -86,53 +86,60 @@ export function useVotingProcess(eventUser, event) {
     const origUsedVotesCount = usedVotesCount.value;
     const origVoteCounter = voteCounter.value;
 
+    console.log(`[DEBUG:VOTING] resetVoteCountersForNewPoll aufgerufen: newPollId=${newPollId}, currentPollId=${currentPollId.value}, usedVotesCount=${origUsedVotesCount}`);
+
     if (newPollId !== currentPollId.value) {
       // WICHTIG: Prüfe, ob wir uns in einer Fortsetzung befinden
       // Wenn die aktuelle Poll dieselbe ist wie in usedVotesCount/voteCounter, nicht zurücksetzen!
       const isContinuation = newPollId === currentPollId.value;
 
+      console.log(`[DEBUG:VOTING] Neue Poll erkannt, isContinuation=${isContinuation} (wird immer false sein!)`);
+
       if (!isContinuation) {
+        console.log(`[DEBUG:VOTING] Setze usedVotesCount von ${origUsedVotesCount} auf 0 zurück`);
         usedVotesCount.value = 0;
         voteCounter.value = 1;
       }
-
-      // WICHTIG: Speichere die aktuelle Poll-ID, damit wir sie als "gesehen" markieren
-      const oldPollId = currentPollId.value;
-      currentPollId.value = newPollId;
-      votingFullyCompleted.value = false;
-
-      // KRITISCH: Bei einem Page-Reload oder Navigation werden wir für die gleiche Poll
-      // aufgerufen - in diesem Fall NICHT den persistenten Zustand zurücksetzen!
-      // Wir setzen nur zurück, wenn wirklich eine neue Abstimmung gestartet wurde
-      const eventObj = event && typeof event.value === 'object' ? event.value : event;
-
-      // KRITISCH: Prüfe, ob wir den gespeicherten Zustand wiederherstellen können
-      if (eventObj && eventObj.id) {
-        // Nur zurücksetzen, wenn oldPollId gesetzt war und sich wirklich geändert hat
-        // Das ist der Fall bei einer echten neuen Abstimmung, NICHT bei einem Reload
-        if (oldPollId !== null && oldPollId !== newPollId) {
-          // Stelle sicher, dass wir nicht versehentlich die gespeicherte Stimmanzahl löschen
-          // Wenn die Poll schon einmal aktiv war, dann behalten wir die maxVotesToUse
-          const existingMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
-
-          // Vollständiges Zurücksetzen der Stimmen, aber gespeicherte Stimmenzahl beibehalten
-          pollStatePersistence.resetVoteStateButKeepMaxVotes(newPollId, eventObj.id, existingMaxVotes);
-
-          // WICHTIG: Bei einer neuen Abstimmung AUCH lokale Form-Daten zurücksetzen
-          // Insbesondere die ausgewählten Antworten (multipleAnswers, singleAnswer)
-          // Dies verhindert, dass alte Antwort-IDs von der vorherigen Abstimmung verwendet werden
-          localStorage.removeItem(`poll_form_data_${oldPollId}`);
-        } else {
-          // Bei einem Reload oder Navigation: Versuche den gespeicherten Zustand zu laden
-          const savedMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
-        }
-      } else {
-        console.warn(`[DEBUG:VOTING] Konnte Zustand nicht zurücksetzen: Event-ID nicht verfügbar`);
-      }
-
-      // Bei neuer Abstimmung sicherstellen, dass alle alten Sessions deaktiviert sind
-      deactivateVotingSession();
+    } else {
+      console.log(`[DEBUG:VOTING] Gleiche Poll, KEIN Reset`);
     }
+
+    // WICHTIG: Speichere die aktuelle Poll-ID, damit wir sie als "gesehen" markieren
+    const oldPollId = currentPollId.value;
+    currentPollId.value = newPollId;
+    votingFullyCompleted.value = false;
+
+    // KRITISCH: Bei einem Page-Reload oder Navigation werden wir für die gleiche Poll
+    // aufgerufen - in diesem Fall NICHT den persistenten Zustand zurücksetzen!
+    // Wir setzen nur zurück, wenn wirklich eine neue Abstimmung gestartet wurde
+    const eventObj = event && typeof event.value === 'object' ? event.value : event;
+
+    // KRITISCH: Prüfe, ob wir den gespeicherten Zustand wiederherstellen können
+    if (eventObj && eventObj.id) {
+      // Nur zurücksetzen, wenn oldPollId gesetzt war und sich wirklich geändert hat
+      // Das ist der Fall bei einer echten neuen Abstimmung, NICHT bei einem Reload
+      if (oldPollId !== null && oldPollId !== newPollId) {
+        // Stelle sicher, dass wir nicht versehentlich die gespeicherte Stimmanzahl löschen
+        // Wenn die Poll schon einmal aktiv war, dann behalten wir die maxVotesToUse
+        const existingMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
+
+        // Vollständiges Zurücksetzen der Stimmen, aber gespeicherte Stimmenzahl beibehalten
+        pollStatePersistence.resetVoteStateButKeepMaxVotes(newPollId, eventObj.id, existingMaxVotes);
+
+        // WICHTIG: Bei einer neuen Abstimmung AUCH lokale Form-Daten zurücksetzen
+        // Insbesondere die ausgewählten Antworten (multipleAnswers, singleAnswer)
+        // Dies verhindert, dass alte Antwort-IDs von der vorherigen Abstimmung verwendet werden
+        localStorage.removeItem(`poll_form_data_${oldPollId}`);
+      } else {
+        // Bei einem Reload oder Navigation: Versuche den gespeicherten Zustand zu laden
+        const savedMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
+      }
+    } else {
+      console.warn(`[DEBUG:VOTING] Konnte Zustand nicht zurücksetzen: Event-ID nicht verfügbar`);
+    }
+
+    // Bei neuer Abstimmung sicherstellen, dass alle alten Sessions deaktiviert sind
+    deactivateVotingSession();
   }
 
   async function handleFormSubmit(pollFormData, poll, votesToUse = null) {
@@ -402,12 +409,11 @@ export function useVotingProcess(eventUser, event) {
       // Wir sind in einem Reload-Zustand, wenn eine der folgenden Bedingungen zutrifft:
       // 1. Die Poll-ID ist bekannt und gleich der aktuellen Poll-ID
       // 2. Laut Server haben wir bereits Stimmen abgegeben (serverVoteCycle > 0) - PRIMÄRE QUELLE
-      // 3. Oder wir haben bereits im lokalen Zustand Stimmen abgegeben (usedVotesCount.value > 0)
+      // 3. ABER: Bei Split-Voting ist serverVoteCycle > usedVotesCount normal und bedeutet KEIN Reload!
 
-      // Priorität: Server-Zyklus ist die primäre Quelle der Wahrheit, dann lokale Zähler
-      const isReload = serverVoteCycle > 0 ||
-        (currentPollId.value === pollId && usedVotesCount.value > 0) ||
-        usedVotesCount.value > 0;
+      // KRITISCH: Ein Reload liegt NUR vor, wenn serverVoteCycle GRÖSSER ist als unser lokaler usedVotesCount
+      // Das bedeutet, die Seite wurde neu geladen und wir müssen mit dem Server synchronisieren
+      const isReload = serverVoteCycle > usedVotesCount.value;
 
       // KRITISCH: Wir müssen hier auch die gewünschte Stimmenanzahl bei Reload erhalten
       // Wenn der Benutzer nur 1 Stimme abgeben möchte, sollten wir diese Information 

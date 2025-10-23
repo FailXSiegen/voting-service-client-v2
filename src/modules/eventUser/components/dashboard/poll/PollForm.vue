@@ -375,7 +375,7 @@ const remainingVotes = computed(() => {
   // Wenn wir einen neuen Poll haben (props.poll.id ist neu oder hat sich geändert),
   // oder wenn ein poll-reset-Event stattgefunden hat, sollten wir die gesamte voteAmount verwenden
   if (typeof window !== 'undefined' && window._newPollActive === true) {
-    console.log("[DEBUG:VOTING] remainingVotes: Verwende komplette voteAmount, da neuer Poll aktiv");
+    // console.log("[DEBUG:VOTING] remainingVotes: Verwende komplette voteAmount, da neuer Poll aktiv");
     return props.eventUser.voteAmount;
   }
   
@@ -421,15 +421,15 @@ const remainingVotes = computed(() => {
         // Alle Stimmen aufgebraucht = 100% verwendet
         formData.useAllAvailableVotes = true;
         
-        console.log("[DEBUG:VOTING] Keine Stimmen mehr übrig: votesToUse auf 0 gesetzt");
+        // console.log("[DEBUG:VOTING] Keine Stimmen mehr übrig: votesToUse auf 0 gesetzt");
       }, 0);
     }
     
-    console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, keine Stimmen mehr übrig`);
+    // console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, keine Stimmen mehr übrig`);
     return 0;
   }
   
-  console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, verbleibend=${total - usedVotes}`);
+  // console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, verbleibend=${total - usedVotes}`);
   return total - usedVotes;
 });
 
@@ -527,7 +527,7 @@ onMounted(() => {
   setTimeout(() => {
     // Dieser Aufruf synchronisiert alle Quellen und erhält den maximalen usedVotes-Wert
     const actualRemaining = remainingVotes.value;
-    console.log(`[DEBUG:VOTING] onMounted Initialisierung: Verbleibende Stimmen=${actualRemaining}`);
+    // console.log(`[DEBUG:VOTING] onMounted Initialisierung: Verbleibende Stimmen=${actualRemaining}`);
     
     // Immer mit maximaler Stimmenzahl starten
     formData.useAllAvailableVotes = true;
@@ -670,7 +670,7 @@ function handleAbstainChange(isChecked) {
 watch(() => formData.votesToUse, (newValue, oldValue) => {
   // Spezialfall: Wenn das Formular gerade zurückgesetzt wurde, nicht eingreifen
   if (window._formResetInProgress === true) {
-    console.log("[DEBUG:VOTING] Watch votesToUse: Reset läuft, überspringe Korrektur");
+    // console.log("[DEBUG:VOTING] Watch votesToUse: Reset läuft, überspringe Korrektur");
     return;
   }
 
@@ -696,7 +696,7 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   }
 
   // Debug-Ausgabe
-  console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
+  // console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
   
   // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
   // wenn sich der Wert tatsächlich geändert hat
@@ -706,7 +706,7 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   // In diesem Fall akzeptieren wir nur 0 als gültigen Wert für votesToUse
   if (remainingVotes.value === 0) {
     if (newValue !== 0) {
-      console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
+      // console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
       formData.votesToUse = 0;
     }
     // Checkbox auf true setzen, da 0 von 0 = 100%
@@ -727,7 +727,7 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   
   // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
   if (correctedValue !== newValue) {
-    console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
+    // console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
     formData.votesToUse = correctedValue;
   }
   
@@ -735,7 +735,7 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
   // aber nur wenn sich der Wert tatsächlich geändert hat
   const shouldUseAllVotes = (correctedValue === remainingVotes.value);
   if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
-    console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
+    // console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
     formData.useAllAvailableVotes = shouldUseAllVotes;
   }
 }, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
@@ -900,7 +900,7 @@ function reset(keepSelection = false) {
       // Garantiere, dass wir den korrekten Wert haben
       // Dies wird die verbesserte Synchronisierung auslösen
       const currentRemainingVotes = remainingVotes.value;
-      console.log("[DEBUG:VOTING] Reset mit remainingVotes:", currentRemainingVotes);
+      // console.log("[DEBUG:VOTING] Reset mit remainingVotes:", currentRemainingVotes);
       
       // Sicherstellen, dass votesToUse einen gültigen Wert hat
       if (typeof currentRemainingVotes !== 'number' || currentRemainingVotes < 1) {
@@ -926,7 +926,7 @@ function reset(keepSelection = false) {
         input.checked = false;
       });
       
-      console.log("[DEBUG:VOTING] Nach Reset: votesToUse =", formData.votesToUse, "useAllAvailableVotes =", formData.useAllAvailableVotes);
+      // console.log("[DEBUG:VOTING] Nach Reset: votesToUse =", formData.votesToUse, "useAllAvailableVotes =", formData.useAllAvailableVotes);
     }, 50);
   }
   

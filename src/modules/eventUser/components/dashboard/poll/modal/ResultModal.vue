@@ -6,7 +6,7 @@
       class="modal fade"
       tabindex="-1"
       data-bs-keyboard="false"
-      data-bs-backdrop="static"
+      data-bs-backdrop="false"
       aria-hidden="true"
     >
       <div
@@ -103,14 +103,22 @@ const props = defineProps({
 });
 
 onMounted(() => {
-  bootstrapModal = new Modal(modal.value);
-  
+  // KRITISCH: Bootstrap Modal mit expliziten Optionen initialisieren
+  try {
+    bootstrapModal = new Modal(modal.value, {
+      backdrop: 'static',
+      keyboard: false
+    });
+  } catch (e) {
+    console.error('[DEBUG:RESULT] Fehler bei Bootstrap-Modal-Initialisierung im onMounted:', e);
+  }
+
   // Event-Listener hinzufügen, um den sichtbaren Zustand des Modals zu verfolgen
   if (modal.value) {
     // Event-Listener, der erkennt, wenn das Modal angezeigt wird
     modal.value.addEventListener('shown.bs.modal', () => {
       isVisible.value = true;
-      
+
       // Setze den recently-shown-Status, um Flackern zu verhindern
       recentlyShown.value = true;
       if (recentlyShownTimeout) {
@@ -120,7 +128,7 @@ onMounted(() => {
         recentlyShown.value = false;
       }, 1000); // Sperre für 1 Sekunde
     });
-    
+
     // Event-Listener, der erkennt, wenn das Modal geschlossen wird
     modal.value.addEventListener('hidden.bs.modal', () => {
       isVisible.value = false;
@@ -129,13 +137,17 @@ onMounted(() => {
 });
 
 function showModal() {
+  // console.log('[DEBUG:RESULT] showModal() aufgerufen, isVisible:', isVisible.value);
+
   // Weniger strenge Prüfung: Nur prüfen, ob das Modal bereits sichtbar ist
   if (isVisible.value) {
+    // console.log('[DEBUG:RESULT] Modal ist bereits sichtbar, abbruch');
     return;
   }
   
   // KRITISCHE SICHERHEITSPRÜFUNG: Wenn ein neuer Poll aktiv ist, das Modal NICHT öffnen
   if (window._newPollActive) {
+    // console.log('[DEBUG:RESULT] Neuer Poll ist aktiv, Modal wird nicht geöffnet');
     return;
   }
   
@@ -149,22 +161,47 @@ function showModal() {
   // Reset percentage type to default when opening modal
   modalPercentageType.value = "validVotes";
   
-  // Zusätzliche Sicherheit: Bootstrap-Modal-Checks hinzufügen
-  if (!modal.value || !bootstrapModal) {
-    bootstrapModal = modal.value ? new Modal(modal.value) : null;
+  // KRITISCH: Stelle sicher, dass Bootstrap Modal korrekt initialisiert ist
+  if (!bootstrapModal && modal.value) {
+    try {
+      bootstrapModal = new Modal(modal.value, {
+        backdrop: 'static',
+        keyboard: false
+      });
+    } catch (e) {
+      console.error('[DEBUG:RESULT] Fehler bei Bootstrap-Modal-Initialisierung:', e);
+      isVisible.value = false;
+      return;
+    }
   }
-  
+
+  if (!bootstrapModal) {
+    console.error('[DEBUG:RESULT] Bootstrap Modal konnte nicht initialisiert werden');
+    isVisible.value = false;
+    return;
+  }
+
   // Generiere eine eindeutige ID für dieses Modal-Fenster
   const modalId = Date.now().toString();
   window._resultModalTracking.activeModalId = modalId;
-  
+
   // Wir setzen das Flag sofort auf visible um Race-Conditions zu vermeiden
   isVisible.value = true;
 
-  if (bootstrapModal) {
+  // Modal öffnen
+  try {
+    // console.log('[DEBUG:RESULT] Rufe bootstrapModal.show() auf');
     bootstrapModal.show();
-  } else {
-    // Setze Status zurück, wenn wir das Modal nicht öffnen konnten
+    // console.log('[DEBUG:RESULT] bootstrapModal.show() erfolgreich');
+
+    // KRITISCH: Stelle sicher, dass modal-open auf Body gesetzt ist
+    if (!document.body.classList.contains('modal-open')) {
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      // console.log('[DEBUG:RESULT] modal-open Klasse auf Body gesetzt');
+    }
+  } catch (e) {
+    console.error('[DEBUG:RESULT] Fehler beim Öffnen des Modals:', e);
     isVisible.value = false;
   }
 }
@@ -284,3 +321,10 @@ defineExpose({
   updatePollResult
 });
 </script>
+
+<style scoped>
+/* ResultModal mit integriertem Backdrop-Effekt */
+#resultModal.show {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+</style>
