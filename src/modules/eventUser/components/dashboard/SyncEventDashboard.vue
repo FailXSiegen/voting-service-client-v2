@@ -172,11 +172,13 @@ const showVotingModal = computed(() => {
   const maxVotes = eventUser.value?.voteAmount || 0;
   const hasRemainingVotes = usedVotes < maxVotes;
 
-  const result = hasVotesAvailable && (isAllowedToVote || hasRemainingVotes);
+  // FIX: Modal soll NUR angezeigt werden, wenn der User abstimmen darf UND noch Stimmen übrig sind
+  // Nicht mehr anzeigen, wenn alle Stimmen bereits abgegeben wurden
+  const result = hasVotesAvailable && isAllowedToVote && hasRemainingVotes;
 
   console.log(`[DEBUG:VOTING] showVotingModal berechnet: hasVotesAvailable=${hasVotesAvailable}, isAllowedToVote=${isAllowedToVote}, usedVotes=${usedVotes}, maxVotes=${maxVotes}, hasRemainingVotes=${hasRemainingVotes}, RESULT=${result}`);
 
-  // Zeige Modal wenn: (erlaubt zu wählen) ODER (noch Stimmen übrig bei Split-Voting)
+  // Zeige Modal wenn: (erlaubt zu wählen) UND (noch Stimmen übrig)
   return result;
 });
 
@@ -184,6 +186,21 @@ const showVotingModal = computed(() => {
 watch(usedVotesCount, (newVal, oldVal) => {
   console.log(`[DEBUG:VOTING] 🔄 usedVotesCount GEÄNDERT von ${oldVal} zu ${newVal}`);
   console.log(`[DEBUG:VOTING] 🔍 eventUser.voteAmount=${eventUser.value?.voteAmount}, eventUser.allowToVote=${eventUser.value?.allowToVote}`);
+
+  // FIX: Wenn alle Stimmen abgegeben wurden, resetSubmittingState aufrufen BEVOR das Modal aus dem DOM entfernt wird
+  const maxVotes = eventUser.value?.voteAmount || 0;
+  if (newVal >= maxVotes && maxVotes > 0) {
+    console.log(`[DEBUG:VOTING] 🎯 Alle Stimmen abgegeben (${newVal}/${maxVotes}), setze isSubmitting zurück`);
+    // Verwende die resetSubmittingState-Funktion des PollModals
+    if (pollModal.value?.resetSubmittingState) {
+      try {
+        pollModal.value.resetSubmittingState();
+        console.log('[DEBUG:VOTING] ✅ isSubmitting erfolgreich zurückgesetzt via resetSubmittingState');
+      } catch (e) {
+        console.error('[DEBUG:VOTING] ❌ Fehler beim Zurücksetzen von isSubmitting:', e);
+      }
+    }
+  }
 }, { immediate: true });
 
 // KRITISCH: Watcher auf showVotingModal, um zu tracken, wann es sich ändert
@@ -193,8 +210,20 @@ watch(showVotingModal, (newVal, oldVal) => {
     console.log('[DEBUG:VOTING] ✅ Modal SOLLTE jetzt im DOM sein (v-if=true)');
   } else {
     console.log('[DEBUG:VOTING] ❌ Modal SOLLTE jetzt AUS dem DOM sein (v-if=false)');
+
+    // FIX: Modal explizit schließen, BEVOR es durch v-if=false unmounted wird
+    // WICHTIG: Verwende flush: 'sync' im Watch, um sicherzustellen, dass hideModal
+    // aufgerufen wird, BEVOR Vue die Komponente aus dem DOM entfernt
+    if (pollModal.value?.hideModal) {
+      try {
+        console.log('[DEBUG:VOTING] 🔧 Rufe hideModal() auf, bevor Modal unmounted wird');
+        pollModal.value.hideModal();
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Schließen des Modals vor Unmount:', e);
+      }
+    }
   }
-}, { immediate: true });
+}, { immediate: true, flush: 'sync' });
 
 votingProcess.setVotingCompletedCallback(() => {
   if (pollState.value !== "closed") {
@@ -1001,8 +1030,19 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                 finalVoteCycle = persistedUsedVotes;
               }
 
-              // Die verwendeten Stimmen direkt übernehmen
-              votingProcess.usedVotesCount.value = finalVoteCycle;
+              // FIX: Nur überschreiben, wenn der Server-Wert größer ist als der aktuelle Client-Wert
+              // Dies verhindert Race Conditions, wenn der Bulk-Vote noch nicht vom Server verarbeitet wurde
+              const currentClientValue = votingProcess.usedVotesCount.value;
+              if (finalVoteCycle > currentClientValue) {
+                console.log(`[DEBUG:VOTING] Server hat höheren Wert (${finalVoteCycle} > ${currentClientValue}), übernehme Server-Wert`);
+                votingProcess.usedVotesCount.value = finalVoteCycle;
+              } else if (finalVoteCycle < currentClientValue) {
+                console.warn(`[DEBUG:VOTING] ⚠️ Server-Wert (${finalVoteCycle}) ist niedriger als Client-Wert (${currentClientValue}), behalte Client-Wert`);
+                // Behalte den höheren Client-Wert
+              } else {
+                console.log(`[DEBUG:VOTING] Server und Client sind synchron (${finalVoteCycle})`);
+                votingProcess.usedVotesCount.value = finalVoteCycle;
+              }
 
               // Stelle sicher, dass der Zähler korrekt initialisiert wird
               voteCounter.value = finalVoteCycle + 1;

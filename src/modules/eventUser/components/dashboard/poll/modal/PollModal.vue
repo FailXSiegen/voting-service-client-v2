@@ -117,6 +117,9 @@ const isVisible = ref(false);
 // Timer für automatische Sichtbarkeitsprüfung
 let visibilityCheckInterval = null;
 
+// MutationObserver für das Tracken von Klassenänderungen
+let modalClassObserver = null;
+
 // Funktion zum Überprüfen, ob das Modal wirklich sichtbar ist
 function checkModalVisibility() {
   // DOM-basierte Prüfung
@@ -353,6 +356,33 @@ function resetSubmittingState() {
 }
 
 onMounted(() => {
+  // KRITISCHER FIX: Entferne alle alten "Zombie"-Modal-Elemente beim Mounten
+  // Dies verhindert, dass alte Modal-Instanzen im DOM bleiben und Probleme verursachen
+  console.log('[DEBUG:VOTING] PollModal wird gemounted, prüfe auf Zombie-Modals');
+  const allModals = document.querySelectorAll('.modal');
+  allModals.forEach(oldModal => {
+    // Entferne nur Modal-Elemente, die nicht das aktuelle sind
+    if (oldModal !== modal.value) {
+      console.log('[DEBUG:VOTING] Entferne Zombie-Modal:', oldModal.id);
+      oldModal.remove();
+    }
+  });
+
+  // Entferne auch alle Backdrops
+  const allBackdrops = document.querySelectorAll('.modal-backdrop');
+  allBackdrops.forEach(backdrop => {
+    console.log('[DEBUG:VOTING] Entferne Zombie-Backdrop');
+    backdrop.remove();
+  });
+
+  // Entferne modal-open von body
+  if (document.body.classList.contains('modal-open')) {
+    console.log('[DEBUG:VOTING] Entferne modal-open von body beim Mount');
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+  }
+
   bootstrapModal = new Modal(modal.value);
 
   // Event-Listener hinzufügen, um den sichtbaren Zustand des Modals zu verfolgen
@@ -372,9 +402,14 @@ onMounted(() => {
 
     // KRITISCH: Permanenter MutationObserver um zu tracken, wann die show-Klasse entfernt wird
     let lastHadShow = false;
-    const observer = new MutationObserver((mutations) => {
+    modalClassObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          // SICHERHEITSCHECK: Prüfe, ob modal.value noch existiert (kann null sein beim Unmounting)
+          if (!modal.value) {
+            console.warn('[DEBUG:VOTING] Observer läuft, aber modal.value ist null - überspringe');
+            return;
+          }
           const hasShow = modal.value.classList.contains('show');
           const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
           const maxVotes = props.eventUser?.voteAmount || 0;
@@ -400,7 +435,7 @@ onMounted(() => {
         }
       });
     });
-    observer.observe(modal.value, { attributes: true, attributeFilter: ['class'] });
+    modalClassObserver.observe(modal.value, { attributes: true, attributeFilter: ['class'] });
   }
 
   // Setup completion handler to show appropriate UI state when voting is complete
@@ -452,13 +487,61 @@ onMounted(() => {
   // Cleanup für dieses Intervall hinzufügen (auskommentiert, da submittingCheckInterval deaktiviert)
   onBeforeUnmount(() => {
     // clearInterval(submittingCheckInterval);
-    
+
     // Auch die Event-Listener entfernen
     if (typeof window !== 'undefined') {
       window.removeEventListener('voting:complete', handleVotingComplete);
       window.removeEventListener('voting:error', handleVotingError);
       window.removeEventListener('voting:reset', handleVotingReset);
     }
+
+    // KRITISCHER FIX: MutationObserver disconnecten
+    if (modalClassObserver) {
+      modalClassObserver.disconnect();
+      modalClassObserver = null;
+      console.log('[DEBUG:VOTING] MutationObserver disconnected');
+    }
+
+    // Sichtbarkeits-Interval stoppen
+    if (visibilityCheckInterval) {
+      clearInterval(visibilityCheckInterval);
+      visibilityCheckInterval = null;
+      console.log('[DEBUG:VOTING] Visibility check interval cleared');
+    }
+
+    // KRITISCHER FIX: Bootstrap Modal SOFORT zerstören, bevor Component unmounted wird
+    if (bootstrapModal) {
+      try {
+        bootstrapModal.dispose();
+        console.log('[DEBUG:VOTING] Bootstrap Modal disposed');
+      } catch (e) {
+        console.error('[DEBUG:VOTING] Fehler beim Dispose des Bootstrap Modals:', e);
+      }
+    }
+
+    // KRITISCHER FIX: Modal-Element DIREKT aus DOM entfernen
+    // Dies ist notwendig, weil Bootstrap das Element nicht automatisch entfernt
+    if (modal.value && modal.value.parentNode) {
+      console.log('[DEBUG:VOTING] Entferne Modal-Element direkt aus DOM');
+      modal.value.parentNode.removeChild(modal.value);
+    }
+
+    // KRITISCHER FIX: Backdrop entfernen beim Unmounten der Komponente
+    // Dies verhindert, dass der Backdrop sichtbar bleibt, wenn das Modal durch v-if=false entfernt wird
+    console.log('[DEBUG:VOTING] PollModal wird unmounted, entferne Backdrop und modal-open');
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => {
+      if (backdrop && backdrop.parentNode) {
+        backdrop.parentNode.removeChild(backdrop);
+        console.log('[DEBUG:VOTING] Backdrop entfernt');
+      }
+    });
+
+    // Entferne auch modal-open von body
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    console.log('[DEBUG:VOTING] modal-open von body entfernt');
   });
   
   // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
