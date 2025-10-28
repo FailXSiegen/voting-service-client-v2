@@ -68,8 +68,8 @@
           </div>
         </div>
 
-        <!-- Quick selection buttons - only show if user has more than 3 votes -->
-        <div v-if="props.eventUser.voteAmount > 3" class="btn-group w-100 mb-2">
+        <!-- Quick selection buttons - only show if user has more than 3 remaining votes -->
+        <div v-if="remainingVotes > 3" class="btn-group w-100 mb-2">
           <button
             type="button"
             class="btn btn-outline-primary"
@@ -107,13 +107,14 @@
         <!-- Vote slider and input -->
         <div class="row mb-2">
           <div class="col-12 col-lg-8 d-flex align-items-center">
-            <input 
-              v-model.number="formData.votesToUse" 
-              type="range" 
-              class="form-range flex-grow-1 me-2" 
-              min="1" 
+            <input
+              v-model.number="formData.votesToUse"
+              type="range"
+              class="form-range flex-grow-1 me-2"
+              min="1"
               :max="remainingVotes"
               :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+              @input="onSliderChange"
             >
           </div>
           <!-- Numerical input -->
@@ -126,6 +127,7 @@
                 min="1"
                 :max="remainingVotes"
                 :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+                @input="onNumberInputChange"
               >
               <span class="input-group-text">{{ $t('view.polls.modal.votes') }}</span>
             </div>
@@ -146,8 +148,8 @@
           }) }}
         </div>
 
-        <!-- Checkbox for "Use all available votes" -->
-        <div class="mt-2">
+        <!-- Checkbox for "Use all available votes" - nur anzeigen wenn mehr als 1 Stimme verfügbar -->
+        <div v-if="remainingVotes > 1" class="mt-2">
           <CheckboxInput
             id="submit-answer-for-each-vote"
             :label="$t('view.polls.modal.useAllVotes')"
@@ -467,6 +469,9 @@ const formData = reactive({
   votesToUse: 1,
 });
 
+// Flag um zu tracken, ob gerade eine programmatische Änderung läuft
+let isUpdatingProgrammatically = false;
+
 // KRITISCH: Überwache explizit die Poll-ID, um das Formular zurückzusetzen
 // wenn zu einer neuen Abstimmung gewechselt wird
 watch(() => props.poll?.id, (newPollId, oldPollId) => {
@@ -500,16 +505,28 @@ watch(() => props.poll?.id, (newPollId, oldPollId) => {
 watch(() => remainingVotes.value, (newValue, oldValue) => {
   // Nur reagieren, wenn sich der Wert tatsächlich geändert hat
   if (newValue === oldValue) return;
-  
-  // Rekursion-Schutz: Stelle sicher, dass wir nicht in eine Endlosschleife geraten
-  // indem wir prüfen, ob wir bereits auf dem aktuellen Wert sind
-  if (formData.votesToUse !== newValue) {
-    formData.votesToUse = newValue;
-  }
-  
-  // Checkbox nur setzen, wenn der Zustand sich ändert
-  if (!formData.useAllAvailableVotes) {
-    formData.useAllAvailableVotes = true;
+
+  // BUGFIX: Wenn gerade eine programmatische Änderung läuft, nicht eingreifen
+  // Dies verhindert Race Conditions zwischen den Watchern
+  if (isUpdatingProgrammatically) return;
+
+  isUpdatingProgrammatically = true;
+  try {
+    // Rekursion-Schutz: Stelle sicher, dass wir nicht in eine Endlosschleife geraten
+    // indem wir prüfen, ob wir bereits auf dem aktuellen Wert sind
+    if (formData.votesToUse !== newValue) {
+      formData.votesToUse = newValue;
+
+      // BUGFIX: Checkbox nur setzen, wenn wir auch votesToUse anpassen
+      // und nur wenn die Checkbox nicht bereits manuell vom Benutzer gesetzt wurde
+      // Das verhindert, dass die Checkbox bei 100% bleibt wenn der Slider bewegt wird
+      if (!formData.useAllAvailableVotes) {
+        formData.useAllAvailableVotes = true;
+      }
+    }
+  } finally {
+    // Wichtig: Flag zurücksetzen, auch wenn ein Fehler auftritt
+    isUpdatingProgrammatically = false;
   }
 }, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
 
@@ -643,16 +660,61 @@ function setVotesToUse(amount) {
   }
 }
 
+function onSliderChange(event) {
+  // Direkter Event-Handler für Slider-Änderungen
+  const newValue = parseInt(event.target.value, 10);
+
+  // Synchronisiere die Checkbox basierend auf dem Slider-Wert
+  const shouldUseAllVotes = (newValue === remainingVotes.value);
+
+  // Setze Flag um Watcher-Rekursion zu verhindern
+  isUpdatingProgrammatically = true;
+  try {
+    formData.useAllAvailableVotes = shouldUseAllVotes;
+  } finally {
+    isUpdatingProgrammatically = false;
+  }
+}
+
+function onNumberInputChange(event) {
+  // Direkter Event-Handler für Zahlen-Eingabefeld-Änderungen
+  const newValue = parseInt(event.target.value, 10);
+
+  // Nur synchronisieren wenn der Wert gültig ist
+  if (!isNaN(newValue) && newValue >= 1 && newValue <= remainingVotes.value) {
+    // Synchronisiere die Checkbox basierend auf dem Eingabewert
+    const shouldUseAllVotes = (newValue === remainingVotes.value);
+
+    // Setze Flag um Watcher-Rekursion zu verhindern
+    isUpdatingProgrammatically = true;
+    try {
+      formData.useAllAvailableVotes = shouldUseAllVotes;
+    } finally {
+      isUpdatingProgrammatically = false;
+    }
+  }
+}
+
 function onCheckboxChange(isChecked) {
   // Überprüfe, ob sich der Zustand tatsächlich geändert hat
   if (formData.useAllAvailableVotes === isChecked) return;
-  
-  formData.useAllAvailableVotes = isChecked;
 
-  // Nur die Stimmenzahl aktualisieren, wenn wir "Alle Stimmen" auswählen
-  // und der aktuelle Wert nicht bereits die maximale Stimmenzahl ist
-  if (isChecked && formData.votesToUse !== remainingVotes.value) {
-    formData.votesToUse = remainingVotes.value;
+  // Setze Flag um Watcher-Rekursion zu verhindern
+  isUpdatingProgrammatically = true;
+  try {
+    formData.useAllAvailableVotes = isChecked;
+
+    if (isChecked) {
+      // Wenn Checkbox aktiviert wird: Alle Stimmen verwenden
+      if (formData.votesToUse !== remainingVotes.value) {
+        formData.votesToUse = remainingVotes.value;
+      }
+    } else {
+      // Wenn Checkbox deaktiviert wird: Auf 1 Stimme zurücksetzen
+      formData.votesToUse = 1;
+    }
+  } finally {
+    isUpdatingProgrammatically = false;
   }
 
   // Überprüfe, ob wir bei jedem UI-Event den Button-Status aktualisieren sollten
@@ -674,20 +736,24 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
     return;
   }
 
+  // BUGFIX: Wenn gerade eine programmatische Änderung läuft, nicht eingreifen
+  // Dies verhindert Race Conditions zwischen den Watchern
+  if (isUpdatingProgrammatically) return;
+
   // KRITISCH: Endlosschleifen-Erkennung und Schutz
   // Erkenne mögliche Endlosschleifen bei Werten nahe 0 oder remainingVotes
   if (typeof window._votesToUsePreviousValues === 'undefined') {
     window._votesToUsePreviousValues = [];
   }
-  
+
   // Füge aktuellen Wert zum Verlauf hinzu
   window._votesToUsePreviousValues.push(newValue);
-  
+
   // Behalte nur die letzten 5 Werte
   if (window._votesToUsePreviousValues.length > 5) {
     window._votesToUsePreviousValues.shift();
   }
-  
+
   // Prüfe auf oszillierende Werte (mögliche Endlosschleife)
   const uniqueValues = new Set(window._votesToUsePreviousValues);
   if (window._votesToUsePreviousValues.length >= 4 && uniqueValues.size <= 2) {
@@ -697,46 +763,52 @@ watch(() => formData.votesToUse, (newValue, oldValue) => {
 
   // Debug-Ausgabe
   // console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
-  
+
   // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
   // wenn sich der Wert tatsächlich geändert hat
   if (newValue === oldValue) return;
-  
-  // KRITISCH: Spezialbehandlung für den Fall, dass remainingVotes 0 ist
-  // In diesem Fall akzeptieren wir nur 0 als gültigen Wert für votesToUse
-  if (remainingVotes.value === 0) {
-    if (newValue !== 0) {
-      // console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
-      formData.votesToUse = 0;
+
+  isUpdatingProgrammatically = true;
+  try {
+    // KRITISCH: Spezialbehandlung für den Fall, dass remainingVotes 0 ist
+    // In diesem Fall akzeptieren wir nur 0 als gültigen Wert für votesToUse
+    if (remainingVotes.value === 0) {
+      if (newValue !== 0) {
+        // console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
+        formData.votesToUse = 0;
+      }
+      // Checkbox auf true setzen, da 0 von 0 = 100%
+      if (!formData.useAllAvailableVotes) {
+        formData.useAllAvailableVotes = true;
+      }
+      return;
     }
-    // Checkbox auf true setzen, da 0 von 0 = 100%
-    if (!formData.useAllAvailableVotes) {
-      formData.useAllAvailableVotes = true;
+
+    let correctedValue = newValue;
+
+    // Korrigiere den Wert, wenn er außerhalb des gültigen Bereichs liegt
+    if (newValue < 1) {
+      correctedValue = 1;
+    } else if (newValue > remainingVotes.value) {
+      correctedValue = remainingVotes.value;
     }
-    return;
-  }
-  
-  let correctedValue = newValue;
-  
-  // Korrigiere den Wert, wenn er außerhalb des gültigen Bereichs liegt
-  if (newValue < 1) {
-    correctedValue = 1;
-  } else if (newValue > remainingVotes.value) {
-    correctedValue = remainingVotes.value;
-  }
-  
-  // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
-  if (correctedValue !== newValue) {
-    // console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
-    formData.votesToUse = correctedValue;
-  }
-  
-  // Synchronisiere die "Alle Stimmen verwenden" Checkbox 
-  // aber nur wenn sich der Wert tatsächlich geändert hat
-  const shouldUseAllVotes = (correctedValue === remainingVotes.value);
-  if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
-    // console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
-    formData.useAllAvailableVotes = shouldUseAllVotes;
+
+    // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
+    if (correctedValue !== newValue) {
+      // console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
+      formData.votesToUse = correctedValue;
+    }
+
+    // Synchronisiere die "Alle Stimmen verwenden" Checkbox
+    // aber nur wenn sich der Wert tatsächlich geändert hat
+    const shouldUseAllVotes = (correctedValue === remainingVotes.value);
+    if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
+      // console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
+      formData.useAllAvailableVotes = shouldUseAllVotes;
+    }
+  } finally {
+    // Wichtig: Flag zurücksetzen, auch wenn ein Fehler auftritt
+    isUpdatingProgrammatically = false;
   }
 }, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
 

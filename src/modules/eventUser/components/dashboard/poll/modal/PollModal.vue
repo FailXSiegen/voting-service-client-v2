@@ -37,6 +37,14 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
                 <b>(Stimmzettel {{ votingProcess.usedVotesCount?.value + 1 }} von {{ eventUser.voteAmount }})</b>
               </small>
             </h5>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-secondary ms-auto"
+              @click="reloadPage"
+              title="Seite neu laden"
+            >
+              <i class="bi bi-arrow-clockwise"></i>
+            </button>
           </div>
 
           <div class="modal-body">
@@ -631,12 +639,16 @@ onMounted(() => {
     }
   });
 
+function reloadPage() {
+  window.location.reload();
+}
+
 function onSubmit(data) {
   if (isSubmitting.value) {
     console.warn('Vermeidung von doppelter Stimmabgabe: Formular ist bereits im Submitting-Zustand');
     return;
   }
-  
+
   isSubmitting.value = true;
   
   // WICHTIG: Speichere den Zeitpunkt des Submit-Beginns für automatische Überwachung
