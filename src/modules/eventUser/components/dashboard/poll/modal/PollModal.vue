@@ -34,7 +34,7 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
             <h5 class="modal-title">
               {{ poll.title }}<br />
               <small v-if="props.event.multivoteType !== 2 && votingProcess.usedVotesCount?.value < eventUser.voteAmount" id="pollCounter">
-                <b>(Stimmzettel {{ votingProcess.usedVotesCount?.value + 1 }} von {{ eventUser.voteAmount }})</b>
+                <b>({{ $t('view.polls.modal.ballotCounter', { current: votingProcess.usedVotesCount?.value + 1, total: eventUser.voteAmount }) }})</b>
               </small>
             </h5>
             <button
