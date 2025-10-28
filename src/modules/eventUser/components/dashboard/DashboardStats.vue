@@ -14,7 +14,7 @@
         $t("view.event.user.visitor")
       }}</span>
       <span v-if="eventUser.allowToVote">
-        | Anzahl Stimmzettel:
+        | {{ $t("view.polls.modal.ballotCount") }}:
         <span class="badge text-bg-info">{{ eventUser.voteAmount }}</span></span
       >
       <span> | Status: </span>

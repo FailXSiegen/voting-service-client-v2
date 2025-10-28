@@ -385,7 +385,9 @@ export default
           "useAllVotes": "100 % der Stimmzettel verwenden",
           "votesToUseHelptext": "Geben Sie an, wie viele Ihrer Stimmzettel Sie für diese Umfrage verwenden möchten.",
           "ofTotalVotes": "von Stimmzetteln",
-          "fewVotesRemaining": "Nur noch wenige Stimmzettel übrig"
+          "fewVotesRemaining": "Nur noch wenige Stimmzettel übrig",
+          "ballotCounter": "Stimmzettel {current} von {total}",
+          "ballotCount": "Anzahl Stimmzettel"
         },
         "active": {
           "title": "Aktuelle Abstimmung",
