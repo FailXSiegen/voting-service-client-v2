@@ -21,7 +21,7 @@
       :event="event"
       :event-user="eventUser"
     />
-    <PollStatus :exist-active-poll="existActivePoll" :poll-state="pollState" />
+    <PollStatus :exist-active-poll="existActivePoll" :poll-state="pollState" :vote-amount="eventUser?.voteAmount || 0" />
     <VotingDetailsWithSubscription
       v-if="poll?.type === 'PUBLIC' && existActivePoll && event.publicVoteVisible"
       :active-poll-event-user="activePollEventUser"
