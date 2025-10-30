@@ -1,7 +1,7 @@
 <template>
   <div class="container-poll-status d-print-none">
     <div
-      v-if="pollState === 'voted'"
+      v-if="pollState === 'voted' && hasVotingRights"
       class="container-poll-voted text-center alert alert-success"
     >
       <i class="bi-check bi--4xl my-3" />
@@ -29,7 +29,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
   pollState: {
     type: String,
     required: true,
@@ -38,5 +40,13 @@ defineProps({
     type: Boolean,
     required: true,
   },
+  voteAmount: {
+    type: Number,
+    required: true,
+  },
+});
+
+const hasVotingRights = computed(() => {
+  return props.voteAmount > 0;
 });
 </script>
