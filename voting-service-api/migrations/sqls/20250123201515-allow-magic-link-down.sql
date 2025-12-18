@@ -1,1 +1,0 @@
-ALTER TABLE `event` DROP COLUMN `allow_magic_link`;
