@@ -3,7 +3,7 @@
     <h2>{{ $t("view.results.pastResults") }}</h2>
     <div v-if="visiblePollResults?.length > 0" class="created-polls">
       <ResultItem
-        v-for="(pollResult, index) in visiblePollResults"
+        v-for="pollResult in visiblePollResults"
         :key="pollResult.id"
         :event-record="eventRecord"
         :poll-result="pollResult"

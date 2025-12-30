@@ -181,7 +181,6 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
     console.warn('[ORGANIZER DEBUG] MemberRoom - No valid data in eventUserLifeCycle event');
     return;
   }
-
   
   // We have to make a copy to add a new entry to the event users array.
   // Ensure eventUsers.value is an array before copying

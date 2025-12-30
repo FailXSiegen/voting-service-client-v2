@@ -149,7 +149,9 @@ export default {
       required: true
     }
   },
-  
+
+  emits: ['input', 'update:modelValue', 'change'],
+
   data() {
     return {
       items: [],
@@ -271,7 +273,7 @@ export default {
     /**
      * Update item data
      */
-    updateItem(index) {
+    updateItem() {
       this.emitUpdate();
     },
     

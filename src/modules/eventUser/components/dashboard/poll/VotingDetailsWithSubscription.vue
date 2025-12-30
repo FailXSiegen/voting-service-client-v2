@@ -14,9 +14,9 @@
         </small>
         <button
           class="btn btn-sm btn-outline-primary"
-          @click="refreshManually"
           :disabled="refreshing"
           :title="$t('view.polls.active.refresh')"
+          @click="refreshManually"
         >
           <i :class="refreshing ? 'bi bi-arrow-clockwise spinning' : 'bi bi-arrow-clockwise'"></i>
         </button>

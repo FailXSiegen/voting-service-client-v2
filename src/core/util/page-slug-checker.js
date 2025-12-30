@@ -1,4 +1,3 @@
-import { gql } from 'graphql-tag';
 import { apolloClient } from '@/apollo-client';
 // Import the GraphQL queries from page-slug-mutations.js to avoid duplication
 import { FETCH_PAGE_SLUG_BY_SLUG as PAGE_SLUG_BY_SLUG_QUERY } from '@/modules/organizer/graphql/mutation/page-slug-mutations';

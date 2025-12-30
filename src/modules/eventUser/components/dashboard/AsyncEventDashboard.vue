@@ -93,7 +93,6 @@ const highlightStatusChange = ref(false);
 const availablePolls = ref([]);
 const pollResults = ref([]);
 const pollStatePersistence = usePollStatePersistence();
-const { canVote } = pollStatePersistence;
 const votingProcess = useVotingProcess(eventUser, props.event);
 const voteCounter = votingProcess.voteCounter;
 votingProcess.setVotingCompletedCallback(onVotingCompleted);

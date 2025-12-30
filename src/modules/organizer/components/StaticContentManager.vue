@@ -2472,7 +2472,7 @@ const saveContentInternal = async (continueEditing) => {
         errorMessage.includes('Duplicate entry')) {
 
       console.error('Duplikat-Fehler erkannt:', err);
-      toast.error(`Diese Kombination aus Seitenschlüssel "${pageKey}" und Abschnittschlüssel "${sectionKey}" existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`);
+      toast.error(`Diese Kombination aus Seitenschlüssel "${formData.value.pageKey}" und Abschnittschlüssel "${formData.value.sectionKey}" existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`);
 
       // Fokus auf das Feld setzen
       setTimeout(() => {

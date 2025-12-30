@@ -49,7 +49,6 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import t from "@/core/util/l18n";
 
 const STORAGE_KEY = 'active_poll_collapsed';
 

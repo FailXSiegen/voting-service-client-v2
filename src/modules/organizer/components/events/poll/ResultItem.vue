@@ -23,9 +23,9 @@
           class="btn btn-sm d-print-none ms-2"
           :class="isHidden ? 'btn-outline-success' : 'btn-outline-secondary'"
           type="button"
-          @click="toggleHidden"
           :disabled="isTogglingHidden"
           :title="isHidden ? $t('view.results.showResult') : $t('view.results.hideResult')"
+          @click="toggleHidden"
         >
           <i :class="isHidden ? 'bi bi-eye' : 'bi bi-eye-slash'" />
         </button>
@@ -262,11 +262,11 @@ v-else
 
 <script setup>
 import { computed, ref, watch, onMounted } from "vue";
+/* global bootstrap */
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import { useMutation } from "@vue/apollo-composable";
 import { TOGGLE_POLL_RESULT_HIDDEN } from "@/modules/organizer/graphql/mutation/toggle-poll-result-hidden";
 import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
 
 // Bootstrap Tooltips initialisieren
 onMounted(() => {
@@ -352,11 +352,6 @@ function changePercentageType(type) {
 // Maximum selectable options per voter from poll configuration
 const maxSelectPerVoter = computed(() => {
   return props.pollResult?.poll?.maxSelect || 1;
-});
-
-// Maximum potential votes from participants (number of participants × max selectable options)
-const maxPotentialVotes = computed(() => {
-  return (props.pollResult?.pollUser?.length || 0) * maxSelectPerVoter.value;
 });
 
 // Maximum votes possible per option
@@ -512,8 +507,8 @@ function isMajority(answerLength) {
   
   // Get all vote counts excluding abstentions
   const voteCounts = Object.entries(pollAnswerGroups.value)
-    .filter(([option]) => option !== 'Enthaltung')
-    .map(([_, answers]) => answers.length);
+    .filter(([_option]) => _option !== 'Enthaltung')
+    .map(([, answers]) => answers.length);
   
   if (voteCounts.length === 0) return false;
   

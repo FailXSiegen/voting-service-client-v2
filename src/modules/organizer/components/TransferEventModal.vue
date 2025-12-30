@@ -107,9 +107,6 @@ const props = defineProps({
 
 const emit = defineEmits(['transfer-success', 'transfer-error']);
 
-const coreStore = useCore();
-const isSuperAdmin = computed(() => coreStore?.user?.superAdmin === true);
-
 const loading = ref(false);
 const error = ref(null);
 const organizers = ref([]);

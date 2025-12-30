@@ -207,7 +207,6 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import defaultMessages from '@/messages.js';
 import { toast } from 'vue3-toastify';
-import { deepMerge } from '@/core/util/deep-merge';
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
 import { useApolloClient } from '@vue/apollo-composable';
@@ -254,7 +253,6 @@ const currentLocale = ref('de');
 // Recursively extract all leaf nodes from the messages object
 const extractLeafNodes = (obj, locale = 'de', path = '') => {
   console.debug("Extracting messages for locale:", locale);
-  const result = [];
 
   // Special case for the top level object with locale keys
   if (path === '' && obj[locale]) {
@@ -368,7 +366,7 @@ const loadMessages = async (locale = currentLocale.value) => {
     const result = [];
 
     // Rekursive Funktion zum Durchlaufen der Originalmeldungen
-    function processMessages(obj, path = '') {
+    const processMessages = (obj, path = '') => {
       Object.keys(obj).forEach(key => {
         const currentPath = path ? `${path}.${key}` : key;
 
@@ -410,7 +408,7 @@ const loadMessages = async (locale = currentLocale.value) => {
           });
         }
       });
-    }
+    };
 
     // Bearbeitung starten und Ergebnis speichern
     processMessages(originalMessages);
@@ -429,7 +427,7 @@ function getNestedPropertyExists(obj, pathArray) {
   let current = obj;
 
   for (const key of pathArray) {
-    if (current === undefined || current === null || !current.hasOwnProperty(key)) {
+    if (current === undefined || current === null || !Object.prototype.hasOwnProperty.call(current, key)) {
       return false;
     }
     current = current[key];
@@ -571,15 +569,11 @@ const resetMessage = async (item) => {
 
         // Remove this path from the local messages
         let current = currentCustom;
-        let parentObj = null;
-        let lastKey = null;
 
         // Find the parent object containing the key to delete
         for (let i = 0; i < path.length - 1; i++) {
           if (!current[path[i]]) break;
-          parentObj = current;
           current = current[path[i]];
-          lastKey = path[i];
         }
 
         // If we found the path, delete the key

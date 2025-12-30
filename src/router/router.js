@@ -46,7 +46,7 @@ import {
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 import { USER_ROLE_ORGANIZER } from "@/core/auth/login";
-import { getPageSlugBySlug, STATIC_ROUTE_MAPPING } from "@/core/util/page-slug-checker";
+import { getPageSlugBySlug } from "@/core/util/page-slug-checker";
 
 import MainLogin from "@/core/views/MainLogin.vue";
 import NotFound from "@/core/views/NotFound.vue";
@@ -94,7 +94,7 @@ import { fetchEventBySlug } from "@/modules/eventUser/requests/fetch-event-by-sl
 const routes = [
   // Debug-Route, um zu prüfen, ob diese Route aktiviert wird
   new Route("/debug-route", "debugRoute", NotFound, {
-    beforeEnter: (to, from) => {
+    beforeEnter: () => {
       console.log('Debug route was hit!');
       return true;
     }
@@ -383,7 +383,7 @@ const routes = [
     null,
     true,
     null,
-    async (to) => {
+    async () => {
       const coreStore = useCore();
 
       // Wait for authentication to be initialized
@@ -608,7 +608,6 @@ const routes = [
         to.params = { ...to.params, pageKey };
 
         // Eine statische Seite wird aufgerufen
-        const coreStore = useCore();
         console.log(`StaticContent existence will be checked for: ${pageKey}`);
 
         // Zur GenericStaticPage-Komponente navigieren

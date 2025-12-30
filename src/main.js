@@ -12,7 +12,7 @@ import Vue3EasyDataTable from "vue3-easy-data-table";
 import VueDatePicker from "@vuepic/vue-datepicker";
 import { createPinia } from "pinia";
 import jQuery from "jquery";
-import Vue3Toastify, { toast } from 'vue3-toastify';
+import Vue3Toastify from 'vue3-toastify';
 import { watch } from 'vue';
 window.$ = window.jQuery = jQuery;
 

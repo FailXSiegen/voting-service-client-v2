@@ -6,9 +6,6 @@ import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/
 import { CREATE_BULK_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer";
 import { USER_VOTE_CYCLE } from "@/modules/eventUser/graphql/queries/user-vote-cycle";
 
-// Erstelle ein Symbol als eindeutigen Key für Browser-Isolation
-const instanceKey = Symbol('voting-process-instance');
-
 // Globale Map um zu tracken, welche Browser-Instanz aktiv abstimmt
 // Diese ist über Hooks hinweg isoliert
 const globalBrowserSessions = new Map();
@@ -84,7 +81,6 @@ export function useVotingProcess(eventUser, event) {
 
     // Speichere die ursprünglichen Werte für Debug-Zwecke
     const origUsedVotesCount = usedVotesCount.value;
-    const origVoteCounter = voteCounter.value;
 
     console.log(`[DEBUG:VOTING] resetVoteCountersForNewPoll aufgerufen: newPollId=${newPollId}, currentPollId=${currentPollId.value}, usedVotesCount=${origUsedVotesCount}`);
 
@@ -130,9 +126,6 @@ export function useVotingProcess(eventUser, event) {
         // Insbesondere die ausgewählten Antworten (multipleAnswers, singleAnswer)
         // Dies verhindert, dass alte Antwort-IDs von der vorherigen Abstimmung verwendet werden
         localStorage.removeItem(`poll_form_data_${oldPollId}`);
-      } else {
-        // Bei einem Reload oder Navigation: Versuche den gespeicherten Zustand zu laden
-        const savedMaxVotes = pollStatePersistence.getMaxVotesToUse(newPollId, eventObj.id);
       }
     } else {
       console.warn(`[DEBUG:VOTING] Konnte Zustand nicht zurücksetzen: Event-ID nicht verfügbar`);
@@ -292,7 +285,6 @@ export function useVotingProcess(eventUser, event) {
 
       const maxAllowedVotes = eventUser.value.voteAmount;
       const remainingVotes = maxAllowedVotes - usedVotesCount.value;
-
 
       // KRITISCH: Prüfe ob es bereits eine gespeicherte maximale Stimmanzahl gibt
       // Eventobj wurde bereits vorher deklariert, also benutzen wir es hier wieder
@@ -1540,9 +1532,6 @@ export function useVotingProcess(eventUser, event) {
         const successCount = result.data?.createBulkPollSubmitAnswer || 0;
 
         // Ende der Zeitmessung
-        const endTime = performance.now();
-        const duration = Math.round(endTime - startTime);
-
         if (successCount > 0) {
           // Zähler für die abgegebenen Stimmen aktualisieren
           // WICHTIGER FIX: Wir erhöhen den Zähler um die tatsächliche Anzahl der erfolgreichen Stimmen!

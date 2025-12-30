@@ -41,7 +41,6 @@ import {
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings
 } from "@/router/routes";
-import { useCore } from "@/core/store/core";
 
 // Define navigation items
 const routes = getRoutesByName([

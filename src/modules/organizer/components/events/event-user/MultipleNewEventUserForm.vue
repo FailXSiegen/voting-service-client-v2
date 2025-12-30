@@ -135,13 +135,12 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
-import { required, requiredIf } from "@vuelidate/validators";
+import { computed, reactive, ref } from "vue";
+import { required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
 import { handleError } from "@/core/error/error-handler";
 import { InvalidFormError } from "@/core/error/InvalidFormError";
 import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import BaseInput from "@/core/components/form/BaseInput.vue";
 import TextInput from "@/core/components/form/TextInput.vue";
 import { NetworkError } from "@/core/error/NetworkError";
 import { isValidEmail } from "@/core/util/email-validator";

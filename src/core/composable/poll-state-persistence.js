@@ -204,7 +204,7 @@ export function usePollStatePersistence() {
       // Zur Überprüfung: Lese die gespeicherten Daten sofort wieder aus
       const rawStored = persistence.getItem(stateKey);
       try {
-        const parsedState = JSON.parse(rawStored);
+        JSON.parse(rawStored);
       } catch (e) {
         console.error(`[DEBUG:STORAGE] Fehler beim Parsen des gespeicherten Werts:`, e);
       }

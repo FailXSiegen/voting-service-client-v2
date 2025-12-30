@@ -50,8 +50,8 @@
         <button 
           type="button" 
           class="btn btn-secondary btn-sm" 
-          @click="onRefresh"
           :disabled="isRefreshing"
+          @click="onRefresh"
         >
           {{ $t("view.polls.active.refresh") || "Aktualisieren" }}
         </button>

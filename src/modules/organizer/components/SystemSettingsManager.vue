@@ -7,7 +7,7 @@
       </h5>
     </div>
     <div class="card-body">
-      <form @submit.prevent="onSave" class="needs-validation" novalidate>
+      <form class="needs-validation" novalidate @submit.prevent="onSave">
         <!-- Title Suffix -->
         <div class="mb-3">
           <label class="form-label">
@@ -185,10 +185,10 @@
   <MediaManager
     v-if="showMediaManager"
     :show="showMediaManager"
-    @close="showMediaManager = false"
-    @selected="onMediaSelected"
     accept-types="image/*"
     :max-file-size="1024 * 1024"
+    @close="showMediaManager = false"
+    @selected="onMediaSelected"
   />
 </template>
 

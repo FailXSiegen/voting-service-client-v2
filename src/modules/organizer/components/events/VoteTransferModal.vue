@@ -1,7 +1,7 @@
 <template>
   <div
-    class="modal fade"
     :id="modalId"
+    class="modal fade"
     tabindex="-1"
     aria-labelledby="voteTransferModalLabel"
     aria-hidden="true"
@@ -9,7 +9,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="voteTransferModalLabel">
+          <h1 id="voteTransferModalLabel" class="modal-title fs-5">
             {{ $t("voteTransfer.modal.title") }}
           </h1>
           <button
@@ -42,10 +42,10 @@
                   class="form-control"
                   :placeholder="$t('voteTransfer.searchUserPlaceholder')"
                   :disabled="!availableTargetUsers || availableTargetUsers.length === 0"
+                  autocomplete="off"
                   @focus="onInputFocus"
                   @blur="onInputBlur"
                   @input="onInputChange"
-                  autocomplete="off"
                 />
               </div>
               <div v-if="selectedTargetUser" class="mt-2">
@@ -232,7 +232,6 @@ const canTransfer = computed(() => {
          votesToTransfer.value > 0 &&
          votesToTransfer.value <= (props.sourceUser?.voteAmount || 0);
 });
-
 
 // Watch for source user changes to reset form
 watch(() => props.sourceUser, (newUser) => {

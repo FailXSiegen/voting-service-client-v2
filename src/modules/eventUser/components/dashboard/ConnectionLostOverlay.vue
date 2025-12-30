@@ -28,9 +28,7 @@
 <script setup>
 import { logout } from "@/core/auth/login";
 import { useCore } from "@/core/store/core";
-import { useRouter } from "vue-router";
 
-const router = useRouter();
 const store = useCore();
 
 function onReloadPage() {

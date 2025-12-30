@@ -86,14 +86,13 @@ import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results"
 import { ACTIVE_POLL_EVENT_USER } from "@/modules/organizer/graphql/queries/active-poll-event-user.js";
 import { USER_VOTE_CYCLE } from "@/modules/eventUser/graphql/queries/user-vote-cycle";
 import { toast } from "vue3-toastify";
-import l18n from "@/l18n";
+import { useI18n } from "vue-i18n";
 import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
 import { POLL_LIFE_CYCLE_SUBSCRIPTION } from "@/modules/eventUser/graphql/subscription/poll-life-cycle";
 import { usePollStatePersistence } from "@/core/composable/poll-state-persistence";
 import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 import { apolloClient } from "@/apollo-client";
 import { POLL_ANSWER_LIVE_CYCLE } from "@/modules/organizer/graphql/subscription/poll-answer-life-cycle";
-import { useI18n } from "vue-i18n";
 
 const coreStore = useCore();
 const { t } = useI18n();
@@ -158,9 +157,6 @@ function ensureUIIsUnlocked() {
   }
 }
 
-// Eine eindeutige ID, die nur innerhalb dieser Browser-Session existiert
-// Wird verwendet, um eigene Events von fremden Events zu unterscheiden
-const localBrowserSessionKey = ref(Date.now().toString() + "-" + Math.random().toString(36).substring(2, 15));
 const currentPollSubmissionId = ref(null); // Speichert die ID der aktuellen Abstimmungssession
 const showVotingModal = computed(() => {
   // KRITISCH: Modal muss auch bei Split-Voting sichtbar bleiben!
@@ -366,9 +362,6 @@ activePollEventUserQuery.onResult(({ data }) => {
           
           // Stelle sicher, dass der Zähler korrekt initialisiert wird
           voteCounter.value = serverVoteCycle + 1;
-          
-          // Vergleichen mit dem Wert aus dem localStorage
-          const storedCounter = pollStatePersistence.restoreVoteCounter(poll.value.id, props.event.id);
           
           // Persistieren, damit future Loads konsistent sind
           pollStatePersistence.upsertPollState(poll.value.id, voteCounter.value, serverVoteCycle, props.event.id);
@@ -1692,9 +1685,6 @@ pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
     return;
   }
   
-  // Debug-Ausgabe zur Überwachung der Event-Verarbeitung
-  const serverVoteCount = data.pollAnswerLifeCycle.pollUserVotedCount || 0;
-  
   // Schritt 5: Zeitliche Validierung - Events zu alt?
   const ourStartTimestamp = votingProcess.lastBatchTimestamp.value || 0;
   const currentTime = Date.now();
@@ -1717,9 +1707,6 @@ pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
   // Prüfe, ob jetzt alle erwarteten Events eingetroffen sind
   const expectedVoteCount = expectedCount; // wir verwenden den vorher deklarierten Wert
   const batchComplete = (pollUserVotedCount.value >= expectedVoteCount);
-  
-  // Gibt den aktuellen Status der Verarbeitung aus (nur für Debug-Zwecke)
-  const completionPercentage = Math.round(pollUserVotedCount.value/expectedVoteCount*100);
   
   // Solange der Batch nicht vollständig ist, bleiben alle Sperren aktiv
   if (!batchComplete) {
@@ -1783,6 +1770,7 @@ pollAnswerLifeCycleSubscription.onResult(async ({ data }) => {
     // Bei vollständiger Abstimmung das votingFullyCompleted Flag setzen
     votingProcess.votingFullyCompleted.value = true;
   } else {
+    // Partial votes used
   }
   
   // VERBESSERTE UI-FREIGABE mit der neuen Methode
@@ -2209,6 +2197,7 @@ function resetUIAfterSubmission() {
           // Das Modal bleibt einfach offen und der Benutzer kann direkt weitervoten
           // DEAKTIVIERT: Formular zurücksetzen und Modal schließen/neu öffnen
           // Dies verhindert, dass die Auswahl verloren geht und usedVotesCount auf 0 gesetzt wird
+          // eslint-disable-next-line no-constant-condition
           if (false && pollModal.value) {  // DEAKTIVIERT durch if (false)
             pollModal.value.reset(false);
 
@@ -2317,6 +2306,7 @@ function resetUIAfterSubmission() {
     // DEAKTIVIERT: Notfall-Wiedereröffnung nicht mehr nötig, da Modal bei Split-Voting offen bleibt
     // Zusätzlicher Sicherheitscheck: nach einer Zeit nochmals prüfen,
     // ob der Modal-Dialog tatsächlich geöffnet wurde
+    // eslint-disable-next-line no-constant-condition
     if (false && partialVotesUsed) {  // DEAKTIVIERT durch if (false)
       setTimeout(() => {
         // Wenn wir noch Stimmen übrig haben und das Modal nicht angezeigt wird

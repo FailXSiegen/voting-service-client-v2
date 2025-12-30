@@ -123,7 +123,7 @@ provideApolloClient(apolloClient);
     // Browser-Kompatibilität überprüfen
     const browserInfo = detectBrowser();
     
-    const compatibility = checkBrowserCompatibility({
+    checkBrowserCompatibility({
       showAlert: false,
       onIncompatible: (result) => {
         browserCompatible.value = false;
