@@ -51,7 +51,9 @@ export default {
       required: true
     }
   },
-  
+
+  emits: ['update:modelValue', 'change'],
+
   methods: {
     selectType(type) {
       this.$emit('update:modelValue', type);

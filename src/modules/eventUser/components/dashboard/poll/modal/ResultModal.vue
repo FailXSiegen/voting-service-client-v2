@@ -59,10 +59,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { Modal } from "bootstrap";
 import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
-import t from "@/core/util/l18n";
 
 const modal = ref(null);
 let bootstrapModal = null;

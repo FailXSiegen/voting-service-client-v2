@@ -39,9 +39,8 @@
 <script setup>
 import { ref } from 'vue';
 import { toast } from 'vue3-toastify';
-import t from "@/core/util/l18n";
 
-const props = defineProps({
+defineProps({
   modelValue: {
     type: String,
     default: ''
@@ -106,7 +105,7 @@ const compressImage = (file) => {
       URL.revokeObjectURL(img.src);
     };
       
-    img.onerror = (error) => {
+    img.onerror = () => {
       URL.revokeObjectURL(img.src);
       reject(new Error('Fehler beim Laden des Bildes'));
     };

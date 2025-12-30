@@ -201,7 +201,7 @@ export function logout() {
   };
 
   return fetch(endpoint, requestOptions)
-    .then((response) => {
+    .then(() => {
       return useCore().logoutUser();
     })
     .catch((error) => {

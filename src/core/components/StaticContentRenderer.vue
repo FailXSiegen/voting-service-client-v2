@@ -74,6 +74,8 @@ export default {
       default: false
     }
   },
+
+  emits: ['loaded'],
   
   data() {
     return {

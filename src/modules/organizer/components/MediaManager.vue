@@ -199,20 +199,7 @@ const uploadFile = async () => {
     // Formular erstellen
     const formData = new FormData();
     formData.append('file', selectedFile.value);
-    
-    // Konfiguration für Upload mit Fortschrittsanzeige
-    const config = {
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        uploadProgress.value = percentCompleted;
-      },
-      headers: {
-        // JWT-Token für Authentifizierung
-        'Authorization': `Bearer ${localStorage.getItem('apollo-token')}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    };
-    
+
     // Datei hochladen über direkten API-Endpunkt
     const response = await fetch(UPLOAD_URL, {
       method: 'POST',

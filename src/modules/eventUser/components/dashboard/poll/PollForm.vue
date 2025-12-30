@@ -259,9 +259,7 @@ type="submit" class="btn btn-primary mx-auto d-block h1"
 </template>
 
 <script setup>
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { computed, reactive, watch, onMounted, onUnmounted, ref, inject, watchEffect } from "vue";
+import { computed, reactive, watch, onMounted, onUnmounted, ref } from "vue";
 import { detectBrowser, isLocalStorageAvailable } from "@/core/utils/browser-compatibility";
 import { and, or, required } from "@vuelidate/validators";
 import { useVuelidate } from "@vuelidate/core";
@@ -400,10 +398,11 @@ const remainingVotes = computed(() => {
   usedVotes = Math.max(usedVotes, voteCounterBasedUsed);
   
   // Jetzt zur Sicherheit in beide andere Quellen zurückspeichern für Konsistenz
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   if (votingProcess && votingProcess.usedVotesCount) {
     votingProcess.usedVotesCount.value = usedVotes;
   }
-  
+
   if (window && window.votingProcessModule) {
     window.votingProcessModule.usedVotesCount = usedVotes;
   }
@@ -417,9 +416,10 @@ const remainingVotes = computed(() => {
     // Dies verhindert Endlosschleifen bei der Validierung
     if (formData && formData.votesToUse !== 0) {
       // Nicht-reaktive Änderung durch direkten Zugriff auf das Objekt
+      // eslint-disable-next-line vue/no-async-in-computed-properties
       setTimeout(() => {
         formData.votesToUse = 0;
-        
+
         // Alle Stimmen aufgebraucht = 100% verwendet
         formData.useAllAvailableVotes = true;
         
@@ -433,11 +433,6 @@ const remainingVotes = computed(() => {
   
   // console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, verbleibend=${total - usedVotes}`);
   return total - usedVotes;
-});
-
-// Ursprüngliche Berechnung, ob mehrere Stimmen vorhanden sind
-const rawHasMultipleVotes = computed(() => {
-  return props.eventUser.voteAmount > 1 && props.event.multivoteType === 1;
 });
 
 // Sicherer Berechnungsweg für hasMultipleVotes mit expliziter Typ-Konvertierung

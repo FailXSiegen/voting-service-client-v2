@@ -230,6 +230,7 @@ wsLink.client.on("closed", (event) => {
 // VERBESSERT: Keep-Alive-Mechanismus für die WebSocket-Verbindung
 let wsKeepAliveInterval = null;
 
+// eslint-disable-next-line no-unused-vars
 function startWebSocketKeepAlive() {
   // Stoppe zuerst eventuell laufende Intervalle
   stopWebSocketKeepAlive();

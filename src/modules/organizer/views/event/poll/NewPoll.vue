@@ -31,7 +31,6 @@
 import PageLayout from "@/modules/organizer/components/PageLayout.vue";
 import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
 import PollForm from "@/modules/organizer/components/events/poll/PollForm.vue";
-import AlertBox from "@/core/components/AlertBox.vue";
 import { RouteOrganizerDashboard, RouteOrganizerPolls } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 import { useRoute, useRouter } from "vue-router";

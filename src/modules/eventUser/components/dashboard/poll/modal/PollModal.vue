@@ -40,8 +40,8 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
             <button
               type="button"
               class="btn btn-sm btn-outline-secondary ms-auto"
-              @click="reloadPage"
               title="Seite neu laden"
+              @click="reloadPage"
             >
               <i class="bi bi-arrow-clockwise"></i>
             </button>
@@ -101,7 +101,7 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { Modal } from "bootstrap";
 import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
 import VotingDetailsWithSubscription from "@/modules/eventUser/components/dashboard/poll/VotingDetailsWithSubscription.vue";
@@ -170,11 +170,6 @@ function checkModalVisibility() {
   }
 }
 
-// Getter-Funktion, um den sichtbaren Zustand des Modals abzufragen
-function getIsVisible() {
-  return isVisible.value;
-}
-
 const props = defineProps({
   poll: {
     type: Object,
@@ -217,7 +212,6 @@ const modalState = computed(() => {
 
 // Tracking-Variable, um mehrfache Aufrufe zu verhindern
 let isResetInProgress = false;
-let isRestoringBackdrop = false;
 
 // Deklariere die Event-Handler-Funktionen VOR ihrer Verwendung
 const handleVotingComplete = () => {
@@ -462,182 +456,182 @@ onMounted(() => {
   setTimeout(checkModalVisibility, 300);
 });
   
-  // DEAKTIVIERT: Das 30-Sekunden-Reset wurde deaktiviert, da es bei längeren Abstimmungen störend ist
-  // // NEUES SAFETY NET: Regelmäßig überprüfen, ob isSubmitting zurückgesetzt werden muss
-  // // Falls ein Event nicht korrekt verarbeitet wurde oder ein Callback nicht ankam
-  // const submittingCheckInterval = setInterval(() => {
-  //   // Prüfe, ob das isSubmitting-Flag länger als 30 Sekunden aktiv ist
-  //   if (isSubmitting.value && window._lastSubmittingStartTime) {
-  //     const submittingDuration = Date.now() - window._lastSubmittingStartTime;
-  //
-  //     // Nach 30 Sekunden im submitting-Zustand forcieren wir ein Zurücksetzen
-  //     if (submittingDuration > 30000) { // 30 Sekunden
-  //       console.warn('[DEBUG:VOTING] isSubmitting ist seit mehr als 30 Sekunden aktiv - forciere Zurücksetzen');
-  //       resetSubmittingState();
-  //
-  //       // Flags im voting-process auch zurücksetzen
-  //       if (votingProcess) {
-  //         votingProcess.releaseUILocks();
-  //       }
-  //     }
-  //   }
-  // }, 5000); // Alle 5 Sekunden prüfen
+// DEAKTIVIERT: Das 30-Sekunden-Reset wurde deaktiviert, da es bei längeren Abstimmungen störend ist
+// // NEUES SAFETY NET: Regelmäßig überprüfen, ob isSubmitting zurückgesetzt werden muss
+// // Falls ein Event nicht korrekt verarbeitet wurde oder ein Callback nicht ankam
+// const submittingCheckInterval = setInterval(() => {
+//   // Prüfe, ob das isSubmitting-Flag länger als 30 Sekunden aktiv ist
+//   if (isSubmitting.value && window._lastSubmittingStartTime) {
+//     const submittingDuration = Date.now() - window._lastSubmittingStartTime;
+//
+//     // Nach 30 Sekunden im submitting-Zustand forcieren wir ein Zurücksetzen
+//     if (submittingDuration > 30000) { // 30 Sekunden
+//       console.warn('[DEBUG:VOTING] isSubmitting ist seit mehr als 30 Sekunden aktiv - forciere Zurücksetzen');
+//       resetSubmittingState();
+//
+//       // Flags im voting-process auch zurücksetzen
+//       if (votingProcess) {
+//         votingProcess.releaseUILocks();
+//       }
+//     }
+//   }
+// }, 5000); // Alle 5 Sekunden prüfen
   
-  // NEU: Verwende die global deklarierten Event-Handler-Funktionen für garantierte UI-Entsperrung
+// NEU: Verwende die global deklarierten Event-Handler-Funktionen für garantierte UI-Entsperrung
   
-  // Event-Listener registrieren
+// Event-Listener registrieren
+if (typeof window !== 'undefined') {
+  window.addEventListener('voting:complete', handleVotingComplete);
+  window.addEventListener('voting:error', handleVotingError);
+  window.addEventListener('voting:reset', handleVotingReset);
+}
+  
+// Cleanup für dieses Intervall hinzufügen (auskommentiert, da submittingCheckInterval deaktiviert)
+onBeforeUnmount(() => {
+  // clearInterval(submittingCheckInterval);
+
+  // Auch die Event-Listener entfernen
   if (typeof window !== 'undefined') {
-    window.addEventListener('voting:complete', handleVotingComplete);
-    window.addEventListener('voting:error', handleVotingError);
-    window.addEventListener('voting:reset', handleVotingReset);
+    window.removeEventListener('voting:complete', handleVotingComplete);
+    window.removeEventListener('voting:error', handleVotingError);
+    window.removeEventListener('voting:reset', handleVotingReset);
   }
-  
-  // Cleanup für dieses Intervall hinzufügen (auskommentiert, da submittingCheckInterval deaktiviert)
-  onBeforeUnmount(() => {
-    // clearInterval(submittingCheckInterval);
 
-    // Auch die Event-Listener entfernen
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('voting:complete', handleVotingComplete);
-      window.removeEventListener('voting:error', handleVotingError);
-      window.removeEventListener('voting:reset', handleVotingReset);
+  // KRITISCHER FIX: MutationObserver disconnecten
+  if (modalClassObserver) {
+    modalClassObserver.disconnect();
+    modalClassObserver = null;
+    console.log('[DEBUG:VOTING] MutationObserver disconnected');
+  }
+
+  // Sichtbarkeits-Interval stoppen
+  if (visibilityCheckInterval) {
+    clearInterval(visibilityCheckInterval);
+    visibilityCheckInterval = null;
+    console.log('[DEBUG:VOTING] Visibility check interval cleared');
+  }
+
+  // KRITISCHER FIX: Bootstrap Modal SOFORT zerstören, bevor Component unmounted wird
+  if (bootstrapModal) {
+    try {
+      bootstrapModal.dispose();
+      console.log('[DEBUG:VOTING] Bootstrap Modal disposed');
+    } catch (e) {
+      console.error('[DEBUG:VOTING] Fehler beim Dispose des Bootstrap Modals:', e);
     }
+  }
 
-    // KRITISCHER FIX: MutationObserver disconnecten
-    if (modalClassObserver) {
-      modalClassObserver.disconnect();
-      modalClassObserver = null;
-      console.log('[DEBUG:VOTING] MutationObserver disconnected');
+  // KRITISCHER FIX: Modal-Element DIREKT aus DOM entfernen
+  // Dies ist notwendig, weil Bootstrap das Element nicht automatisch entfernt
+  if (modal.value && modal.value.parentNode) {
+    console.log('[DEBUG:VOTING] Entferne Modal-Element direkt aus DOM');
+    modal.value.parentNode.removeChild(modal.value);
+  }
+
+  // KRITISCHER FIX: Backdrop entfernen beim Unmounten der Komponente
+  // Dies verhindert, dass der Backdrop sichtbar bleibt, wenn das Modal durch v-if=false entfernt wird
+  console.log('[DEBUG:VOTING] PollModal wird unmounted, entferne Backdrop und modal-open');
+  const backdrops = document.querySelectorAll('.modal-backdrop');
+  backdrops.forEach(backdrop => {
+    if (backdrop && backdrop.parentNode) {
+      backdrop.parentNode.removeChild(backdrop);
+      console.log('[DEBUG:VOTING] Backdrop entfernt');
     }
-
-    // Sichtbarkeits-Interval stoppen
-    if (visibilityCheckInterval) {
-      clearInterval(visibilityCheckInterval);
-      visibilityCheckInterval = null;
-      console.log('[DEBUG:VOTING] Visibility check interval cleared');
-    }
-
-    // KRITISCHER FIX: Bootstrap Modal SOFORT zerstören, bevor Component unmounted wird
-    if (bootstrapModal) {
-      try {
-        bootstrapModal.dispose();
-        console.log('[DEBUG:VOTING] Bootstrap Modal disposed');
-      } catch (e) {
-        console.error('[DEBUG:VOTING] Fehler beim Dispose des Bootstrap Modals:', e);
-      }
-    }
-
-    // KRITISCHER FIX: Modal-Element DIREKT aus DOM entfernen
-    // Dies ist notwendig, weil Bootstrap das Element nicht automatisch entfernt
-    if (modal.value && modal.value.parentNode) {
-      console.log('[DEBUG:VOTING] Entferne Modal-Element direkt aus DOM');
-      modal.value.parentNode.removeChild(modal.value);
-    }
-
-    // KRITISCHER FIX: Backdrop entfernen beim Unmounten der Komponente
-    // Dies verhindert, dass der Backdrop sichtbar bleibt, wenn das Modal durch v-if=false entfernt wird
-    console.log('[DEBUG:VOTING] PollModal wird unmounted, entferne Backdrop und modal-open');
-    const backdrops = document.querySelectorAll('.modal-backdrop');
-    backdrops.forEach(backdrop => {
-      if (backdrop && backdrop.parentNode) {
-        backdrop.parentNode.removeChild(backdrop);
-        console.log('[DEBUG:VOTING] Backdrop entfernt');
-      }
-    });
-
-    // Entferne auch modal-open von body
-    document.body.classList.remove('modal-open');
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-    console.log('[DEBUG:VOTING] modal-open von body entfernt');
   });
+
+  // Entferne auch modal-open von body
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
+  console.log('[DEBUG:VOTING] modal-open von body entfernt');
+});
   
-  // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
-  const pollClosedWatcher = watch(
-    () => props.poll?.closed,
-    (isClosed) => {
-      if (isClosed) {
-        console.warn("[DEBUG:VOTING] Poll wurde geschlossen (reactive watch), schließe Modal");
-        // Nur schließen, wenn es keine Split-Vote-Situation ist
-        const totalAllowedVotes = props.eventUser?.voteAmount || 0;
-        const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
-        
-        // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
-        if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
-          hideModal();
-        } else {
-          console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
-        }
-      }
-    },
-    { immediate: false } // NICHT sofort beim Mounting prüfen
-  );
-  
-  // KRITISCH: Überwache auch den Poll-State vom Parent-Component
-  const pollStateWatcher = watch(
-    () => props.activePollEventUser?.state,
-    (state) => {
-      if (state === 'closed') {
-        console.warn("[DEBUG:VOTING] Poll-State wurde auf 'closed' gesetzt (reactive watch)");
-
-        // Nur schließen, wenn es keine Split-Vote-Situation ist
-        const totalAllowedVotes = props.eventUser?.voteAmount || 0;
-        const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
-
-        // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
-        if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
-          console.warn("[DEBUG:VOTING] Schließe Modal, da alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt");
-          hideModal();
-        } else {
-          console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
-        }
-      }
-    },
-    { immediate: false } // NICHT sofort beim Mounting prüfen
-  );
-
-  // KRITISCH: Überwache usedVotesCount und schließe Modal SOFORT, wenn alle Stimmen abgegeben wurden
-  const usedVotesWatcher = watch(
-    () => votingProcess.value?.usedVotesCount?.value,
-    (usedVotes) => {
+// KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
+const pollClosedWatcher = watch(
+  () => props.poll?.closed,
+  (isClosed) => {
+    if (isClosed) {
+      console.warn("[DEBUG:VOTING] Poll wurde geschlossen (reactive watch), schließe Modal");
+      // Nur schließen, wenn es keine Split-Vote-Situation ist
       const totalAllowedVotes = props.eventUser?.voteAmount || 0;
-
-      // Wenn alle Stimmen abgegeben wurden, schließe das Modal SOFORT
-      if (usedVotes >= totalAllowedVotes && totalAllowedVotes > 0) {
-        console.warn(`[DEBUG:VOTING] Alle Stimmen abgegeben (${usedVotes}/${totalAllowedVotes}), schließe Modal SOFORT`);
-        hideModal();
-      }
-    },
-    { immediate: false }
-  );
-
-  // Watcher beim Unmounting entfernen
-  onBeforeUnmount(() => {
-    pollClosedWatcher();
-    pollStateWatcher();
-    usedVotesWatcher();
-    
-    // Cleanup des Sichtbarkeits-Intervalls
-    if (visibilityCheckInterval) {
-      clearInterval(visibilityCheckInterval);
-      visibilityCheckInterval = null;
-    }
-    
-    // Event-Listener entfernen
-    if (modal.value) {
-      try {
-        modal.value.removeEventListener('shown.bs.modal', () => {
-          isVisible.value = true;
-        });
+      const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
         
-        modal.value.removeEventListener('hidden.bs.modal', () => {
-          isVisible.value = false;
-        });
-      } catch (e) {
-        console.error("[DEBUG:VOTING] Fehler beim Entfernen der Event-Listener:", e);
+      // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
+      if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
+        hideModal();
+      } else {
+        console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
       }
     }
-  });
+  },
+  { immediate: false } // NICHT sofort beim Mounting prüfen
+);
+  
+// KRITISCH: Überwache auch den Poll-State vom Parent-Component
+const pollStateWatcher = watch(
+  () => props.activePollEventUser?.state,
+  (state) => {
+    if (state === 'closed') {
+      console.warn("[DEBUG:VOTING] Poll-State wurde auf 'closed' gesetzt (reactive watch)");
+
+      // Nur schließen, wenn es keine Split-Vote-Situation ist
+      const totalAllowedVotes = props.eventUser?.voteAmount || 0;
+      const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
+
+      // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
+      if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
+        console.warn("[DEBUG:VOTING] Schließe Modal, da alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt");
+        hideModal();
+      } else {
+        console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
+      }
+    }
+  },
+  { immediate: false } // NICHT sofort beim Mounting prüfen
+);
+
+// KRITISCH: Überwache usedVotesCount und schließe Modal SOFORT, wenn alle Stimmen abgegeben wurden
+const usedVotesWatcher = watch(
+  () => votingProcess.value?.usedVotesCount?.value,
+  (usedVotes) => {
+    const totalAllowedVotes = props.eventUser?.voteAmount || 0;
+
+    // Wenn alle Stimmen abgegeben wurden, schließe das Modal SOFORT
+    if (usedVotes >= totalAllowedVotes && totalAllowedVotes > 0) {
+      console.warn(`[DEBUG:VOTING] Alle Stimmen abgegeben (${usedVotes}/${totalAllowedVotes}), schließe Modal SOFORT`);
+      hideModal();
+    }
+  },
+  { immediate: false }
+);
+
+// Watcher beim Unmounting entfernen
+onBeforeUnmount(() => {
+  pollClosedWatcher();
+  pollStateWatcher();
+  usedVotesWatcher();
+    
+  // Cleanup des Sichtbarkeits-Intervalls
+  if (visibilityCheckInterval) {
+    clearInterval(visibilityCheckInterval);
+    visibilityCheckInterval = null;
+  }
+    
+  // Event-Listener entfernen
+  if (modal.value) {
+    try {
+      modal.value.removeEventListener('shown.bs.modal', () => {
+        isVisible.value = true;
+      });
+        
+      modal.value.removeEventListener('hidden.bs.modal', () => {
+        isVisible.value = false;
+      });
+    } catch (e) {
+      console.error("[DEBUG:VOTING] Fehler beim Entfernen der Event-Listener:", e);
+    }
+  }
+});
 
 function reloadPage() {
   window.location.reload();

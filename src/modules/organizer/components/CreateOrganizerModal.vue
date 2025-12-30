@@ -116,8 +116,8 @@
           <button
             type="button"
             class="btn btn-primary"
-            @click="onSubmit"
             :disabled="isSubmitting"
+            @click="onSubmit"
           >
             <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
             {{ $t("view.organizers.create.submit") }}

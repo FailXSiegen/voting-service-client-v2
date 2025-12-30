@@ -15,7 +15,7 @@ import {
   USER_TYPE_EVENT_USER,
   USER_TYPE_ORGANIZER,
 } from "@/core/auth/login";
-import { provideApolloClient, useQuery } from "@vue/apollo-composable";
+import { provideApolloClient } from "@vue/apollo-composable";
 import { ORGANIZER } from "@/modules/organizer/graphql/queries/organizer";
 import { EVENT_USER } from "@/modules/eventUser/graphql/queries/event-user";
 import { reactive, ref } from "vue";

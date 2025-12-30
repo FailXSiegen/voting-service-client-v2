@@ -144,10 +144,8 @@ import {
 } from "@/router/routes";
 import { useMutation, useQuery, useLazyQuery } from "@vue/apollo-composable";
 import { ORGANIZERS } from "@/modules/organizer/graphql/queries/organizers";
-import { ORGANIZER_HAS_EVENTS } from "@/modules/organizer/graphql/queries/organizer-has-events";
-import { ORGANIZER_HAS_EVENTS_WITH_ORIGINAL } from "@/modules/organizer/graphql/queries/organizer-has-events-with-original";
 import { ALL_EVENTS_WITH_ORIGINAL_OWNER } from "@/modules/organizer/graphql/queries/all-events-with-original-owner";
-import { computed, ref, onMounted } from "vue";
+import { computed, ref } from "vue";
 import t from "@/core/util/l18n";
 import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
 import { UPDATE_ORGANIZER } from "@/modules/organizer/graphql/mutation/update-organizer";
@@ -204,7 +202,6 @@ const organizersWithEvents = ref([]);
 const selectedOrganizer = ref(null);
 const showModal = ref(false);
 const showCreateModal = ref(false);
-
 
 const organizersFiltered = computed(() =>
   organizersCopy.value ? organizersCopy.value : organizers.value

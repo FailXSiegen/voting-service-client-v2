@@ -1,6 +1,7 @@
 <template>
   <ActivePoll
     v-if="activePoll && activePollEventUser"
+    ref="activePollComponent"
     :active-poll="activePoll"
     :active-poll-event-user="activePollEventUser"
     :active-poll-answer-count="activePollAnswerCount"
@@ -9,7 +10,6 @@
     :poll-user-voted-count="pollUserVotedCount"
     @close="onCloseActivePoll"
     @refresh="onRefreshActivePoll"
-    ref="activePollComponent"
   />
   <div
     v-if="!activePoll"
@@ -38,8 +38,8 @@
       type="button" 
       class="btn btn-outline-secondary btn-sm mt-1" 
       style="--bs-btn-padding-y: 0; --bs-btn-padding-x: .1rem; --bs-btn-font-size: .75em;"
-      @click="onRefreshUserCount"
       :disabled="isRefreshingUserCount"
+      @click="onRefreshUserCount"
     >
       <i class="bi bi-arrow-clockwise"></i>
     </button>
@@ -182,7 +182,6 @@ activePollQuery.onResult(({ data }) => {
       // Update user counts too from the same source
       const userCount = parseInt(data.activePoll.pollUserCount, 10) || 0;
       const votedCount = parseInt(data.activePoll.pollUserVotedCount, 10) || 0;
-      
       
       // Set all values from the same data source
       activePollMaxAnswer.value = maxVotes;

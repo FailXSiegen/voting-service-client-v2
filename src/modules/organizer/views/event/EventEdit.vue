@@ -112,7 +112,6 @@ eventQuery.onResult(({ data }) => {
   prefillData.endDatetime = event.value?.endDatetime ?? 0;
   prefillData.publicnameReadonly = event.value?.publicnameReadonly ?? false;
 
-
   // WICHTIGER FIX: Defensive Programmierung für JSON.parse und null-safety
   let resolvedVideoConferenceConfig;
   try {

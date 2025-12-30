@@ -9,8 +9,8 @@
         <button 
           type="button" 
           class="btn-close" 
-          @click="showTokenRefreshNotification = false" 
-          aria-label="Close"
+          aria-label="Close" 
+          @click="showTokenRefreshNotification = false"
         ></button>
       </div>
     </div>
