@@ -95,7 +95,7 @@ async function loginOrganizer(browser) {
   return page;
 }
 
-async function createAndStartPoll(organizerPage, title) {
+async function createAndStartPoll(organizerPage, title, { multipleAnswers = false, customOptions = [] } = {}) {
   await organizerPage.goto(
     `${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`,
     { waitUntil: 'networkidle', timeout: 30000 }
@@ -107,6 +107,22 @@ async function createAndStartPoll(organizerPage, title) {
   await titleField.fill(title);
   await organizerPage.waitForTimeout(1000);
 
+  // Bei individuellen Antwortoptionen: Radio auf "Individuelle Antwortoptionen" umschalten
+  if (customOptions.length > 0) {
+    const individualRadio = organizerPage.locator('label:has-text("Individuelle Antwortoptionen")').first();
+    if (await individualRadio.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await individualRadio.click();
+      await organizerPage.waitForTimeout(1000);
+    }
+
+    // Antwortoptionen als Text eingeben (eine pro Zeile)
+    const textarea = organizerPage.locator('textarea').first();
+    if (await textarea.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await textarea.fill(customOptions.join('\n'));
+      await organizerPage.waitForTimeout(500);
+    }
+  }
+
   const startBtn = organizerPage.locator('button:has-text("speichern & sofort starten")');
   for (let i = 0; i < 20; i++) {
     if (!await startBtn.isDisabled().catch(() => true)) break;
@@ -114,6 +130,14 @@ async function createAndStartPoll(organizerPage, title) {
     await organizerPage.waitForTimeout(2000);
     const tf = organizerPage.locator('input[placeholder*="abgestimmt"]').first();
     if (await tf.isVisible().catch(() => false)) await tf.fill(title);
+    // Bei Reload müssen die Optionen erneut gesetzt werden
+    if (customOptions.length > 0) {
+      const indRadio = organizerPage.locator('label:has-text("Individuelle Antwortoptionen")').first();
+      if (await indRadio.isVisible({ timeout: 2000 }).catch(() => false)) await indRadio.click();
+      await organizerPage.waitForTimeout(500);
+      const ta = organizerPage.locator('textarea').first();
+      if (await ta.isVisible().catch(() => false)) await ta.fill(customOptions.join('\n'));
+    }
   }
 
   await startBtn.click({ timeout: 5000 });
@@ -380,6 +404,43 @@ test('Bulk-Vote Szenarien', async ({ browser }) => {
 
   await stopPoll(organizerPage);
 
+  // ============ SZENARIO 7: Multiple-Answer Bulk ============
+  console.log('━━━ SZENARIO 7: Multiple-Answer (Checkboxen, alle Stimmen) ━━━');
+  t0 = performance.now();
+
+  const poll7 = await createAndStartPoll(organizerPage, 'Szenario 7: Multi-Answer', {
+    customOptions: ['Option A', 'Option B', 'Option C']
+  });
+
+  // Warte auf Modal
+  await waitForModal(user1Page);
+
+  // Checkboxen anklicken (Option A und C)
+  const checkboxes = user1Page.locator('input[type="checkbox"]');
+  const cbCount = await checkboxes.count();
+  console.log(`  ${cbCount} Checkboxen gefunden`);
+
+  if (cbCount >= 2) {
+    await checkboxes.nth(0).click({ force: true }); // Option A
+    await user1Page.waitForTimeout(300);
+    await checkboxes.nth(2 < cbCount ? 2 : 1).click({ force: true }); // Option C oder B
+    await user1Page.waitForTimeout(300);
+
+    // Submit
+    await user1Page.locator('button[type="submit"], button:has-text("Jetzt abstimmen")').first().click({ force: true, timeout: 5000 });
+    console.log('  ✓ user1 → Multiple-Answer abgestimmt');
+  } else {
+    console.log('  ⚠ Zu wenige Checkboxen, überspringe');
+  }
+
+  await user1Page.waitForTimeout(3000);
+
+  timings.scenario7 = Math.round(performance.now() - t0);
+  printResults(poll7, 'Szenario 7');
+  console.log(`  ⏱  ${timings.scenario7}ms\n`);
+
+  await stopPoll(organizerPage);
+
   // ============ ZUSAMMENFASSUNG ============
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('📊 ZEITMESSUNGEN:');
@@ -390,6 +451,7 @@ test('Bulk-Vote Szenarien', async ({ browser }) => {
   console.log(`  Szenario 4: ${timings.scenario4}ms (Enthaltung)`);
   console.log(`  Szenario 5: ${timings.scenario5}ms (Reload während Voting)`);
   console.log(`  Szenario 6: ${timings.scenario6}ms (Over-Voting Versuch)`);
+  console.log(`  Szenario 7: ${timings.scenario7}ms (Multiple-Answer Bulk)`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   // Cleanup
