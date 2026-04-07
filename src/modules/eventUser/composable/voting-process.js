@@ -436,18 +436,10 @@ export function useVotingProcess(eventUser, event) {
         const firstResult = await submitSingleVote(pollFormData, poll, false, adjustedVotesToUse);
 
         if (firstResult) {
-          localSuccessCount++;
-          // UI-Update für erste Stimme
-          currentlySubmittedInBatch.value = 1;
-          console.warn(`[DEBUG:VOTING] Erste Stimme abgegeben, localSuccessCount=${localSuccessCount}`);
-
-          // FIX: Prüfen, ob bereits alle Stimmen abgegeben wurden (z.B. durch Bulk-Vote)
-          // Wenn ja, sofort beenden und nicht weiter machen
-          const currentUsedVotes = usedVotesCount.value || 0;
-          if (currentUsedVotes >= maxAllowedVotes && maxAllowedVotes > 0) {
-            console.warn(`[DEBUG:VOTING] ✅ Alle Stimmen bereits abgegeben via Bulk-Vote (${currentUsedVotes}/${maxAllowedVotes}), beende handleFormSubmit SOFORT`);
-            return true; // Erfolgreich beenden
-          }
+          // Bulk-Vote hat alle angeforderten Stimmen auf einmal abgegeben
+          // Kein weiterer Batch-Loop nötig
+          console.warn(`[DEBUG:VOTING] ✅ Bulk-Vote hat ${adjustedVotesToUse} Stimmen abgegeben, beende handleFormSubmit`);
+          return true;
         } else {
           // Prüfen, ob dies ein normales Verhalten bei einem Poll-Wechsel ist
           if (typeof window !== 'undefined' && (window.pollClosedEventReceived === true || window._newPollActive === true)) {
