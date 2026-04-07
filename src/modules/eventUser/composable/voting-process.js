@@ -1231,59 +1231,52 @@ export function useVotingProcess(eventUser, event) {
       return false;
     }
 
-    // WICHTIG: Prüfe sowohl useAllVotes als auch pollFormData.useAllAvailableVotes
-    // useAllVotes wird vom SyncEventDashboard gesetzt
-    // pollFormData.useAllAvailableVotes wird vom Formular gesetzt
-    if ((useAllVotes || pollFormData.useAllAvailableVotes) && remainingVotes > 1) {
-      // Prüfen, ob wir eine einzelne Antwort haben (entweder abstain oder singleAnswer)
-      let bulkInput;
+    // Bulk-Vote für einzelne Antworten: 1 Request statt N einzelne
+    // Gilt für alle Fälle (useAllVotes, Split-Voting, Einzelstimme) solange es eine einzelne Antwort ist
+    // Der Server validiert die Stimmanzahl mit FOR UPDATE Lock — Over-Voting ist ausgeschlossen
+    const bulkVoteCount = (useAllVotes || pollFormData.useAllAvailableVotes)
+      ? remainingVotes
+      : Math.min(parseInt(votesToUse, 10) || 1, remainingVotes);
 
-      if (pollFormData.abstain) {
-        bulkInput = {
-          eventUserId: eventUser.value.id,
-          pollId: poll.value?.id ?? 0,
-          type: poll.value.type,
-          answerContent: l18n.global.t("view.polls.modal.abstain"),
-          possibleAnswerId: null,
-          voteCount: remainingVotes
-        };
-
-        return await submitBulkVote(bulkInput);
-      }
-      else if (pollFormData.singleAnswer && !pollFormData.multipleAnswers?.length) {
-        // Sicherstellen, dass possibleAnswers existiert
-        if (!poll.value || !poll.value.possibleAnswers || !Array.isArray(poll.value.possibleAnswers)) {
-          console.error(`[ERROR:VOTING] possibleAnswers ist nicht verfügbar für Bulk Vote: ${JSON.stringify(poll.value)}`);
-          return false;
-        }
-
-        // Antwort validieren
-        const singleAnswerStr = String(pollFormData.singleAnswer);
-        const answer = poll.value.possibleAnswers.find(
-          (x) => x && x.id && (
-            String(x.id) === singleAnswerStr ||
-            (parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10))
-          )
-        );
-
-        if (!answer) {
-          console.error(`[ERROR:VOTING] Ungültige singleAnswer-ID für Bulk Vote: ${pollFormData.singleAnswer}`);
-          return false;
-        }
-
-        bulkInput = {
-          eventUserId: eventUser.value.id,
-          pollId: poll.value?.id ?? 0,
-          type: poll.value.type,
-          answerContent: answer.content,
-          possibleAnswerId: answer.id,
-          voteCount: remainingVotes
-        };
-
-        return await submitBulkVote(bulkInput);
-      }
-      // Bei mehreren unterschiedlichen Antworten den normalen Voting-Prozess nutzen
+    if (pollFormData.abstain) {
+      return await submitBulkVote({
+        eventUserId: eventUser.value.id,
+        pollId: poll.value?.id ?? 0,
+        type: poll.value.type,
+        answerContent: l18n.global.t("view.polls.modal.abstain"),
+        possibleAnswerId: null,
+        voteCount: bulkVoteCount
+      });
     }
+    else if (pollFormData.singleAnswer && !pollFormData.multipleAnswers?.length) {
+      if (!poll.value || !poll.value.possibleAnswers || !Array.isArray(poll.value.possibleAnswers)) {
+        console.error(`[ERROR:VOTING] possibleAnswers ist nicht verfügbar für Bulk Vote`);
+        return false;
+      }
+
+      const singleAnswerStr = String(pollFormData.singleAnswer);
+      const answer = poll.value.possibleAnswers.find(
+        (x) => x && x.id && (
+          String(x.id) === singleAnswerStr ||
+          (parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10))
+        )
+      );
+
+      if (!answer) {
+        console.error(`[ERROR:VOTING] Ungültige singleAnswer-ID für Bulk Vote: ${pollFormData.singleAnswer}`);
+        return false;
+      }
+
+      return await submitBulkVote({
+        eventUserId: eventUser.value.id,
+        pollId: poll.value?.id ?? 0,
+        type: poll.value.type,
+        answerContent: answer.content,
+        possibleAnswerId: answer.id,
+        voteCount: bulkVoteCount
+      });
+    }
+    // Bei mehreren unterschiedlichen Antworten (multipleAnswers) weiter zum normalen Voting-Prozess
 
     // Für useAllVotes ohne Bulk-Optimierung: Wir senden die Anzahl der verbleibenden Stimmen statt des Zyklus
     // Sonst senden wir 1 für einzelne Stimmen
