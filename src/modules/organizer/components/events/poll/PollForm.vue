@@ -161,7 +161,10 @@ const props = defineProps({
 });
 
 onMounted(() => {
+  const savedAllowAbstain = formData.allowAbstain;
   updatePollAnswers();
+  // Preserve prefilled allowAbstain (e.g. when copying a poll)
+  formData.allowAbstain = savedAllowAbstain;
 });
 
 // Data.
@@ -286,11 +289,6 @@ async function onSubmit() {
     return;
   }
 
-  // Reset abstain if max votes is bigger 1.
-  if (formData.maxVotes > 1) {
-    formData.allowAbstain = false;
-  }
-
   emit("submit", formData);
 }
 
@@ -303,6 +301,7 @@ async function onSubmitAndStart() {
     handleError(new InvalidFormError());
     return;
   }
+
   emit("submitAndStart", formData);
 }
 

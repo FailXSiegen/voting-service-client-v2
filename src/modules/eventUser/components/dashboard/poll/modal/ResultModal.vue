@@ -60,8 +60,11 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { Modal } from "bootstrap";
 import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
+
+const { t } = useI18n();
 
 const modal = ref(null);
 let bootstrapModal = null;

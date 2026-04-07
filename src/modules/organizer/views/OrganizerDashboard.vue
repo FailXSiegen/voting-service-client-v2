@@ -171,6 +171,8 @@ import {
 } from "@/router/routes";
 import { useCore } from "@/core/store/core";
 
+const coreStore = useCore();
+
 // Define navigation items.
 const routes = getRoutesByName([
   RouteOrganizerDashboard,
