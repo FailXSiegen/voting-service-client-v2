@@ -433,7 +433,7 @@ export function useVotingProcess(eventUser, event) {
       // um sicherzustellen, dass wir immer mindestens eine Stimme zählen
       if (adjustedVotesToUse > 0) {
         // Bei jeder Abstimmung: erste Stimme sofort abgeben für schnelles Feedback
-        const firstResult = await submitSingleVote(pollFormData, poll, false);
+        const firstResult = await submitSingleVote(pollFormData, poll, false, adjustedVotesToUse);
 
         if (firstResult) {
           localSuccessCount++;
@@ -1157,7 +1157,7 @@ export function useVotingProcess(eventUser, event) {
     }
   }
 
-  async function submitSingleVote(pollFormData, poll, useAllVotes) {
+  async function submitSingleVote(pollFormData, poll, useAllVotes, requestedVoteCount = null) {
     // OPTIMIERUNG: Keine UI-Updates in dieser Funktion
     // Wir verzichten auf das Inkrementieren des Fortschrittszählers in dieser Funktion
     // Stattdessen aktualisieren wir den Zähler an strategischen Punkten in handleFormSubmit
@@ -1236,7 +1236,7 @@ export function useVotingProcess(eventUser, event) {
     // Der Server validiert die Stimmanzahl mit FOR UPDATE Lock — Over-Voting ist ausgeschlossen
     const bulkVoteCount = (useAllVotes || pollFormData.useAllAvailableVotes)
       ? remainingVotes
-      : Math.min(parseInt(votesToUse, 10) || 1, remainingVotes);
+      : Math.min(requestedVoteCount || remainingVotes, remainingVotes);
 
     if (pollFormData.abstain) {
       return await submitBulkVote({
