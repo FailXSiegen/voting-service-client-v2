@@ -37,6 +37,7 @@ import { TOKEN_REFRESH_REQUIRED_SUBSCRIPTION } from "@/core/graphql/subscription
 import { refreshLogin } from "@/core/auth/login";
 import { handleError } from "@/core/error/error-handler";
 import { useHead } from "@vueuse/head";
+import { URLS } from "@/urls";
 
 const loaded = ref(false);
 const browserCompatible = ref(true);
@@ -50,7 +51,7 @@ const titleSuffix = ref('digitalwahl.org');
 const loadSystemSettings = async () => {
   try {
     // Try to load system settings from API
-    const response = await fetch('/graphql', {
+    const response = await fetch(URLS.GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

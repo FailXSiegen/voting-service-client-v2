@@ -1243,7 +1243,7 @@ export function useVotingProcess(eventUser, event) {
           eventUserId: eventUser.value.id,
           pollId: poll.value?.id ?? 0,
           type: poll.value.type,
-          answerContent: l18n.global.tc("view.polls.modal.abstain"),
+          answerContent: l18n.global.t("view.polls.modal.abstain"),
           possibleAnswerId: null,
           voteCount: remainingVotes
         };
@@ -1304,7 +1304,7 @@ export function useVotingProcess(eventUser, event) {
       if (pollFormData.abstain) {
         const input = {
           ...baseInput,
-          answerContent: l18n.global.tc("view.polls.modal.abstain"),
+          answerContent: l18n.global.t("view.polls.modal.abstain"),
           possibleAnswerId: null,
         };
         await mutateAnswer(input);
