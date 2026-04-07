@@ -4,6 +4,7 @@ import { usePollStatePersistence } from "@/core/composable/poll-state-persistenc
 import { useMutation, useApolloClient } from "@vue/apollo-composable";
 import { CREATE_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-poll-submit-answer";
 import { CREATE_BULK_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer";
+import { CREATE_MULTI_POLL_SUBMIT_ANSWER } from "@/modules/eventUser/graphql/mutation/create-multi-poll-submit-answer";
 import { USER_VOTE_CYCLE } from "@/modules/eventUser/graphql/queries/user-vote-cycle";
 
 // Globale Map um zu tracken, welche Browser-Instanz aktiv abstimmt
@@ -1365,22 +1366,42 @@ export function useVotingProcess(eventUser, event) {
           return false;
         }
 
-        // Jetzt können wir sicher sein, dass alle IDs gültig sind
-        for await (const answerId of pollFormData.multipleAnswers) {
+        // Multi-Answer Bulk: 1 Request statt N×M einzelne
+        // bulkVoteCount = Anzahl Stimmzettel, jeder Stimmzettel hat die gleichen Antworten
+        const answers = pollFormData.multipleAnswers.map((answerId) => {
           const answer = poll.value.possibleAnswers.find(
             (x) => parseInt(x.id) === parseInt(answerId),
           );
-
-          const input = {
-            ...baseInput,
-            answerContent: answer.content,
+          return {
             possibleAnswerId: answer.id,
-            answerItemLength: pollFormData.multipleAnswers.length,
-            answerItemCount: answerCounter,
-            isLastAnswerInBallot: (answerCounter === pollFormData.multipleAnswers.length),
+            answerContent: answer.content,
+            voteCount: bulkVoteCount
           };
-          await mutateAnswer(input);
-          answerCounter++;
+        });
+
+        const multiInput = {
+          pollId: poll.value?.id ?? 0,
+          eventUserId: eventUser.value.id,
+          type: poll.value.type,
+          answers
+        };
+
+        try {
+          const createMultiMutation = useMutation(CREATE_MULTI_POLL_SUBMIT_ANSWER, { variables: { input: multiInput } });
+          const result = await createMultiMutation.mutate();
+          const successCount = result.data?.createMultiPollSubmitAnswer || 0;
+
+          if (successCount > 0) {
+            usedVotesCount.value += successCount;
+            voteCounter.value += successCount;
+            releaseUILocks();
+          }
+
+          console.log(`[MULTI_VOTE] ${successCount} Stimmen auf ${answers.length} Antworten verteilt`);
+          return successCount > 0;
+        } catch (multiError) {
+          console.error(`[ERROR:MULTI_VOTE] ${multiError.message}`);
+          return false;
         }
       } else if (pollFormData.singleAnswer) {
         // Prüfe, ob poll.value.possibleAnswers existiert
