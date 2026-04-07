@@ -497,7 +497,7 @@ test.describe('Live testing mit Benutzern aus CSV', () => {
 
   // Parallele Tests für die Benutzer aus der CSV-Datei
   // Wir teilen die Benutzer in 2 Batches auf (oder passen uns an die Benutzerzahl an)
-  const batchCount = 3; // Reduziert: 2 Batches
+  const batchCount = CONFIG.USERS_PER_BATCH || 2;
 
   for (let testId = 1; testId <= batchCount; testId++) {
     test(`User batch ${testId} votes in poll`, async ({ browser }) => {

@@ -338,7 +338,7 @@ async function createAndStartPoll(page) {
             // Direkt zur Seite zum Erstellen einer neuen Abstimmung gehen
             // Umgehe die Polls-Liste komplett
             log('Navigiere direkt zur Seite für neue Abstimmung', 'milestone');
-            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}/new-poll`, { 
+            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`, { 
                 waitUntil: ['domcontentloaded', 'networkidle'],
                 timeout: 60000 
             });
@@ -396,7 +396,7 @@ async function createAndStartPoll(page) {
                         
                         // Etwas warten und neu laden
                         await page.waitForTimeout(5000);
-                        await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}/new-poll`, { 
+                        await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`, { 
                             waitUntil: 'networkidle', 
                             timeout: 60000 
                         });
@@ -445,7 +445,7 @@ async function createAndStartPoll(page) {
                         });
                         await page.waitForTimeout(3000);
                         
-                        await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}/new-poll`, { 
+                        await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`, { 
                             waitUntil: 'networkidle',
                             timeout: 30000 
                         });
@@ -515,7 +515,7 @@ async function createAndStartPoll(page) {
         // Überprüfe, ob die URL auf die Erstellungsseite hinweist
         if (!currentUrl.includes('/new-poll')) {
             log('Nicht auf der Erstellungsseite - navigiere direkt dorthin', 'warn');
-            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}/new-poll`, { waitUntil: 'networkidle' });
+            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`, { waitUntil: 'networkidle' });
             await page.waitForTimeout(5000);
             
             // Screenshot nach Navigation
@@ -554,18 +554,14 @@ async function createAndStartPoll(page) {
                 // Strategie 1: Vollständiger Page Cycle (Logout und Login)
                 log('Strategie: Vollständiger Reload mit Cache-Clearing', 'info');
                 
-                // Cache leeren und neu laden
-                await page.evaluate(() => {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                });
+                // Seite nur neu laden (kein localStorage/sessionStorage clear — das loggt den User aus)
                 
                 // Auf Events-Dashboard gehen, dann zum Formular
                 await page.goto(`${CONFIG.CLIENT_URL}/admin/dashboard`, { waitUntil: 'networkidle' });
                 await page.waitForTimeout(2000);
                 await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}`, { waitUntil: 'networkidle' });
                 await page.waitForTimeout(2000);
-                await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}/new-poll`, { waitUntil: 'networkidle' });
+                await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`, { waitUntil: 'networkidle' });
                 await page.waitForTimeout(5000);
                 
                 // Screenshot nach Multi-Navigation
@@ -711,7 +707,7 @@ async function createAndStartPoll(page) {
         if (formState.length === 0) {
             log('KRITISCHER FEHLER: Keine Formularelemente sichtbar!', 'error');
             // Versuche einen alternativen Ansatz mit direkter URL-Navigation
-            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/${CONFIG.EVENT_ID}/new-poll`, { waitUntil: 'networkidle' });
+            await page.goto(`${CONFIG.CLIENT_URL}/admin/event/polls/${CONFIG.EVENT_ID}/poll/new`, { waitUntil: 'networkidle' });
             await page.waitForTimeout(5000);
             
             // Erneut Screenshot machen nach Neunavigation
@@ -881,7 +877,29 @@ async function createAndStartPoll(page) {
             path: path.join(screenshotsDir, 'after-options-input.png')
         });
 
-        // Abstimmung speichern
+        // Warte bis der "sofort starten" Button enabled ist (= User sind online)
+        log('Warte bis User online sind (Button enabled)...', 'milestone');
+        const startButton = page.locator('button:has-text("speichern & sofort starten")');
+        const maxWaitForOnline = 60000;
+        const onlineStart = Date.now();
+        while (Date.now() - onlineStart < maxWaitForOnline) {
+            const isDisabled = await startButton.isDisabled().catch(() => true);
+            if (!isDisabled) {
+                log('Button ist enabled — User sind online!', 'milestone');
+                break;
+            }
+            log(`Button noch disabled, warte... (${Math.round((Date.now() - onlineStart) / 1000)}s)`, 'debug');
+            // Seite refreshen damit die EVENT_USERS Query neu ausgeführt wird
+            await page.reload({ waitUntil: 'networkidle' });
+            await page.waitForTimeout(3000);
+            // Titel muss nach Reload neu eingegeben werden
+            const titleField = page.locator('input[placeholder*="abgestimmt"], input[type="text"]').first();
+            if (await titleField.isVisible().catch(() => false)) {
+                await titleField.fill(votingTitle);
+            }
+        }
+
+        // Abstimmung speichern & starten
         log('Speichere & starte Abstimmung', 'milestone');
 
         // Screenshot vor dem Speichern
@@ -891,17 +909,14 @@ async function createAndStartPoll(page) {
 
         // Versuche verschiedene Selektoren für den Speicher-Button
         const saveButtonSelectors = [
-            'text=Abstimmung speichern & sofort starten',
             'button:has-text("speichern & sofort starten")',
+            'text=Abstimmung speichern & sofort starten',
             'button:has-text("Speichern & starten")',
             'button.btn-primary:has-text("speichern")',
             'button.btn-primary:has-text("starten")',
             'button[type="submit"]',
-            // Erweiterte Selektoren
-            'button.btn-primary', // Primärer Button (meist zum Speichern)
-            'button.btn[type="submit"]', // Submit-Button mit Bootstrap-Styling
-            'input[type="submit"]', // Submit-Button als Input
-            'button:has-text("starten")' // Irgendein Button mit "starten"
+            'button.btn-primary',
+            'button:has-text("starten")'
         ];
 
         // Verbesserte Fehlerbehandlung und Logging
