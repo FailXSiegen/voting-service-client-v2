@@ -178,7 +178,9 @@ const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
 eventUserLifeCycleSubscription.onResult(({ data }) => {
   
   if (!data || !data.eventUserLifeCycle) {
-    console.warn('[ORGANIZER DEBUG] MemberRoom - No valid data in eventUserLifeCycle event');
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] MemberRoom - No valid data in eventUserLifeCycle event');
+    }
     return;
   }
   
@@ -194,7 +196,9 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
   });
   
   if (!eventUser) {
-    console.warn('[ORGANIZER DEBUG] MemberRoom - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] MemberRoom - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+    }
     return;
   }
     

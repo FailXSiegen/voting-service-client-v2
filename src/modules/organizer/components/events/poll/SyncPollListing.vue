@@ -190,7 +190,9 @@ activePollQuery.onResult(({ data }) => {
       pollUserVotedCount.value = votedCount;
     }
     
-    console.log('[ORGANIZER DEBUG] SyncPollListing - Current activePoll:', activePoll.value);
+    if (import.meta.env.DEV) {
+      console.log('[ORGANIZER DEBUG] SyncPollListing - Current activePoll:', activePoll.value);
+    }
   }
 });
 
@@ -359,7 +361,9 @@ const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
 });
 eventUserLifeCycleSubscription.onResult(({ data }) => {
   if (!data || !data.eventUserLifeCycle) {
-    console.warn('[ORGANIZER DEBUG] SyncPollListing - No valid data in eventUserLifeCycle event');
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] SyncPollListing - No valid data in eventUserLifeCycle event');
+    }
     return;
   }
   // We have to make a copy to add a new entry to the event users array.
@@ -373,7 +377,9 @@ eventUserLifeCycleSubscription.onResult(({ data }) => {
   });
   
   if (!eventUser) {
-    console.warn('[ORGANIZER DEBUG] SyncPollListing - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+    if (import.meta.env.DEV) {
+      console.warn('[ORGANIZER DEBUG] SyncPollListing - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+    }
     return;
   }
   eventUser.online = data?.eventUserLifeCycle?.online;
