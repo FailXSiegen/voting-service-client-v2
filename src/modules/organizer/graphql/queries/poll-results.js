@@ -1,4 +1,4 @@
-import gql from "graphql-tag";
+import gql from 'graphql-tag';
 
 export const POLLS_RESULTS = gql`
   query pollResults($eventId: ID, $page: Int, $pageSize: Int, $includeHidden: Boolean) {

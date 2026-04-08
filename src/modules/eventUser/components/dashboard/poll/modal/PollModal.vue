@@ -9,23 +9,29 @@
       data-bs-backdrop="static"
       aria-hidden="true"
     >
-      <div
-        class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
-      >
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div v-if="poll" class="modal-content position-relative">
           <!-- Modal-wide overlay to block all interaction during submission -->
           <!-- VERBESSERTE SPERRUNG: Bedingung mit Split-Vote-Erkennung -->
           <div
-v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < eventUser.voteAmount)" 
-               class="position-absolute w-100 h-100 top-0 start-0 z-3" 
-               style="background-color: rgba(255,255,255,0.95); cursor: not-allowed;">
+            v-if="
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < eventUser.voteAmount
+              )
+            "
+            class="position-absolute w-100 h-100 top-0 start-0 z-3"
+            style="background-color: rgba(255, 255, 255, 0.95); cursor: not-allowed"
+          >
             <div class="position-absolute top-50 start-50 translate-middle text-center">
               <span class="spinner-border spinner-border-lg text-primary" role="status"></span>
-              <div class="mt-2 fw-bold text-dark">{{ $t("view.polls.modal.submitting") }}...</div>
+              <div class="mt-2 fw-bold text-dark">{{ $t('view.polls.modal.submitting') }}...</div>
               <div class="mt-2 small">Bitte warten Sie, Ihre Stimmen werden gezählt</div>
               <!-- Fortschrittsanzeige für viele Stimmen -->
               <div v-if="votingProcess.usedVotesCount?.value > 0" class="mt-2">
-                Fortschritt: {{ votingProcess.usedVotesCount?.value }} von {{ eventUser.voteAmount }} Stimmzetteln
+                Fortschritt: {{ votingProcess.usedVotesCount?.value }} von
+                {{ eventUser.voteAmount }} Stimmzetteln
               </div>
             </div>
           </div>
@@ -33,8 +39,21 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
           <div class="modal-header">
             <h5 class="modal-title">
               {{ poll.title }}<br />
-              <small v-if="props.event.multivoteType !== 2 && votingProcess.usedVotesCount?.value < eventUser.voteAmount" id="pollCounter">
-                <b>({{ $t('view.polls.modal.ballotCounter', { current: votingProcess.usedVotesCount?.value + 1, total: eventUser.voteAmount }) }})</b>
+              <small
+                v-if="
+                  props.event.multivoteType !== 2 &&
+                  votingProcess.usedVotesCount?.value < eventUser.voteAmount
+                "
+                id="pollCounter"
+              >
+                <b
+                  >({{
+                    $t('view.polls.modal.ballotCounter', {
+                      current: votingProcess.usedVotesCount?.value + 1,
+                      total: eventUser.voteAmount,
+                    })
+                  }})</b
+                >
               </small>
             </h5>
             <button
@@ -51,30 +70,46 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
             <!-- NEUE WARNUNG: Anzeige wenn Umfrage geschlossen ist -->
             <div v-if="poll.closed" class="alert alert-warning mb-3">
               <i class="bi bi-exclamation-triangle me-2"></i>
-              <strong>Diese Abstimmung ist geschlossen und kann nicht mehr verwendet werden.</strong>
+              <strong
+                >Diese Abstimmung ist geschlossen und kann nicht mehr verwendet werden.</strong
+              >
             </div>
-            
+
             <!-- NEUE WARNUNG: Anzeige wenn alle Stimmen abgegeben wurden -->
-            <div v-else-if="votingProcess.votingFullyCompleted?.value || (eventUser.voteAmount && votingProcess.usedVotesCount?.value >= eventUser.voteAmount)" class="alert alert-info mb-3">
+            <div
+              v-else-if="
+                votingProcess.votingFullyCompleted?.value ||
+                (eventUser.voteAmount &&
+                  votingProcess.usedVotesCount?.value >= eventUser.voteAmount)
+              "
+              class="alert alert-info mb-3"
+            >
               <i class="bi bi-check-circle me-2"></i>
               <strong>Sie haben alle verfügbaren Stimmen für diese Abstimmung abgegeben.</strong>
             </div>
 
             <p v-if="poll.maxVotes === 1">
-              {{ $t("view.polls.modal.maxVote1") }}
+              {{ $t('view.polls.modal.maxVote1') }}
             </p>
             <p v-if="poll.maxVotes > 1">
-              {{ $t("view.polls.modal.maxVoteGreater1") }}
+              {{ $t('view.polls.modal.maxVoteGreater1') }}
               {{ poll.maxVotes }}
             </p>
             <p v-if="poll.minVotes > 0">
-              {{ $t("view.polls.modal.minVoteGreater0") }}
+              {{ $t('view.polls.modal.minVoteGreater0') }}
               {{ poll.minVotes }}
             </p>
 
             <!-- Form conditionally disabled when poll is closed or all votes used -->
             <PollForm
-              v-if="!poll.closed && !(votingProcess.votingFullyCompleted?.value || (eventUser.voteAmount && votingProcess.usedVotesCount?.value >= eventUser.voteAmount))"
+              v-if="
+                !poll.closed &&
+                !(
+                  votingProcess.votingFullyCompleted?.value ||
+                  (eventUser.voteAmount &&
+                    votingProcess.usedVotesCount?.value >= eventUser.voteAmount)
+                )
+              "
               ref="pollForm"
               :key="pollFormKey"
               :event="event"
@@ -83,7 +118,10 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
               :vote-counter="voteCounter"
               @submit="onSubmit"
             />
-            <div v-if="poll.type === 'PUBLIC' && activePollEventUser && event.publicVoteVisible" class="d-inline-block w-100">
+            <div
+              v-if="poll.type === 'PUBLIC' && activePollEventUser && event.publicVoteVisible"
+              class="d-inline-block w-100"
+            >
               <hr />
               <VotingDetailsWithSubscription
                 :active-poll-event-user="activePollEventUser"
@@ -92,7 +130,6 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
                 :poll="poll"
               />
             </div>
-            
           </div>
         </div>
       </div>
@@ -101,14 +138,14 @@ v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
-import { Modal } from "bootstrap";
-import PollForm from "@/modules/eventUser/components/dashboard/poll/PollForm.vue";
-import VotingDetailsWithSubscription from "@/modules/eventUser/components/dashboard/poll/VotingDetailsWithSubscription.vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch } from 'vue';
+import { Modal } from 'bootstrap';
+import PollForm from '@/modules/eventUser/components/dashboard/poll/PollForm.vue';
+import VotingDetailsWithSubscription from '@/modules/eventUser/components/dashboard/poll/VotingDetailsWithSubscription.vue';
 // ENTFERNT: useVotingProcess - wird jetzt als Prop übergeben
 // import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
 
-const emit = defineEmits(["submit"]);
+const emit = defineEmits(['submit']);
 const modal = ref(null);
 const pollForm = ref(null);
 let bootstrapModal = null;
@@ -133,34 +170,40 @@ function checkModalVisibility() {
   // DOM-basierte Prüfung
   const modalElement = document.getElementById('pollModal');
   if (modalElement) {
-    const isDisplayed = modalElement.classList.contains('show') && 
-                        window.getComputedStyle(modalElement).display !== 'none';
-    
+    const isDisplayed =
+      modalElement.classList.contains('show') &&
+      window.getComputedStyle(modalElement).display !== 'none';
+
     // Nur aktualisieren, wenn sich der Zustand ändert
     if (isDisplayed !== isVisible.value) {
       isVisible.value = isDisplayed;
-      
+
       // Debug ausgeben
-      if (!isDisplayed) { 
-        // Wenn das Modal verschwunden ist, obwohl es sichtbar sein sollte, 
+      if (!isDisplayed) {
+        // Wenn das Modal verschwunden ist, obwohl es sichtbar sein sollte,
         // versuchen es neu zu öffnen
-        if (props.poll && !props.poll.closed && 
-            props.eventUser.voteAmount > 0 && 
-            props.eventUser.allowToVote) {
-          
+        if (
+          props.poll &&
+          !props.poll.closed &&
+          props.eventUser.voteAmount > 0 &&
+          props.eventUser.allowToVote
+        ) {
           // Stelle sicher, dass wir nur wieder öffnen, wenn wir Teilstimmen abgegeben haben
-          const usedVotes = props.eventUser.voteAmount > 1 ? votingProcess.value.usedVotesCount?.value || 0 : 0;
+          const usedVotes =
+            props.eventUser.voteAmount > 1 ? votingProcess.value.usedVotesCount?.value || 0 : 0;
           const totalVotes = props.eventUser.voteAmount || 0;
-          
+
           if (usedVotes > 0 && usedVotes < totalVotes) {
-            console.warn("[DEBUG:VOTING] Modal verschwunden bei Teilabstimmung! Versuche erneut zu öffnen...");
-            
+            console.warn(
+              '[DEBUG:VOTING] Modal verschwunden bei Teilabstimmung! Versuche erneut zu öffnen...'
+            );
+
             // 250ms Verzögerung für stabile Wiedereröffnung
             setTimeout(() => {
               try {
                 showModal();
               } catch (e) {
-                console.error("[DEBUG:VOTING] Fehler bei auto-reopen:", e);
+                console.error('[DEBUG:VOTING] Fehler bei auto-reopen:', e);
               }
             }, 250);
           }
@@ -206,7 +249,7 @@ const pollFormKey = ref(1);
 
 const modalState = computed(() => {
   return {
-    isDisabled: isSubmitting.value || (pollForm.value && pollForm.value.isSubmitting)
+    isDisabled: isSubmitting.value || (pollForm.value && pollForm.value.isSubmitting),
   };
 });
 
@@ -332,7 +375,10 @@ function resetSubmittingState() {
             // Reset als abgeschlossen markieren
             isResetInProgress = false;
           } catch (e) {
-            console.error('[DEBUG:VOTING] Fehler beim Hinzufügen der Event-Listener nach Pause:', e);
+            console.error(
+              '[DEBUG:VOTING] Fehler beim Hinzufügen der Event-Listener nach Pause:',
+              e
+            );
             isResetInProgress = false; // Trotzdem Reset als abgeschlossen markieren
           }
         }, 100);
@@ -345,7 +391,9 @@ function resetSubmittingState() {
 
   // DOM-basierte Garantie für Overlay-Ausblendung
   try {
-    const overlay = document.querySelector('.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]');
+    const overlay = document.querySelector(
+      '.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]'
+    );
     if (overlay) {
       overlay.style.display = 'none';
     }
@@ -362,7 +410,7 @@ onMounted(() => {
   // Dies verhindert, dass alte Modal-Instanzen im DOM bleiben und Probleme verursachen
   console.log('[DEBUG:VOTING] PollModal wird gemounted, prüfe auf Zombie-Modals');
   const allModals = document.querySelectorAll('.modal');
-  allModals.forEach(oldModal => {
+  allModals.forEach((oldModal) => {
     // Entferne nur Modal-Elemente, die nicht das aktuelle sind
     if (oldModal !== modal.value) {
       console.log('[DEBUG:VOTING] Entferne Zombie-Modal:', oldModal.id);
@@ -372,7 +420,7 @@ onMounted(() => {
 
   // Entferne auch alle Backdrops
   const allBackdrops = document.querySelectorAll('.modal-backdrop');
-  allBackdrops.forEach(backdrop => {
+  allBackdrops.forEach((backdrop) => {
     console.log('[DEBUG:VOTING] Entferne Zombie-Backdrop');
     backdrop.remove();
   });
@@ -423,7 +471,7 @@ onMounted(() => {
               usedVotes,
               maxVotes,
               inSplitVoting,
-              stack: new Error().stack
+              stack: new Error().stack,
             });
 
             if (inSplitVoting) {
@@ -455,7 +503,7 @@ onMounted(() => {
   // Initial überprüfen
   setTimeout(checkModalVisibility, 300);
 });
-  
+
 // DEAKTIVIERT: Das 30-Sekunden-Reset wurde deaktiviert, da es bei längeren Abstimmungen störend ist
 // // NEUES SAFETY NET: Regelmäßig überprüfen, ob isSubmitting zurückgesetzt werden muss
 // // Falls ein Event nicht korrekt verarbeitet wurde oder ein Callback nicht ankam
@@ -476,16 +524,16 @@ onMounted(() => {
 //     }
 //   }
 // }, 5000); // Alle 5 Sekunden prüfen
-  
+
 // NEU: Verwende die global deklarierten Event-Handler-Funktionen für garantierte UI-Entsperrung
-  
+
 // Event-Listener registrieren
 if (typeof window !== 'undefined') {
   window.addEventListener('voting:complete', handleVotingComplete);
   window.addEventListener('voting:error', handleVotingError);
   window.addEventListener('voting:reset', handleVotingReset);
 }
-  
+
 // Cleanup für dieses Intervall hinzufügen (auskommentiert, da submittingCheckInterval deaktiviert)
 onBeforeUnmount(() => {
   // clearInterval(submittingCheckInterval);
@@ -532,7 +580,7 @@ onBeforeUnmount(() => {
   // Dies verhindert, dass der Backdrop sichtbar bleibt, wenn das Modal durch v-if=false entfernt wird
   console.log('[DEBUG:VOTING] PollModal wird unmounted, entferne Backdrop und modal-open');
   const backdrops = document.querySelectorAll('.modal-backdrop');
-  backdrops.forEach(backdrop => {
+  backdrops.forEach((backdrop) => {
     if (backdrop && backdrop.parentNode) {
       backdrop.parentNode.removeChild(backdrop);
       console.log('[DEBUG:VOTING] Backdrop entfernt');
@@ -545,28 +593,30 @@ onBeforeUnmount(() => {
   document.body.style.paddingRight = '';
   console.log('[DEBUG:VOTING] modal-open von body entfernt');
 });
-  
+
 // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
 const pollClosedWatcher = watch(
   () => props.poll?.closed,
   (isClosed) => {
     if (isClosed) {
-      console.warn("[DEBUG:VOTING] Poll wurde geschlossen (reactive watch), schließe Modal");
+      console.warn('[DEBUG:VOTING] Poll wurde geschlossen (reactive watch), schließe Modal');
       // Nur schließen, wenn es keine Split-Vote-Situation ist
       const totalAllowedVotes = props.eventUser?.voteAmount || 0;
       const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
-        
+
       // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
       if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
         hideModal();
       } else {
-        console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
+        console.warn(
+          '[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen'
+        );
       }
     }
   },
   { immediate: false } // NICHT sofort beim Mounting prüfen
 );
-  
+
 // KRITISCH: Überwache auch den Poll-State vom Parent-Component
 const pollStateWatcher = watch(
   () => props.activePollEventUser?.state,
@@ -580,10 +630,14 @@ const pollStateWatcher = watch(
 
       // Schließe nur, wenn alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt
       if (usedVotes >= totalAllowedVotes || usedVotes === 0) {
-        console.warn("[DEBUG:VOTING] Schließe Modal, da alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt");
+        console.warn(
+          '[DEBUG:VOTING] Schließe Modal, da alle Stimmen abgegeben wurden oder keine Split-Vote-Situation vorliegt'
+        );
         hideModal();
       } else {
-        console.warn("[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen");
+        console.warn(
+          '[DEBUG:VOTING] Split-Vote-Situation erkannt, Modal bleibt geöffnet für weitere Stimmen'
+        );
       }
     }
   },
@@ -598,7 +652,9 @@ const usedVotesWatcher = watch(
 
     // Wenn alle Stimmen abgegeben wurden, schließe das Modal SOFORT
     if (usedVotes >= totalAllowedVotes && totalAllowedVotes > 0) {
-      console.warn(`[DEBUG:VOTING] Alle Stimmen abgegeben (${usedVotes}/${totalAllowedVotes}), schließe Modal SOFORT`);
+      console.warn(
+        `[DEBUG:VOTING] Alle Stimmen abgegeben (${usedVotes}/${totalAllowedVotes}), schließe Modal SOFORT`
+      );
       hideModal();
     }
   },
@@ -610,25 +666,25 @@ onBeforeUnmount(() => {
   pollClosedWatcher();
   pollStateWatcher();
   usedVotesWatcher();
-    
+
   // Cleanup des Sichtbarkeits-Intervalls
   if (visibilityCheckInterval) {
     clearInterval(visibilityCheckInterval);
     visibilityCheckInterval = null;
   }
-    
+
   // Event-Listener entfernen
   if (modal.value) {
     try {
       modal.value.removeEventListener('shown.bs.modal', () => {
         isVisible.value = true;
       });
-        
+
       modal.value.removeEventListener('hidden.bs.modal', () => {
         isVisible.value = false;
       });
     } catch (e) {
-      console.error("[DEBUG:VOTING] Fehler beim Entfernen der Event-Listener:", e);
+      console.error('[DEBUG:VOTING] Fehler beim Entfernen der Event-Listener:', e);
     }
   }
 });
@@ -639,33 +695,35 @@ function reloadPage() {
 
 function onSubmit(data) {
   if (isSubmitting.value) {
-    console.warn('Vermeidung von doppelter Stimmabgabe: Formular ist bereits im Submitting-Zustand');
+    console.warn(
+      'Vermeidung von doppelter Stimmabgabe: Formular ist bereits im Submitting-Zustand'
+    );
     return;
   }
 
   isSubmitting.value = true;
-  
+
   // WICHTIG: Speichere den Zeitpunkt des Submit-Beginns für automatische Überwachung
   if (typeof window !== 'undefined') {
     window._lastSubmittingStartTime = Date.now();
   }
-  
+
   // Safety-Timeout: Falls keine Antwort kommt, nach 45 Sekunden UI entsperren
   const safetyTimeout = setTimeout(() => {
     if (isSubmitting.value) {
       console.warn('[DEBUG:VOTING] Safety-Timeout ausgelöst: isSubmitting wird zurückgesetzt');
       resetSubmittingState();
-      
+
       // Auch voting-process Flags zurücksetzen
       if (votingProcess.value) {
         votingProcess.value.releaseUILocks();
       }
     }
   }, 45000); // 45 Sekunden
-  
+
   // Event emittieren und Callback für Erfolg/Fehler registrieren
-  emit("submit", data);
-  
+  emit('submit', data);
+
   // Neues Event-System für besser koordinierte UI-Updates:
   // Lausche auf globale Voting-Events für garantierte UI-Entsperrung
   // Da handleVotingComplete global definiert ist, erstellen wir hier eine lokale Funktion mit dem gleichen Namen
@@ -673,24 +731,24 @@ function onSubmit(data) {
     clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
     resetSubmittingState();
   };
-  
+
   const localHandleVotingError = () => {
     clearTimeout(safetyTimeout); // Safety-Timeout abbrechen
     resetSubmittingState();
   };
-  
+
   // Globale Event-Listener für bessere Koordination
   if (typeof window !== 'undefined') {
     window.addEventListener('voting:complete', localHandleVotingComplete);
     window.addEventListener('voting:error', localHandleVotingError);
-    
+
     // Nach 5 Sekunden Events wieder entfernen, um Memory-Leaks zu vermeiden
     setTimeout(() => {
       window.removeEventListener('voting:complete', localHandleVotingComplete);
       window.removeEventListener('voting:error', localHandleVotingError);
     }, 5000);
   }
-  
+
   // Status wird durch pollAnswerLifeCycle-Event oder Fehlerbehandlung zurückgesetzt
   // UND durch die neuen Safety-Mechanismen
 }
@@ -709,7 +767,12 @@ function showModal() {
 
   // Überprüfe, ob wir in einer Split-Vote-Situation sind (noch Stimmen übrig)
   const totalAllowedVotes = props.eventUser?.voteAmount || 0;
-  console.log('[DEBUG:VOTING] Lese votingProcess.usedVotesCount.value:', votingProcess.value?.usedVotesCount?.value, 'votingProcess exists:', !!votingProcess.value);
+  console.log(
+    '[DEBUG:VOTING] Lese votingProcess.usedVotesCount.value:',
+    votingProcess.value?.usedVotesCount?.value,
+    'votingProcess exists:',
+    !!votingProcess.value
+  );
   const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
   const inSplitVoteSituation = usedVotes > 0 && usedVotes < totalAllowedVotes;
 
@@ -719,19 +782,21 @@ function showModal() {
   // Sie bedeuten nur, dass es sichtbar SEIN SOLLTE.
   const isModalAlreadyVisible = hasShowClass;
 
-  console.log(`[DEBUG:VOTING] showModal() aufgerufen: hasShowClass=${hasShowClass}, computedDisplay=${computedDisplay}, hasVisibleDisplay=${hasVisibleDisplay}, bodyHasModalOpen=${bodyHasModalOpen}, inSplitVoteSituation=${inSplitVoteSituation}, usedVotes=${usedVotes}/${totalAllowedVotes}, isModalAlreadyVisible=${isModalAlreadyVisible}`);
+  console.log(
+    `[DEBUG:VOTING] showModal() aufgerufen: hasShowClass=${hasShowClass}, computedDisplay=${computedDisplay}, hasVisibleDisplay=${hasVisibleDisplay}, bodyHasModalOpen=${bodyHasModalOpen}, inSplitVoteSituation=${inSplitVoteSituation}, usedVotes=${usedVotes}/${totalAllowedVotes}, isModalAlreadyVisible=${isModalAlreadyVisible}`
+  );
 
   // KRITISCH: Wenn bereits alle Stimmen abgegeben wurden, Modal NICHT öffnen
   if (usedVotes >= totalAllowedVotes && totalAllowedVotes > 0) {
     // console.log(`[DEBUG:VOTING] Alle Stimmen bereits abgegeben (${usedVotes}/${totalAllowedVotes}), Modal wird nicht geöffnet`);
     return;
   }
-  
+
   // KRITISCHE SICHERHEITSPRÜFUNG: Wenn der Poll geschlossen ist, das Modal NICHT öffnen
   // und stattdessen SOFORT schließen, falls es geöffnet ist - AUSSER wir sind in einer Split-Vote-Situation
   if (props.poll && props.poll.closed && !inSplitVoteSituation) {
-    console.warn("[DEBUG:VOTING] Poll ist geschlossen, Modal wird geschlossen");
-    
+    console.warn('[DEBUG:VOTING] Poll ist geschlossen, Modal wird geschlossen');
+
     // Sofort schließen falls offen
     if (bootstrapModal) {
       try {
@@ -740,22 +805,24 @@ function showModal() {
         console.error('[DEBUG:VOTING] Fehler beim Schließen des geschlossenen Poll-Modals:', e);
       }
     }
-    
+
     return; // Sofort zurückkehren ohne das Modal zu öffnen
   }
-    
+
   // EXTRA-PRÜFUNG: Prüfe auch beim Parents-Component, ob der Poll closed ist - AUSSER bei Split-Vote-Situation
   if (!inSplitVoteSituation) {
     try {
-      if (props.activePollEventUser?.state === "closed") {
-        console.warn("[DEBUG:VOTING] Poll-State ist 'closed' laut activePollEventUser, Modal wird nicht geöffnet");
+      if (props.activePollEventUser?.state === 'closed') {
+        console.warn(
+          "[DEBUG:VOTING] Poll-State ist 'closed' laut activePollEventUser, Modal wird nicht geöffnet"
+        );
         return;
       }
     } catch (e) {
       console.error('[DEBUG:VOTING] Fehler bei extra Poll-State-Prüfung:', e);
     }
   }
-  
+
   // Vor dem Öffnen des Modals müssen wir sicherstellen, dass alle Status zurückgesetzt sind
   isSubmitting.value = false;
 
@@ -789,16 +856,18 @@ function showModal() {
     votingProcess.value.pollFormSubmitting.value = false;
     votingProcess.value.currentlyProcessingBatch.value = false;
   }
-  
-  // Um das "Wird abgestimmt" bei jedem Öffnen korrekt anzuzeigen, 
+
+  // Um das "Wird abgestimmt" bei jedem Öffnen korrekt anzuzeigen,
   // stellen wir sicher, dass die Komponente in einem frischen Zustand ist
-  
+
   // KRITISCH: Vor dem Öffnen NOCHMAL prüfen, ob der Poll geschlossen ist
   if (props.poll && props.poll.closed) {
-    console.warn("[DEBUG:VOTING] Poll wurde während der Vorbereitung geschlossen, Modal wird nicht geöffnet");
+    console.warn(
+      '[DEBUG:VOTING] Poll wurde während der Vorbereitung geschlossen, Modal wird nicht geöffnet'
+    );
     return;
   }
-  
+
   // Bereinige zuvor eventuell verbliebene Modal-Elemente - ABER NUR wenn Modal nicht bereits sichtbar ist
   // UND wenn modal-open nicht bereits gesetzt ist
   const isModalOpenSet = document.body.classList.contains('modal-open');
@@ -813,20 +882,20 @@ function showModal() {
       document.body.style.position = '';
       // console.log('[DEBUG:VOTING] Body-Styles zurückgesetzt (Modal war nicht sichtbar, modal-open war nicht gesetzt)');
     } catch (e) {
-      console.error("[DEBUG:VOTING] Fehler beim Bereinigen vorheriger Modal-Elemente:", e);
+      console.error('[DEBUG:VOTING] Fehler beim Bereinigen vorheriger Modal-Elemente:', e);
     }
   } else {
     // console.log(`[DEBUG:VOTING] Body-Styles werden NICHT zurückgesetzt: isModalAlreadyVisible=${isModalAlreadyVisible}, isModalOpenSet=${isModalOpenSet}`);
   }
-  
+
   // Dann das Modal zeigen
   try {
     // Sicherheitsprüfung: Ist das DOM-Element vorhanden?
     if (!modal.value) {
-      console.error("[DEBUG:VOTING] Kann Modal nicht öffnen: DOM-Element nicht verfügbar");
+      console.error('[DEBUG:VOTING] Kann Modal nicht öffnen: DOM-Element nicht verfügbar');
       return; // Abbrechen, wenn kein DOM-Element vorhanden ist
     }
-    
+
     // Ist Bootstrap Modal bereits initialisiert?
     if (bootstrapModal) {
       // KRITISCH: Wenn das Modal bereits sichtbar ist UND noch Stimmen übrig sind,
@@ -834,8 +903,13 @@ function showModal() {
       const hasVotesRemaining = usedVotes < totalAllowedVotes;
 
       if (isModalAlreadyVisible && hasVotesRemaining) {
-        console.log('[DEBUG:VOTING] Modal bereits sichtbar mit verbleibenden Stimmen: bleibt offen');
-        console.log('[DEBUG:VOTING] modal.value ist:', modal.value ? 'vorhanden' : 'NULL/UNDEFINED');
+        console.log(
+          '[DEBUG:VOTING] Modal bereits sichtbar mit verbleibenden Stimmen: bleibt offen'
+        );
+        console.log(
+          '[DEBUG:VOTING] modal.value ist:',
+          modal.value ? 'vorhanden' : 'NULL/UNDEFINED'
+        );
 
         // KRITISCH: Nutze Bootstrap's eigene show() Methode statt manuelle Klassen-Manipulation
         console.log('[DEBUG:VOTING] Rufe bootstrapModal.show() auf um Modal sichtbar zu machen');
@@ -848,7 +922,9 @@ function showModal() {
             if (modal.value) {
               const hasShowClassNow = modal.value.classList.contains('show');
               const computedDisplayNow = window.getComputedStyle(modal.value).display;
-              console.log(`[DEBUG:VOTING] Nach bootstrapModal.show(): hasShowClass=${hasShowClassNow}, computedDisplay: ${computedDisplayNow}`);
+              console.log(
+                `[DEBUG:VOTING] Nach bootstrapModal.show(): hasShowClass=${hasShowClassNow}, computedDisplay: ${computedDisplayNow}`
+              );
             }
           }, 100);
         } catch (e) {
@@ -882,7 +958,7 @@ function showModal() {
             computedDisplay: window.getComputedStyle(modal.value).display,
             visibility: window.getComputedStyle(modal.value).visibility,
             opacity: window.getComputedStyle(modal.value).opacity,
-            zIndex: window.getComputedStyle(modal.value).zIndex
+            zIndex: window.getComputedStyle(modal.value).zIndex,
           });
         }
 
@@ -893,7 +969,10 @@ function showModal() {
               if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                 const hasShow = modal.value.classList.contains('show');
                 if (!hasShow) {
-                  console.error('[DEBUG:VOTING] WARNUNG: show-Klasse wurde ENTFERNT!', new Error().stack);
+                  console.error(
+                    '[DEBUG:VOTING] WARNUNG: show-Klasse wurde ENTFERNT!',
+                    new Error().stack
+                  );
                 }
               }
             });
@@ -927,7 +1006,7 @@ function showModal() {
               // Entferne alle zurückgebliebenen Modal-Elemente
               const activeModals = document.getElementsByClassName('modal show');
               if (activeModals.length > 0) {
-                Array.from(activeModals).forEach(modal => {
+                Array.from(activeModals).forEach((modal) => {
                   if (modal && modal.id !== 'pollModal') {
                     try {
                       const instance = Modal.getInstance(modal);
@@ -935,13 +1014,16 @@ function showModal() {
                         instance.hide();
                       }
                     } catch (e) {
-                      console.error("[DEBUG:VOTING] Fehler beim Schließen eines anderen Modals:", e);
+                      console.error(
+                        '[DEBUG:VOTING] Fehler beim Schließen eines anderen Modals:',
+                        e
+                      );
                     }
                   }
                 });
               }
             }
-            
+
             // Extra: Bootstrap-Timer-Verzögerung abschalten, damit das Modal sofort geöffnet wird
             if (typeof Modal !== 'undefined' && Modal._getInstance) {
               const modalContent = document.querySelector('#pollModal .modal-content');
@@ -949,7 +1031,7 @@ function showModal() {
                 modalContent.style.transitionDuration = '0.1s';
               }
             }
-            
+
             // Nach aufräumen Modal öffnen und dabei Option setzen, dass es nicht automatisch geschlossen werden kann
             bootstrapModal.show();
 
@@ -968,93 +1050,93 @@ function showModal() {
               document.body.classList.add('modal-open');
             }
           } catch (showErr) {
-            console.error("[DEBUG:VOTING] Fehler beim Show nach Timeout:", showErr);
-            
+            console.error('[DEBUG:VOTING] Fehler beim Show nach Timeout:', showErr);
+
             // Trotzdem versuchen, das Modal anzuzeigen
             try {
               bootstrapModal.show();
             } catch (e) {
-              console.error("[DEBUG:VOTING] Auch zweiter Versuch fehlgeschlagen:", e);
+              console.error('[DEBUG:VOTING] Auch zweiter Versuch fehlgeschlagen:', e);
             }
           }
         }, 150); // Längere Verzögerung für bessere Stabilität
       } catch (modalErr) {
         // Wenn das Schließen fehlschlägt, versuchen wir das Modal trotzdem zu öffnen
-        console.warn("[DEBUG:VOTING] Fehler beim Schließen vor Neuanzeige:", modalErr);
+        console.warn('[DEBUG:VOTING] Fehler beim Schließen vor Neuanzeige:', modalErr);
         try {
           bootstrapModal.show();
         } catch (e) {
-          console.error("[DEBUG:VOTING] Fehler beim direkten Anzeigen:", e);
+          console.error('[DEBUG:VOTING] Fehler beim direkten Anzeigen:', e);
         }
       }
     } else {
       // Falls nicht, neu initialisieren
-      console.warn("[DEBUG:VOTING] bootstrapModal nicht initialisiert, erstelle neu");
-      
+      console.warn('[DEBUG:VOTING] bootstrapModal nicht initialisiert, erstelle neu');
+
       // Prüfen, ob die Bootstrap Modal-Klasse verfügbar ist
       if (typeof Modal === 'undefined') {
-        console.error("[DEBUG:VOTING] Bootstrap Modal-Klasse ist nicht verfügbar");
+        console.error('[DEBUG:VOTING] Bootstrap Modal-Klasse ist nicht verfügbar');
         return;
       }
-      
+
       // Vor der Initialisierung nochmal prüfen, ob das DOM-Element existiert
       if (!modal.value) {
-        console.error("[DEBUG:VOTING] DOM-Element ist während der Initialisierung verschwunden");
+        console.error('[DEBUG:VOTING] DOM-Element ist während der Initialisierung verschwunden');
         return;
       }
-      
+
       // Neues Modal erstellen und anzeigen
       bootstrapModal = new Modal(modal.value);
       bootstrapModal.show();
     }
   } catch (error) {
-    console.error("[DEBUG:VOTING] Fehler beim Öffnen des Modals:", error);
+    console.error('[DEBUG:VOTING] Fehler beim Öffnen des Modals:', error);
   }
 }
 
-function hideModal() {  
+function hideModal() {
   try {
     // WICHTIG: Stelle vor dem Schließen sicher, dass das Modal gesperrt ist,
     // damit keine weiteren Klicks möglich sind
     isSubmitting.value = true;
-    
+
     // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
     if (props.poll && props.poll.id) {
       localStorage.removeItem(`poll_form_data_${props.poll.id}`);
     }
-    
+
     // Alle UI-relevanten Flags auf true setzen
     if (votingProcess.value) {
       votingProcess.value.pollFormSubmitting.value = true;
       votingProcess.value.currentlyProcessingBatch.value = true;
       votingProcess.value.isProcessingVotes.value = true;
     }
-    
+
     // Sichere Prüfung, ob DOM-Element existiert, bevor Operationen durchgeführt werden
     if (!modal.value) {
-      console.warn("[DEBUG:VOTING] Modal-Element nicht verfügbar beim Schließen");
+      console.warn('[DEBUG:VOTING] Modal-Element nicht verfügbar beim Schließen');
       // Trotzdem Backdrop und modal-open entfernen, falls vorhanden
       cleanupModalEffects();
       return;
     }
-    
+
     // WICHTIG: Wenn das Bootstrap-Modal nicht existiert, neu initialisieren
     if (!bootstrapModal && modal.value) {
       try {
         // Prüfen, ob die Bootstrap Modal-Klasse verfügbar ist
         if (typeof Modal === 'undefined') {
-          console.error("[DEBUG:VOTING] Bootstrap Modal-Klasse ist nicht verfügbar");
+          console.error('[DEBUG:VOTING] Bootstrap Modal-Klasse ist nicht verfügbar');
           cleanupModalEffects(); // Trotzdem aufräumen
           return;
         }
-        
+
         bootstrapModal = new Modal(modal.value);
       } catch (e) {
         console.error('[DEBUG:VOTING] Fehler bei Bootstrap-Modal-Initialisierung:', e);
         cleanupModalEffects(); // Trotzdem aufräumen
       }
     }
-    
+
     // Sofortiger Schließversuch ohne Verzögerung
     if (bootstrapModal) {
       try {
@@ -1085,7 +1167,7 @@ function cleanupModalEffects() {
       modal.value.style.display = 'none';
       modal.value.setAttribute('aria-hidden', 'true');
     }
-    
+
     // Backdrop entfernen - DEAKTIVIERT: Lasse Bootstrap das verwalten
     // const backdrops = document.getElementsByClassName('modal-backdrop');
     // if (backdrops.length > 0) {
@@ -1124,7 +1206,7 @@ function cleanupModalEffects() {
     //     overlay.parentNode.removeChild(overlay);
     //   }
     // });
-    
+
     // KRITISCH: Zusätzlich mit kurzer Verzögerung, damit die reaktiven Updates durch Vue erfolgen können
     // Dadurch wird sichergestellt, dass die UI gesperrt bleibt und das Modal wirklich geschlossen wird
     setTimeout(() => {
@@ -1133,13 +1215,13 @@ function cleanupModalEffects() {
         if (bootstrapModal) {
           bootstrapModal.hide();
         }
-        
+
         // LOKAL states danach zurücksetzen (nicht vorher!)
         reset(false); // Immer vollständiges Zurücksetzen erzwingen
-        
+
         // Formular Key erhöhen für frisches Formular beim nächsten Öffnen
         pollFormKey.value += 1;
-        
+
         // Prüfe, ob alle Stimmen abgegeben wurden
         const totalAllowedVotes = props.eventUser?.voteAmount || 0;
         const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
@@ -1169,12 +1251,12 @@ function reset(keepSelection = false) {
   // WICHTIG: Hier explizit auf false setzen, damit das Overlay verschwindet,
   // wenn die Verarbeitung vollständig abgeschlossen ist
   isSubmitting.value = false;
-  
+
   // KRITISCH: Lokalen Storage für die aktuelle Abstimmung löschen
   if (props.poll && props.poll.id) {
     localStorage.removeItem(`poll_form_data_${props.poll.id}`);
   }
-  
+
   // Stelle sicher, dass auch das PollForm vollständig zurückgesetzt wird
   if (pollForm.value) {
     if (!keepSelection) {
@@ -1192,24 +1274,26 @@ function reset(keepSelection = false) {
       }
     }
   }
-  
+
   // Auch alle Event-Handler explizit freischalten
   if (typeof window !== 'undefined') {
     // Global-Flags zurücksetzen (wichtig für übergeordnete Komponenten)
-    window._pollFormSubmitting = false; 
+    window._pollFormSubmitting = false;
     window._isProcessingVotes = false;
     window._currentlyProcessingBatch = false;
     window._lastSubmittingStartTime = null; // Timestamp zurücksetzen
   }
-  
+
   // GARANTIERTE UI-ENTSPERRUNG mit zusätzlichem DOM-basierten Ansatz
   try {
     // Overlay forciert ausblenden via DOM-Manipulation
-    const overlay = document.querySelector('.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]');
+    const overlay = document.querySelector(
+      '.modal-content > div[style*="background-color: rgba(255,255,255,0.95)"]'
+    );
     if (overlay) {
       overlay.style.display = 'none';
     }
-    
+
     // Modal-Lockouts zurücksetzen
     // KRITISCH: Verzögere das Entfernen der modal-open Klasse
     setTimeout(() => {
@@ -1243,24 +1327,24 @@ function reset(keepSelection = false) {
   } catch (e) {
     console.error('[DEBUG:VOTING] Fehler bei DOM-basierter UI-Entsperrung:', e);
   }
-  
+
   // Stelle sicher, dass die Overlay-Anzeige auch wirklich aktualisiert wird
   // durch eine sofortige zweite Aktualisierung für bessere Reaktivität
-  
+
   // Nochmal setzen für sicherere Reaktivität
   setTimeout(() => {
     isSubmitting.value = false;
-    
+
     // NOCHMALS sicherstellen, dass keine alten Formulardaten existieren
     if (props.poll && props.poll.id) {
       localStorage.removeItem(`poll_form_data_${props.poll.id}`);
     }
-    
+
     // Bei jeder Zurücksetzung UI-Lock im voting-process garantiert aufheben
     if (votingProcess.value && typeof votingProcess.value.releaseUILocks === 'function') {
       votingProcess.value.releaseUILocks();
     }
-    
+
     // Event auslösen für globale Koordination
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('modal:reset-complete'));
@@ -1275,7 +1359,7 @@ defineExpose({
   isSubmitting,
   pollForm,
   reset,
-  resetSubmittingState // Neue Funktion für externe Komponenten verfügbar machen
+  resetSubmittingState, // Neue Funktion für externe Komponenten verfügbar machen
 });
 </script>
 

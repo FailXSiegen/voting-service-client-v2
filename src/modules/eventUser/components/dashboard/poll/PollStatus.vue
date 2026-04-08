@@ -22,7 +22,7 @@
     role="alert"
   >
     <p class="mb-0">
-      {{ $t("view.user.verified.noActivePoll") }}
+      {{ $t('view.user.verified.noActivePoll') }}
     </p>
   </div>
   <hr class="d-print-none" />

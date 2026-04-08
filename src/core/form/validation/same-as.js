@@ -1,4 +1,4 @@
-import { helpers } from "@vuelidate/validators";
+import { helpers } from '@vuelidate/validators';
 
 /**
  * @param {String} field
@@ -8,10 +8,10 @@ import { helpers } from "@vuelidate/validators";
 export const sameAs = (field, formData) =>
   helpers.withParams(
     {
-      type: "sameAs",
+      type: 'sameAs',
       value: field,
     },
-    (value) => value === formData[field],
+    (value) => value === formData[field]
   );
 
 /**
@@ -37,10 +37,10 @@ export const maxLength = (max) => (value) => value.length <= max;
 export const objectPropertyIsEqual = (field, object, targetValue) =>
   helpers.withParams(
     {
-      type: "objectPropertyIsEqual",
+      type: 'objectPropertyIsEqual',
       value: field,
     },
-    () => object[field] === targetValue,
+    () => object[field] === targetValue
   );
 
 /**
@@ -52,10 +52,10 @@ export const objectPropertyIsEqual = (field, object, targetValue) =>
 export const objectPropertyIsNotEqual = (field, object, targetValue) =>
   helpers.withParams(
     {
-      type: "objectPropertyIsNotEqual",
+      type: 'objectPropertyIsNotEqual',
       value: field,
     },
-    () => object[field] !== targetValue,
+    () => object[field] !== targetValue
   );
 
 /**
@@ -67,8 +67,8 @@ export const objectPropertyIsNotEqual = (field, object, targetValue) =>
 export const objectPropertyIsGreaterThan = (field, object, targetValue) =>
   helpers.withParams(
     {
-      type: "objectPropertyIsGreaterThan",
+      type: 'objectPropertyIsGreaterThan',
       value: field,
     },
-    () => object[field] > targetValue,
+    () => object[field] > targetValue
   );

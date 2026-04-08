@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const ALL_PAST_EVENTS = gql`
   query allPastEvents($page: Int, $pageSize: Int) {

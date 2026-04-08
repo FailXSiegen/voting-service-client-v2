@@ -2,7 +2,7 @@
 <template>
   <div class="bootstrap-styles-input">
     <label class="form-label">{{ label }}</label>
-    
+
     <div class="style-rows container">
       <div v-for="(row, index) in styleRows" :key="index" class="row mb-2">
         <div class="col-6">
@@ -17,14 +17,8 @@
               >
                 <option value="">Select variable</option>
                 <option value="custom">Custom variable...</option>
-                <optgroup
-v-for="(vars, group) in bootstrapVariables" 
-                         :key="group" 
-                         :label="group">
-                  <option
-v-for="variable in vars" 
-                          :key="variable.name" 
-                          :value="variable.name">
+                <optgroup v-for="(vars, group) in bootstrapVariables" :key="group" :label="group">
+                  <option v-for="variable in vars" :key="variable.name" :value="variable.name">
                     {{ variable.label }}
                   </option>
                 </optgroup>
@@ -37,16 +31,15 @@ v-for="variable in vars"
                 placeholder="variable-name"
                 @input="updateVariable(index, $event.target.value)"
               />
-             
             </div>
-            <button 
-                class="btn btn-outline-secondary border border-start-0" 
-                type="button"
-                :title="row.isCustom ? 'Switch to predefined variables' : 'Switch to custom input'"
-                @click="toggleInputType(index)"
-              >
-                <i :class="row.isCustom ? 'bi-list' : 'bi-pencil'"></i>
-              </button>
+            <button
+              class="btn btn-outline-secondary border border-start-0"
+              type="button"
+              :title="row.isCustom ? 'Switch to predefined variables' : 'Switch to custom input'"
+              @click="toggleInputType(index)"
+            >
+              <i :class="row.isCustom ? 'bi-list' : 'bi-pencil'"></i>
+            </button>
           </div>
         </div>
         <div class="col-4">
@@ -59,22 +52,14 @@ v-for="variable in vars"
           />
         </div>
         <div class="col-2">
-          <button 
-            type="button" 
-            class="btn btn-danger"
-            @click="removeRow(index)"
-          >
+          <button type="button" class="btn btn-danger" @click="removeRow(index)">
             <i class="bi bi-trash"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <button 
-      type="button" 
-      class="btn btn-secondary mt-2"
-      @click="addNewRow"
-    >
+    <button type="button" class="btn btn-secondary mt-2" @click="addNewRow">
       <i class="bi bi-plus-circle me-1"></i>
       {{ $t('form.bootstrapStyles.addVariable') || 'Add Variable' }}
     </button>
@@ -84,7 +69,7 @@ v-for="variable in vars"
         {{ error.$message }}
       </span>
     </div>
-    
+
     <small v-if="helpText" class="form-text text-muted d-inline-block w-100">
       {{ helpText }}
     </small>
@@ -96,7 +81,7 @@ import { ref, watch, onMounted } from 'vue';
 
 // Predefined Bootstrap variables grouped by category
 const bootstrapVariables = {
-  'Colors': [
+  Colors: [
     { name: 'primary', label: 'Primary Color' },
     { name: 'secondary', label: 'Secondary Color' },
     { name: 'success', label: 'Success Color' },
@@ -104,9 +89,9 @@ const bootstrapVariables = {
     { name: 'warning', label: 'Warning Color' },
     { name: 'danger', label: 'Danger Color' },
     { name: 'light', label: 'Light Color' },
-    { name: 'dark', label: 'Dark Color' }
+    { name: 'dark', label: 'Dark Color' },
   ],
-  'Buttons': [
+  Buttons: [
     { name: 'btn-color', label: 'Button Text Color' },
     { name: 'btn-bg', label: 'Button Background' },
     { name: 'btn-border-color', label: 'Button Border Color' },
@@ -114,52 +99,52 @@ const bootstrapVariables = {
     { name: 'btn-hover-bg', label: 'Button Hover Background' },
     { name: 'btn-hover-border-color', label: 'Button Hover Border Color' },
     { name: 'btn-active-color', label: 'Button Active Text Color' },
-    { name: 'btn-active-bg', label: 'Button Active Background' }
+    { name: 'btn-active-bg', label: 'Button Active Background' },
   ],
-  'Cards': [
+  Cards: [
     { name: 'card-bg', label: 'Card Background' },
     { name: 'card-color', label: 'Card Text Color' },
     { name: 'card-border-color', label: 'Card Border Color' },
     { name: 'card-cap-bg', label: 'Card Header Background' },
-    { name: 'card-cap-color', label: 'Card Header Text Color' }
+    { name: 'card-cap-color', label: 'Card Header Text Color' },
   ],
-  'Forms': [
+  Forms: [
     { name: 'input-bg', label: 'Input Background' },
     { name: 'input-color', label: 'Input Text Color' },
     { name: 'input-border-color', label: 'Input Border Color' },
     { name: 'input-focus-bg', label: 'Input Focus Background' },
-    { name: 'input-focus-border-color', label: 'Input Focus Border Color' }
+    { name: 'input-focus-border-color', label: 'Input Focus Border Color' },
   ],
-  'Typography': [
+  Typography: [
     { name: 'body-color', label: 'Body Text Color' },
     { name: 'body-bg', label: 'Body Background' },
     { name: 'heading-color', label: 'Heading Color' },
     { name: 'link-color', label: 'Link Color' },
-    { name: 'link-hover-color', label: 'Link Hover Color' }
-  ]
+    { name: 'link-hover-color', label: 'Link Hover Color' },
+  ],
 };
 
 const props = defineProps({
   modelValue: {
     type: String,
-    default: '{}'
+    default: '{}',
   },
   label: {
     type: String,
-    required: true
+    required: true,
   },
   helpText: {
     type: String,
-    default: ''
+    default: '',
   },
   errors: {
     type: Array,
-    default: () => []
+    default: () => [],
   },
   hasErrors: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);
@@ -173,13 +158,13 @@ onMounted(() => {
     styleRows.value = Object.entries(parsedStyles).map(([variable, value]) => {
       const varName = variable.replace('bs-', '');
       // Check if it's a predefined variable
-      const isPredefined = Object.values(bootstrapVariables).some(
-        group => group.some(v => v.name === varName)
+      const isPredefined = Object.values(bootstrapVariables).some((group) =>
+        group.some((v) => v.name === varName)
       );
       return {
         variable: varName,
         value,
-        isCustom: !isPredefined
+        isCustom: !isPredefined,
       };
     });
   } catch (e) {
@@ -188,18 +173,22 @@ onMounted(() => {
 });
 
 // Update styles JSON when rows change
-watch(styleRows, () => {
-  const stylesObject = styleRows.value.reduce((acc, row) => {
-    if (row.variable && row.value) {
-      acc[`bs-${row.variable}`] = row.value;
-    }
-    return acc;
-  }, {});
-  
-  const stylesJson = JSON.stringify(stylesObject);
-  emit('update:modelValue', stylesJson);
-  emit('change', { value: stylesJson });
-}, { deep: true });
+watch(
+  styleRows,
+  () => {
+    const stylesObject = styleRows.value.reduce((acc, row) => {
+      if (row.variable && row.value) {
+        acc[`bs-${row.variable}`] = row.value;
+      }
+      return acc;
+    }, {});
+
+    const stylesJson = JSON.stringify(stylesObject);
+    emit('update:modelValue', stylesJson);
+    emit('change', { value: stylesJson });
+  },
+  { deep: true }
+);
 
 function toggleInputType(index) {
   styleRows.value[index].isCustom = !styleRows.value[index].isCustom;
@@ -236,7 +225,7 @@ function updateValue(index, value) {
     max-height: 300px;
     overflow-y: auto;
   }
-  
+
   .form-select {
     // Override default padding to align with input-group
     padding-left: 0.75rem;

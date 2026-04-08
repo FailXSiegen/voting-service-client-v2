@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref } from 'vue';
 
 const minHeight = 250;
 const show = ref(false);
@@ -21,7 +21,7 @@ let lastKnownScrollPosition = 0;
 let ticking = false;
 
 function onClickToTopButton() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function onScroll() {
@@ -39,7 +39,7 @@ function onScroll() {
 }
 
 onMounted(() => {
-  document.addEventListener("scroll", onScroll);
+  document.addEventListener('scroll', onScroll);
 });
 </script>
 

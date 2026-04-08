@@ -8,29 +8,29 @@
 </template>
 
 <script setup>
-import { useHead } from "@vueuse/head";
-import LoginFooter from "@/core/components/LoginFooter.vue";
+import { useHead } from '@vueuse/head';
+import LoginFooter from '@/core/components/LoginFooter.vue';
 
 const props = defineProps({
   metaTitle: {
     type: String,
-    default: "Einfach die Wahl haben",
+    default: 'Einfach die Wahl haben',
   },
 });
 
 useHead({
-  title: props.metaTitle ?? "Einfach die Wahl haben",
+  title: props.metaTitle ?? 'Einfach die Wahl haben',
   titleTemplate: (title) => {
     const settings = JSON.parse(localStorage.getItem('systemSettings') || '{}');
     const suffix = settings.titleSuffix || 'digitalwahl.org';
     return `${title} - ${suffix}`;
   },
   htmlAttrs: {
-    lang: "de",
+    lang: 'de',
   },
   meta: [
-    { name: "description", content: "Einfach die Wahl haben." },
-    { name: "viewport", content: "width=device-width, initial-scale=1" },
+    { name: 'description', content: 'Einfach die Wahl haben.' },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
   ],
 });
 </script>

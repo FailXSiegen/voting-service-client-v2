@@ -19,9 +19,7 @@
             :to="{ name: RouteOrganizerMemberRoom, params }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{
-              $t("navigation.views." + RouteOrganizerMemberRoom)
-            }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + RouteOrganizerMemberRoom) }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -41,9 +39,7 @@
             :to="{ name: RouteOrganizerLobbyRoom, params }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{
-              $t("navigation.views." + RouteOrganizerLobbyRoom)
-            }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + RouteOrganizerLobbyRoom) }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -63,9 +59,7 @@
             :to="{ name: RouteOrganizerPolls, params }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{
-              $t("navigation.views." + RouteOrganizerPolls)
-            }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + RouteOrganizerPolls) }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -82,9 +76,7 @@
             :to="{ name: RouteOrganizerPollResults, params }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{
-              $t("navigation.views." + RouteOrganizerPollResults)
-            }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + RouteOrganizerPollResults) }}</span>
             <span
               :class="[
                 'nav-icon',
@@ -101,7 +93,7 @@
             :to="{ name: RouteOrganizerEvents }"
             class="btn btn-danger w-100 text-center"
           >
-            <span class="nav-title">{{ $t("navigation.backToEvents") }}</span>
+            <span class="nav-title">{{ $t('navigation.backToEvents') }}</span>
             <span
               :class="['nav-icon', 'bi', 'bi--2xl', 'bi-arrow-left']"
               :title="$t('navigation.backToEvents')"
@@ -120,14 +112,14 @@ import {
   RouteOrganizerLobbyRoom,
   RouteOrganizerPolls,
   RouteOrganizerPollResults,
-  RouteOrganizerEvents
-} from "@/router/routes";
-import { computed, ref } from "vue";
-import { useRoute } from "vue-router";
-import { useQuery, useSubscription } from "@vue/apollo-composable";
-import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
-import { NEW_EVENT_USER } from "@/modules/organizer/graphql/subscription/new-event-user";
-import { EVENT_USER_LIFE_CYCLE } from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
+  RouteOrganizerEvents,
+} from '@/router/routes';
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useQuery, useSubscription } from '@vue/apollo-composable';
+import { EVENT_USERS } from '@/modules/organizer/graphql/queries/event-users';
+import { NEW_EVENT_USER } from '@/modules/organizer/graphql/subscription/new-event-user';
+import { EVENT_USER_LIFE_CYCLE } from '@/modules/organizer/graphql/subscription/event-user-life-cycle';
 
 const route = useRoute();
 const eventId = route.params.id;
@@ -135,11 +127,7 @@ const params = useRoute().params;
 const eventUsers = ref([]);
 
 // Fetch event users..
-const eventUsersQuery = useQuery(
-  EVENT_USERS,
-  { eventId },
-  { fetchPolicy: "cache-and-network" },
-);
+const eventUsersQuery = useQuery(EVENT_USERS, { eventId }, { fetchPolicy: 'cache-and-network' });
 eventUsersQuery.onResult(({ data }) => {
   if (data?.eventUsers) {
     eventUsers.value = data?.eventUsers;
@@ -159,7 +147,12 @@ const verifiedUsersCount = computed(() => {
 const pendingUsersCount = computed(() => {
   const count = (eventUsers.value || []).filter((eventUser) => !eventUser.verified)?.length ?? 0;
   if (import.meta.env.DEV) {
-    console.log('[ORGANIZER DEBUG] EventNavigation - Pending users count:', count, 'Total users:', (eventUsers.value || []).length);
+    console.log(
+      '[ORGANIZER DEBUG] EventNavigation - Pending users count:',
+      count,
+      'Total users:',
+      (eventUsers.value || []).length
+    );
   }
   return count;
 });
@@ -170,21 +163,32 @@ let newEventUserSubscription;
 try {
   // Only create subscription if eventId is valid
   if (eventId && eventId !== 'undefined' && eventId !== null) {
-    const subscriptionResult = useSubscription(NEW_EVENT_USER, {
-      eventId
-    }, {
-      // Add enabled option to control subscription lifecycle
-      enabled: !!eventId
-    });
+    const subscriptionResult = useSubscription(
+      NEW_EVENT_USER,
+      {
+        eventId,
+      },
+      {
+        // Add enabled option to control subscription lifecycle
+        enabled: !!eventId,
+      }
+    );
 
     // Defensive check: Ensure subscription result has expected methods
-    if (subscriptionResult && typeof subscriptionResult.onError === 'function' && typeof subscriptionResult.onResult === 'function') {
+    if (
+      subscriptionResult &&
+      typeof subscriptionResult.onError === 'function' &&
+      typeof subscriptionResult.onResult === 'function'
+    ) {
       newEventUserSubscription = subscriptionResult;
-      
+
       // Add error handling for subscription
       newEventUserSubscription.onError((error) => {
         if (import.meta.env.DEV) {
-          console.error('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER subscription error:', error);
+          console.error(
+            '[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER subscription error:',
+            error
+          );
         }
       });
 
@@ -192,28 +196,33 @@ try {
         if (import.meta.env.DEV) {
           console.log('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER received:', data);
         }
-  
+
         if (!data?.newEventUser) {
           if (import.meta.env.DEV) {
-            console.warn('[ORGANIZER DEBUG] EventNavigation - No newEventUser in subscription data');
+            console.warn(
+              '[ORGANIZER DEBUG] EventNavigation - No newEventUser in subscription data'
+            );
           }
           return;
         }
-  
+
         if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(eventId, 10)) {
           if (import.meta.env.DEV) {
             console.warn('[ORGANIZER DEBUG] EventNavigation - Event ID mismatch:', {
               received: data?.newEventUser?.eventId,
-              expected: eventId
+              expected: eventId,
             });
           }
           return;
         }
 
         if (import.meta.env.DEV) {
-          console.log('[ORGANIZER DEBUG] EventNavigation - Adding new user to list:', data?.newEventUser);
+          console.log(
+            '[ORGANIZER DEBUG] EventNavigation - Adding new user to list:',
+            data?.newEventUser
+          );
         }
-  
+
         // We have to make a copy to add a new entry to the event users array.
         // Ensure eventUsers.value is an array before copying
         const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
@@ -223,17 +232,26 @@ try {
       });
     } else {
       if (import.meta.env.DEV) {
-        console.error('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER subscription returned invalid object:', subscriptionResult);
+        console.error(
+          '[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER subscription returned invalid object:',
+          subscriptionResult
+        );
       }
     }
   } else {
     if (import.meta.env.DEV) {
-      console.warn('[ORGANIZER DEBUG] EventNavigation - Skipping NEW_EVENT_USER subscription, invalid eventId:', eventId);
+      console.warn(
+        '[ORGANIZER DEBUG] EventNavigation - Skipping NEW_EVENT_USER subscription, invalid eventId:',
+        eventId
+      );
     }
   }
 } catch (error) {
   if (import.meta.env.DEV) {
-    console.error('[ORGANIZER DEBUG] EventNavigation - Failed to create NEW_EVENT_USER subscription:', error);
+    console.error(
+      '[ORGANIZER DEBUG] EventNavigation - Failed to create NEW_EVENT_USER subscription:',
+      error
+    );
   }
 }
 
@@ -241,21 +259,32 @@ let eventUserLifeCycleSubscription;
 try {
   // Only create subscription if eventId is valid
   if (eventId && eventId !== 'undefined' && eventId !== null) {
-    const subscriptionResult = useSubscription(EVENT_USER_LIFE_CYCLE, {
-      eventId
-    }, {
-      // Add enabled option to control subscription lifecycle
-      enabled: !!eventId
-    });
+    const subscriptionResult = useSubscription(
+      EVENT_USER_LIFE_CYCLE,
+      {
+        eventId,
+      },
+      {
+        // Add enabled option to control subscription lifecycle
+        enabled: !!eventId,
+      }
+    );
 
     // Defensive check: Ensure subscription result has expected methods
-    if (subscriptionResult && typeof subscriptionResult.onError === 'function' && typeof subscriptionResult.onResult === 'function') {
+    if (
+      subscriptionResult &&
+      typeof subscriptionResult.onError === 'function' &&
+      typeof subscriptionResult.onResult === 'function'
+    ) {
       eventUserLifeCycleSubscription = subscriptionResult;
-      
+
       // Add error handling for subscription
       eventUserLifeCycleSubscription.onError((error) => {
         if (import.meta.env.DEV) {
-          console.error('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE subscription error:', error);
+          console.error(
+            '[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE subscription error:',
+            error
+          );
         }
       });
 
@@ -263,10 +292,12 @@ try {
         if (import.meta.env.DEV) {
           console.log('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE received:', data);
         }
-  
+
         if (!data || !data.eventUserLifeCycle) {
           if (import.meta.env.DEV) {
-            console.warn('[ORGANIZER DEBUG] EventNavigation - No valid data in eventUserLifeCycle event');
+            console.warn(
+              '[ORGANIZER DEBUG] EventNavigation - No valid data in eventUserLifeCycle event'
+            );
           }
           return;
         }
@@ -274,42 +305,51 @@ try {
         // Ensure eventUsers.value is an array before copying
         const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
         const eventUser = copyOfEventUsers.find((user) => {
-          return (
-            parseInt(user.id, 10) ===
-      parseInt(data?.eventUserLifeCycle?.eventUserId, 10)
-          );
+          return parseInt(user.id, 10) === parseInt(data?.eventUserLifeCycle?.eventUserId, 10);
         });
-  
+
         if (!eventUser) {
           if (import.meta.env.DEV) {
-            console.warn('[ORGANIZER DEBUG] EventNavigation - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+            console.warn(
+              '[ORGANIZER DEBUG] EventNavigation - No matching user found for ID:',
+              data.eventUserLifeCycle.eventUserId
+            );
           }
           return;
         }
-  
+
         if (import.meta.env.DEV) {
           console.log('[ORGANIZER DEBUG] EventNavigation - Updating user online status:', {
             userId: eventUser.id,
-            online: data?.eventUserLifeCycle?.online
+            online: data?.eventUserLifeCycle?.online,
           });
         }
-  
+
         eventUser.online = data?.eventUserLifeCycle?.online;
         eventUsers.value = copyOfEventUsers;
       });
     } else {
       if (import.meta.env.DEV) {
-        console.error('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE subscription returned invalid object:', subscriptionResult);
+        console.error(
+          '[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE subscription returned invalid object:',
+          subscriptionResult
+        );
       }
     }
   } else {
     if (import.meta.env.DEV) {
-      console.warn('[ORGANIZER DEBUG] EventNavigation - Skipping EVENT_USER_LIFE_CYCLE subscription, invalid eventId:', eventId);
+      console.warn(
+        '[ORGANIZER DEBUG] EventNavigation - Skipping EVENT_USER_LIFE_CYCLE subscription, invalid eventId:',
+        eventId
+      );
     }
   }
 } catch (error) {
   if (import.meta.env.DEV) {
-    console.error('[ORGANIZER DEBUG] EventNavigation - Failed to create EVENT_USER_LIFE_CYCLE subscription:', error);
+    console.error(
+      '[ORGANIZER DEBUG] EventNavigation - Failed to create EVENT_USER_LIFE_CYCLE subscription:',
+      error
+    );
   }
 }
 </script>

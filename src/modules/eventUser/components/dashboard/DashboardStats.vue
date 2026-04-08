@@ -2,30 +2,24 @@
   <div class="dashboard-stats">
     <h1>{{ event.title }}</h1>
     <h2>
-      {{ $t("view.user.verified.welcome") }}
+      {{ $t('view.user.verified.welcome') }}
       {{ eventUser.publicName }}
     </h2>
     <p :class="{ pulse: highlightStatusChange }">
       {{ eventUser.username }} -
       <span v-if="eventUser.allowToVote" class="text-success small">
-        {{ $t("view.event.user.member") }}</span
+        {{ $t('view.event.user.member') }}</span
       >
-      <span v-else class="text-info small">{{
-        $t("view.event.user.visitor")
-      }}</span>
+      <span v-else class="text-info small">{{ $t('view.event.user.visitor') }}</span>
       <span v-if="eventUser.allowToVote">
-        | {{ $t("view.polls.modal.ballotCount") }}:
+        | {{ $t('view.polls.modal.ballotCount') }}:
         <span class="badge text-bg-info">{{ eventUser.voteAmount }}</span></span
       >
       <span> | Status: </span>
-      <span
-        v-if="eventUser.online"
-        class="badge text-bg-success badge-pill status-indicator"
+      <span v-if="eventUser.online" class="badge text-bg-success badge-pill status-indicator"
         >online</span
       >
-      <span v-else class="badge text-bg-danger badge-pill status-indicator"
-        >offline</span
-      >
+      <span v-else class="badge text-bg-danger badge-pill status-indicator">offline</span>
     </p>
     <hr class="d-print-none" />
     <p v-if="event.description" class="d-print-none">

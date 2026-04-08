@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerPollsEdit')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerPollsEdit") }} -
+        {{ $t('navigation.views.organizerPollsEdit') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -23,23 +23,23 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import PollForm from "@/modules/organizer/components/events/poll/PollForm.vue";
-import { RouteOrganizerDashboard, RouteOrganizerPolls } from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { reactive, ref, computed } from "vue";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { POLL } from "@/modules/organizer/graphql/queries/poll";
-import { UPDATE_POLL } from "@/modules/organizer/graphql/mutation/update-poll";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import PollForm from '@/modules/organizer/components/events/poll/PollForm.vue';
+import { RouteOrganizerDashboard, RouteOrganizerPolls } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { reactive, ref, computed } from 'vue';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { POLL } from '@/modules/organizer/graphql/queries/poll';
+import { UPDATE_POLL } from '@/modules/organizer/graphql/mutation/update-poll';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -52,10 +52,10 @@ const loaded = ref(false);
 const event = ref(null);
 const poll = ref(null);
 const prefillData = reactive({
-  title: "",
-  type: "PUBLIC",
-  pollAnswer: "yesNoAbstain",
-  list: "",
+  title: '',
+  type: 'PUBLIC',
+  pollAnswer: 'yesNoAbstain',
+  list: '',
   minVotes: 0,
   maxVotes: 1,
   allowAbstain: false,
@@ -69,7 +69,7 @@ let pollQuery;
 const eventQuery = useQuery(
   EVENT,
   { id: eventId, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // check if the event could be fetched successfully. redirect to list if not.
@@ -81,7 +81,7 @@ eventQuery.onResult(({ data }) => {
   event.value = data?.event;
 
   // Fetch poll to edit.
-  pollQuery = useQuery(POLL, { id: pollId }, { fetchPolicy: "no-cache" });
+  pollQuery = useQuery(POLL, { id: pollId }, { fetchPolicy: 'no-cache' });
   pollQuery.onResult(({ data }) => {
     // Check if the poll could be fetched successfully. redirect to list if not.
     if (null === data?.poll) {
@@ -92,10 +92,10 @@ eventQuery.onResult(({ data }) => {
 
     poll.value = data?.poll;
 
-    prefillData.title = data?.poll?.title ?? "";
-    prefillData.type = data?.poll?.type ?? "PUBLIC";
-    prefillData.pollAnswer = data?.poll?.pollAnswer ?? "yesNoAbstain";
-    prefillData.list = data?.poll?.list ?? "";
+    prefillData.title = data?.poll?.title ?? '';
+    prefillData.type = data?.poll?.type ?? 'PUBLIC';
+    prefillData.pollAnswer = data?.poll?.pollAnswer ?? 'yesNoAbstain';
+    prefillData.list = data?.poll?.list ?? '';
     prefillData.minVotes = data?.poll?.minVotes ?? 0;
     prefillData.maxVotes = data?.poll?.maxVotes ?? 1;
     prefillData.allowAbstain = data?.poll?.allowAbstain ?? false;
@@ -114,14 +114,14 @@ async function onSubmit(formData) {
   // Back to polls view.
   await router.push({ name: RouteOrganizerPolls });
   // Show success message.
-  toast(t("success.organizer.poll.updatedSuccessfully"), { type: "success" });
+  toast(t('success.organizer.poll.updatedSuccessfully'), { type: 'success' });
   canSubmit.value = true;
 }
 
 async function onSubmitAndStart(formData) {
   canSubmit.value = false;
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.polls.listing.startConfirm"),
+    message: t('view.polls.listing.startConfirm'),
   });
 
   dialog.onConfirm(async () => {
@@ -130,8 +130,8 @@ async function onSubmitAndStart(formData) {
     // Back to polls view.
     await router.push({ name: RouteOrganizerPolls });
     // Show success message.
-    toast(t("success.organizer.poll.updatedAndStartedSuccessfully"), {
-      type: "success",
+    toast(t('success.organizer.poll.updatedAndStartedSuccessfully'), {
+      type: 'success',
     });
     canSubmit.value = true;
   });

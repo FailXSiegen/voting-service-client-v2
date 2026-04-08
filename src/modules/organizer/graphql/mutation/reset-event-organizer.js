@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const RESET_EVENT_ORGANIZER = gql`
   mutation resetEventOrganizer($eventId: ID!) {

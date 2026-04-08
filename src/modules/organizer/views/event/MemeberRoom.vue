@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerMemberRoom')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerMemberRoom") }} -
+        {{ $t('navigation.views.organizerMemberRoom') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -10,13 +10,10 @@
       <EventNavigation />
     </template>
     <template #content>
-      <router-link
-        :to="{ name: RouteOrganizerEventUserNew }"
-        class="btn btn-success my-3 me-3"
-      >
+      <router-link :to="{ name: RouteOrganizerEventUserNew }" class="btn btn-success my-3 me-3">
         <i class="bi-plus bi--2xl align-middle" />
         <span class="align-middle">
-          {{ $t("view.event.create.labels.eventUser.createNew") }}
+          {{ $t('view.event.create.labels.eventUser.createNew') }}
         </span>
       </router-link>
       <router-link
@@ -25,7 +22,7 @@
       >
         <i class="bi-list bi--2xl align-middle" />
         <span class="align-middle">
-          {{ $t("view.event.create.labels.eventMultipleUser.createNew") }}
+          {{ $t('view.event.create.labels.eventMultipleUser.createNew') }}
         </span>
       </router-link>
       <hr />
@@ -51,33 +48,33 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import VerifiedEventUserList from "@/modules/organizer/components/events/VerifiedEventUserList.vue";
-import VoteTransferModal from "@/modules/organizer/components/events/VoteTransferModal.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import VerifiedEventUserList from '@/modules/organizer/components/events/VerifiedEventUserList.vue';
+import VoteTransferModal from '@/modules/organizer/components/events/VoteTransferModal.vue';
 import {
   RouteOrganizerDashboard,
   RouteOrganizerEventUserNew,
   RouteOrganizerEventUserMultipleNew,
-} from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQuery, useSubscription } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { computed, ref } from "vue";
-import { UPDATE_EVENT_USER_TO_PARTICIPANT } from "@/modules/organizer/graphql/mutation/update-event-user-to-participant";
-import { UPDATE_EVENT_USER_TO_GUEST } from "@/modules/organizer/graphql/mutation/update-event-user-to-guest";
-import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import t from "@/core/util/l18n";
-import { UPDATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/update-event-user";
-import { TRANSFER_VOTES } from "@/modules/organizer/graphql/mutation/transfer-votes";
-import { NEW_EVENT_USER } from "@/modules/organizer/graphql/subscription/new-event-user";
-import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
-import { EVENT_USER_LIFE_CYCLE } from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
+} from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { useMutation, useQuery, useSubscription } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { computed, ref } from 'vue';
+import { UPDATE_EVENT_USER_TO_PARTICIPANT } from '@/modules/organizer/graphql/mutation/update-event-user-to-participant';
+import { UPDATE_EVENT_USER_TO_GUEST } from '@/modules/organizer/graphql/mutation/update-event-user-to-guest';
+import { EVENT_USERS } from '@/modules/organizer/graphql/queries/event-users';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
+import t from '@/core/util/l18n';
+import { UPDATE_EVENT_USER } from '@/modules/organizer/graphql/mutation/update-event-user';
+import { TRANSFER_VOTES } from '@/modules/organizer/graphql/mutation/transfer-votes';
+import { NEW_EVENT_USER } from '@/modules/organizer/graphql/subscription/new-event-user';
+import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/modules/organizer/graphql/subscription/update-event-user-access-rights';
+import { EVENT_USER_LIFE_CYCLE } from '@/modules/organizer/graphql/subscription/event-user-life-cycle';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -89,7 +86,7 @@ const eventUsers = ref([]);
 const selectedUserForTransfer = ref(null);
 const voteTransferModal = ref(null);
 const verifiedEventUsers = computed(() =>
-  (eventUsers.value || []).filter((eventUser) => eventUser.verified),
+  (eventUsers.value || []).filter((eventUser) => eventUser.verified)
 );
 let eventUsersQuery;
 
@@ -97,7 +94,7 @@ let eventUsersQuery;
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // Check if the event could be fetched successfully. redirect to list if not.
@@ -113,7 +110,7 @@ eventQuery.onResult(({ data }) => {
   eventUsersQuery = useQuery(
     EVENT_USERS,
     { eventId: event.value?.id },
-    { fetchPolicy: "cache-and-network" },
+    { fetchPolicy: 'cache-and-network' }
   );
   eventUsersQuery.onResult(({ data }) => {
     if (data?.eventUsers) {
@@ -124,7 +121,7 @@ eventQuery.onResult(({ data }) => {
 
 // Handle new users.
 const newEventUserSubscription = useSubscription(NEW_EVENT_USER, {
-  eventId: id
+  eventId: id,
 });
 newEventUserSubscription.onResult(({ data }) => {
   if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
@@ -141,9 +138,7 @@ newEventUserSubscription.onResult(({ data }) => {
 });
 
 // Handle update of event user access rights.
-const updateEventUserAccessRightsSubscription = useSubscription(
-  UPDATE_EVENT_USER_ACCESS_RIGHTS,
-);
+const updateEventUserAccessRightsSubscription = useSubscription(UPDATE_EVENT_USER_ACCESS_RIGHTS);
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   const { eventUserId, eventId, verified, allowToVote, voteAmount } =
     data.updateEventUserAccessRights;
@@ -173,75 +168,68 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 
 // Handle event user life cycle updates.
 const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
-  eventId: id
+  eventId: id,
 });
 eventUserLifeCycleSubscription.onResult(({ data }) => {
-  
   if (!data || !data.eventUserLifeCycle) {
     if (import.meta.env.DEV) {
       console.warn('[ORGANIZER DEBUG] MemberRoom - No valid data in eventUserLifeCycle event');
     }
     return;
   }
-  
+
   // We have to make a copy to add a new entry to the event users array.
   // Ensure eventUsers.value is an array before copying
   const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
-  
+
   const eventUser = copyOfEventUsers.find((user) => {
-    return (
-      parseInt(user.id, 10) ===
-      parseInt(data?.eventUserLifeCycle?.eventUserId, 10)
-    );
+    return parseInt(user.id, 10) === parseInt(data?.eventUserLifeCycle?.eventUserId, 10);
   });
-  
+
   if (!eventUser) {
     if (import.meta.env.DEV) {
-      console.warn('[ORGANIZER DEBUG] MemberRoom - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+      console.warn(
+        '[ORGANIZER DEBUG] MemberRoom - No matching user found for ID:',
+        data.eventUserLifeCycle.eventUserId
+      );
     }
     return;
   }
-    
+
   eventUser.online = data?.eventUserLifeCycle?.online;
   eventUsers.value = copyOfEventUsers;
 });
 
 async function onUpdateToParticipant(eventUserId) {
-  const { mutate: updateEventUserToParticipant } = useMutation(
-    UPDATE_EVENT_USER_TO_PARTICIPANT,
-    {
-      variables: {
-        eventUserId,
-      },
+  const { mutate: updateEventUserToParticipant } = useMutation(UPDATE_EVENT_USER_TO_PARTICIPANT, {
+    variables: {
+      eventUserId,
     },
-  );
+  });
   await updateEventUserToParticipant();
   await eventUsersQuery.refetch();
 }
 
 async function onUpdateToGuest(eventUserId) {
-  const { mutate: updateEventUserToGuest } = useMutation(
-    UPDATE_EVENT_USER_TO_GUEST,
-    {
-      variables: {
-        eventUserId,
-      },
+  const { mutate: updateEventUserToGuest } = useMutation(UPDATE_EVENT_USER_TO_GUEST, {
+    variables: {
+      eventUserId,
     },
-  );
+  });
   await updateEventUserToGuest();
   await eventUsersQuery.refetch();
 }
 
 async function onUnverfifyEventUser(eventUserId) {
   const eventUser = (eventUsers.value || []).find(
-    (eventUser) => parseInt(eventUser?.id, 10) === parseInt(eventUserId, 10),
+    (eventUser) => parseInt(eventUser?.id, 10) === parseInt(eventUserId, 10)
   );
   if (!eventUser) {
     return;
   }
 
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.event.user.confirm.unverify"),
+    message: t('view.event.user.confirm.unverify'),
   });
   dialog.onConfirm(async () => {
     const { mutate: updateEventUser } = useMutation(UPDATE_EVENT_USER, {
@@ -294,7 +282,7 @@ async function onTransferVotes(transferData) {
       const targetUserName = result.data.transferVotes.targetUser.publicName;
       const transferredVotes = result.data.transferVotes.transferredVotes;
 
-      const successMessage = t("voteTransfer.success", {
+      const successMessage = t('voteTransfer.success', {
         votes: transferredVotes,
         source: sourceUserName,
         target: targetUserName,
@@ -304,7 +292,7 @@ async function onTransferVotes(transferData) {
       console.log(successMessage);
     }
   } catch (error) {
-    console.error("Vote transfer failed:", error);
+    console.error('Vote transfer failed:', error);
     // Handle error - show error message to user
   }
 }

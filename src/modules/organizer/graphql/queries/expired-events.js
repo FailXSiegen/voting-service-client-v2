@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const EXPIRED_EVENTS = gql`
   query expiredEvents($organizerId: ID!) {

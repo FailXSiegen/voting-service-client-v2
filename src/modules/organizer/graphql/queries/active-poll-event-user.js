@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const ACTIVE_POLL_EVENT_USER = gql`
   query activePollEventUser($eventId: ID) {

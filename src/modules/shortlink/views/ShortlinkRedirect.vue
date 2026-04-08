@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+  <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh">
     <div class="text-center">
       <div v-if="loading" class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Lade...</span>
@@ -15,10 +15,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { resolveShortlink } from "@/modules/shortlink/requests/resolve-shortlink";
-import { handleError } from "@/core/error/error-handler";
+import { ref, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { resolveShortlink } from '@/modules/shortlink/requests/resolve-shortlink';
+import { handleError } from '@/core/error/error-handler';
 
 const route = useRoute();
 const router = useRouter();
@@ -47,7 +47,7 @@ onMounted(async () => {
     });
   } catch (err) {
     handleError(err);
-    error.value = "Der angeforderte Link konnte nicht gefunden werden.";
+    error.value = 'Der angeforderte Link konnte nicht gefunden werden.';
     loading.value = false;
   }
 });

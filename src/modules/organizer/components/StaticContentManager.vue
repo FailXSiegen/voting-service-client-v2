@@ -1,41 +1,41 @@
 <template>
   <div class="static-content-manager">
     <h2>Statische Inhalte verwalten</h2>
-    
+
     <!-- Tab-Navigation -->
     <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
-        <a 
-          class="nav-link" 
+        <a
+          class="nav-link"
           :class="{ active: activeTab === 'pages' }"
-          href="#" 
+          href="#"
           @click.prevent="activeTab = 'pages'"
         >
           <i class="bi bi-file-earmark-text"></i> Seiten
         </a>
       </li>
       <li class="nav-item">
-        <a 
-          class="nav-link" 
+        <a
+          class="nav-link"
           :class="{ active: activeTab === 'sections' }"
-          href="#" 
+          href="#"
           @click.prevent="activeTab = 'sections'"
         >
           <i class="bi bi-list-ul"></i> Abschnitte
         </a>
       </li>
       <li class="nav-item">
-        <a 
-          class="nav-link" 
+        <a
+          class="nav-link"
           :class="{ active: activeTab === 'editor' }"
-          href="#" 
+          href="#"
           @click.prevent="activeTab = 'editor'"
         >
           <i class="bi bi-pencil-square"></i> {{ editMode ? 'Bearbeiten' : 'Neu erstellen' }}
         </a>
       </li>
     </ul>
-    
+
     <!-- Seiten-Tab -->
     <div v-if="activeTab === 'pages'" class="mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -58,11 +58,7 @@
       <div v-else class="row">
         <div class="col-md-8">
           <div class="list-group">
-            <div
-              v-for="page in uniquePages"
-              :key="page"
-              class="list-group-item"
-            >
+            <div v-for="page in uniquePages" :key="page" class="list-group-item">
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <div>
                   <h5 class="mb-1">{{ page }}</h5>
@@ -94,7 +90,7 @@
                     :value="tempSlugs[page] || ''"
                     placeholder="z.B. ueber-uns oder kontakt"
                     @input="tempSlugs[page] = $event.target.value"
-                  >
+                  />
                   <button
                     class="btn btn-outline-success"
                     :disabled="!isTempSlugValid(page)"
@@ -112,7 +108,12 @@
                 </div>
                 <small class="text-muted">
                   <i class="bi bi-info-circle me-1"></i>
-                  Die URL wird dann: {{ localUseDirectPaths ? `/${tempSlugs[page] || page}` : `/static-page/${tempSlugs[page] || page}` }}
+                  Die URL wird dann:
+                  {{
+                    localUseDirectPaths
+                      ? `/${tempSlugs[page] || page}`
+                      : `/static-page/${tempSlugs[page] || page}`
+                  }}
                 </small>
               </div>
             </div>
@@ -123,7 +124,9 @@
             Die URL für statische Seiten lautet:
             <div v-if="localUseDirectPaths" class="mt-2">
               <div><code>/[seiten-schlüssel]</code> (Standard-Zugriff)</div>
-              <div class="mt-1"><code>/[slug]</code> (wenn ein benutzerdefinierter Slug eingetragen ist)</div>
+              <div class="mt-1">
+                <code>/[slug]</code> (wenn ein benutzerdefinierter Slug eingetragen ist)
+              </div>
             </div>
             <div v-else>
               <code>/static-page/[seiten-schlüssel]</code>
@@ -143,7 +146,7 @@
                     v-model="localUseDirectPaths"
                     type="checkbox"
                     class="form-check-input"
-                  >
+                  />
                   <label class="form-check-label" for="useDirectPaths">
                     Direkte Pfade aktivieren (ohne /static-page/ Prefix)
                   </label>
@@ -154,7 +157,7 @@
                     v-model="localUseInFooterNavigation"
                     type="checkbox"
                     class="form-check-input"
-                  >
+                  />
                   <label class="form-check-label" for="useInFooterNavigation">
                     Dynamische Seiten in der Footer-Navigation anzeigen
                   </label>
@@ -189,7 +192,10 @@
                 <li>Geben Sie einen eindeutigen Seitenschlüssel ein</li>
                 <li>Optional: Geben Sie einen benutzerfreundlichen Slug ein</li>
                 <li>Erstellen Sie mindestens einen Abschnitt für die Seite</li>
-                <li>Die Seite ist dann unter /static-page/[schlüssel] und optional über /[slug] erreichbar</li>
+                <li>
+                  Die Seite ist dann unter /static-page/[schlüssel] und optional über /[slug]
+                  erreichbar
+                </li>
               </ol>
             </div>
           </div>
@@ -197,7 +203,12 @@
       </div>
 
       <!-- Bestätigungsdialog für Slug-Löschen -->
-      <div v-if="showDeleteSlugDialog" class="modal delete-slug-modal" tabindex="-1" style="display: block;">
+      <div
+        v-if="showDeleteSlugDialog"
+        class="modal delete-slug-modal"
+        tabindex="-1"
+        style="display: block"
+      >
         <div class="modal-backdrop show"></div>
         <div class="modal-dialog">
           <div class="modal-content">
@@ -206,18 +217,25 @@
               <button type="button" class="btn-close" @click="cancelDeletePageSlug"></button>
             </div>
             <div class="modal-body">
-              <p>Sind Sie sicher, dass Sie die Seiten-URL für <strong>{{ slugToDelete }}</strong> löschen möchten?</p>
+              <p>
+                Sind Sie sicher, dass Sie die Seiten-URL für
+                <strong>{{ slugToDelete }}</strong> löschen möchten?
+              </p>
               <p>Die Seite wird dann nur noch über ihren Schlüssel erreichbar sein.</p>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="cancelDeletePageSlug">Abbrechen</button>
-              <button type="button" class="btn btn-danger" @click="confirmDeleteSlug">Löschen</button>
+              <button type="button" class="btn btn-secondary" @click="cancelDeletePageSlug">
+                Abbrechen
+              </button>
+              <button type="button" class="btn btn-danger" @click="confirmDeleteSlug">
+                Löschen
+              </button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
+
     <!-- Abschnitte-Tab -->
     <div v-if="activeTab === 'sections'" class="mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -227,41 +245,47 @@
         </h3>
         <div>
           <div class="input-group">
-            <select 
-              v-model="selectedPage" 
-              class="form-select"
-              aria-label="Seite auswählen"
-            >
+            <select v-model="selectedPage" class="form-select" aria-label="Seite auswählen">
               <option value="">Alle Seiten</option>
               <option v-for="page in uniquePages" :key="page" :value="page">
                 {{ page }}
               </option>
             </select>
-            <button 
-              class="btn btn-success" 
+            <button
+              class="btn btn-success"
               :disabled="!selectedPage"
-              @click="activeTab = 'editor'; prepareNewSection()"
+              @click="
+                activeTab = 'editor';
+                prepareNewSection();
+              "
             >
               <i class="bi bi-plus-circle"></i> Abschnitt hinzufügen
             </button>
           </div>
         </div>
       </div>
-      
+
       <div v-if="loading" class="text-center py-3">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Wird geladen...</span>
         </div>
       </div>
-      
+
       <div v-else-if="filteredSections.length === 0" class="alert alert-info">
         <span v-if="selectedPage">
-          Noch keine Abschnitte für diese Seite. 
-          <a href="#" @click.prevent="activeTab = 'editor'; prepareNewSection()">Erstellen Sie den ersten Abschnitt</a>.
+          Noch keine Abschnitte für diese Seite.
+          <a
+            href="#"
+            @click.prevent="
+              activeTab = 'editor';
+              prepareNewSection();
+            "
+            >Erstellen Sie den ersten Abschnitt</a
+          >.
         </span>
         <span v-else>Keine Abschnitte gefunden.</span>
       </div>
-      
+
       <div v-else>
         <div class="table-responsive">
           <table class="table table-striped table-hover">
@@ -277,17 +301,17 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="content in filteredSections" :key="content.id" :class="{'table-light': !content.isPublished}">
+              <tr
+                v-for="content in filteredSections"
+                :key="content.id"
+                :class="{ 'table-light': !content.isPublished }"
+              >
                 <td>{{ content.pageKey }}</td>
                 <td>{{ content.sectionKey }}</td>
                 <td>{{ content.title || '-' }}</td>
                 <td>{{ content.ordering }}</td>
                 <td>
-                  <span
-:class="[
-                    'badge',
-                    content.isPublished ? 'bg-success' : 'bg-warning'
-                  ]">
+                  <span :class="['badge', content.isPublished ? 'bg-success' : 'bg-warning']">
                     {{ content.isPublished ? 'Veröffentlicht' : 'Entwurf' }}
                   </span>
                 </td>
@@ -331,7 +355,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Editor-Tab -->
     <div v-if="activeTab === 'editor'" class="mt-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -340,7 +364,7 @@
           <i class="bi bi-arrow-left"></i> Zurück
         </button>
       </div>
-      
+
       <form class="border rounded p-4 bg-light" @submit.prevent="saveContent">
         <div class="row mb-3">
           <div class="col-md-6">
@@ -355,7 +379,7 @@
               required
               @input="checkDuplicateSection"
               @blur="checkDuplicateSection"
-            >
+            />
             <small class="form-text text-muted">
               Der Seitenschlüssel wird in der URL verwendet: /static-page/[seitenschlüssel]
             </small>
@@ -373,16 +397,17 @@
               required
               @input="checkDuplicateSection"
               @blur="checkDuplicateSection"
-            >
+            />
             <div class="invalid-feedback">
-              Dieser Abschnittschlüssel existiert bereits für diese Seite. Bitte wählen Sie einen anderen Schlüssel.
+              Dieser Abschnittschlüssel existiert bereits für diese Seite. Bitte wählen Sie einen
+              anderen Schlüssel.
             </div>
             <small class="form-text text-muted">
               Mehrere Abschnitte auf einer Seite werden nach diesem Schlüssel sortiert
             </small>
           </div>
         </div>
-        
+
         <div class="row mb-3">
           <div class="col-md-6">
             <label for="title" class="form-label">Titel</label>
@@ -392,16 +417,12 @@
               type="text"
               class="form-control"
               placeholder="Titel des Abschnitts"
-            >
+            />
           </div>
 
           <div class="col-md-3">
             <label for="headerClass" class="form-label">Titel-Stil</label>
-            <select
-              id="headerClass"
-              v-model="formData.headerClass"
-              class="form-select"
-            >
+            <select id="headerClass" v-model="formData.headerClass" class="form-select">
               <option value="h1">H1 - Sehr groß</option>
               <option value="h2">H2 - Groß</option>
               <option value="h3">H3 - Mittel</option>
@@ -419,15 +440,12 @@
               type="number"
               class="form-control"
               placeholder="1"
-            >
+            />
           </div>
         </div>
 
         <div class="mb-3">
-          <ContentTypeSelector
-            v-model="formData.contentType"
-            @change="handleContentTypeChange"
-          />
+          <ContentTypeSelector v-model="formData.contentType" @change="handleContentTypeChange" />
         </div>
 
         <div class="mb-3">
@@ -492,26 +510,23 @@
             <div class="modal media-manager-dialog d-block" tabindex="-1">
               <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
                 <div class="modal-content">
-                  <MediaManager
-                    @select="insertMedia"
-                    @close="showMediaManager = false"
-                  />
+                  <MediaManager @select="insertMedia" @close="showMediaManager = false" />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <div class="mb-3 form-check">
-          <input 
-            id="isPublished" 
-            v-model="formData.isPublished" 
-            type="checkbox" 
+          <input
+            id="isPublished"
+            v-model="formData.isPublished"
+            type="checkbox"
             class="form-check-input"
-          >
+          />
           <label class="form-check-label" for="isPublished">Veröffentlichen</label>
         </div>
-        
+
         <div class="d-flex mt-4">
           <button type="submit" class="btn btn-primary me-2" :disabled="saving">
             <span v-if="saving" class="spinner-border spinner-border-sm me-1"></span>
@@ -538,7 +553,7 @@
           </button>
         </div>
       </form>
-      
+
       <!-- Tabs für Editor und Vorschau -->
       <div class="card mt-4">
         <div class="card-header">
@@ -567,12 +582,19 @@
         </div>
         <div class="card-body">
           <!-- Code-Ansicht -->
-          <div v-if="previewTab === 'code' || previewTab === 'code-forced'" class="p-3 border rounded bg-light">
+          <div
+            v-if="previewTab === 'code' || previewTab === 'code-forced'"
+            class="p-3 border rounded bg-light"
+          >
             <div class="debug-info mb-3 p-2 bg-dark text-white d-none">
               <h6 class="mb-2">Debug Info:</h6>
               <div>Content Type: {{ formData.contentType }}</div>
-              <div v-if="formData.contentType === 'multi-column'">Columns: {{ formData.columnsContent.length }}</div>
-              <div v-if="formData.contentType === 'accordion'">Items: {{ formData.accordionItems.length }}</div>
+              <div v-if="formData.contentType === 'multi-column'">
+                Columns: {{ formData.columnsContent.length }}
+              </div>
+              <div v-if="formData.contentType === 'accordion'">
+                Items: {{ formData.accordionItems.length }}
+              </div>
               <div>Preview Tab: {{ previewTab }}</div>
             </div>
 
@@ -583,7 +605,11 @@
               <h6 class="mb-3">Multi-Column HTML:</h6>
               <div v-if="formData.columnsContent && formData.columnsContent.length > 0">
                 <div class="row mb-3">
-                  <div v-for="(column, index) in formData.columnsContent" :key="index" class="col-12 mb-3">
+                  <div
+                    v-for="(column, index) in formData.columnsContent"
+                    :key="index"
+                    class="col-12 mb-3"
+                  >
                     <h6>Spalte {{ index + 1 }}:</h6>
                     <pre class="border p-2 bg-white"><code>{{ column.content }}</code></pre>
                   </div>
@@ -615,7 +641,10 @@
           </div>
 
           <!-- Vorschau-Ansicht -->
-          <div v-if="previewTab === 'preview' || previewTab === 'preview-forced'" class="p-3 border rounded bg-white">
+          <div
+            v-if="previewTab === 'preview' || previewTab === 'preview-forced'"
+            class="p-3 border rounded bg-white"
+          >
             <div class="debug-info mb-3 p-2 bg-dark text-white d-none">
               <h6 class="mb-2">Preview Debug Info:</h6>
               <div>Content Type: {{ formData.contentType }}</div>
@@ -694,7 +723,10 @@
  * https://ckeditor.com/ckeditor-5/builder/#installation/NoFgNARATAdArDADBSBGA7CKI4E4ToAcAbMSKrounKgMyIF6GHXnnGVS2pwggoQAJgFMUiMMFRgpU8TIC6kXLQDGAM2GoARhHlA=
  */
 import { computed, ref, onMounted, useTemplateRef, watch, nextTick, reactive } from 'vue';
-import { UPSERT_PAGE_SLUG, DELETE_PAGE_SLUG, FETCH_PAGE_SLUGS } from '@/modules/organizer/graphql/mutation/page-slug-mutations';
+import {
+  UPSERT_PAGE_SLUG,
+  DELETE_PAGE_SLUG,
+} from '@/modules/organizer/graphql/mutation/page-slug-mutations';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
 import { toast } from 'vue3-toastify';
@@ -768,7 +800,7 @@ import {
   TableProperties,
   TableToolbar,
   TextTransformation,
-  TodoList
+  TodoList,
 } from 'ckeditor5';
 
 import translations from 'ckeditor5/translations/de.js';
@@ -780,7 +812,8 @@ const LICENSE_KEY = 'GPL';
 
 // Editor-Menüleiste (aus Builder-Beispiel)
 // Wir kommentieren die Variable aus, da sie bereits definiert sein könnte
-const editorMenuBar = useTemplateRef('editorMenuBarElement');
+// eslint-disable-next-line no-unused-vars
+const _editorMenuBar = useTemplateRef('editorMenuBarElement');
 
 // Funktion zum Initialisieren des Editors
 // Layout-Status
@@ -825,9 +858,9 @@ const config = computed(() => {
         'numberedList',
         'todoList',
         'outdent',
-        'indent'
+        'indent',
       ],
-      shouldNotGroupWhenFull: true
+      shouldNotGroupWhenFull: true,
     },
     plugins: [
       Alignment,
@@ -888,12 +921,23 @@ const config = computed(() => {
       TableProperties,
       TableToolbar,
       TextTransformation,
-      TodoList
+      TodoList,
     ],
     balloonToolbar: ['bold', 'italic', '|', 'link', '|', 'bulletedList', 'numberedList'],
-    blockToolbar: ['bold', 'italic', '|', 'link', 'insertTable', '|', 'bulletedList', 'numberedList', 'outdent', 'indent'],
+    blockToolbar: [
+      'bold',
+      'italic',
+      '|',
+      'link',
+      'insertTable',
+      '|',
+      'bulletedList',
+      'numberedList',
+      'outdent',
+      'indent',
+    ],
     fullscreen: {
-      onEnterCallback: container =>
+      onEnterCallback: (container) =>
         container.classList.add(
           'editor-container',
           'editor-container_classic-editor',
@@ -901,52 +945,52 @@ const config = computed(() => {
           'editor-container_include-block-toolbar',
           'editor-container_include-fullscreen',
           'main-container'
-        )
+        ),
     },
     heading: {
       options: [
         {
           model: 'paragraph',
           title: 'Paragraph',
-          class: 'ck-heading_paragraph'
+          class: 'ck-heading_paragraph',
         },
         {
           model: 'heading1',
           view: 'h1',
           title: 'Heading 1',
-          class: 'ck-heading_heading1'
+          class: 'ck-heading_heading1',
         },
         {
           model: 'heading2',
           view: 'h2',
           title: 'Heading 2',
-          class: 'ck-heading_heading2'
+          class: 'ck-heading_heading2',
         },
         {
           model: 'heading3',
           view: 'h3',
           title: 'Heading 3',
-          class: 'ck-heading_heading3'
+          class: 'ck-heading_heading3',
         },
         {
           model: 'heading4',
           view: 'h4',
           title: 'Heading 4',
-          class: 'ck-heading_heading4'
+          class: 'ck-heading_heading4',
         },
         {
           model: 'heading5',
           view: 'h5',
           title: 'Heading 5',
-          class: 'ck-heading_heading5'
+          class: 'ck-heading_heading5',
         },
         {
           model: 'heading6',
           view: 'h6',
           title: 'Heading 6',
-          class: 'ck-heading_heading6'
-        }
-      ]
+          class: 'ck-heading_heading6',
+        },
+      ],
     },
     htmlSupport: {
       allow: [
@@ -954,9 +998,9 @@ const config = computed(() => {
           name: /^.*$/,
           styles: true,
           attributes: true,
-          classes: true
-        }
-      ]
+          classes: true,
+        },
+      ],
     },
     image: {
       toolbar: [
@@ -967,8 +1011,8 @@ const config = computed(() => {
         'imageStyle:wrapText',
         'imageStyle:breakText',
         '|',
-        'resizeImage'
-      ]
+        'resizeImage',
+      ],
     },
     language: 'de',
     licenseKey: LICENSE_KEY,
@@ -980,20 +1024,20 @@ const config = computed(() => {
           mode: 'manual',
           label: 'Downloadable',
           attributes: {
-            download: 'file'
-          }
-        }
-      }
+            download: 'file',
+          },
+        },
+      },
     },
     list: {
       properties: {
         styles: true,
         startIndex: true,
-        reversed: true
-      }
+        reversed: true,
+      },
     },
     menuBar: {
-      isVisible: true
+      isVisible: true,
     },
     placeholder: 'Type or paste your content here!',
     style: {
@@ -1001,49 +1045,55 @@ const config = computed(() => {
         {
           name: 'Article category',
           element: 'h3',
-          classes: ['category']
+          classes: ['category'],
         },
         {
           name: 'Title',
           element: 'h2',
-          classes: ['document-title']
+          classes: ['document-title'],
         },
         {
           name: 'Subtitle',
           element: 'h3',
-          classes: ['document-subtitle']
+          classes: ['document-subtitle'],
         },
         {
           name: 'Info box',
           element: 'p',
-          classes: ['info-box']
+          classes: ['info-box'],
         },
         {
           name: 'CTA Link Primary',
           element: 'a',
-          classes: ['btn', 'btn-primary']
+          classes: ['btn', 'btn-primary'],
         },
         {
           name: 'CTA Link Secondary',
           element: 'a',
-          classes: ['btn', 'btn-primary']
+          classes: ['btn', 'btn-primary'],
         },
         {
           name: 'Marker',
           element: 'span',
-          classes: ['marker']
+          classes: ['marker'],
         },
         {
           name: 'Spoiler',
           element: 'span',
-          classes: ['spoiler']
-        }
-      ]
+          classes: ['spoiler'],
+        },
+      ],
     },
     table: {
-      contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+      contentToolbar: [
+        'tableColumn',
+        'tableRow',
+        'mergeTableCells',
+        'tableProperties',
+        'tableCellProperties',
+      ],
     },
-    translations: [translations]
+    translations: [translations],
   };
 });
 
@@ -1059,36 +1109,36 @@ const insertMedia = (media) => {
     // Bild-URL bereitstellen
     const imageUrl = media.url;
     const altText = media.filename || 'Bild';
-    
+
     if (editorInstance.value) {
       // CKEditor API verwenden, um das Bild einzufügen
       const editor = editorInstance.value;
-      
+
       // Bild in den Editor einfügen
       editor.execute('insertImage', {
         source: {
           src: imageUrl,
-          alt: altText
-        }
+          alt: altText,
+        },
       });
-      
+
       // Den aktualisierten Inhalt aus dem Editor holen
       formData.value.content = editor.getData();
-      
+
       // Media Manager Dialog schließen
       showMediaManager.value = false;
-      
+
       // Erfolgsbenachrichtigung
       toast.success('Bild erfolgreich eingefügt');
     } else {
       console.error('Keine CKEditor-Instanz gefunden');
       toast.error('Editor konnte nicht gefunden werden');
-      
+
       // Fallback: direktes Einfügen in das Formular, falls der Editor nicht verfügbar ist
       const currentContent = formData.value.content || '';
       const imgHtml = `<img src="${imageUrl}" alt="${altText}" class="img-fluid" loading="lazy">`;
       formData.value.content = currentContent + imgHtml;
-      
+
       // Media Manager Dialog schließen
       showMediaManager.value = false;
     }
@@ -1149,19 +1199,22 @@ const tempSlugs = reactive({}); // Temporäre Speicherung für Slug-Änderungen
 
 // Initialisiere tempSlugs mit aktuellen Werten, wenn pageSlugs geladen werden
 // Der Hauptinitialisierungscode ist jetzt in fetchStaticContents
-watch(() => pageSlugs.value, (newSlugs) => {
-  console.log('pageSlugs changed:', newSlugs);
+watch(
+  () => pageSlugs.value,
+  (newSlugs) => {
+    console.log('pageSlugs changed:', newSlugs);
 
-  if (newSlugs && newSlugs.length > 0) {
-    // Aktualisiere slugs, ohne bestehende Seiten zu entfernen
-    newSlugs.forEach(slug => {
-      if (slug && slug.pageKey) {
-        console.log('Updating slug from watcher for', slug.pageKey, 'to', slug.slug);
-        tempSlugs[slug.pageKey] = slug.slug || '';
-      }
-    });
+    if (newSlugs && newSlugs.length > 0) {
+      // Aktualisiere slugs, ohne bestehende Seiten zu entfernen
+      newSlugs.forEach((slug) => {
+        if (slug && slug.pageKey) {
+          console.log('Updating slug from watcher for', slug.pageKey, 'to', slug.slug);
+          tempSlugs[slug.pageKey] = slug.slug || '';
+        }
+      });
+    }
   }
-});
+);
 const showDeleteSlugDialog = ref(false);
 const slugToDelete = ref(''); // Page key für zu löschenden Slug
 // Store
@@ -1199,13 +1252,13 @@ const updateSystemSettings = async () => {
       toast.error('Super-Admin-Rechte erforderlich, um Systemeinstellungen zu ändern');
       return;
     }
-    
+
     // Aktualisiere Einstellungen über den Store
     await coreStore.updateSystemSettings({
       useDirectStaticPaths: localUseDirectPaths.value,
-      useDbFooterNavigation: localUseInFooterNavigation.value
+      useDbFooterNavigation: localUseInFooterNavigation.value,
     });
-    
+
     toast.success('Systemeinstellungen wurden aktualisiert');
   } catch (error) {
     console.error('Fehler beim Aktualisieren der Systemeinstellungen:', error);
@@ -1225,13 +1278,13 @@ const formData = ref({
   isPublished: true,
   columnCount: 2, // Add columnCount field for multi-column layout
   columnsContent: [], // Add columnsContent field for multi-column content
-  accordionItems: [] // Add accordionItems field for accordion content
+  accordionItems: [], // Add accordionItems field for accordion content
 });
 
 // Einzigartige Seiten für die Vorschau-Links
 const uniquePages = computed(() => {
   const pages = new Set();
-  staticContents.value.forEach(content => {
+  staticContents.value.forEach((content) => {
     pages.add(content.pageKey);
   });
   return Array.from(pages);
@@ -1243,16 +1296,14 @@ const filteredSections = computed(() => {
     return staticContents.value;
   }
 
-  return staticContents.value.filter(content =>
-    content.pageKey === selectedPage.value
-  ).sort((a, b) => a.ordering - b.ordering);
+  return staticContents.value
+    .filter((content) => content.pageKey === selectedPage.value)
+    .sort((a, b) => a.ordering - b.ordering);
 });
 
 // Zählt die Anzahl der Abschnitte für eine bestimmte Seite
 const countSections = (pageKey) => {
-  return staticContents.value.filter(content => 
-    content.pageKey === pageKey
-  ).length;
+  return staticContents.value.filter((content) => content.pageKey === pageKey).length;
 };
 
 // Wählt eine Seite aus und wechselt zum Abschnitts-Tab
@@ -1396,7 +1447,8 @@ const getMultiColumnHtml = () => {
   const columnClass = getColumnClass(columnCount);
 
   let html = '<div class="row">\n';
-  formData.value.columnsContent.forEach((column, index) => {
+  // eslint-disable-next-line no-unused-vars
+  formData.value.columnsContent.forEach((column, _index) => {
     html += `  <div class="${columnClass}">\n`;
     html += `    <div class="h-100">${column.content || ''}</div>\n`;
     html += '  </div>\n';
@@ -1449,7 +1501,7 @@ const fetchStaticContents = async () => {
     const client = resolveClient();
     const result = await client.query({
       query: FETCH_STATIC_CONTENTS,
-      fetchPolicy: 'network-only'
+      fetchPolicy: 'network-only',
     });
 
     // Erstelle eine Kopie des Arrays und sortiere diese
@@ -1465,21 +1517,21 @@ const fetchStaticContents = async () => {
 
     // Leere und initialisiere tempSlugs komplett neu
     // Das verhindert, dass alte Daten erhalten bleiben
-    Object.keys(tempSlugs).forEach(key => {
+    Object.keys(tempSlugs).forEach((key) => {
       delete tempSlugs[key];
     });
 
     // Initialisiere tempSlugs mit allen Seiten
-    const pageKeys = staticContents.value.map(content => content.pageKey);
+    const pageKeys = staticContents.value.map((content) => content.pageKey);
     const uniquePageKeys = [...new Set(pageKeys)];
 
     // Setze zuerst alle auf leer
-    uniquePageKeys.forEach(pageKey => {
+    uniquePageKeys.forEach((pageKey) => {
       tempSlugs[pageKey] = '';
     });
 
     // Dann fülle die mit Slugs
-    pageSlugs.value.forEach(slug => {
+    pageSlugs.value.forEach((slug) => {
       if (slug && slug.pageKey) {
         tempSlugs[slug.pageKey] = slug.slug || '';
       }
@@ -1495,12 +1547,13 @@ const fetchStaticContents = async () => {
 // Gibt den Slug für eine Seite zurück
 // Holt den in der Datenbank gespeicherten Slug für eine Seite
 const getPageSlug = (pageKey) => {
-  const pageSlug = pageSlugs.value.find(slug => slug.pageKey === pageKey);
+  const pageSlug = pageSlugs.value.find((slug) => slug.pageKey === pageKey);
   return pageSlug ? pageSlug.slug : '';
 };
 
 // Aktualisiert den temporären Slug
-const updateTempPageSlug = (pageKey, value) => {
+// eslint-disable-next-line no-unused-vars
+const _updateTempPageSlug = (pageKey, value) => {
   tempSlugs[pageKey] = value;
 };
 
@@ -1542,7 +1595,7 @@ const savePageSlug = async (pageKey) => {
     if (tempSlug === '') {
       await client.mutate({
         mutation: DELETE_PAGE_SLUG,
-        variables: { pageKey }
+        variables: { pageKey },
       });
 
       toast.success(`Slug für "${pageKey}" wurde gelöscht.`);
@@ -1552,8 +1605,8 @@ const savePageSlug = async (pageKey) => {
         mutation: UPSERT_PAGE_SLUG,
         variables: {
           pageKey,
-          slug: tempSlug
-        }
+          slug: tempSlug,
+        },
       });
 
       if (result.data.upsertPageSlug) {
@@ -1598,7 +1651,7 @@ const confirmDeleteSlug = async () => {
     const client = resolveClient();
     await client.mutate({
       mutation: DELETE_PAGE_SLUG,
-      variables: { pageKey }
+      variables: { pageKey },
     });
 
     toast.success(`Slug für "${pageKey}" wurde gelöscht.`);
@@ -1644,9 +1697,9 @@ const editContent = async (content) => {
       isPublished: content.isPublished,
       columnCount: content.columnCount || 2,
       columnsContent: content.columnsContent || [],
-      accordionItems: content.accordionItems || []
+      accordionItems: content.accordionItems || [],
     };
-    
+
     // Wenn das Content-Feld fehlt, laden wir es nach
     if (!content.content) {
       const client = resolveClient();
@@ -1666,18 +1719,20 @@ const editContent = async (content) => {
             }
           `,
           variables: { id: content.id },
-          fetchPolicy: 'network-only'
+          fetchPolicy: 'network-only',
         });
-        
+
         const fullContent = result.data.staticContent;
-        
+
         if (fullContent) {
           formData.value.content = fullContent.content;
         } else {
           // Wenn der API-Aufruf null zurückgibt, zeigen wir einen Fehler an
           console.error('API returned null for content ID:', content.id);
-          toast.error('Fehler: Der Server hat keine Daten für diesen Inhalt zurückgegeben. Prüfe deine Berechtigungen.');
-          
+          toast.error(
+            'Fehler: Der Server hat keine Daten für diesen Inhalt zurückgegeben. Prüfe deine Berechtigungen.'
+          );
+
           return; // Abbrechen
         }
       } catch (err) {
@@ -1686,7 +1741,7 @@ const editContent = async (content) => {
         return; // Abbrechen
       }
     }
-    
+
     editMode.value = true;
     currentContentId.value = content.id;
 
@@ -1709,7 +1764,6 @@ const editContent = async (content) => {
         }
       }, 100);
     }
-    
   } catch (err) {
     console.error('Failed to load content for editing:', err);
     toast.error('Fehler beim Laden des Inhalts zum Bearbeiten: ' + err.message);
@@ -1722,10 +1776,11 @@ const editorContainerElement = ref(null);
 const editorElement = ref(null);
 
 // Hilfsfunktion, um Kontext des aktuellen Benutzers zu erhalten (für Debugging)
-const getUserContext = async () => {
+// eslint-disable-next-line no-unused-vars
+const _getUserContext = async () => {
   try {
     const client = resolveClient();
-    
+
     // Zunächst prüfen wir die JWT-Token im localStorage
     const authToken = localStorage.getItem('apollo-token');
     if (authToken) {
@@ -1734,13 +1789,13 @@ const getUserContext = async () => {
         const parts = authToken.split('.');
         if (parts.length === 3) {
           const payload = JSON.parse(atob(parts[1]));
-          
+
           // Prüfen, ob der Token abgelaufen ist
           const now = Math.floor(Date.now() / 1000);
           if (payload.exp && payload.exp < now) {
             console.log('JWT Token ist abgelaufen!', {
               expiresAt: new Date(payload.exp * 1000).toLocaleString(),
-              currentTime: new Date().toLocaleString()
+              currentTime: new Date().toLocaleString(),
             });
           }
         }
@@ -1748,7 +1803,7 @@ const getUserContext = async () => {
         console.error('Fehler beim Decodieren des Tokens:', e);
       }
     }
-    
+
     // Jetzt versuchen wir, den aktuellen Benutzer zu laden
     const result = await client.query({
       query: gql`
@@ -1761,13 +1816,13 @@ const getUserContext = async () => {
           }
         }
       `,
-      fetchPolicy: 'network-only'
+      fetchPolicy: 'network-only',
     });
-    
+
     return result.data.me;
   } catch (err) {
     console.error('Failed to get user context:', err);
-    
+
     return 'Error fetching user context';
   }
 };
@@ -1800,7 +1855,7 @@ const resetForm = () => {
     isPublished: true,
     columnCount: 2,
     columnsContent: [], // Create new array
-    accordionItems: []
+    accordionItems: [],
   };
 };
 
@@ -1827,7 +1882,7 @@ const safeDestroyEditor = async () => {
 
         // Try to destroy the editor
         if (tempEditor && typeof tempEditor.destroy === 'function') {
-          await tempEditor.destroy().catch(error => {
+          await tempEditor.destroy().catch((error) => {
             console.error('Error destroying standard editor:', error);
           });
         }
@@ -1866,14 +1921,9 @@ const handleContentTypeChange = async (newType) => {
   // Initialize default values for the selected content type
   if (newType === 'multi-column' && !formData.value.columnsContent.length) {
     formData.value.columnCount = 2;
-    formData.value.columnsContent = [
-      { content: '' },
-      { content: '' }
-    ];
+    formData.value.columnsContent = [{ content: '' }, { content: '' }];
   } else if (newType === 'accordion' && !formData.value.accordionItems.length) {
-    formData.value.accordionItems = [
-      { title: '', content: '' }
-    ];
+    formData.value.accordionItems = [{ title: '', content: '' }];
   }
 
   // Allow component to rerender
@@ -1896,7 +1946,6 @@ const forceUpdatePreview = () => {
 
 // NO DEBOUNCE HERE - we need immediate updates
 const handleMultiColumnChange = (data) => {
-
   if (data && data.columnCount) {
     formData.value.columnCount = data.columnCount;
   }
@@ -1906,7 +1955,7 @@ const handleMultiColumnChange = (data) => {
     const cleanColumns = [];
     for (const column of data.columns) {
       cleanColumns.push({
-        content: column.content || ''
+        content: column.content || '',
       });
     }
     formData.value.columnsContent = cleanColumns;
@@ -1920,15 +1969,15 @@ const handleMultiColumnChange = (data) => {
 const handleAccordionChange = (items) => {
   if (items && Array.isArray(items)) {
     // Kopiere die Elemente, aber entferne __typename, um GraphQL-Fehler zu vermeiden
-    formData.value.accordionItems = items.map(item => ({
+    formData.value.accordionItems = items.map((item) => ({
       title: item.title || '',
-      content: item.content || ''
+      content: item.content || '',
     }));
 
-    // Für Debug-Zwecke, Ausgabe der aktualisierten Inhalte
-    formData.value.accordionItems.forEach((item, idx) => {
-      const titlePreview = item.title || '(no title)';
-      const contentPreview = item.content ? item.content.substring(0, 30) + '...' : '(empty)';
+    // Für Debug-Zwecke (no-op loop kept for future debugging)
+    // eslint-disable-next-line no-unused-vars
+    formData.value.accordionItems.forEach((_item, _idx) => {
+      // Debug previews removed (were unused)
     });
   } else {
     console.warn('Received invalid accordion items:', items);
@@ -1941,20 +1990,20 @@ const handleAccordionChange = (items) => {
 // Prüft, ob ein Abschnitt für eine Seite bereits existiert
 const checkDuplicateSection = () => {
   if (editMode.value) return; // Nicht prüfen, wenn wir im Bearbeitungsmodus sind
-  
+
   const pageKey = formData.value.pageKey.trim();
   const sectionKey = formData.value.sectionKey.trim();
-  
+
   if (!pageKey || !sectionKey) return;
-  
+
   const sectionKeyInput = document.getElementById('sectionKey');
   if (!sectionKeyInput) return;
-  
+
   // Prüfen, ob diese Kombination bereits existiert
   const duplicate = staticContents.value.find(
-    item => item.pageKey === pageKey && item.sectionKey === sectionKey
+    (item) => item.pageKey === pageKey && item.sectionKey === sectionKey
   );
-  
+
   if (duplicate) {
     sectionKeyInput.classList.add('is-invalid');
   } else {
@@ -1967,16 +2016,16 @@ const directApiSaveContent = async (contentData) => {
   try {
     const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
     const GRAPHQL_ENDPOINT = `${API_URL}/graphql`;
-    
+
     // JWT-Token aus localStorage holen
     const authToken = localStorage.getItem('apollo-token');
     if (!authToken) {
       throw new Error('Nicht angemeldet. Bitte melden Sie sich erneut an.');
     }
-    
+
     // GraphQL-Mutation abhängig davon erstellen, ob wir einen neuen Inhalt oder ein Update haben
     const isUpdate = !!contentData.id;
-    
+
     let mutationQuery;
     if (isUpdate) {
       mutationQuery = `
@@ -2003,37 +2052,37 @@ const directApiSaveContent = async (contentData) => {
         }
       `;
     }
-    
+
     // Anfrage an die API senden
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
       },
       body: JSON.stringify({
         query: mutationQuery,
         variables: {
-          input: contentData
-        }
-      })
+          input: contentData,
+        },
+      }),
     });
-    
+
     // Antwort verarbeiten
     const responseData = await response.json();
-    
+
     // Detaillierte Fehleranalyse
     if (responseData.errors) {
       const errorDetail = {
         message: responseData.errors[0].message,
         path: responseData.errors[0].path,
         extensions: responseData.errors[0].extensions,
-        fullError: JSON.stringify(responseData.errors)
+        fullError: JSON.stringify(responseData.errors),
       };
       console.error('GraphQL error details:', errorDetail);
       throw new Error(`GraphQL Fehler: ${errorDetail.message}`);
     }
-    
+
     // Erfolgreiche Antwort
     return responseData.data;
   } catch (error) {
@@ -2080,16 +2129,18 @@ const saveContentInternal = async (continueEditing) => {
       toast.error('Bitte füllen Sie mindestens Seitenschlüssel und Abschnittschlüssel aus.');
       return false;
     }
-    
+
     // Prüfe auf Duplikate, wenn wir einen neuen Eintrag erstellen
     if (!editMode.value) {
       const duplicateContent = staticContents.value.find(
-        item => item.pageKey === pageKey && item.sectionKey === sectionKey
+        (item) => item.pageKey === pageKey && item.sectionKey === sectionKey
       );
-      
+
       if (duplicateContent) {
-        toast.error(`Diese Kombination aus Seitenschlüssel "${pageKey}" und Abschnittschlüssel "${sectionKey}" existiert bereits.`);
-        
+        toast.error(
+          `Diese Kombination aus Seitenschlüssel "${pageKey}" und Abschnittschlüssel "${sectionKey}" existiert bereits.`
+        );
+
         // Fokus auf das Feld setzen
         setTimeout(() => {
           const sectionKeyInput = document.getElementById('sectionKey');
@@ -2102,15 +2153,15 @@ const saveContentInternal = async (continueEditing) => {
         return false;
       }
     }
-    
+
     // HTML-Inhalt bereinigen und optimieren
     const cleanContent = formData.value.content;
-    
+
     // 1. Strategien - Vollständige Speicherung versuchen
     // ================================================
-    
+
     toast.info('Speichere Inhalt...');
-    
+
     if (editMode.value) {
       // Update-Strategie
       try {
@@ -2121,7 +2172,7 @@ const saveContentInternal = async (continueEditing) => {
           headerClass: formData.value.headerClass || 'h2',
           ordering,
           content: cleanContent,
-          isPublished: formData.value.isPublished
+          isPublished: formData.value.isPublished,
         };
 
         // Add multi-column data if needed
@@ -2136,7 +2187,7 @@ const saveContentInternal = async (continueEditing) => {
           if (Array.isArray(formData.value.columnsContent)) {
             for (const column of formData.value.columnsContent) {
               updateInput.columnsContent.push({
-                content: column && column.content ? column.content : ''
+                content: column && column.content ? column.content : '',
               });
             }
           }
@@ -2152,23 +2203,23 @@ const saveContentInternal = async (continueEditing) => {
             for (const item of formData.value.accordionItems) {
               updateInput.accordionItems.push({
                 title: item && item.title ? item.title : '',
-                content: item && item.content ? item.content : ''
+                content: item && item.content ? item.content : '',
               });
             }
           }
         }
-        
+
         // 1. Versuch: Versuch mit Apollo-Client
         const client = resolveClient();
-        
+
         try {
           const result = await client.mutate({
             mutation: UPDATE_STATIC_CONTENT,
             variables: {
-              input: updateInput
-            }
+              input: updateInput,
+            },
           });
-          
+
           if (result.data?.updateStaticContent) {
             if (continueEditing) {
               toast.success('Inhalt erfolgreich aktualisiert und bleibt im Bearbeitungsmodus');
@@ -2190,15 +2241,20 @@ const saveContentInternal = async (continueEditing) => {
             return;
           }
         } catch (apolloError) {
-          console.warn('Apollo-Client Update fehlgeschlagen, versuche direkten API-Zugriff:', apolloError.message);
-          
+          console.warn(
+            'Apollo-Client Update fehlgeschlagen, versuche direkten API-Zugriff:',
+            apolloError.message
+          );
+
           // 2. Versuch: Direkter API-Zugriff (ohne Apollo-Client)
           try {
             const apiResult = await directApiSaveContent(updateInput);
-            
+
             if (apiResult?.updateStaticContent) {
               if (continueEditing) {
-                toast.success('Inhalt erfolgreich aktualisiert (direkter API-Zugriff) und bleibt im Bearbeitungsmodus');
+                toast.success(
+                  'Inhalt erfolgreich aktualisiert (direkter API-Zugriff) und bleibt im Bearbeitungsmodus'
+                );
                 // Daten neu laden, aber im Editor bleiben
                 await fetchStaticContents();
                 // Falls ID sich geändert hat, aktualisieren
@@ -2220,7 +2276,7 @@ const saveContentInternal = async (continueEditing) => {
             // Weiter mit Fallback-Strategien
           }
         }
-        
+
         try {
           const metaResult = await client.mutate({
             mutation: UPDATE_STATIC_CONTENT,
@@ -2230,21 +2286,25 @@ const saveContentInternal = async (continueEditing) => {
                 title,
                 headerClass: formData.value.headerClass || 'h2',
                 ordering,
-                isPublished: formData.value.isPublished
+                isPublished: formData.value.isPublished,
                 // Kein content-Feld
-              }
-            }
+              },
+            },
           });
-          
+
           if (metaResult.data?.updateStaticContent) {
             if (continueEditing) {
-              toast.warning('Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden. Sie bleiben im Bearbeitungsmodus.');
+              toast.warning(
+                'Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden. Sie bleiben im Bearbeitungsmodus.'
+              );
               // Daten neu laden, aber im Editor bleiben
               await fetchStaticContents();
               // Falls ID sich geändert hat, aktualisieren
               currentContentId.value = metaResult.data.updateStaticContent.id;
             } else {
-              toast.warning('Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden.');
+              toast.warning(
+                'Nur Metadaten wurden aktualisiert. Der Inhalt konnte nicht gespeichert werden.'
+              );
               editMode.value = false;
               currentContentId.value = null;
               selectedPage.value = pageKey;
@@ -2275,7 +2335,7 @@ const saveContentInternal = async (continueEditing) => {
           headerClass: formData.value.headerClass || 'h2',
           content: cleanContent,
           ordering,
-          isPublished: formData.value.isPublished
+          isPublished: formData.value.isPublished,
         };
 
         // Add multi-column data if needed
@@ -2290,7 +2350,7 @@ const saveContentInternal = async (continueEditing) => {
           if (Array.isArray(formData.value.columnsContent)) {
             for (const column of formData.value.columnsContent) {
               createInput.columnsContent.push({
-                content: column && column.content ? column.content : ''
+                content: column && column.content ? column.content : '',
               });
             }
           }
@@ -2306,23 +2366,23 @@ const saveContentInternal = async (continueEditing) => {
             for (const item of formData.value.accordionItems) {
               createInput.accordionItems.push({
                 title: item && item.title ? item.title : '',
-                content: item && item.content ? item.content : ''
+                content: item && item.content ? item.content : '',
               });
             }
           }
         }
-        
+
         // 1. Versuch: Kompletten Inhalt mit Apollo-Client speichern
         const client = resolveClient();
-        
+
         try {
           const result = await client.mutate({
             mutation: CREATE_STATIC_CONTENT,
             variables: {
-              input: createInput
-            }
+              input: createInput,
+            },
           });
-          
+
           if (result.data?.createStaticContent) {
             if (continueEditing) {
               toast.success('Neuer Inhalt erfolgreich erstellt und bleibt im Bearbeitungsmodus');
@@ -2342,15 +2402,20 @@ const saveContentInternal = async (continueEditing) => {
             return;
           }
         } catch (apolloError) {
-          console.warn('Apollo-Client Create fehlgeschlagen, versuche direkten API-Zugriff:', apolloError.message);
-          
+          console.warn(
+            'Apollo-Client Create fehlgeschlagen, versuche direkten API-Zugriff:',
+            apolloError.message
+          );
+
           // 2. Versuch: Direkter API-Zugriff (ohne Apollo-Client)
           try {
             const apiResult = await directApiSaveContent(createInput);
-            
+
             if (apiResult?.createStaticContent) {
               if (continueEditing) {
-                toast.success('Neuer Inhalt erfolgreich erstellt (direkter API-Zugriff) und bleibt im Bearbeitungsmodus');
+                toast.success(
+                  'Neuer Inhalt erfolgreich erstellt (direkter API-Zugriff) und bleibt im Bearbeitungsmodus'
+                );
                 // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
                 await fetchStaticContents();
                 // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
@@ -2371,35 +2436,39 @@ const saveContentInternal = async (continueEditing) => {
             // Weiter mit Fallback-Strategien
           }
         }
-        
+
         // 3. Versuch: Chunked Content-Strategie - nur Teilinhalt speichern
         let shortenedContent = cleanContent;
         const maxChunkSize = 1000; // Maximal 1000 Zeichen pro Versuch
-        
+
         if (shortenedContent.length > maxChunkSize) {
           shortenedContent = shortenedContent.substring(0, maxChunkSize) + '...';
-          
+
           try {
             const chunkResult = await client.mutate({
               mutation: CREATE_STATIC_CONTENT,
               variables: {
                 input: {
                   ...createInput,
-                  content: shortenedContent
-                }
-              }
+                  content: shortenedContent,
+                },
+              },
             });
-            
+
             if (chunkResult.data?.createStaticContent) {
               if (continueEditing) {
-                toast.warning('Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server. Sie bleiben im Bearbeitungsmodus.');
+                toast.warning(
+                  'Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server. Sie bleiben im Bearbeitungsmodus.'
+                );
                 // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
                 await fetchStaticContents();
                 // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
                 currentContentId.value = chunkResult.data.createStaticContent.id;
                 editMode.value = true;
               } else {
-                toast.warning('Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server.');
+                toast.warning(
+                  'Inhalt wurde erstellt, aber gekürzt. Der vollständige Inhalt war zu groß für den Server.'
+                );
                 selectedPage.value = pageKey;
                 activeTab.value = 'sections';
 
@@ -2413,7 +2482,7 @@ const saveContentInternal = async (continueEditing) => {
             // Letzter Fallback
           }
         }
-                
+
         try {
           const minimalResult = await client.mutate({
             mutation: CREATE_STATIC_CONTENT,
@@ -2426,23 +2495,27 @@ const saveContentInternal = async (continueEditing) => {
                 title,
                 headerClass: formData.value.headerClass || 'h2',
                 ordering,
-                isPublished: false // Als Entwurf speichern
-              }
-            }
+                isPublished: false, // Als Entwurf speichern
+              },
+            },
           });
-          
+
           if (minimalResult.data?.createStaticContent) {
             const createdId = minimalResult.data.createStaticContent.id;
 
             if (continueEditing) {
-              toast.warning('Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte fügen Sie jetzt Inhalt hinzu.');
+              toast.warning(
+                'Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte fügen Sie jetzt Inhalt hinzu.'
+              );
               // Daten neu laden, im Editor bleiben und in Bearbeitungsmodus wechseln
               await fetchStaticContents();
               // ID des neuen Inhalts merken und in den Bearbeitungsmodus wechseln
               currentContentId.value = createdId;
               editMode.value = true;
             } else {
-              toast.warning('Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte bearbeiten Sie ihn später erneut.');
+              toast.warning(
+                'Eintrag konnte nur als leerer Entwurf erstellt werden. Bitte bearbeiten Sie ihn später erneut.'
+              );
               selectedPage.value = pageKey;
               activeTab.value = 'sections';
 
@@ -2467,12 +2540,15 @@ const saveContentInternal = async (continueEditing) => {
     const errorMessage = err.message || '';
 
     // Spezielle Erkennung des Duplikat-Fehlers
-    if (errorMessage.includes('Failed to insert static content') ||
-        errorMessage.includes('ER_DUP_ENTRY') ||
-        errorMessage.includes('Duplicate entry')) {
-
+    if (
+      errorMessage.includes('Failed to insert static content') ||
+      errorMessage.includes('ER_DUP_ENTRY') ||
+      errorMessage.includes('Duplicate entry')
+    ) {
       console.error('Duplikat-Fehler erkannt:', err);
-      toast.error(`Diese Kombination aus Seitenschlüssel "${formData.value.pageKey}" und Abschnittschlüssel "${formData.value.sectionKey}" existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`);
+      toast.error(
+        `Diese Kombination aus Seitenschlüssel "${formData.value.pageKey}" und Abschnittschlüssel "${formData.value.sectionKey}" existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`
+      );
 
       // Fokus auf das Feld setzen
       setTimeout(() => {
@@ -2485,36 +2561,44 @@ const saveContentInternal = async (continueEditing) => {
 
       return false; // Früher beenden, da wir den Fehler bereits spezifisch behandelt haben
     }
-    
+
     // Normale GraphQL-Fehlerbehandlung
     if (err.graphQLErrors) {
       console.error('GraphQL-Fehler:', err.graphQLErrors);
-      
+
       // Detaillierte Fehleranalyse
-      const errorMessages = err.graphQLErrors.map(e => {
-        let details = '';
-        if (e.extensions?.code) {
-          details += ` (Code: ${e.extensions.code})`;
-        }
-        if (e.extensions?.exception?.stacktrace) {
-          console.error('Server stacktrace:', e.extensions.exception.stacktrace);
-        }
-        
-        // Nach Duplikat-Fehlern im Backend suchen
-        const errMsg = e.message || '';
-        if (errMsg.includes('ER_DUP_ENTRY') || errMsg.includes('Duplicate entry') || 
-            (e.extensions?.exception?.sqlMessage && e.extensions.exception.sqlMessage.includes('Duplicate entry'))) {
-          return `Dieser Abschnitt existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`;
-        }
-        
-        return e.message + details;
-      }).join('\n- ');
-      
+      const errorMessages = err.graphQLErrors
+        .map((e) => {
+          let details = '';
+          if (e.extensions?.code) {
+            details += ` (Code: ${e.extensions.code})`;
+          }
+          if (e.extensions?.exception?.stacktrace) {
+            console.error('Server stacktrace:', e.extensions.exception.stacktrace);
+          }
+
+          // Nach Duplikat-Fehlern im Backend suchen
+          const errMsg = e.message || '';
+          if (
+            errMsg.includes('ER_DUP_ENTRY') ||
+            errMsg.includes('Duplicate entry') ||
+            (e.extensions?.exception?.sqlMessage &&
+              e.extensions.exception.sqlMessage.includes('Duplicate entry'))
+          ) {
+            return `Dieser Abschnitt existiert bereits. Bitte wählen Sie einen anderen Abschnittschlüssel.`;
+          }
+
+          return e.message + details;
+        })
+        .join('\n- ');
+
       toast.error(`GraphQL-Fehler:\n- ${errorMessages}`);
     } else if (err.networkError) {
       console.error('Netzwerkfehler:', err.networkError);
       if (err.networkError.statusCode) {
-        toast.error(`Netzwerkfehler (${err.networkError.statusCode}): Bitte prüfen Sie Ihre Verbindung zum Server.`);
+        toast.error(
+          `Netzwerkfehler (${err.networkError.statusCode}): Bitte prüfen Sie Ihre Verbindung zum Server.`
+        );
       } else {
         toast.error('Netzwerkfehler: Bitte prüfen Sie Ihre Verbindung zum Server.');
       }
@@ -2525,9 +2609,13 @@ const saveContentInternal = async (continueEditing) => {
     // Spezifischere Hilfestellung für den Benutzer
     const isCreation = !editMode.value;
     if (isCreation) {
-      toast.info('Bitte überprüfen Sie, ob die Kombination aus Seitenschlüssel und Abschnittschlüssel bereits existiert, und wählen Sie bei Bedarf einen anderen Schlüssel.');
+      toast.info(
+        'Bitte überprüfen Sie, ob die Kombination aus Seitenschlüssel und Abschnittschlüssel bereits existiert, und wählen Sie bei Bedarf einen anderen Schlüssel.'
+      );
     } else {
-      toast.info('Bitte prüfen Sie, ob Ihre Eingaben korrekt sind und versuchen Sie, den Inhalt zu vereinfachen oder in kleinere Abschnitte aufzuteilen.');
+      toast.info(
+        'Bitte prüfen Sie, ob Ihre Eingaben korrekt sind und versuchen Sie, den Inhalt zu vereinfachen oder in kleinere Abschnitte aufzuteilen.'
+      );
     }
 
     return false;
@@ -2545,16 +2633,12 @@ const togglePublishStatus = async (content) => {
       mutation: TOGGLE_STATIC_CONTENT_PUBLISHED,
       variables: {
         id: content.id,
-        isPublished: !content.isPublished
-      }
+        isPublished: !content.isPublished,
+      },
     });
 
     if (result.data.toggleStaticContentPublished) {
-      toast.success(
-        content.isPublished
-          ? 'Inhalt wurde verborgen'
-          : 'Inhalt wurde veröffentlicht'
-      );
+      toast.success(content.isPublished ? 'Inhalt wurde verborgen' : 'Inhalt wurde veröffentlicht');
       await fetchStaticContents();
     }
   } catch (err) {
@@ -2570,15 +2654,13 @@ const canMoveUp = (content) => {
   if (!selectedPage.value) return false;
 
   // Finde alle Elemente der gleichen Seite
-  const pageSections = staticContents.value.filter(
-    item => item.pageKey === content.pageKey
-  );
+  const pageSections = staticContents.value.filter((item) => item.pageKey === content.pageKey);
 
   // Sortiere nach Ordering
   pageSections.sort((a, b) => a.ordering - b.ordering);
 
   // Prüfe, ob es das erste Element ist
-  const index = pageSections.findIndex(item => item.id === content.id);
+  const index = pageSections.findIndex((item) => item.id === content.id);
   return index > 0;
 };
 
@@ -2587,15 +2669,13 @@ const canMoveDown = (content) => {
   if (!selectedPage.value) return false;
 
   // Finde alle Elemente der gleichen Seite
-  const pageSections = staticContents.value.filter(
-    item => item.pageKey === content.pageKey
-  );
+  const pageSections = staticContents.value.filter((item) => item.pageKey === content.pageKey);
 
   // Sortiere nach Ordering
   pageSections.sort((a, b) => a.ordering - b.ordering);
 
   // Prüfe, ob es das letzte Element ist
-  const index = pageSections.findIndex(item => item.id === content.id);
+  const index = pageSections.findIndex((item) => item.id === content.id);
   return index < pageSections.length - 1;
 };
 
@@ -2607,15 +2687,13 @@ const moveItemUp = async (content) => {
     loading.value = true;
 
     // Finde alle Elemente der gleichen Seite
-    const pageSections = staticContents.value.filter(
-      item => item.pageKey === content.pageKey
-    );
+    const pageSections = staticContents.value.filter((item) => item.pageKey === content.pageKey);
 
     // Sortiere nach Ordering
     pageSections.sort((a, b) => a.ordering - b.ordering);
 
     // Finde das aktuelle Element und das darüber liegende
-    const index = pageSections.findIndex(item => item.id === content.id);
+    const index = pageSections.findIndex((item) => item.id === content.id);
     const currentItem = pageSections[index];
     const previousItem = pageSections[index - 1];
 
@@ -2628,9 +2706,9 @@ const moveItemUp = async (content) => {
       variables: {
         input: {
           id: currentItem.id,
-          ordering: previousItem.ordering
-        }
-      }
+          ordering: previousItem.ordering,
+        },
+      },
     });
 
     // Aktualisiere das vorherige Element
@@ -2639,15 +2717,14 @@ const moveItemUp = async (content) => {
       variables: {
         input: {
           id: previousItem.id,
-          ordering: currentItem.ordering
-        }
-      }
+          ordering: currentItem.ordering,
+        },
+      },
     });
 
     // Lade die aktualisierten Daten
     await fetchStaticContents();
     toast.success('Reihenfolge wurde aktualisiert');
-
   } catch (err) {
     console.error('Failed to move item up:', err);
     toast.error('Fehler beim Verschieben des Elements');
@@ -2664,15 +2741,13 @@ const moveItemDown = async (content) => {
     loading.value = true;
 
     // Finde alle Elemente der gleichen Seite
-    const pageSections = staticContents.value.filter(
-      item => item.pageKey === content.pageKey
-    );
+    const pageSections = staticContents.value.filter((item) => item.pageKey === content.pageKey);
 
     // Sortiere nach Ordering
     pageSections.sort((a, b) => a.ordering - b.ordering);
 
     // Finde das aktuelle Element und das darunter liegende
-    const index = pageSections.findIndex(item => item.id === content.id);
+    const index = pageSections.findIndex((item) => item.id === content.id);
     const currentItem = pageSections[index];
     const nextItem = pageSections[index + 1];
 
@@ -2685,9 +2760,9 @@ const moveItemDown = async (content) => {
       variables: {
         input: {
           id: currentItem.id,
-          ordering: nextItem.ordering
-        }
-      }
+          ordering: nextItem.ordering,
+        },
+      },
     });
 
     // Aktualisiere das nächste Element
@@ -2696,15 +2771,14 @@ const moveItemDown = async (content) => {
       variables: {
         input: {
           id: nextItem.id,
-          ordering: currentItem.ordering
-        }
-      }
+          ordering: currentItem.ordering,
+        },
+      },
     });
 
     // Lade die aktualisierten Daten
     await fetchStaticContents();
     toast.success('Reihenfolge wurde aktualisiert');
-
   } catch (err) {
     console.error('Failed to move item down:', err);
     toast.error('Fehler beim Verschieben des Elements');

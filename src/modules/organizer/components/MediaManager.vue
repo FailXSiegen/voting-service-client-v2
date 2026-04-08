@@ -3,30 +3,26 @@
     <div class="card">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Medienverwaltung</h5>
-        <button 
-          type="button" 
-          class="btn btn-sm btn-outline-secondary" 
-          @click="$emit('close')"
-        >
+        <button type="button" class="btn btn-sm btn-outline-secondary" @click="$emit('close')">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
-      
+
       <div class="card-body">
         <!-- Uploads -->
         <div class="mb-4">
           <h6>Neues Bild hochladen</h6>
           <div class="input-group mb-3">
-            <input 
-              id="mediaUpload" 
-              type="file" 
-              class="form-control" 
+            <input
+              id="mediaUpload"
+              type="file"
+              class="form-control"
               accept="image/*"
               @change="handleFileSelect"
-            >
-            <button 
-              class="btn btn-primary" 
-              type="button" 
+            />
+            <button
+              class="btn btn-primary"
+              type="button"
               :disabled="!selectedFile || uploading"
               @click="uploadFile"
             >
@@ -34,61 +30,59 @@
               Hochladen
             </button>
           </div>
-          
+
           <div v-if="uploadProgress > 0 && uploadProgress < 100" class="progress">
-            <div 
-              class="progress-bar" 
-              role="progressbar" 
-              :style="{ width: uploadProgress + '%' }" 
-              :aria-valuenow="uploadProgress" 
-              aria-valuemin="0" 
+            <div
+              class="progress-bar"
+              role="progressbar"
+              :style="{ width: uploadProgress + '%' }"
+              :aria-valuenow="uploadProgress"
+              aria-valuemin="0"
               aria-valuemax="100"
             >
               {{ uploadProgress }}%
             </div>
           </div>
-          
+
           <div v-if="selectedFile" class="mt-2">
             <div class="alert alert-info">
-              <strong>Ausgewählte Datei:</strong> {{ selectedFile.name }} ({{ formatFileSize(selectedFile.size) }})
+              <strong>Ausgewählte Datei:</strong> {{ selectedFile.name }} ({{
+                formatFileSize(selectedFile.size)
+              }})
             </div>
           </div>
-          
+
           <div v-if="uploadError" class="alert alert-danger">
             {{ uploadError }}
           </div>
         </div>
-        
+
         <!-- Media Library -->
         <div>
           <h6>Medienbibliothek</h6>
-          
+
           <div v-if="loading" class="text-center py-3">
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Wird geladen...</span>
             </div>
           </div>
-          
+
           <div v-else-if="mediaItems.length === 0" class="alert alert-info">
             Noch keine Medien hochgeladen. Laden Sie oben Ihr erstes Bild hoch.
           </div>
-          
+
           <div v-else class="row g-2 media-grid">
-            <div 
-              v-for="item in mediaItems" 
-              :key="item.id" 
+            <div
+              v-for="item in mediaItems"
+              :key="item.id"
               class="col-md-4 col-lg-3"
               @click="selectMedia(item)"
             >
-              <div 
-                class="card h-100 media-item" 
-                :class="{ 'selected': selectedMedia?.id === item.id }"
+              <div
+                class="card h-100 media-item"
+                :class="{ selected: selectedMedia?.id === item.id }"
               >
-                <img 
-                  :src="item.url" 
-                  class="card-img-top media-thumbnail" 
-                  :alt="item.filename"
-                >
+                <img :src="item.url" class="card-img-top media-thumbnail" :alt="item.filename" />
                 <div class="card-body p-2">
                   <p class="card-text small text-truncate">{{ item.filename }}</p>
                   <p class="card-text small text-muted">{{ formatDate(item.uploadedAt) }}</p>
@@ -96,21 +90,17 @@
               </div>
             </div>
           </div>
-          
+
           <div class="d-flex justify-content-between mt-3">
-            <button 
-              class="btn btn-sm btn-outline-danger" 
+            <button
+              class="btn btn-sm btn-outline-danger"
               :disabled="!selectedMedia"
               @click="deleteMedia"
             >
               <i class="bi bi-trash"></i> Löschen
             </button>
-            
-            <button 
-              class="btn btn-primary" 
-              :disabled="!selectedMedia"
-              @click="useSelectedMedia"
-            >
+
+            <button class="btn btn-primary" :disabled="!selectedMedia" @click="useSelectedMedia">
               Auswählen
             </button>
           </div>
@@ -184,17 +174,17 @@ const uploadFile = async () => {
     uploadError.value = 'Bitte wählen Sie eine Datei aus.';
     return;
   }
-  
+
   // Bildtyp prüfen
   if (!selectedFile.value.type.startsWith('image/')) {
     uploadError.value = 'Nur Bilddateien sind erlaubt.';
     return;
   }
-  
+
   uploading.value = true;
   uploadProgress.value = 0;
   uploadError.value = '';
-  
+
   try {
     // Formular erstellen
     const formData = new FormData();
@@ -205,18 +195,18 @@ const uploadFile = async () => {
       method: 'POST',
       body: formData,
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('apollo-token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem('apollo-token')}`,
+      },
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || 'Upload fehlgeschlagen');
     }
-    
+
     // Antwort verarbeiten
     const result = await response.json();
-    
+
     // Neues Media-Item erstellen
     const newItem = {
       id: result.id,
@@ -224,19 +214,19 @@ const uploadFile = async () => {
       url: result.url,
       mimeType: result.mimeType,
       fileSize: result.fileSize,
-      uploadedAt: result.uploadedAt
+      uploadedAt: result.uploadedAt,
     };
-    
+
     // Zum Anfang der Liste hinzufügen
     mediaItems.value = [newItem, ...mediaItems.value];
-    
+
     // Als aktuell ausgewähltes Item setzen
     selectedMedia.value = newItem;
-    
+
     // Formular zurücksetzen
     selectedFile.value = null;
     uploading.value = false;
-    
+
     toast.success('Datei erfolgreich hochgeladen');
   } catch (err) {
     console.error('Failed to upload media:', err);
@@ -248,15 +238,15 @@ const uploadFile = async () => {
 // Medien vom Server laden via GraphQL
 const fetchMedia = async () => {
   loading.value = true;
-  
+
   try {
     // Medien über GraphQL vom Server laden
     const client = resolveClient();
     const result = await client.query({
       query: FETCH_MEDIA,
-      fetchPolicy: 'network-only'
+      fetchPolicy: 'network-only',
     });
-    
+
     if (result.data && result.data.mediaItems) {
       mediaItems.value = result.data.mediaItems;
     } else {
@@ -287,28 +277,28 @@ const useSelectedMedia = () => {
 // Medium löschen über GraphQL
 const deleteMedia = async () => {
   if (!selectedMedia.value) return;
-  
+
   if (!confirm(`Möchten Sie wirklich "${selectedMedia.value.filename}" löschen?`)) {
     return;
   }
-  
+
   try {
     loading.value = true;
-    
+
     // GraphQL-Mutation zum Löschen aufrufen
     const client = resolveClient();
     const result = await client.mutate({
       mutation: DELETE_MEDIA,
       variables: {
-        id: selectedMedia.value.id
-      }
+        id: selectedMedia.value.id,
+      },
     });
-    
+
     if (result.data.deleteMedia) {
       // Auch aus der lokalen Liste entfernen
-      mediaItems.value = mediaItems.value.filter(item => item.id !== selectedMedia.value.id);
+      mediaItems.value = mediaItems.value.filter((item) => item.id !== selectedMedia.value.id);
       selectedMedia.value = null;
-      
+
       toast.success('Medium erfolgreich gelöscht');
     } else {
       toast.error('Medium konnte nicht gelöscht werden');
@@ -333,7 +323,7 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('de-DE', {
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   });
 };
 </script>

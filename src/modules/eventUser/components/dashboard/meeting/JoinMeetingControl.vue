@@ -1,8 +1,6 @@
 <template>
   <button class="btn btn-primary" @click.prevent="onJoinMeeting">
-    <i class="bi bi-camera-video-fill me-2" />{{
-      $t("view.event.meeting.join")
-    }}
+    <i class="bi bi-camera-video-fill me-2" />{{ $t('view.event.meeting.join') }}
   </button>
   <hr />
 </template>
@@ -14,9 +12,9 @@ defineProps({
     required: true,
   },
 });
-const emit = defineEmits(["joinMeeting"]);
+const emit = defineEmits(['joinMeeting']);
 
 function onJoinMeeting() {
-  emit("joinMeeting");
+  emit('joinMeeting');
 }
 </script>

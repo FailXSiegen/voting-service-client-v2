@@ -6,9 +6,7 @@
           id="tokenBasedLogin"
           v-model:checked="formData.tokenBasedLogin"
           :label="$t('view.event.create.labels.eventUser.tokenBasedLogin')"
-          :help-text="
-            $t('view.event.create.labels.eventUser.tokenBasedLoginHelp')
-          "
+          :help-text="$t('view.event.create.labels.eventUser.tokenBasedLoginHelp')"
           :errors="v$.tokenBasedLogin?.$errors"
           :has-errors="v$.tokenBasedLogin?.$errors?.length > 0"
           @update="
@@ -22,16 +20,11 @@
         <TextInput
           id="eventMultipleUser"
           :label="
-            $t(
-              'view.event.create.labels.eventMultipleUser.importFormat',
-              {
-                defaultValue: `${formData.tokenBasedLogin ? 'E-Mail' : 'Benutzername'};Name;Stimmen`
-              }
-            )
+            $t('view.event.create.labels.eventMultipleUser.importFormat', {
+              defaultValue: `${formData.tokenBasedLogin ? 'E-Mail' : 'Benutzername'};Name;Stimmen`,
+            })
           "
-          :help-text="
-            `<strong>Format:</strong> ${formData.tokenBasedLogin ? 'email' : 'username'}[;public_name][;vote_amount]<br><br><strong>Beispiele (eine Zeile pro Teilnehmer):</strong><br>user1@example.com;Max Mustermann;5<br>user2@example.com;Erika Musterfrau<br>user3@example.com;;3<br>user4@example.com<br><br>Ein Eintrag pro Zeile (leere Zeilen werden ignoriert). <strong>Teilnehmer mit Stimmenzahl > 0 erhalten automatisch Stimmrecht.</strong>`
-          "
+          :help-text="`<strong>Format:</strong> ${formData.tokenBasedLogin ? 'email' : 'username'}[;public_name][;vote_amount]<br><br><strong>Beispiele (eine Zeile pro Teilnehmer):</strong><br>user1@example.com;Max Mustermann;5<br>user2@example.com;Erika Musterfrau<br>user3@example.com;;3<br>user4@example.com<br><br>Ein Eintrag pro Zeile (leere Zeilen werden ignoriert). <strong>Teilnehmer mit Stimmenzahl > 0 erhalten automatisch Stimmrecht.</strong>`"
           :errors="v$.usernames?.$errors"
           :has-errors="v$.usernames?.$errors?.length > 0"
           :rows="12"
@@ -39,7 +32,7 @@
           @change="onChangeUsernamesText"
         />
       </div>
-      
+
       <!-- Tabellarische Vorschau -->
       <div v-if="parsedPreview.length > 0" class="preview-table mb-4">
         <h5>Vorschau der zu erstellenden Benutzer</h5>
@@ -56,17 +49,28 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(user, index) in parsedPreview" :key="index" :class="{ 'table-danger': user.hasErrors }">
+              <tr
+                v-for="(user, index) in parsedPreview"
+                :key="index"
+                :class="{ 'table-danger': user.hasErrors }"
+              >
                 <td class="text-center">{{ user.lineIndex }}</td>
                 <td>{{ user.identifier }}</td>
-                <td><em v-if="!user.publicName">Leer</em><span v-else>{{ user.publicName }}</span></td>
+                <td>
+                  <em v-if="!user.publicName">Leer</em><span v-else>{{ user.publicName }}</span>
+                </td>
                 <td>{{ user.voteAmount !== null ? user.voteAmount : 0 }}</td>
                 <td>
                   <span v-if="user.allowToVote" class="badge bg-success">Ja</span>
                   <span v-else class="badge bg-secondary">Nein</span>
                 </td>
                 <td>
-                  <span v-if="user.hasErrors" class="badge bg-danger" title="{{user.errors.join(', ')}}">Fehler</span>
+                  <span
+                    v-if="user.hasErrors"
+                    class="badge bg-danger"
+                    title="{{user.errors.join(', ')}}"
+                    >Fehler</span
+                  >
                   <span v-else class="badge bg-success">OK</span>
                 </td>
               </tr>
@@ -75,9 +79,9 @@
         </div>
         <div class="summary">
           <small class="text-muted">
-            Insgesamt: {{ parsedPreview.length }} Benutzer, 
-            davon {{ parsedPreview.filter(u => u.allowToVote).length }} mit Stimmrecht.
-            Gesamtstimmen: {{ getTotalVotes() }}
+            Insgesamt: {{ parsedPreview.length }} Benutzer, davon
+            {{ parsedPreview.filter((u) => u.allowToVote).length }} mit Stimmrecht. Gesamtstimmen:
+            {{ getTotalVotes() }}
           </small>
         </div>
       </div>
@@ -97,7 +101,7 @@
           </div>
         </div>
         <small class="text-muted">
-          {{ $t("view.event.create.labels.eventUser.processing") }}
+          {{ $t('view.event.create.labels.eventUser.processing') }}
           <span v-if="progress.current > 0 && progress.total > 0">
             ({{ Math.round((progress.current / progress.total) * 100) }}%)
           </span>
@@ -114,18 +118,13 @@
       </div>
 
       <button class="btn btn-primary mt-5 mb-3" :disabled="isProcessing || hasValidationErrors">
-        <i
-          :class="[
-            isProcessing ? 'bi-hourglass-split' : 'bi-play',
-            'bi--2xl align-middle',
-          ]"
-        />
+        <i :class="[isProcessing ? 'bi-hourglass-split' : 'bi-play', 'bi--2xl align-middle']" />
         <span class="align-middle">
           {{
             $t(
               isProcessing
-                ? "view.event.create.labels.eventUser.processing"
-                : "view.event.create.labels.eventUser.submit",
+                ? 'view.event.create.labels.eventUser.processing'
+                : 'view.event.create.labels.eventUser.submit'
             )
           }}
         </span>
@@ -135,15 +134,15 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from "vue";
-import { required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import TextInput from "@/core/components/form/TextInput.vue";
-import { NetworkError } from "@/core/error/NetworkError";
-import { isValidEmail } from "@/core/util/email-validator";
+import { computed, reactive, ref } from 'vue';
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import TextInput from '@/core/components/form/TextInput.vue';
+import { NetworkError } from '@/core/error/NetworkError';
+import { isValidEmail } from '@/core/util/email-validator';
 
 defineProps({
   isProcessing: {
@@ -159,8 +158,8 @@ defineProps({
   },
 });
 
-const emit = defineEmits(["submit"]);
-const usernamesText = ref("");
+const emit = defineEmits(['submit']);
+const usernamesText = ref('');
 const parsedPreview = ref([]);
 const validationErrors = ref([]);
 const hasValidationErrors = computed(() => validationErrors.value.length > 0);
@@ -169,7 +168,7 @@ const hasValidationErrors = computed(() => validationErrors.value.length > 0);
 const formData = reactive({
   tokenBasedLogin: false,
   usernames: [],
-  usersWithData: [] // To store parsed user data with public_name and individual vote_amount
+  usersWithData: [], // To store parsed user data with public_name and individual vote_amount
 });
 
 // Validation rules
@@ -184,20 +183,19 @@ const v$ = useVuelidate(rules, formData);
 // Parse and validate usernames/emails from textarea
 function parseUsernamesText() {
   // Teile Text nach Zeilen auf und filtere leere Zeilen heraus
-  const rawLines = usernamesText.value?.split("\n") ?? [];
-  const lines = rawLines.filter(line => line.trim() !== "");
+  const rawLines = usernamesText.value?.split('\n') ?? [];
+  const lines = rawLines.filter((line) => line.trim() !== '');
   formData.usersWithData = [];
   try {
     // Validate and parse each line
     lines.forEach((line, index) => {
-
-      const parts = line.split(";").map(part => part.trim());
+      const parts = line.split(';').map((part) => part.trim());
       const identifier = parts[0]; // Username or email
-      const publicName = parts[1] || ""; // Optional public_name
+      const publicName = parts[1] || ''; // Optional public_name
       const individualVoteAmount = parts[2] ? parseInt(parts[2], 10) : null; // Optional vote_amount
 
       // Validate identifier (username/email)
-      if (identifier === "") {
+      if (identifier === '') {
         throw { index, message: `Leerer Benutzername/E-Mail in Zeile ${index + 1}` };
       }
 
@@ -207,7 +205,10 @@ function parseUsernamesText() {
       }
 
       // Validate vote amount if provided
-      if (individualVoteAmount !== null && (isNaN(individualVoteAmount) || individualVoteAmount < 0)) {
+      if (
+        individualVoteAmount !== null &&
+        (isNaN(individualVoteAmount) || individualVoteAmount < 0)
+      ) {
         throw { index, message: `Ungültige Stimmenzahl in Zeile ${index + 1}: ${parts[2]}` };
       }
 
@@ -217,18 +218,19 @@ function parseUsernamesText() {
         identifier,
         publicName,
         voteAmount: individualVoteAmount,
-        allowToVote: individualVoteAmount !== null && individualVoteAmount > 0
+        allowToVote: individualVoteAmount !== null && individualVoteAmount > 0,
       });
     });
 
     // Update the usernames array for backward compatibility
-    formData.usernames = formData.usersWithData.map(user => user.identifier);
+    formData.usernames = formData.usersWithData.map((user) => user.identifier);
     return true;
   } catch (error) {
     handleError(
       new NetworkError(
-        error.message || `Die Benutzerliste enthält fehlerhafte Eintragungen in Zeile ${error.index + 1}`,
-      ),
+        error.message ||
+          `Die Benutzerliste enthält fehlerhafte Eintragungen in Zeile ${error.index + 1}`
+      )
     );
     parsedPreview.value = []; // Bei Fehler Vorschau zurücksetzen
     return false;
@@ -245,42 +247,44 @@ function onChangeUsernamesText({ value }) {
 function updatePreview() {
   try {
     // Teile Text nach Zeilen auf und filtere leere Zeilen heraus
-    const rawLines = usernamesText.value?.split("\n") ?? [];
-    const lines = rawLines.filter(line => line.trim() !== "");
+    const rawLines = usernamesText.value?.split('\n') ?? [];
+    const lines = rawLines.filter((line) => line.trim() !== '');
     const preview = [];
     const errors = [];
     const identifiers = new Set();
-    
+
     // Verarbeite jede Zeile
     lines.forEach((line, lineIndex) => {
-
-      const parts = line.split(";").map(part => part.trim());
+      const parts = line.split(';').map((part) => part.trim());
       const identifier = parts[0]; // Username oder email
-      const publicName = parts[1] || ""; // Optional public_name
+      const publicName = parts[1] || ''; // Optional public_name
       const individualVoteAmount = parts[2] ? parseInt(parts[2], 10) : null; // Optional vote_amount
-      
+
       // Erfasse Validierungsfehler
       const rowErrors = [];
-      
+
       // Validiere den Identifier
-      if (identifier === "") {
+      if (identifier === '') {
         rowErrors.push('Leerer Benutzername/E-Mail');
       } else if (formData.tokenBasedLogin && !isValidEmail(identifier)) {
         rowErrors.push('Ungültige E-Mail-Adresse');
       }
-      
+
       // Prüfe auf doppelte Benutzernamen
       if (identifier && identifiers.has(identifier)) {
         rowErrors.push('Doppelter Benutzername/E-Mail');
       } else if (identifier) {
         identifiers.add(identifier);
       }
-      
+
       // Validiere Stimmenzahl
-      if (individualVoteAmount !== null && (isNaN(individualVoteAmount) || individualVoteAmount < 0)) {
+      if (
+        individualVoteAmount !== null &&
+        (isNaN(individualVoteAmount) || individualVoteAmount < 0)
+      ) {
         rowErrors.push('Ungültige Stimmenzahl');
       }
-      
+
       // Füge gültigen Benutzer zur Vorschau hinzu mit Fehlerinformationen
       preview.push({
         lineIndex: lineIndex + 1, // Zeilennummer (1-basiert für Benutzer)
@@ -289,22 +293,22 @@ function updatePreview() {
         voteAmount: individualVoteAmount,
         allowToVote: individualVoteAmount !== null && individualVoteAmount > 0,
         errors: rowErrors,
-        hasErrors: rowErrors.length > 0
+        hasErrors: rowErrors.length > 0,
       });
-      
+
       // Sammle Fehler für die Formularvalidierung
       if (rowErrors.length > 0) {
         errors.push({
           line: lineIndex + 1,
-          messages: rowErrors
+          messages: rowErrors,
         });
       }
     });
-    
+
     parsedPreview.value = preview;
     validationErrors.value = errors;
   } catch (error) {
-    console.error("Fehler bei der Vorschau-Generierung", error);
+    console.error('Fehler bei der Vorschau-Generierung', error);
     // Wir zeigen keine Fehlermeldung an, da dies nur die Vorschau ist
   }
 }
@@ -319,12 +323,12 @@ function getTotalVotes() {
 async function onSubmit() {
   // Aktualisiere Vorschau und prüfe auf Fehler
   updatePreview();
-  
+
   if (hasValidationErrors.value) {
-    handleError(new InvalidFormError("Die Benutzerliste enthält Fehler"));
+    handleError(new InvalidFormError('Die Benutzerliste enthält Fehler'));
     return;
   }
-  
+
   const parsedSuccessfully = parseUsernamesText();
   const result = await v$.value.$validate();
 
@@ -333,10 +337,10 @@ async function onSubmit() {
     return;
   }
 
-  emit("submit", {
+  emit('submit', {
     usernames: formData.usernames,
     tokenBasedLogin: formData.tokenBasedLogin,
-    usersWithData: formData.usersWithData // Pass the full user data including public_name and individual vote_amount
+    usersWithData: formData.usersWithData, // Pass the full user data including public_name and individual vote_amount
   });
 }
 </script>
@@ -358,16 +362,16 @@ async function onSubmit() {
 
     .table {
       margin-bottom: 0.5rem;
-      
+
       em {
         color: #6c757d;
         font-style: italic;
       }
-      
+
       tr.table-danger {
         --bs-table-bg: rgba(var(--bs-danger-rgb), 0.15);
       }
-      
+
       td {
         vertical-align: middle;
       }

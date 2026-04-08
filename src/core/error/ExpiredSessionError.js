@@ -1,4 +1,4 @@
-const type = "ExpiredSessionError";
+const type = 'ExpiredSessionError';
 
 export class ExpiredSessionError extends Error {
   constructor(message) {

@@ -14,8 +14,8 @@
 
       <h2>Nutzungsbedingungen</h2>
       <p>
-        Die Bedingungen, unter denen digitalwahl.org genutzt werden kann,
-        findest du <a href="/nutzerbedingungen">hier</a>.
+        Die Bedingungen, unter denen digitalwahl.org genutzt werden kann, findest du
+        <a href="/nutzerbedingungen">hier</a>.
       </p>
       <div class="card border-primary p-3">
         <h2 class="mb-3">Unterstützt und gefördert von:</h2>
@@ -40,11 +40,7 @@
           </div>
           <div class="col-sm col-12">
             <figure class="figure">
-              <a
-                href="https://www.bmi.bund.de/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://www.bmi.bund.de/" target="_blank" rel="noopener noreferrer">
                 <img
                   src="../../../assets/images/logos/BMI_Fz_2018_Web_de.gif"
                   class="figure-img img-fluid"
@@ -67,9 +63,7 @@
                   alt="Deutsche Chorjugend"
                 />
               </a>
-              <figcaption class="figure-caption">
-                Deutsche Chorjugend
-              </figcaption>
+              <figcaption class="figure-caption">Deutsche Chorjugend</figcaption>
             </figure>
           </div>
         </div>
@@ -77,56 +71,38 @@
         <div class="row align-items-baseline">
           <div class="col-sm col-12">
             <figure class="figure">
-              <a
-                href="https://www.s-chorverband.de/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://www.s-chorverband.de/" target="_blank" rel="noopener noreferrer">
                 <img
                   src="../../../assets/images/logos/scv.jpg"
                   class="figure-img img-fluid"
                   alt="Schwäbischer Chorverband"
                 />
               </a>
-              <figcaption class="figure-caption">
-                Schwäbischer Chorverband
-              </figcaption>
+              <figcaption class="figure-caption">Schwäbischer Chorverband</figcaption>
             </figure>
           </div>
           <div class="col-sm-auto col-12">
             <figure class="figure">
-              <a
-                href="http://www.bcvonline.de/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="http://www.bcvonline.de/" target="_blank" rel="noopener noreferrer">
                 <img
                   src="../../../assets/images/logos/bcv.png"
                   class="figure-img img-fluid"
                   alt="Badischer Chorverband"
                 />
               </a>
-              <figcaption class="figure-caption">
-                Badischer Chorverband
-              </figcaption>
+              <figcaption class="figure-caption">Badischer Chorverband</figcaption>
             </figure>
           </div>
           <div class="col-sm col-12">
             <figure class="figure">
-              <a
-                href="http://www.saengerjugend.de/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="http://www.saengerjugend.de/" target="_blank" rel="noopener noreferrer">
                 <img
                   src="../../../assets/images/logos/sjnrw.png"
                   class="figure-img img-fluid"
                   alt="Sängerjugend im Chorverband NRW e. V."
                 />
               </a>
-              <figcaption class="figure-caption">
-                Sängerjugend im Chorverband NRW e. V.
-              </figcaption>
+              <figcaption class="figure-caption">Sängerjugend im Chorverband NRW e. V.</figcaption>
             </figure>
           </div>
         </div>
@@ -134,11 +110,7 @@
         <div class="row align-items-baseline">
           <div class="col-sm-4 col-12">
             <figure class="figure">
-              <a
-                href="https://www.pro-stimme.de/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href="https://www.pro-stimme.de/" target="_blank" rel="noopener noreferrer">
                 <img
                   src="../../../assets/images/logos/ProStimme.jpg"
                   class="figure-img img-fluid"
@@ -155,5 +127,5 @@
 </template>
 
 <script setup>
-import CorePageLayout from "@/core/components/CorePageLayout.vue";
+import CorePageLayout from '@/core/components/CorePageLayout.vue';
 </script>

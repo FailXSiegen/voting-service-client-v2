@@ -1,6 +1,6 @@
-import { URLS } from "@/urls";
-import { standaloneRequest } from "@/core/request/standalone-request";
-import { useCore } from "@/core/store/core";
+import { URLS } from '@/urls';
+import { standaloneRequest } from '@/core/request/standalone-request';
+import { useCore } from '@/core/store/core';
 
 /**
  * @param {string} meetingNumber
@@ -12,14 +12,14 @@ export function fetchSignature(meetingNumber) {
   const coreStore = useCore();
 
   const requestOptions = {
-    method: "POST",
-    redirect: "follow",
-    referrerPolicy: "no-referrer",
-    cache: "no-cache",
-    credentials: "include",
-    mode: "cors",
+    method: 'POST',
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
+    cache: 'no-cache',
+    credentials: 'include',
+    mode: 'cors',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${coreStore.getAuthToken}`,
     },
     body: JSON.stringify({

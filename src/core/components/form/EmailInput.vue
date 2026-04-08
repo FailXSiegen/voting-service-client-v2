@@ -17,19 +17,15 @@
   <div v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
   </div>
-  <span
-    v-for="error in errors"
-    :key="error.uid"
-    class="form-field-error text-danger"
-  >
-    {{ $t("error.formValidation." + error.$validator) }}<br />
+  <span v-for="error in errors" :key="error.uid" class="form-field-error text-danger">
+    {{ $t('error.formValidation.' + error.$validator) }}<br />
   </span>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from 'vue';
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(['change']);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -60,6 +56,6 @@ const props = defineProps({
 const inputValue = ref(props.value);
 
 function onChange() {
-  emit("change", { value: inputValue.value });
+  emit('change', { value: inputValue.value });
 }
 </script>

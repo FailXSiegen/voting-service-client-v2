@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const CREATE_EVENT = gql`
   mutation CreateEvent($input: CreateEventInput!) {

@@ -6,42 +6,37 @@
         class="actions-item btn btn-danger d-print-none"
         @click="onLogout"
       >
-        <i class="me-2 bi bi-x-square" />{{ $t("navigation.logOut") }}
+        <i class="me-2 bi bi-x-square" />{{ $t('navigation.logOut') }}
       </button>
       <button
         v-else
         class="actions-item btn btn-danger d-print-none"
         @click="onTerminateTokenSession"
       >
-        <i class="me-2 bi bi-x-square" />{{
-          $t("navigation.terminateTokenSession")
-        }}
+        <i class="me-2 bi bi-x-square" />{{ $t('navigation.terminateTokenSession') }}
       </button>
-      <button
-        class="actions-item btn btn-secondary d-print-none"
-        @click="onReloadPage"
-      >
-        <i class="me-2 bi bi-arrow-repeat" />{{ $t("navigation.reload") }}
+      <button class="actions-item btn btn-secondary d-print-none" @click="onReloadPage">
+        <i class="me-2 bi bi-arrow-repeat" />{{ $t('navigation.reload') }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useCore } from "@/core/store/core";
+import { useCore } from '@/core/store/core';
 
-const emit = defineEmits(["logout", "terminateTokenSession"]);
+const emit = defineEmits(['logout', 'terminateTokenSession']);
 const store = useCore();
 const isEventUserAuthorizedViaToken = store.isEventUserAuthorizedViaToken;
 
 // Events.
 
 function onLogout() {
-  emit("logout");
+  emit('logout');
 }
 
 function onTerminateTokenSession() {
-  emit("terminateTokenSession");
+  emit('terminateTokenSession');
 }
 
 function onReloadPage() {

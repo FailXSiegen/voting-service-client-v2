@@ -18,9 +18,7 @@
           :to="{ name: RouteOrganizerProfile }"
           class="btn btn-secondary btn-block py-3 px-0 w-100"
         >
-          <span class="nav-title">{{
-            $t("navigation.views." + RouteOrganizerProfile)
-          }}</span>
+          <span class="nav-title">{{ $t('navigation.views.' + RouteOrganizerProfile) }}</span>
           <span
             class="nav-icon bi--2xl bi-person"
             :title="$t('navigation.views.' + RouteOrganizerProfile)"
@@ -38,16 +36,9 @@
             :to="{ name: navigationItemRoute.name, params }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{
-              $t("navigation.views." + navigationItemRoute.name)
-            }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + navigationItemRoute.name) }}</span>
             <span
-              :class="[
-                'nav-icon',
-                'bi',
-                'bi--2xl',
-                navigationItemRoute.meta.bootstrapIcon,
-              ]"
+              :class="['nav-icon', 'bi', 'bi--2xl', navigationItemRoute.meta.bootstrapIcon]"
               :title="$t('navigation.views.' + navigationItemRoute.name)"
             />
           </router-link>
@@ -56,39 +47,29 @@
             :to="{ name: navigationItemRoute.name }"
             class="list-group-item-action btn btn-lg list-group-item-dark d-block w-100 rounded py-3 px-0 text-center"
           >
-            <span class="nav-title">{{
-              $t("navigation.views." + navigationItemRoute.name)
-            }}</span>
+            <span class="nav-title">{{ $t('navigation.views.' + navigationItemRoute.name) }}</span>
             <span
-              :class="[
-                'nav-icon',
-                'bi',
-                'bi--2xl',
-                navigationItemRoute.meta.bootstrapIcon,
-              ]"
+              :class="['nav-icon', 'bi', 'bi--2xl', navigationItemRoute.meta.bootstrapIcon]"
               :title="$t('navigation.views.' + navigationItemRoute.name)"
             />
           </router-link>
         </li>
       </ul>
     </div>
-    <button
-      class="logout btn btn-danger py-1 d-flex align-items-center"
-      @click="onLogout"
-    >
+    <button class="logout btn btn-danger py-1 d-flex align-items-center" @click="onLogout">
       <i class="me-md-3 bi bi-x-square bi--2xl" />
-      <span class="d-none d-md-block">{{ $t("navigation.logOut") }}</span>
+      <span class="d-none d-md-block">{{ $t('navigation.logOut') }}</span>
     </button>
   </nav>
 </template>
 
 <script setup>
-import { RouteOrganizerProfile, RouteMainLogin } from "@/router/routes";
-import { logout } from "@/core/auth/login";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
+import { RouteOrganizerProfile, RouteMainLogin } from '@/router/routes';
+import { logout } from '@/core/auth/login';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -114,7 +95,7 @@ const params = useRoute().params;
 function onLogout() {
   logout()
     .then(() => router.push({ name: RouteMainLogin }))
-    .then(() => toast(t("success.logout.organizer"), { type: "success" }));
+    .then(() => toast(t('success.logout.organizer'), { type: 'success' }));
 }
 
 function isRouteAccessible(route) {

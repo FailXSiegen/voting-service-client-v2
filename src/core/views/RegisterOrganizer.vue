@@ -4,21 +4,15 @@
       <div class="align-items-center justify-content-center">
         <div class="register-organizer-wrapper text-center m-auto">
           <h1 class="register-organizer-headline">
-            {{ $t("view.register.headline") }}
+            {{ $t('view.register.headline') }}
           </h1>
           <p class="register-organizer-subheadline">
-            {{ $t("view.register.subheadline") }}
+            {{ $t('view.register.subheadline') }}
           </p>
           <div class="p-5 mb-4 bg-body-tertiary rounded-3">
-            <p
-              class="register__description"
-              v-html="$t('view.register.description')"
-            />
+            <p class="register__description" v-html="$t('view.register.description')" />
           </div>
-          <AlertBox
-            v-if="submitSuccess"
-            :message="$t('view.register.success')"
-          />
+          <AlertBox v-if="submitSuccess" :message="$t('view.register.success')" />
           <form
             v-else
             id="register-form"
@@ -100,7 +94,7 @@
                 "
               />
               <small id="public-organisation-hint" class="form-text text-muted">
-                {{ $t("view.register.label.publicOrganisationHint") }}
+                {{ $t('view.register.label.publicOrganisationHint') }}
               </small>
             </div>
             <div class="mb-3">
@@ -133,11 +127,8 @@
               @verified="recaptchaVerified = true"
               @expired="recaptchaVerified = false"
             />
-            <button
-              class="btn btn-primary btn-block float-end mt-3"
-              :disabled="!recaptchaVerified"
-            >
-              {{ $t("view.register.submit") }}
+            <button class="btn btn-primary btn-block float-end mt-3" :disabled="!recaptchaVerified">
+              {{ $t('view.register.submit') }}
             </button>
           </form>
         </div>
@@ -147,31 +138,31 @@
 </template>
 
 <script setup>
-import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import { reactive, ref } from "vue";
-import { required, sameAs as equal } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { create } from "@/modules/organizer/requests/create";
-import { sameAs } from "@/core/form/validation/same-as";
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import EmailInput from "@/core/components/form/EmailInput.vue";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import AlertBox from "@/core/components/AlertBox.vue";
-import GoogleRecaptcha from "@/core/components/form/GoogleRecaptcha.vue";
+import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import { reactive, ref } from 'vue';
+import { required, sameAs as equal } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import { create } from '@/modules/organizer/requests/create';
+import { sameAs } from '@/core/form/validation/same-as';
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import EmailInput from '@/core/components/form/EmailInput.vue';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import AlertBox from '@/core/components/AlertBox.vue';
+import GoogleRecaptcha from '@/core/components/form/GoogleRecaptcha.vue';
 
 const submitSuccess = ref(false);
 const recaptchaVerified = ref(false);
 
 // Form and validation setup.
 const formData = reactive({
-  username: "",
-  email: "",
-  password: "",
-  passwordRepeated: "",
-  publicName: "",
-  publicOrganisation: "",
+  username: '',
+  email: '',
+  password: '',
+  passwordRepeated: '',
+  publicName: '',
+  publicOrganisation: '',
   dataProtectionAccepted: false,
   isBetaAccepted: true,
 });
@@ -182,7 +173,7 @@ const rules = {
   password: { required },
   passwordRepeated: {
     required,
-    sameAs: sameAs("password", formData),
+    sameAs: sameAs('password', formData),
   },
   publicName: { required },
   publicOrganisation: { required },

@@ -4,40 +4,29 @@
       <ul class="nav navbar-nav flex-row">
         <li class="nav-item m-1">
           <router-link :to="{ name: RouteMainLogin }" class="nav-link p-1">
-            {{ $t("navigation.views.startPage") }}
+            {{ $t('navigation.views.startPage') }}
           </router-link>
         </li>
         <!-- Statische Navigation -->
         <template v-if="!useDbNavigation">
-          <li
-            v-for="routeName in staticNavigationItems"
-            :key="routeName"
-            class="nav-item m-1"
-          >
+          <li v-for="routeName in staticNavigationItems" :key="routeName" class="nav-item m-1">
             <router-link :to="{ name: routeName }" class="nav-link p-1">
-              {{ $t("navigation.views.staticPages." + routeName) }}
+              {{ $t('navigation.views.staticPages.' + routeName) }}
             </router-link>
           </li>
         </template>
-        
+
         <!-- Dynamische DB-basierte Navigation -->
         <template v-else>
-          <li
-            v-for="page in dynamicPages"
-            :key="page.pageKey"
-            class="nav-item m-1"
-          >
-            <router-link 
-              :to="getStaticPageRoute(page.pageKey)" 
-              class="nav-link p-1"
-            >
+          <li v-for="page in dynamicPages" :key="page.pageKey" class="nav-item m-1">
+            <router-link :to="getStaticPageRoute(page.pageKey)" class="nav-link p-1">
               {{ page.title || page.pageKey }}
             </router-link>
           </li>
         </template>
       </ul>
     </nav>
-    
+
     <!-- Lade-Indikator für dynamische Seiten -->
     <div v-if="loading" class="d-flex justify-content-center pb-2">
       <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -60,8 +49,8 @@ import {
   RouteStaticManual,
   RouteStaticUserAgreement,
   RouteStaticGeneric,
-} from "@/router/routes";
-import { useCore } from "@/core/store/core";
+} from '@/router/routes';
+import { useCore } from '@/core/store/core';
 
 // Core-Store
 const coreStore = useCore();
@@ -89,9 +78,9 @@ const getStaticPageRoute = (pageKey) => {
   if (useDirectPaths.value) {
     return { path: `/${pageKey}` };
   } else {
-    return { 
-      name: RouteStaticGeneric, 
-      params: { pageKey } 
+    return {
+      name: RouteStaticGeneric,
+      params: { pageKey },
     };
   }
 };
@@ -116,9 +105,9 @@ watch(useDbNavigation, async (newValue) => {
 // Seiten aus der Datenbank laden
 const fetchDynamicPages = async () => {
   if (!useDbNavigation.value) return;
-  
+
   loading.value = true;
-  
+
   try {
     const client = resolveClient();
     const result = await client.query({
@@ -134,24 +123,24 @@ const fetchDynamicPages = async () => {
           }
         }
       `,
-      fetchPolicy: 'network-only'
+      fetchPolicy: 'network-only',
     });
-    
+
     // Gruppieren nach pageKey und nur die Hauptinformationen behalten
     const pages = {};
-    result.data.staticContents.forEach(content => {
+    result.data.staticContents.forEach((content) => {
       if (content.isPublished) {
         if (!pages[content.pageKey]) {
           pages[content.pageKey] = {
             pageKey: content.pageKey,
             title: content.title || content.pageKey,
             sectionKey: content.sectionKey,
-            ordering: content.ordering
+            ordering: content.ordering,
           };
         }
       }
     });
-    
+
     // In Array umwandeln und sortieren
     dynamicPages.value = Object.values(pages).sort((a, b) => a.ordering - b.ordering);
   } catch (err) {

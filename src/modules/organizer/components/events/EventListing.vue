@@ -4,37 +4,35 @@
       {{ headline }}
     </h2>
     <p class="hint small">
-      {{ $t("view.event.listing.deleteInfo") }}
+      {{ $t('view.event.listing.deleteInfo') }}
     </p>
-    <table
-      class="table table-responsive-md table-bordered table-hover table-sm"
-    >
+    <table class="table table-responsive-md table-bordered table-hover table-sm">
       <thead class="thead-light">
         <tr>
           <th scope="col">
-            {{ $t("view.event.listing.name") }} <br />
+            {{ $t('view.event.listing.name') }} <br />
             <small
-              ><b>{{ $t("view.event.listing.slug") }}</b></small
+              ><b>{{ $t('view.event.listing.slug') }}</b></small
             ><br />
             <hr />
             <small
-              ><b>{{ $t("view.event.create.labels.description") }}</b></small
+              ><b>{{ $t('view.event.create.labels.description') }}</b></small
             >
           </th>
           <th v-if="showOrganizer" scope="col">
-            {{ $t("view.event.listing.organizer") }}
+            {{ $t('view.event.listing.organizer') }}
           </th>
           <th scope="col">
-            {{ $t("view.event.listing.created") }}
+            {{ $t('view.event.listing.created') }}
           </th>
           <th scope="col">
-            {{ $t("view.event.listing.scheduled") }}
+            {{ $t('view.event.listing.scheduled') }}
           </th>
           <th scope="col" class="text-center">
-            {{ $t("view.event.listing.state") }}
+            {{ $t('view.event.listing.state') }}
           </th>
           <th v-if="eventsDetail" scope="col">
-            {{ $t("view.event.listing.actions.label") }}
+            {{ $t('view.event.listing.actions.label') }}
           </th>
         </tr>
       </thead>
@@ -56,9 +54,9 @@
 </template>
 
 <script setup>
-import EventRow from "@/modules/organizer/components/events/EventRow.vue";
+import EventRow from '@/modules/organizer/components/events/EventRow.vue';
 
-const emit = defineEmits(["delete", "toggleActive"]);
+const emit = defineEmits(['delete', 'toggleActive']);
 defineProps({
   headline: {
     type: String,
@@ -91,11 +89,11 @@ defineProps({
 });
 
 function onDelete(event) {
-  emit("delete", event);
+  emit('delete', event);
 }
 
 function onToggleActive(event) {
-  emit("toggleActive", event);
+  emit('toggleActive', event);
 }
 </script>
 

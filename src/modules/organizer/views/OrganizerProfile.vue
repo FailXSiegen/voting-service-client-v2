@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerProfile')">
     <template #title>
-      {{ $t("navigation.views.organizerProfile") }}
+      {{ $t('navigation.views.organizerProfile') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -97,7 +97,7 @@
             </div>
           </div>
           <button type="submit" class="btn btn-primary btn-block my-3">
-            {{ $t("view.profile.label.submit") }}
+            {{ $t('view.profile.label.submit') }}
           </button>
         </form>
       </div>
@@ -106,8 +106,8 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -118,24 +118,23 @@ import {
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings,
-} from "@/router/routes";
-import { computed, watch } from "vue";
-import { useCore } from "@/core/store/core";
-import { required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { reactive } from "vue";
-import { sameAs } from "@/core/form/validation/same-as";
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import { storeToRefs } from "pinia";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import EmailInput from "@/core/components/form/EmailInput.vue";
-import { validatePassword } from "@/core/auth/validate-password";
-import { useMutation } from "@vue/apollo-composable";
-import { UPDATE_ORGANIZER } from "@/modules/organizer/graphql/mutation/update-organizer";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
+} from '@/router/routes';
+import { computed, watch, reactive } from 'vue';
+import { useCore } from '@/core/store/core';
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import { sameAs } from '@/core/form/validation/same-as';
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import { storeToRefs } from 'pinia';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import EmailInput from '@/core/components/form/EmailInput.vue';
+import { validatePassword } from '@/core/auth/validate-password';
+import { useMutation } from '@vue/apollo-composable';
+import { UPDATE_ORGANIZER } from '@/modules/organizer/graphql/mutation/update-organizer';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
 
 const coreStore = useCore();
 
@@ -154,18 +153,18 @@ const routes = getRoutesByName([
 // Form and validation setup.
 const formData = reactive({
   changePassword: false,
-  currentPassword: "",
-  newPassword: "",
-  newPasswordRepeated: "",
-  email: coreStore.getOrganizer?.email ?? "",
-  publicName: coreStore.getOrganizer?.publicName ?? "",
+  currentPassword: '',
+  newPassword: '',
+  newPasswordRepeated: '',
+  email: coreStore.getOrganizer?.email ?? '',
+  publicName: coreStore.getOrganizer?.publicName ?? '',
 });
 const rules = computed(() => {
   return {
     currentPassword: { required },
     newPassword: formData.changePassword ? { required } : {},
     newPasswordRepeated: formData.changePassword
-      ? { required, sameAs: sameAs("newPassword", formData) }
+      ? { required, sameAs: sameAs('newPassword', formData) }
       : {},
     email: { required },
     publicName: { required },
@@ -221,7 +220,7 @@ async function onSubmit() {
   await updateOrganizer();
 
   // Show success message.
-  toast(t("success.organizer.profile.savedSuccessfully"), { type: "success" });
+  toast(t('success.organizer.profile.savedSuccessfully'), { type: 'success' });
 }
 </script>
 

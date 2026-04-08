@@ -36,8 +36,8 @@ services:
   # API Service
   api:
     build:
-      context: ../..
-      dockerfile: docker/local/Dockerfile.api
+      context: ../../..
+      dockerfile: voting-service-client-v2/docker/local/Dockerfile.api
     container_name: voting_api
     restart: unless-stopped
     ports:
@@ -100,8 +100,8 @@ services:
   # Vote Consumer Service
   consumer:
     build:
-      context: ../..
-      dockerfile: docker/local/Dockerfile.consumer
+      context: ../../..
+      dockerfile: voting-service-client-v2/docker/local/Dockerfile.consumer
     container_name: voting_consumer
     restart: unless-stopped
     healthcheck:
@@ -146,16 +146,19 @@ services:
   # Client Service - Development Mode
   client:
     build:
-      context: ../..
-      dockerfile: docker/local/Dockerfile.client
+      context: ../../..
+      dockerfile: voting-service-client-v2/docker/local/Dockerfile.client
     container_name: voting_client
     restart: unless-stopped
     ports:
+      - "80:80"
       - "8090:80"
     volumes:
-      - ../../voting-service-client-v2:/app:delegated
+      - ../..:/app:delegated
       # Exclude node_modules from mounting to avoid platform-specific binary issues
       - /app/node_modules
+      # Mount nginx config for easy updates
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - api
     networks:
@@ -183,7 +186,7 @@ services:
       - MYSQL_DATABASE=application
     volumes:
       - db_data:/var/lib/mysql
-      - ../../voting-service-api/.docker/mariadb-conf:/etc/mysql/conf.d
+      - ../../../voting-service-api/.docker/mariadb-conf:/etc/mysql/conf.d
     command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci --max_connections=1500
     networks:
       - voting_network
@@ -219,8 +222,8 @@ services:
   # RabbitMQ mit korrektem Netzwerk und Traefik-Integration
   rabbitmq:
     build:
-      context: ../..
-      dockerfile: docker/local/Dockerfile.rabbitmq
+      context: ../../..
+      dockerfile: voting-service-client-v2/docker/local/Dockerfile.rabbitmq
     container_name: voting_rabbitmq
     restart: always
     healthcheck:

@@ -36,8 +36,8 @@
               class="form-control"
               :placeholder="$t('view.systemSettings.favicon.placeholder')"
             />
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-outline-secondary"
               @click="showMediaManager = true"
             >
@@ -50,8 +50,8 @@
           </div>
           <!-- Favicon Preview -->
           <div v-if="formData.faviconUrl" class="mt-2">
-            <img 
-              :src="formData.faviconUrl" 
+            <img
+              :src="formData.faviconUrl"
               alt="Favicon Preview"
               class="favicon-preview"
               @error="onFaviconError"
@@ -96,12 +96,12 @@
         </div>
 
         <!-- Google reCAPTCHA Settings -->
-        <hr class="my-4">
+        <hr class="my-4" />
         <h6 class="mb-3">
           <i class="bi bi-shield-check me-2"></i>
           {{ $t('view.systemSettings.recaptcha.label') }}
         </h6>
-        
+
         <div class="mb-3">
           <div class="form-check">
             <input
@@ -158,11 +158,7 @@
 
         <!-- Save Button -->
         <div class="d-flex justify-content-end">
-          <button 
-            type="submit" 
-            class="btn btn-primary"
-            :disabled="saving"
-          >
+          <button type="submit" class="btn btn-primary" :disabled="saving">
             <i v-if="saving" class="bi bi-hourglass-split me-1"></i>
             <i v-else class="bi bi-check-lg me-1"></i>
             {{ saving ? $t('view.systemSettings.saving') : $t('view.systemSettings.save') }}
@@ -172,7 +168,7 @@
 
       <!-- Last Updated Info -->
       <div v-if="systemSettings?.updatedAt" class="mt-3 text-muted small">
-        {{ $t('view.systemSettings.lastUpdated') }}: 
+        {{ $t('view.systemSettings.lastUpdated') }}:
         {{ formatDate(systemSettings.updatedAt) }}
         <span v-if="systemSettings.updatedBy">
           {{ $t('view.systemSettings.updatedBy') }} {{ systemSettings.updatedBy.username }}
@@ -193,7 +189,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, watch } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useQuery, useMutation } from '@vue/apollo-composable';
 import { toast } from 'vue3-toastify';
 import { handleError } from '@/core/error/error-handler';
@@ -215,32 +211,37 @@ const formData = reactive({
   titleSuffix: 'digitalwahl.org',
   recaptchaEnabled: false,
   recaptchaSiteKey: '',
-  recaptchaSecretKey: ''
+  recaptchaSecretKey: '',
 });
 
 // Query system settings
-const { result: systemSettingsResult, loading: settingsLoading, refetch } = useQuery(
-  SYSTEM_SETTINGS_QUERY,
-  {},
-  { fetchPolicy: 'cache-and-network' }
-);
+const {
+  result: systemSettingsResult,
+  // eslint-disable-next-line no-unused-vars
+  loading: _settingsLoading,
+  refetch,
+} = useQuery(SYSTEM_SETTINGS_QUERY, {}, { fetchPolicy: 'cache-and-network' });
 
 const systemSettings = computed(() => systemSettingsResult.value?.systemSettings);
 
 // Update form data when query loads
-watch(systemSettings, (settings) => {
-  console.log('Received system settings:', JSON.stringify(settings, null, 2));
-  if (settings) {
-    formData.useDirectStaticPaths = settings.useDirectStaticPaths;
-    formData.useDbFooterNavigation = settings.useDbFooterNavigation;
-    formData.faviconUrl = settings.faviconUrl;
-    formData.titleSuffix = settings.titleSuffix || 'digitalwahl.org';
-    formData.recaptchaEnabled = Boolean(settings.recaptchaEnabled);
-    formData.recaptchaSiteKey = settings.recaptchaSiteKey || '';
-    formData.recaptchaSecretKey = settings.recaptchaSecretKey || '';
-    console.log('Updated form data:', JSON.stringify(formData, null, 2));
-  }
-}, { immediate: true });
+watch(
+  systemSettings,
+  (settings) => {
+    console.log('Received system settings:', JSON.stringify(settings, null, 2));
+    if (settings) {
+      formData.useDirectStaticPaths = settings.useDirectStaticPaths;
+      formData.useDbFooterNavigation = settings.useDbFooterNavigation;
+      formData.faviconUrl = settings.faviconUrl;
+      formData.titleSuffix = settings.titleSuffix || 'digitalwahl.org';
+      formData.recaptchaEnabled = Boolean(settings.recaptchaEnabled);
+      formData.recaptchaSiteKey = settings.recaptchaSiteKey || '';
+      formData.recaptchaSecretKey = settings.recaptchaSecretKey || '';
+      console.log('Updated form data:', JSON.stringify(formData, null, 2));
+    }
+  },
+  { immediate: true }
+);
 
 // Save mutation
 const { mutate: updateSystemSettings } = useMutation(UPDATE_SYSTEM_SETTINGS);
@@ -262,10 +263,10 @@ function onSecretKeyChange(event) {
 
 async function onSave() {
   saving.value = true;
-  
+
   try {
     console.log('Saving system settings:', JSON.stringify(formData, null, 2));
-    
+
     const inputData = {
       useDirectStaticPaths: formData.useDirectStaticPaths,
       useDbFooterNavigation: formData.useDbFooterNavigation,
@@ -273,17 +274,17 @@ async function onSave() {
       titleSuffix: formData.titleSuffix,
       recaptchaEnabled: Boolean(formData.recaptchaEnabled),
       recaptchaSiteKey: formData.recaptchaSiteKey || '',
-      recaptchaSecretKey: formData.recaptchaSecretKey || ''
+      recaptchaSecretKey: formData.recaptchaSecretKey || '',
     };
-    
+
     console.log('Input data being sent:', JSON.stringify(inputData, null, 2));
-    
+
     const result = await updateSystemSettings({
-      input: inputData
+      input: inputData,
     });
-    
+
     console.log('Mutation result:', result);
-    
+
     try {
       await refetch();
       console.log('Refetch completed successfully');
@@ -291,18 +292,17 @@ async function onSave() {
       console.error('Refetch error:', refetchError);
       // Continue anyway, the save was successful
     }
-    
+
     toast(t('success.systemSettings.saved'), {
-      type: 'success'
+      type: 'success',
     });
-    
   } catch (error) {
     console.error('Error in onSave:', error);
     console.error('Error details:', {
       message: error.message,
       graphQLErrors: error.graphQLErrors,
       networkError: error.networkError,
-      stack: error.stack
+      stack: error.stack,
     });
     handleError(error);
   } finally {
@@ -328,7 +328,7 @@ function formatDate(dateString) {
       month: '2-digit',
       day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   } catch (error) {
     console.warn('Error formatting date:', error);

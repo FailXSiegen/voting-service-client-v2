@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerEventsNew')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerEventUserNew") }} -
+        {{ $t('navigation.views.organizerEventUserNew') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -16,24 +16,20 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import EventUserForm from "@/modules/organizer/components/events/event-user/EventUserForm.vue";
-import {
-  RouteOrganizerDashboard,
-  RouteOrganizerMemberRoom,
-} from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
-import { useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { useMutation } from "@vue/apollo-composable";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { CREATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/create-event-user";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import EventUserForm from '@/modules/organizer/components/events/event-user/EventUserForm.vue';
+import { RouteOrganizerDashboard, RouteOrganizerMemberRoom } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { ref } from 'vue';
+import { useQuery, useMutation } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { CREATE_EVENT_USER } from '@/modules/organizer/graphql/mutation/create-event-user';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -46,7 +42,7 @@ const event = ref(null);
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // Check if the event could be fetched successfully. redirect to list if not.
@@ -59,13 +55,7 @@ eventQuery.onResult(({ data }) => {
   loaded.value = true;
 });
 
-async function onSubmit({
-  username,
-  verified,
-  allowToVote,
-  publicName,
-  voteAmount,
-}) {
+async function onSubmit({ username, verified, allowToVote, publicName, voteAmount }) {
   // Create new Event user.
   const { mutate: createEventUser } = useMutation(CREATE_EVENT_USER, {
     variables: {
@@ -85,8 +75,8 @@ async function onSubmit({
   await router.push({ name: RouteOrganizerMemberRoom });
 
   // Show success message.
-  toast(t("success.organizer.eventUser.createdSuccessfully"), {
-    type: "success",
+  toast(t('success.organizer.eventUser.createdSuccessfully'), {
+    type: 'success',
   });
 }
 </script>

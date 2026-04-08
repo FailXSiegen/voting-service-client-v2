@@ -2,18 +2,14 @@
   <div v-if="resolvedConfig">
     <div class="mb-3">
       <BaseInput
-        :label="
-          $t('view.event.create.labels.videoConferenceConfig.zoom.meetingId')
-        "
+        :label="$t('view.event.create.labels.videoConferenceConfig.zoom.meetingId')"
         :value="appliedConfig.meetingId"
         @change="onChangeMeetingId"
       />
     </div>
     <div class="mb-3">
       <BaseInput
-        :label="
-          $t('view.event.create.labels.videoConferenceConfig.zoom.password')
-        "
+        :label="$t('view.event.create.labels.videoConferenceConfig.zoom.password')"
         :value="appliedConfig.password"
         @change="onChangePassword"
       />
@@ -22,8 +18,8 @@
 </template>
 
 <script setup>
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import { reactive } from "vue";
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import { reactive } from 'vue';
 
 const props = defineProps({
   recordId: {
@@ -33,20 +29,20 @@ const props = defineProps({
   config: {
     type: String,
     required: true,
-    default: "{}",
+    default: '{}',
   },
 });
-const emit = defineEmits(["change"]);
+const emit = defineEmits(['change']);
 
 const resolvedConfig = JSON.parse(props.config);
 const appliedConfig = reactive({
-  meetingId: resolvedConfig?.credentials?.meetingId ?? "",
-  password: resolvedConfig?.credentials?.password ?? "",
+  meetingId: resolvedConfig?.credentials?.meetingId ?? '',
+  password: resolvedConfig?.credentials?.password ?? '',
 });
 
 function onChangeMeetingId(value) {
   appliedConfig.meetingId = value.value;
-  emit("change", {
+  emit('change', {
     id: parseInt(props.recordId, 10),
     type: 1,
     credentials: {
@@ -58,7 +54,7 @@ function onChangeMeetingId(value) {
 
 function onChangePassword(value) {
   appliedConfig.password = value.value;
-  emit("change", {
+  emit('change', {
     id: parseInt(props.recordId, 10),
     type: 1,
     credentials: {

@@ -9,13 +9,11 @@
       data-bs-backdrop="false"
       aria-hidden="true"
     >
-      <div
-        class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable"
-      >
+      <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div v-if="pollResult" class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">
-              {{ t("view.polls.modal.result") }}
+              {{ t('view.polls.modal.result') }}
             </h5>
             <button
               type="button"
@@ -29,16 +27,14 @@
               Wichtig: v-if hinzugefügt, um sicherzustellen, dass die Komponente nur 
               gerendert wird, wenn pollResult vorhanden ist
             -->
-            <result-item 
-              v-if="pollResult && pollResult.poll" 
-              :poll-result="pollResult" 
+            <result-item
+              v-if="pollResult && pollResult.poll"
+              :poll-result="pollResult"
               :event-record="event"
               :initial-percentage-type="modalPercentageType"
-              @percentage-type-change="handlePercentageTypeChange" 
+              @percentage-type-change="handlePercentageTypeChange"
             />
-            <div v-else class="alert alert-info">
-              Lade Ergebnisse...
-            </div>
+            <div v-else class="alert alert-info">Lade Ergebnisse...</div>
           </div>
           <div class="modal-footer">
             <button
@@ -48,7 +44,7 @@
               @click="hideModal()"
             >
               <span aria-hidden="true">
-                {{ t("view.polls.modal.close") }}
+                {{ t('view.polls.modal.close') }}
               </span>
             </button>
           </div>
@@ -59,10 +55,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
-import { Modal } from "bootstrap";
-import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
+import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { Modal } from 'bootstrap';
+import ResultItem from '@/modules/organizer/components/events/poll/ResultItem.vue';
 
 const { t } = useI18n();
 
@@ -70,7 +66,7 @@ const modal = ref(null);
 let bootstrapModal = null;
 
 // Eigener State für die Prozentanzeige innerhalb des Modals
-const modalPercentageType = ref("validVotes");
+const modalPercentageType = ref('validVotes');
 
 // Flag, das anzeigt, ob das Modal sichtbar ist
 const isVisible = ref(false);
@@ -91,7 +87,7 @@ window.setTimeout(() => {
 window._resultModalTracking = window._resultModalTracking || {};
 window._resultModalTracking.activeModalId = window._resultModalTracking.activeModalId || null;
 
-const props = defineProps({
+defineProps({
   pollResult: {
     type: Object,
     required: false,
@@ -100,7 +96,7 @@ const props = defineProps({
   event: {
     type: Object,
     required: true,
-    default: () => ({}),  // Fallback-Wert als leeres Objekt
+    default: () => ({}), // Fallback-Wert als leeres Objekt
   },
 });
 
@@ -109,7 +105,7 @@ onMounted(() => {
   try {
     bootstrapModal = new Modal(modal.value, {
       backdrop: 'static',
-      keyboard: false
+      keyboard: false,
     });
   } catch (e) {
     console.error('[DEBUG:RESULT] Fehler bei Bootstrap-Modal-Initialisierung im onMounted:', e);
@@ -146,29 +142,29 @@ function showModal() {
     // console.log('[DEBUG:RESULT] Modal ist bereits sichtbar, abbruch');
     return;
   }
-  
+
   // KRITISCHE SICHERHEITSPRÜFUNG: Wenn ein neuer Poll aktiv ist, das Modal NICHT öffnen
   if (window._newPollActive) {
     // console.log('[DEBUG:RESULT] Neuer Poll ist aktiv, Modal wird nicht geöffnet');
     return;
   }
-  
+
   // Debouncing-Flag zurücksetzen, um sicherzustellen, dass wir das Modal zeigen können
   recentlyShown.value = false;
   if (recentlyShownTimeout) {
     clearTimeout(recentlyShownTimeout);
     recentlyShownTimeout = null;
   }
-  
+
   // Reset percentage type to default when opening modal
-  modalPercentageType.value = "validVotes";
-  
+  modalPercentageType.value = 'validVotes';
+
   // KRITISCH: Stelle sicher, dass Bootstrap Modal korrekt initialisiert ist
   if (!bootstrapModal && modal.value) {
     try {
       bootstrapModal = new Modal(modal.value, {
         backdrop: 'static',
-        keyboard: false
+        keyboard: false,
       });
     } catch (e) {
       console.error('[DEBUG:RESULT] Fehler bei Bootstrap-Modal-Initialisierung:', e);
@@ -209,13 +205,12 @@ function showModal() {
 }
 
 function hideModal() {
-  
   // Markiere sofort als nicht mehr sichtbar, um Race-Conditions zu vermeiden
   isVisible.value = false;
-  
+
   // Tracking-ID zurücksetzen
   window._resultModalTracking.activeModalId = null;
-  
+
   // Fallback in case bootstrapModal isn't initialized properly
   if (!bootstrapModal && modal.value) {
     try {
@@ -224,16 +219,16 @@ function hideModal() {
       console.error('[DEBUG:VOTING] Fehler bei Bootstrap-Modal-Initialisierung:', e);
     }
   }
-  
+
   // VERSTÄRKTE SCHLIESSEN-METHODE mit mehrfachen Fallbacks
-  
+
   // 1. Versuch: Standard Bootstrap 5 API
   try {
     // Bootstrap-Schließung
     if (bootstrapModal) {
       bootstrapModal.hide();
     }
-    
+
     // Zustand aktualisieren
     recentlyShown.value = false;
     if (recentlyShownTimeout) {
@@ -243,7 +238,7 @@ function hideModal() {
   } catch (e) {
     console.error('[DEBUG:VOTING] Fehler bei Standard-Bootstrap-Schließung:', e);
   }
-  
+
   // 2. Versuch: Native Bootstrap 5 API - zweiter Anlauf mit direkter Modal-Instanz
   try {
     if (modal.value && typeof Modal !== 'undefined' && typeof Modal.getInstance === 'function') {
@@ -255,7 +250,7 @@ function hideModal() {
   } catch (e) {
     console.error('[DEBUG:VOTING] Fehler bei nativem Bootstrap-Modal-Zugriff:', e);
   }
-  
+
   // 3. Versuch: Direkter DOM-Zugriff als letzter Fallback
   try {
     if (modal.value) {
@@ -263,35 +258,35 @@ function hideModal() {
       modal.value.classList.remove('show');
       modal.value.style.display = 'none';
       modal.value.setAttribute('aria-hidden', 'true');
-      
+
       // Backdrop entfernen
       const backdrops = document.getElementsByClassName('modal-backdrop');
       if (backdrops.length > 0) {
         // Array.from um eine echte Array-Kopie zu erstellen, da die HTMLCollection sich verändert wenn Elemente entfernt werden
-        Array.from(backdrops).forEach(backdrop => {
+        Array.from(backdrops).forEach((backdrop) => {
           if (backdrop && backdrop.parentNode) {
             backdrop.parentNode.removeChild(backdrop);
           }
         });
       }
-      
+
       // Modal-Open-Klasse vom Body entfernen
       document.body.classList.remove('modal-open');
-      
+
       // Zusätzlich overflow: hidden vom Body entfernen
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
-      
+
       // Absolut sicherstellen, dass keine anderen Styles die Interaktion blockieren
       document.body.style.pointerEvents = '';
-      
+
       // Eventuelle fixierte Position zurücksetzen
       document.body.style.position = '';
     }
-    
+
     // Zusätzlich alle Overlays entfernen, die möglicherweise übriggeblieben sind
     const overlays = document.querySelectorAll('.modal-backdrop, [data-bs-backdrop="static"]');
-    overlays.forEach(overlay => {
+    overlays.forEach((overlay) => {
       if (overlay && overlay.parentNode) {
         overlay.parentNode.removeChild(overlay);
       }
@@ -312,7 +307,7 @@ function updatePollResult(newPollResult) {
   // und die Komponente neu rendern
   if (newPollResult) {
     // Erzwinge ein Re-render der Komponente
-    modalPercentageType.value = "validVotes"; // Reset zur Sicherheit
+    modalPercentageType.value = 'validVotes'; // Reset zur Sicherheit
   }
 }
 
@@ -320,7 +315,7 @@ defineExpose({
   showModal,
   hideModal,
   isVisible,
-  updatePollResult
+  updatePollResult,
 });
 </script>
 

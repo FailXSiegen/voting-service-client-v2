@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerEventsEdit')">
     <template #title>
-      {{ $t("navigation.views.organizerEventsEdit") }} -
+      {{ $t('navigation.views.organizerEventsEdit') }} -
       <span v-if="event?.title">{{ event?.title }}</span>
       <router-link
         :to="{ name: RouteOrganizerEvents }"
@@ -9,7 +9,7 @@
       >
         <i class="bi-arrow-left bi--1xl me-1" />
         <span class="align-middle">
-          {{ $t("navigation.backToEvents") }}
+          {{ $t('navigation.backToEvents') }}
         </span>
       </router-link>
     </template>
@@ -23,9 +23,9 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
-import EventForm from "@/modules/organizer/components/events/EventForm.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventForm from '@/modules/organizer/components/events/EventForm.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -33,18 +33,18 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
-} from "@/router/routes";
-import { reactive, ref } from "vue";
-import { handleError } from "@/core/error/error-handler";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { NetworkError } from "@/core/error/NetworkError";
-import { QUERY_ZOOM_MEETING } from "@/modules/organizer/graphql/queries/zoom-meeting";
-import { UPDATE_EVENT } from "@/modules/organizer/graphql/mutation/update-event";
+} from '@/router/routes';
+import { reactive, ref } from 'vue';
+import { handleError } from '@/core/error/error-handler';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { NetworkError } from '@/core/error/NetworkError';
+import { QUERY_ZOOM_MEETING } from '@/modules/organizer/graphql/queries/zoom-meeting';
+import { UPDATE_EVENT } from '@/modules/organizer/graphql/mutation/update-event';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -63,11 +63,11 @@ const routes = getRoutesByName([
 ]);
 
 const prefillData = reactive({
-  title: "",
-  slug: "",
-  description: "",
-  styles: "",
-  logo: "",
+  title: '',
+  slug: '',
+  description: '',
+  styles: '',
+  logo: '',
   scheduledDatetime: Math.floor(Date.now() / 1000),
   lobbyOpen: false,
   allowMagicLink: false,
@@ -75,16 +75,16 @@ const prefillData = reactive({
   active: false,
   orgnaizerId: coreStore.user?.id ?? 0,
   multivoteType: 1,
-  videoConferenceConfig: "{}",
+  videoConferenceConfig: '{}',
   videoConference: null,
-  readOnlyUsername: false
+  readOnlyUsername: false,
 });
 
 // Try to fetch event by id and organizer id.
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // check if the event could be fetched successfully. redirect to list if not.
@@ -97,11 +97,11 @@ eventQuery.onResult(({ data }) => {
   event.value = data?.event ?? null;
 
   // Prefill form data with fetched event data.
-  prefillData.title = event.value?.title ?? "";
-  prefillData.slug = event.value?.slug ?? "";
-  prefillData.description = event.value?.description ?? "";
-  prefillData.styles = event.value?.styles ?? "";
-  prefillData.logo = event.value?.logo ?? "";
+  prefillData.title = event.value?.title ?? '';
+  prefillData.slug = event.value?.slug ?? '';
+  prefillData.description = event.value?.description ?? '';
+  prefillData.styles = event.value?.styles ?? '';
+  prefillData.logo = event.value?.logo ?? '';
   prefillData.scheduledDatetime = event.value?.scheduledDatetime ?? 0;
   prefillData.lobbyOpen = event.value?.lobbyOpen ?? false;
   prefillData.active = event.value?.active ?? false;
@@ -115,12 +115,12 @@ eventQuery.onResult(({ data }) => {
   // WICHTIGER FIX: Defensive Programmierung für JSON.parse und null-safety
   let resolvedVideoConferenceConfig;
   try {
-    resolvedVideoConferenceConfig = JSON.parse(event.value?.videoConferenceConfig || "{}");
+    resolvedVideoConferenceConfig = JSON.parse(event.value?.videoConferenceConfig || '{}');
   } catch (error) {
-    console.warn("Failed to parse videoConferenceConfig:", error);
+    console.warn('Failed to parse videoConferenceConfig:', error);
     resolvedVideoConferenceConfig = {};
   }
-  
+
   if (!resolvedVideoConferenceConfig || !resolvedVideoConferenceConfig.id) {
     // No config exist.
     loaded.value = true;
@@ -131,12 +131,11 @@ eventQuery.onResult(({ data }) => {
   const queryZoomMeeting = useQuery(
     QUERY_ZOOM_MEETING,
     { id: resolvedVideoConferenceConfig.id },
-    { fetchPolicy: "no-cache" },
+    { fetchPolicy: 'no-cache' }
   );
   queryZoomMeeting.onResult(({ data }) => {
     prefillData.videoConference = data.zoomMeeting ?? null;
-    prefillData.videoConferenceConfig =
-      event.value?.videoConferenceConfig ?? "{}";
+    prefillData.videoConferenceConfig = event.value?.videoConferenceConfig ?? '{}';
     loaded.value = true;
   });
 });
@@ -180,7 +179,7 @@ async function onSubmit({ formData, action }) {
     await router.push({ name: RouteOrganizerEvents });
   }
   // Show success message.
-  toast(t("success.organizer.events.updatedSuccessfully"), { type: "success" });
+  toast(t('success.organizer.events.updatedSuccessfully'), { type: 'success' });
 }
 </script>
 

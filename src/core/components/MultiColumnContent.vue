@@ -1,8 +1,8 @@
 <template>
   <div class="multi-column-content">
     <div class="row">
-      <div 
-        v-for="(column, index) in columns" 
+      <div
+        v-for="(column, index) in columns"
         :key="index"
         :class="getColumnClass()"
         class="mb-3 mb-md-0"
@@ -16,7 +16,7 @@
 <script>
 export default {
   name: 'MultiColumnContent',
-  
+
   props: {
     /**
      * The number of columns to display (2 or 3)
@@ -24,18 +24,18 @@ export default {
     columnCount: {
       type: Number,
       required: true,
-      validator: val => [2, 3, 4].includes(val)
+      validator: (val) => [2, 3, 4].includes(val),
     },
-    
+
     /**
      * The content for each column
      */
     columnsContent: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
   },
-  
+
   computed: {
     /**
      * Returns the column content data, ensuring we have the right number of columns
@@ -43,7 +43,7 @@ export default {
     columns() {
       // Make a copy of the columns content
       let columns = [...this.columnsContent];
-      
+
       // Ensure we have the correct number of columns
       if (columns.length < this.columnCount) {
         // Add empty columns if needed
@@ -54,11 +54,11 @@ export default {
         // Truncate if we have too many columns
         columns = columns.slice(0, this.columnCount);
       }
-      
+
       return columns;
-    }
+    },
   },
-  
+
   methods: {
     /**
      * Calculate the Bootstrap column class based on column count
@@ -73,8 +73,8 @@ export default {
         default:
           return 'col-md-6';
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

@@ -6,7 +6,7 @@
   >
     <i class="bi-plus bi--2xl align-middle" />
     <span class="align-middle">
-      {{ $t("view.polls.headlines.createTitle") }}
+      {{ $t('view.polls.headlines.createTitle') }}
     </span>
   </router-link>
   <AlertBox
@@ -27,23 +27,23 @@
 </template>
 
 <script setup>
-import AlertBox from "@/core/components/AlertBox.vue";
-import InactivePollListing from "@/modules/organizer/components/events/poll/InactivePollListing.vue";
-import { ref, computed } from "vue";
+import AlertBox from '@/core/components/AlertBox.vue';
+import InactivePollListing from '@/modules/organizer/components/events/poll/InactivePollListing.vue';
+import { ref, computed } from 'vue';
 import {
   RouteOrganizerPollsCopy,
   RouteOrganizerPollsEdit,
   RouteOrganizerPollsNew,
-} from "@/router/routes";
-import { POLLS } from "@/modules/eventUser/graphql/queries/polls";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { useRoute, useRouter } from "vue-router";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import t from "@/core/util/l18n";
-import { REMOVE_POLL } from "@/modules/organizer/graphql/mutation/remove-poll";
-import { toast } from "vue3-toastify";
-import { getCurrentUnixTimeStamp } from "@/core/util/time-stamp";
+} from '@/router/routes';
+import { POLLS } from '@/modules/eventUser/graphql/queries/polls';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { useRoute, useRouter } from 'vue-router';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
+import t from '@/core/util/l18n';
+import { REMOVE_POLL } from '@/modules/organizer/graphql/mutation/remove-poll';
+import { toast } from 'vue3-toastify';
+import { getCurrentUnixTimeStamp } from '@/core/util/time-stamp';
 
 const props = defineProps({
   event: {
@@ -59,14 +59,14 @@ const eventIsRunning = computed(
   () =>
     (props.event?.active === true || props.event?.active === 1) &&
     props.event?.scheduledDatetime > 0 &&
-    props.event?.scheduledDatetime <= getCurrentUnixTimeStamp(),
+    props.event?.scheduledDatetime <= getCurrentUnixTimeStamp()
 );
 
 // Fetch polls with no results.
 const pollsQuery = useQuery(
   POLLS,
   { eventId: props.event.id },
-  { fetchPolicy: "cache-and-network" },
+  { fetchPolicy: 'cache-and-network' }
 );
 pollsQuery.onResult(({ data }) => {
   polls.value = data?.polls ? data?.polls : [];
@@ -82,7 +82,7 @@ function onEditPoll(pollId) {
 
 function onRemovePoll(pollId) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.polls.listing.deleteConfirm"),
+    message: t('view.polls.listing.deleteConfirm'),
   });
   dialog.onConfirm(async () => {
     const removePollMutation = useMutation(REMOVE_POLL, {
@@ -92,7 +92,7 @@ function onRemovePoll(pollId) {
     // Refresh queries.
     await pollsQuery.refetch();
     // Show success message.
-    toast(t("success.organizer.poll.deletedSuccessfully"), { type: "success" });
+    toast(t('success.organizer.poll.deletedSuccessfully'), { type: 'success' });
   });
 
   // Show confirm dialog.

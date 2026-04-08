@@ -1,0 +1,10 @@
+_obsolete
+node_modules
+dist
+build
+.git
+.idea
+*.min.js
+*.min.css
+package-lock.json
+public/vendor

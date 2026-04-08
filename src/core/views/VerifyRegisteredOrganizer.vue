@@ -4,20 +4,20 @@
       <div class="align-items-center justify-content-center">
         <div class="verify-registered-organizer-wrapper text-center m-auto">
           <h1 class="register-organizer-headline">
-            {{ $t("view.register.headline") }}
+            {{ $t('view.register.headline') }}
           </h1>
           <AlertBox v-if="requestFinished && !requestFailed">
-            <b>{{ $t("view.register.verify.success") }}</b
-            ><br/>
-            {{ $t("view.register.verify.successDescription") }}
+            <b>{{ $t('view.register.verify.success') }}</b
+            ><br />
+            {{ $t('view.register.verify.successDescription') }}
           </AlertBox>
           <AlertBox v-else-if="requestFailed" type="danger">
-            <b>{{ $t("view.register.verify.failed") }}</b>
+            <b>{{ $t('view.register.verify.failed') }}</b>
           </AlertBox>
           <AlertBox v-else type="info">
-            <b>{{ $t("view.register.verify.processing") }}</b
-            ><br/>
-            {{ $t("view.register.verify.processingDescription") }}
+            <b>{{ $t('view.register.verify.processing') }}</b
+            ><br />
+            {{ $t('view.register.verify.processingDescription') }}
           </AlertBox>
         </div>
       </div>
@@ -26,18 +26,18 @@
 </template>
 
 <script setup>
-import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import {validateHash} from "@/modules/organizer/requests/validate-hash";
-import {onMounted, ref} from "vue";
-import {handleError} from "@/core/error/error-handler";
-import {useRoute} from "vue-router";
-import AlertBox from "@/core/components/AlertBox.vue";
+import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import { validateHash } from '@/modules/organizer/requests/validate-hash';
+import { onMounted, ref } from 'vue';
+import { handleError } from '@/core/error/error-handler';
+import { useRoute } from 'vue-router';
+import AlertBox from '@/core/components/AlertBox.vue';
 
 // Access the hash of the url.
 const route = useRoute();
 const hash = route.params?.hash ?? null;
 if (!hash) {
-  throw new Error("Missing required parameter hash!");
+  throw new Error('Missing required parameter hash!');
 }
 
 const requestFinished = ref(false);

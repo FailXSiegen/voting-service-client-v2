@@ -15,20 +15,16 @@
   <div v-if="helpText" class="form-text text-muted">
     <span v-html="helpText" />
   </div>
-  <span
-    v-for="error in errors"
-    :key="error.uid"
-    class="form-field-error text-danger"
-  >
+  <span v-for="error in errors" :key="error.uid" class="form-field-error text-danger">
     <!--    {{ $t('error.formValidation.' + error.$validator) }}<br>-->
   </span>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import VueDatePicker from "@vuepic/vue-datepicker";
+import { ref } from 'vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(['change']);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -61,10 +57,8 @@ const props = defineProps({
 const inputValue = ref(props.value > 0 ? new Date(props.value * 1000) : null);
 
 function onChange() {
-  emit("change", {
-    value: inputValue.value
-      ? Math.floor(inputValue.value.getTime() / 1000)
-      : null,
+  emit('change', {
+    value: inputValue.value ? Math.floor(inputValue.value.getTime() / 1000) : null,
   });
 }
 

@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const START_POLL = gql`
   mutation startPoll($pollId: ID!) {

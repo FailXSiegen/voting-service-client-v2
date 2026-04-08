@@ -1,7 +1,13 @@
 <template>
   <form id="poll-form" class="needs-validation" @submit.prevent="onSubmit">
     <!-- Combined poll hints -->
-    <div v-if="(pollHints && pollHints.length > 0) || (transferredVoteHints && transferredVoteHints.length > 0)" class="alert alert-info mb-3">
+    <div
+      v-if="
+        (pollHints && pollHints.length > 0) ||
+        (transferredVoteHints && transferredVoteHints.length > 0)
+      "
+      class="alert alert-info mb-3"
+    >
       <div class="fw-bold mb-2">
         <i class="bi bi-info-circle me-2"></i>
         Stimmenhinweise:
@@ -23,9 +29,7 @@
         >
           {{ hint.voteAmount }} Stimme(n)
         </button>
-        <span v-else class="fw-bold">
-          {{ hint.voteAmount }} Stimme(n)
-        </span>
+        <span v-else class="fw-bold"> {{ hint.voteAmount }} Stimme(n) </span>
         von {{ hint.fromUserName }} erhalten
         <small class="text-muted ms-2">{{ formatTimestamp(hint.timestamp) }}</small>
         <span v-if="hint.voteAmount > remainingVotes" class="text-muted small">
@@ -39,7 +43,8 @@
         :key="hint.fromUserName + '-transferred-' + hint.timestamp"
         class="mb-1"
       >
-        <span class="fw-bold">{{ hint.voteAmount }} Stimme(n)</span> an {{ hint.fromUserName }} übertragen
+        <span class="fw-bold">{{ hint.voteAmount }} Stimme(n)</span> an
+        {{ hint.fromUserName }} übertragen
         <small class="text-muted ms-2">{{ formatTimestamp(hint.timestamp) }}</small>
       </div>
     </div>
@@ -50,7 +55,8 @@
         <label class="form-label fw-bold">
           {{ $t('view.polls.modal.voteAllocation', { voteAmount: remainingVotes }) }}
           <span class="text-muted ms-2 small">
-            ({{ Math.round((remainingVotes / props.eventUser.voteAmount) * 100) }}% {{ $t('view.polls.modal.ofTotalVotes') }})
+            ({{ Math.round((remainingVotes / props.eventUser.voteAmount) * 100) }}%
+            {{ $t('view.polls.modal.ofTotalVotes') }})
           </span>
         </label>
 
@@ -58,13 +64,19 @@
         <div class="progress mb-2">
           <div
             class="progress-bar"
-            :class="{'bg-success': remainingVotesPercentage > 50, 'bg-warning': remainingVotesPercentage <= 50 && remainingVotesPercentage > 25, 'bg-danger': remainingVotesPercentage <= 25}"
+            :class="{
+              'bg-success': remainingVotesPercentage > 50,
+              'bg-warning': remainingVotesPercentage <= 50 && remainingVotesPercentage > 25,
+              'bg-danger': remainingVotesPercentage <= 25,
+            }"
             role="progressbar"
             :style="{ width: remainingVotesPercentage + '%' }"
             :aria-valuenow="remainingVotesPercentage"
             aria-valuemin="0"
-            aria-valuemax="100">
-            {{ remainingVotes }} / {{ props.eventUser.voteAmount }} {{ $t('view.polls.modal.votes') }}
+            aria-valuemax="100"
+          >
+            {{ remainingVotes }} / {{ props.eventUser.voteAmount }}
+            {{ $t('view.polls.modal.votes') }}
           </div>
         </div>
 
@@ -73,7 +85,13 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+            :disabled="
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+              )
+            "
             @click="setVotePercentage(25)"
           >
             25% ({{ Math.round(remainingVotes * 0.25) }})
@@ -81,7 +99,13 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+            :disabled="
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+              )
+            "
             @click="setVotePercentage(50)"
           >
             50% ({{ Math.round(remainingVotes * 0.5) }})
@@ -89,7 +113,13 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+            :disabled="
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+              )
+            "
             @click="setVotePercentage(75)"
           >
             75% ({{ Math.round(remainingVotes * 0.75) }})
@@ -97,13 +127,19 @@
           <button
             type="button"
             class="btn btn-outline-primary"
-            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+            :disabled="
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+              )
+            "
             @click="setVotePercentage(100)"
           >
             100% ({{ remainingVotes }})
           </button>
         </div>
-        
+
         <!-- Vote slider and input -->
         <div class="row mb-2">
           <div class="col-12 col-lg-8 d-flex align-items-center">
@@ -113,9 +149,15 @@
               class="form-range flex-grow-1 me-2"
               min="1"
               :max="remainingVotes"
-              :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+              :disabled="
+                isSubmitting &&
+                !(
+                  votingProcess.usedVotesCount?.value > 0 &&
+                  votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+                )
+              "
               @input="onSliderChange"
-            >
+            />
           </div>
           <!-- Numerical input -->
           <div class="col-12 col-lg-4">
@@ -126,9 +168,15 @@
                 class="form-control"
                 min="1"
                 :max="remainingVotes"
-                :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+                :disabled="
+                  isSubmitting &&
+                  !(
+                    votingProcess.usedVotesCount?.value > 0 &&
+                    votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+                  )
+                "
                 @input="onNumberInputChange"
-              >
+              />
               <span class="input-group-text">{{ $t('view.polls.modal.votes') }}</span>
             </div>
           </div>
@@ -141,11 +189,13 @@
         <!-- Spezielle UI für wenige verbleibende Stimmen -->
         <div v-if="remainingVotesPercentage <= 15" class="alert alert-warning mt-2 mb-2 p-2">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {{ $t('view.polls.modal.fewVotesRemaining', {
-            remaining: remainingVotes,
-            total: props.eventUser.voteAmount,
-            percentage: remainingVotesPercentage
-          }) }}
+          {{
+            $t('view.polls.modal.fewVotesRemaining', {
+              remaining: remainingVotes,
+              total: props.eventUser.voteAmount,
+              percentage: remainingVotesPercentage,
+            })
+          }}
         </div>
 
         <!-- Checkbox for "Use all available votes" - nur anzeigen wenn mehr als 1 Stimme verfügbar -->
@@ -155,7 +205,13 @@
             :label="$t('view.polls.modal.useAllVotes')"
             :help-text="$t('view.polls.modal.canSubmitAnswerForEachVoteHelptext')"
             :checked="formData.useAllAvailableVotes"
-            :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)"
+            :disabled="
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+              )
+            "
             @update:checked="onCheckboxChange"
           />
         </div>
@@ -164,7 +220,16 @@
     <hr v-if="hasMultipleVotes" />
     <div class="d-flex justify-content-center answer-wrapper">
       <!-- Can only select one. -->
-      <fieldset v-if="voteType === VOTE_TYPE_SINGLE" :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)">
+      <fieldset
+        v-if="voteType === VOTE_TYPE_SINGLE"
+        :disabled="
+          isSubmitting &&
+          !(
+            votingProcess.usedVotesCount?.value > 0 &&
+            votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+          )
+        "
+      >
         <RadioInput
           id="poll-answer"
           :items="possibleAnswers"
@@ -186,7 +251,14 @@
       <!-- Can select multiple or all. -->
       <fieldset
         v-else-if="voteType === VOTE_TYPE_MULTIPLE_ALL"
-        :disabled="formData.abstain || (isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount))"
+        :disabled="
+          formData.abstain ||
+          (isSubmitting &&
+            !(
+              votingProcess.usedVotesCount?.value > 0 &&
+              votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+            ))
+        "
         :class="{ 'opacity-50': formData.abstain }"
       >
         <CheckboxInputGroup
@@ -199,10 +271,12 @@
             (value) => {
               // Nur aktualisieren, wenn die Arrays unterschiedlich sind
               // Dies verhindert unnötige reaktive Aktualisierungen
-              if (!Array.isArray(formData.multipleAnswers) || 
-                  !Array.isArray(value) ||
-                  formData.multipleAnswers.length !== value.length ||
-                  formData.multipleAnswers.some((v, i) => v !== value[i])) {
+              if (
+                !Array.isArray(formData.multipleAnswers) ||
+                !Array.isArray(value) ||
+                formData.multipleAnswers.length !== value.length ||
+                formData.multipleAnswers.some((v, i) => v !== value[i])
+              ) {
                 formData.multipleAnswers = value;
               }
             }
@@ -213,7 +287,15 @@
     <!-- Abstain. -->
     <template v-if="showAbstain">
       <hr />
-      <fieldset :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)">
+      <fieldset
+        :disabled="
+          isSubmitting &&
+          !(
+            votingProcess.usedVotesCount?.value > 0 &&
+            votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+          )
+        "
+      >
         <CheckboxInput
           id="allow-abstain"
           :label="$t('view.polls.modal.abstain')"
@@ -228,30 +310,69 @@
     <div class="overlay-container position-relative">
       <!-- VERBESSERTE SPERRUNG mit Bedingung, die Split-Voting ermöglicht -->
       <div
-v-if="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
-           class="position-absolute w-100 h-100 top-0 start-0 z-1" 
-           style="background-color: rgba(255,255,255,0.95); cursor: not-allowed;">
+        v-if="
+          isSubmitting &&
+          !(
+            votingProcess.usedVotesCount?.value > 0 &&
+            votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+          )
+        "
+        class="position-absolute w-100 h-100 top-0 start-0 z-1"
+        style="background-color: rgba(255, 255, 255, 0.95); cursor: not-allowed"
+      >
         <div class="position-absolute top-50 start-50 translate-middle text-center">
           <span class="spinner-border spinner-border-lg text-primary" role="status"></span>
-          <div class="mt-2 fw-bold text-dark">{{ $t("view.polls.modal.submitting") }}...</div>
+          <div class="mt-2 fw-bold text-dark">{{ $t('view.polls.modal.submitting') }}...</div>
           <div class="mt-2 small">Bitte warten Sie, Ihre Stimmen werden gezählt</div>
-          
+
           <!-- Fortschrittsanzeige für viele Stimmen -->
           <div v-if="votingProcess.usedVotesCount?.value > 0" class="mt-2">
-            Fortschritt: {{ votingProcess.usedVotesCount?.value }} von {{ props.eventUser.voteAmount }} Stimmen
+            Fortschritt: {{ votingProcess.usedVotesCount?.value }} von
+            {{ props.eventUser.voteAmount }} Stimmen
           </div>
         </div>
       </div>
-      
+
       <!-- KRITISCH: Verbesserte Sperrungsbedingung für den Button, die Split-Voting ermöglicht -->
       <button
-type="submit" class="btn btn-primary mx-auto d-block h1" 
-              :disabled="isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount)" 
-              :class="{ 'opacity-50': isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount) }">
-        <span v-if="!(isSubmitting && !(votingProcess.usedVotesCount?.value > 0 && votingProcess.usedVotesCount?.value < props.eventUser.voteAmount))" class="h3">{{ $t("view.polls.modal.submitPoll") }}</span>
+        type="submit"
+        class="btn btn-primary mx-auto d-block h1"
+        :disabled="
+          isSubmitting &&
+          !(
+            votingProcess.usedVotesCount?.value > 0 &&
+            votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+          )
+        "
+        :class="{
+          'opacity-50':
+            isSubmitting &&
+            !(
+              votingProcess.usedVotesCount?.value > 0 &&
+              votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+            ),
+        }"
+      >
+        <span
+          v-if="
+            !(
+              isSubmitting &&
+              !(
+                votingProcess.usedVotesCount?.value > 0 &&
+                votingProcess.usedVotesCount?.value < props.eventUser.voteAmount
+              )
+            )
+          "
+          class="h3"
+          >{{ $t('view.polls.modal.submitPoll') }}</span
+        >
         <span v-else class="d-flex align-items-center justify-content-center">
-          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-          <span class="h3">{{ $t("view.polls.modal.submitting") }}</span>
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          <span class="h3">{{ $t('view.polls.modal.submitting') }}</span>
         </span>
       </button>
     </div>
@@ -259,26 +380,26 @@ type="submit" class="btn btn-primary mx-auto d-block h1"
 </template>
 
 <script setup>
-import { computed, reactive, watch, onMounted, onUnmounted, ref } from "vue";
-import { detectBrowser, isLocalStorageAvailable } from "@/core/utils/browser-compatibility";
-import { and, or, required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import RadioInput from "@/core/components/form/RadioInput.vue";
-import CheckboxInputGroup from "@/core/components/form/CheckboxInputGroup.vue";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import { useVotingProcess } from "@/modules/eventUser/composable/voting-process";
+import { computed, reactive, watch, onMounted, onUnmounted, ref } from 'vue';
+import { detectBrowser, isLocalStorageAvailable } from '@/core/utils/browser-compatibility';
+import { and, or, required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import RadioInput from '@/core/components/form/RadioInput.vue';
+import CheckboxInputGroup from '@/core/components/form/CheckboxInputGroup.vue';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import { useVotingProcess } from '@/modules/eventUser/composable/voting-process';
 import {
   minLength,
   objectPropertyIsEqual,
   objectPropertyIsGreaterThan,
   maxLength,
   objectPropertyIsNotEqual,
-} from "@/core/form/validation/same-as";
+} from '@/core/form/validation/same-as';
 
 const VOTE_TYPE_SINGLE = 1;
 const VOTE_TYPE_MULTIPLE_ALL = 2;
 
-const emit = defineEmits(["submit"]);
+const emit = defineEmits(['submit']);
 const props = defineProps({
   poll: {
     type: Object,
@@ -318,7 +439,7 @@ const pollHints = computed(() => {
     const hintsArray = Array.isArray(hints) ? hints : [];
 
     // Filtere nur 'received' Hints
-    return hintsArray.filter(hint => hint.type === 'received' || !hint.type);
+    return hintsArray.filter((hint) => hint.type === 'received' || !hint.type);
   } catch (e) {
     console.warn('Konnte pollHints nicht parsen:', e);
     return [];
@@ -336,7 +457,7 @@ const transferredVoteHints = computed(() => {
     const hintsArray = Array.isArray(hints) ? hints : [];
 
     // Filtere nur 'transferred' Hints
-    return hintsArray.filter(hint => hint.type === 'transferred');
+    return hintsArray.filter((hint) => hint.type === 'transferred');
   } catch (e) {
     console.warn('Konnte pollHints nicht parsen:', e);
     return [];
@@ -350,14 +471,10 @@ const voteType = computed(() => {
   if (props.poll.maxVotes > 1 || props.poll.maxVotes === 0) {
     return VOTE_TYPE_MULTIPLE_ALL;
   }
-  throw Error("Invalid voting setup!");
+  throw Error('Invalid voting setup!');
 });
 
-const showAbstain = computed(
-  () =>
-    props.poll.allowAbstain &&
-    props.poll.pollAnswer === "custom"
-);
+const showAbstain = computed(() => props.poll.allowAbstain && props.poll.pollAnswer === 'custom');
 
 const possibleAnswers = computed(() => {
   const result = [];
@@ -378,27 +495,35 @@ const remainingVotes = computed(() => {
     // console.log("[DEBUG:VOTING] remainingVotes: Verwende komplette voteAmount, da neuer Poll aktiv");
     return props.eventUser.voteAmount;
   }
-  
+
   // KRITISCH: Wir brauchen eine zuverlässige, konsistente Quelle für used votes
   // Egal ob aus lokalem votingProcess oder globalem Modul
   let usedVotes = 0;
-  
+
   // Zuerst prüfen wir alle möglichen Quellen und verwenden den HÖCHSTEN Wert
   // Dies stellt sicher, dass wir niemals Stimmen "verlieren"
-  if (votingProcess && votingProcess.usedVotesCount && votingProcess.usedVotesCount.value !== undefined) {
+  if (
+    votingProcess &&
+    votingProcess.usedVotesCount &&
+    votingProcess.usedVotesCount.value !== undefined
+  ) {
     usedVotes = Math.max(usedVotes, votingProcess.usedVotesCount.value || 0);
   }
-  
-  if (window && window.votingProcessModule && window.votingProcessModule.usedVotesCount !== undefined) {
+
+  if (
+    window &&
+    window.votingProcessModule &&
+    window.votingProcessModule.usedVotesCount !== undefined
+  ) {
     usedVotes = Math.max(usedVotes, window.votingProcessModule.usedVotesCount || 0);
   }
-  
+
   // Zuletzt die voteCounter-Berechnung als zusätzliche Quelle (falls höher)
-  const voteCounterBasedUsed = (props.voteCounter > 1) ? (props.voteCounter - 1) : 0;
+  const voteCounterBasedUsed = props.voteCounter > 1 ? props.voteCounter - 1 : 0;
   usedVotes = Math.max(usedVotes, voteCounterBasedUsed);
-  
+
   // Jetzt zur Sicherheit in beide andere Quellen zurückspeichern für Konsistenz
-  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+  /* eslint-disable vue/no-side-effects-in-computed-properties */
   if (votingProcess && votingProcess.usedVotesCount) {
     votingProcess.usedVotesCount.value = usedVotes;
   }
@@ -406,9 +531,10 @@ const remainingVotes = computed(() => {
   if (window && window.votingProcessModule) {
     window.votingProcessModule.usedVotesCount = usedVotes;
   }
-  
+  /* eslint-enable vue/no-side-effects-in-computed-properties */
+
   const total = props.eventUser.voteAmount;
-  
+
   // KRITISCH: Wenn total und usedVotes gleich sind, können keine Stimmen mehr abgegeben werden
   // In diesem Fall können wir direkt 0 zurückgeben, um unerwünschtes Verhalten zu vermeiden
   if (total <= usedVotes) {
@@ -422,15 +548,15 @@ const remainingVotes = computed(() => {
 
         // Alle Stimmen aufgebraucht = 100% verwendet
         formData.useAllAvailableVotes = true;
-        
+
         // console.log("[DEBUG:VOTING] Keine Stimmen mehr übrig: votesToUse auf 0 gesetzt");
       }, 0);
     }
-    
+
     // console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, keine Stimmen mehr übrig`);
     return 0;
   }
-  
+
   // console.log(`[DEBUG:VOTING] remainingVotes: Endgültiger usedVotes=${usedVotes}, verbleibend=${total - usedVotes}`);
   return total - usedVotes;
 });
@@ -439,14 +565,15 @@ const remainingVotes = computed(() => {
 // und Fallback für Safari und problematische Browser
 const hasMultipleVotes = computed(() => {
   // Standard-Berechnung
-  const standardCheck = parseInt(props.eventUser.voteAmount || 0, 10) > 1 && 
-                        parseInt(props.event.multivoteType || 0, 10) === 1;
-  
+  const standardCheck =
+    parseInt(props.eventUser.voteAmount || 0, 10) > 1 &&
+    parseInt(props.event.multivoteType || 0, 10) === 1;
+
   // Safari-Kompatibilitätsmodus, falls aktiviert oder Browser-Probleme erkannt wurden
   if (safariCompatibilityMode.value || !storageFunctional.value) {
-    return standardCheck || (parseInt(props.eventUser.voteAmount || 0, 10) > 1);
+    return standardCheck || parseInt(props.eventUser.voteAmount || 0, 10) > 1;
   }
-  
+
   return standardCheck;
 });
 
@@ -469,61 +596,69 @@ let isUpdatingProgrammatically = false;
 
 // KRITISCH: Überwache explizit die Poll-ID, um das Formular zurückzusetzen
 // wenn zu einer neuen Abstimmung gewechselt wird
-watch(() => props.poll?.id, (newPollId, oldPollId) => {
-  if (newPollId && oldPollId && newPollId !== oldPollId) {
-    // Vermeide rekursive Updates, indem wir die Aktualisierung verzögern
-    setTimeout(() => {
-      // KRITISCH: Alte Poll-Daten aus localStorage löschen
-      try {
-        localStorage.removeItem(`poll_form_data_${oldPollId}`);
-      } catch (e) {
-        console.error('Fehler beim Löschen der localStorage-Daten:', e);
-      }
+watch(
+  () => props.poll?.id,
+  (newPollId, oldPollId) => {
+    if (newPollId && oldPollId && newPollId !== oldPollId) {
+      // Vermeide rekursive Updates, indem wir die Aktualisierung verzögern
+      setTimeout(() => {
+        // KRITISCH: Alte Poll-Daten aus localStorage löschen
+        try {
+          localStorage.removeItem(`poll_form_data_${oldPollId}`);
+        } catch (e) {
+          console.error('Fehler beim Löschen der localStorage-Daten:', e);
+        }
 
-      // Formular vollständig zurücksetzen
-      reset(false);
+        // Formular vollständig zurücksetzen
+        reset(false);
 
-      // Mit maximaler Stimmenzahl neu starten
-      // Nur wenn die Werte nicht bereits gesetzt sind
-      if (!formData.useAllAvailableVotes) {
-        formData.useAllAvailableVotes = true;
-      }
-      
-      if (formData.votesToUse !== remainingVotes.value) {
-        formData.votesToUse = remainingVotes.value;
-      }
-    }, 10); // Eine kleine Verzögerung für bessere Event-Verarbeitung
-  }
-}, { immediate: true });
+        // Mit maximaler Stimmenzahl neu starten
+        // Nur wenn die Werte nicht bereits gesetzt sind
+        if (!formData.useAllAvailableVotes) {
+          formData.useAllAvailableVotes = true;
+        }
+
+        if (formData.votesToUse !== remainingVotes.value) {
+          formData.votesToUse = remainingVotes.value;
+        }
+      }, 10); // Eine kleine Verzögerung für bessere Event-Verarbeitung
+    }
+  },
+  { immediate: true }
+);
 
 // WICHTIG: Beobachte auch remainingVotes, um bei jeder Änderung das Formular auf 100% zu setzen
-watch(() => remainingVotes.value, (newValue, oldValue) => {
-  // Nur reagieren, wenn sich der Wert tatsächlich geändert hat
-  if (newValue === oldValue) return;
+watch(
+  () => remainingVotes.value,
+  (newValue, oldValue) => {
+    // Nur reagieren, wenn sich der Wert tatsächlich geändert hat
+    if (newValue === oldValue) return;
 
-  // BUGFIX: Wenn gerade eine programmatische Änderung läuft, nicht eingreifen
-  // Dies verhindert Race Conditions zwischen den Watchern
-  if (isUpdatingProgrammatically) return;
+    // BUGFIX: Wenn gerade eine programmatische Änderung läuft, nicht eingreifen
+    // Dies verhindert Race Conditions zwischen den Watchern
+    if (isUpdatingProgrammatically) return;
 
-  isUpdatingProgrammatically = true;
-  try {
-    // Rekursion-Schutz: Stelle sicher, dass wir nicht in eine Endlosschleife geraten
-    // indem wir prüfen, ob wir bereits auf dem aktuellen Wert sind
-    if (formData.votesToUse !== newValue) {
-      formData.votesToUse = newValue;
+    isUpdatingProgrammatically = true;
+    try {
+      // Rekursion-Schutz: Stelle sicher, dass wir nicht in eine Endlosschleife geraten
+      // indem wir prüfen, ob wir bereits auf dem aktuellen Wert sind
+      if (formData.votesToUse !== newValue) {
+        formData.votesToUse = newValue;
 
-      // BUGFIX: Checkbox nur setzen, wenn wir auch votesToUse anpassen
-      // und nur wenn die Checkbox nicht bereits manuell vom Benutzer gesetzt wurde
-      // Das verhindert, dass die Checkbox bei 100% bleibt wenn der Slider bewegt wird
-      if (!formData.useAllAvailableVotes) {
-        formData.useAllAvailableVotes = true;
+        // BUGFIX: Checkbox nur setzen, wenn wir auch votesToUse anpassen
+        // und nur wenn die Checkbox nicht bereits manuell vom Benutzer gesetzt wurde
+        // Das verhindert, dass die Checkbox bei 100% bleibt wenn der Slider bewegt wird
+        if (!formData.useAllAvailableVotes) {
+          formData.useAllAvailableVotes = true;
+        }
       }
+    } finally {
+      // Wichtig: Flag zurücksetzen, auch wenn ein Fehler auftritt
+      isUpdatingProgrammatically = false;
     }
-  } finally {
-    // Wichtig: Flag zurücksetzen, auch wenn ein Fehler auftritt
-    isUpdatingProgrammatically = false;
-  }
-}, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
+  },
+  { flush: 'post' }
+); // Verzögere die Ausführung bis nach dem DOM-Update
 
 // KRITISCH: Entfernen der alten bidirektionalen Synchronisierung
 // Diese wird jetzt direkt in der remainingVotes-Berechnung durchgeführt
@@ -532,15 +667,15 @@ watch(() => remainingVotes.value, (newValue, oldValue) => {
 
 onMounted(() => {
   // Um die Anzahl der verwendeten Stimmen korrekt zu initialisieren,
-  // rufen wir einfach remainingVotes.value auf. Dies löst die 
+  // rufen wir einfach remainingVotes.value auf. Dies löst die
   // verbesserte Berechnung aus, die alle Quellen synchronisiert.
-  
+
   // Ein kurzer Timeout ist wichtig, damit alle Komponenten vollständig geladen sind
   setTimeout(() => {
     // Dieser Aufruf synchronisiert alle Quellen und erhält den maximalen usedVotes-Wert
     const actualRemaining = remainingVotes.value;
     // console.log(`[DEBUG:VOTING] onMounted Initialisierung: Verbleibende Stimmen=${actualRemaining}`);
-    
+
     // Immer mit maximaler Stimmenzahl starten
     formData.useAllAvailableVotes = true;
     formData.votesToUse = actualRemaining;
@@ -556,7 +691,7 @@ onMounted(() => {
       storageFunctional.value = false;
     }
   }
-  
+
   // KRITISCHES FIX: Safety Timer einrichten, der isSubmitting nach einer gewissen Zeit zurücksetzt
   // Dies ist besonders wichtig für Split-Voting, wenn die UI hängenbleibt
   const safetyTimer = setInterval(() => {
@@ -564,29 +699,31 @@ onMounted(() => {
     const maxAllowedVotes = props.eventUser?.voteAmount || 0;
     const currentUsedVotes = votingProcess?.usedVotesCount?.value || 0;
     const isSplitVoting = currentUsedVotes > 0 && currentUsedVotes < maxAllowedVotes;
-    
+
     // Wenn wir in Split-Voting sind und isSubmitting ist gesetzt, nach 10 Sekunden zurücksetzen
     if (isSplitVoting && isSubmitting.value) {
       // Prüfe, wann isSubmitting zuletzt gesetzt wurde
       const lastSubmitTime = window._lastSubmittingStartTime || 0;
       const now = Date.now();
-      
+
       // Wenn mehr als 10 Sekunden vergangen sind, isSubmitting zurücksetzen
       if (now - lastSubmitTime > 10000) {
-        console.warn("[DEBUG:VOTING] Safety Timer: isSubmitting wird zurückgesetzt nach 10s in Split-Voting");
+        console.warn(
+          '[DEBUG:VOTING] Safety Timer: isSubmitting wird zurückgesetzt nach 10s in Split-Voting'
+        );
         isSubmitting.value = false;
-        
+
         // Auch die voting-process Flags zurücksetzen
         if (votingProcess) {
           // Nur setzen, wenn sie existieren und true sind
           if (votingProcess.pollFormSubmitting && votingProcess.pollFormSubmitting.value === true) {
             votingProcess.pollFormSubmitting.value = false;
           }
-          
+
           if (votingProcess.isProcessingVotes && votingProcess.isProcessingVotes.value === true) {
             votingProcess.isProcessingVotes.value = false;
           }
-          
+
           // Auch die releaseUILocks-Funktion aufrufen, falls verfügbar
           if (typeof votingProcess.releaseUILocks === 'function') {
             votingProcess.releaseUILocks();
@@ -595,34 +732,34 @@ onMounted(() => {
       }
     }
   }, 5000); // Alle 5 Sekunden prüfen
-  
+
   // Safety Timer bereinigen, wenn Komponente entfernt wird
   onUnmounted(() => {
     clearInterval(safetyTimer);
   });
-  
+
   // Browser-Erkennung für Safari und andere problematische Browser
   const browser = detectBrowser();
-  
+
   // Spezieller Safari-Kompatibilitätsmodus
   if (browser.isSafari) {
     console.info('Safari erkannt - Prüfe localStorage-Funktionalität');
-    
+
     // Prüfe, ob localStorage funktioniert
     storageFunctional.value = isLocalStorageAvailable();
-    
+
     if (!storageFunctional.value) {
       console.warn('localStorage-Probleme erkannt - aktiviere Safari-Kompatibilitätsmodus');
       safariCompatibilityMode.value = true;
     }
   }
-  
+
   // Prüfe explizit, ob voteAmount korrekt funktioniert
   if (typeof props.eventUser.voteAmount === 'undefined' || props.eventUser.voteAmount === null) {
     console.warn('voteAmount ist undefiniert oder null - aktiviere Kompatibilitätsmodus');
     safariCompatibilityMode.value = true;
   }
-  
+
   // Wenn Kompatibilitätsmodus aktiv ist, stelle sicher, dass der Formular-Reset korrekt funktioniert
   if (safariCompatibilityMode.value) {
     // Sicherstellen, dass useAllAvailableVotes und votesToUse korrekt gesetzt sind
@@ -634,10 +771,10 @@ onMounted(() => {
 });
 
 function setVotePercentage(percentage) {
-  const votesToUse = Math.max(1, Math.min(
-    remainingVotes.value,
-    Math.round((remainingVotes.value * percentage) / 100)
-  ));
+  const votesToUse = Math.max(
+    1,
+    Math.min(remainingVotes.value, Math.round((remainingVotes.value * percentage) / 100))
+  );
 
   formData.votesToUse = votesToUse;
 
@@ -651,7 +788,7 @@ function setVotePercentage(percentage) {
 function setVotesToUse(amount) {
   if (amount <= remainingVotes.value && amount > 0) {
     formData.votesToUse = amount;
-    formData.useAllAvailableVotes = (amount === remainingVotes.value);
+    formData.useAllAvailableVotes = amount === remainingVotes.value;
   }
 }
 
@@ -660,7 +797,7 @@ function onSliderChange(event) {
   const newValue = parseInt(event.target.value, 10);
 
   // Synchronisiere die Checkbox basierend auf dem Slider-Wert
-  const shouldUseAllVotes = (newValue === remainingVotes.value);
+  const shouldUseAllVotes = newValue === remainingVotes.value;
 
   // Setze Flag um Watcher-Rekursion zu verhindern
   isUpdatingProgrammatically = true;
@@ -678,7 +815,7 @@ function onNumberInputChange(event) {
   // Nur synchronisieren wenn der Wert gültig ist
   if (!isNaN(newValue) && newValue >= 1 && newValue <= remainingVotes.value) {
     // Synchronisiere die Checkbox basierend auf dem Eingabewert
-    const shouldUseAllVotes = (newValue === remainingVotes.value);
+    const shouldUseAllVotes = newValue === remainingVotes.value;
 
     // Setze Flag um Watcher-Rekursion zu verhindern
     isUpdatingProgrammatically = true;
@@ -724,148 +861,157 @@ function handleAbstainChange(isChecked) {
   // Keine automatische Änderung der Stimmzahl bei Enthaltung
 }
 
-watch(() => formData.votesToUse, (newValue, oldValue) => {
-  // Spezialfall: Wenn das Formular gerade zurückgesetzt wurde, nicht eingreifen
-  if (window._formResetInProgress === true) {
-    // console.log("[DEBUG:VOTING] Watch votesToUse: Reset läuft, überspringe Korrektur");
-    return;
-  }
-
-  // BUGFIX: Wenn gerade eine programmatische Änderung läuft, nicht eingreifen
-  // Dies verhindert Race Conditions zwischen den Watchern
-  if (isUpdatingProgrammatically) return;
-
-  // KRITISCH: Endlosschleifen-Erkennung und Schutz
-  // Erkenne mögliche Endlosschleifen bei Werten nahe 0 oder remainingVotes
-  if (typeof window._votesToUsePreviousValues === 'undefined') {
-    window._votesToUsePreviousValues = [];
-  }
-
-  // Füge aktuellen Wert zum Verlauf hinzu
-  window._votesToUsePreviousValues.push(newValue);
-
-  // Behalte nur die letzten 5 Werte
-  if (window._votesToUsePreviousValues.length > 5) {
-    window._votesToUsePreviousValues.shift();
-  }
-
-  // Prüfe auf oszillierende Werte (mögliche Endlosschleife)
-  const uniqueValues = new Set(window._votesToUsePreviousValues);
-  if (window._votesToUsePreviousValues.length >= 4 && uniqueValues.size <= 2) {
-    console.warn("[DEBUG:VOTING] Mögliche Endlosschleife erkannt in votesToUse watch. Überspringe Update.");
-    return;
-  }
-
-  // Debug-Ausgabe
-  // console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
-
-  // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
-  // wenn sich der Wert tatsächlich geändert hat
-  if (newValue === oldValue) return;
-
-  isUpdatingProgrammatically = true;
-  try {
-    // KRITISCH: Spezialbehandlung für den Fall, dass remainingVotes 0 ist
-    // In diesem Fall akzeptieren wir nur 0 als gültigen Wert für votesToUse
-    if (remainingVotes.value === 0) {
-      if (newValue !== 0) {
-        // console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
-        formData.votesToUse = 0;
-      }
-      // Checkbox auf true setzen, da 0 von 0 = 100%
-      if (!formData.useAllAvailableVotes) {
-        formData.useAllAvailableVotes = true;
-      }
+watch(
+  () => formData.votesToUse,
+  (newValue, oldValue) => {
+    // Spezialfall: Wenn das Formular gerade zurückgesetzt wurde, nicht eingreifen
+    if (window._formResetInProgress === true) {
+      // console.log("[DEBUG:VOTING] Watch votesToUse: Reset läuft, überspringe Korrektur");
       return;
     }
 
-    let correctedValue = newValue;
+    // BUGFIX: Wenn gerade eine programmatische Änderung läuft, nicht eingreifen
+    // Dies verhindert Race Conditions zwischen den Watchern
+    if (isUpdatingProgrammatically) return;
 
-    // Korrigiere den Wert, wenn er außerhalb des gültigen Bereichs liegt
-    if (newValue < 1) {
-      correctedValue = 1;
-    } else if (newValue > remainingVotes.value) {
-      correctedValue = remainingVotes.value;
+    // KRITISCH: Endlosschleifen-Erkennung und Schutz
+    // Erkenne mögliche Endlosschleifen bei Werten nahe 0 oder remainingVotes
+    if (typeof window._votesToUsePreviousValues === 'undefined') {
+      window._votesToUsePreviousValues = [];
     }
 
-    // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
-    if (correctedValue !== newValue) {
-      // console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
-      formData.votesToUse = correctedValue;
+    // Füge aktuellen Wert zum Verlauf hinzu
+    window._votesToUsePreviousValues.push(newValue);
+
+    // Behalte nur die letzten 5 Werte
+    if (window._votesToUsePreviousValues.length > 5) {
+      window._votesToUsePreviousValues.shift();
     }
 
-    // Synchronisiere die "Alle Stimmen verwenden" Checkbox
-    // aber nur wenn sich der Wert tatsächlich geändert hat
-    const shouldUseAllVotes = (correctedValue === remainingVotes.value);
-    if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
-      // console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
-      formData.useAllAvailableVotes = shouldUseAllVotes;
+    // Prüfe auf oszillierende Werte (mögliche Endlosschleife)
+    const uniqueValues = new Set(window._votesToUsePreviousValues);
+    if (window._votesToUsePreviousValues.length >= 4 && uniqueValues.size <= 2) {
+      console.warn(
+        '[DEBUG:VOTING] Mögliche Endlosschleife erkannt in votesToUse watch. Überspringe Update.'
+      );
+      return;
     }
-  } finally {
-    // Wichtig: Flag zurücksetzen, auch wenn ein Fehler auftritt
-    isUpdatingProgrammatically = false;
-  }
-}, { flush: 'post' }); // Verzögere die Ausführung bis nach dem DOM-Update
+
+    // Debug-Ausgabe
+    // console.log("[DEBUG:VOTING] Watch votesToUse: Änderung von", oldValue, "zu", newValue, "| remainingVotes =", remainingVotes.value);
+
+    // Verhindere Endlos-Rekursion, indem Änderungen nur vorgenommen werden,
+    // wenn sich der Wert tatsächlich geändert hat
+    if (newValue === oldValue) return;
+
+    isUpdatingProgrammatically = true;
+    try {
+      // KRITISCH: Spezialbehandlung für den Fall, dass remainingVotes 0 ist
+      // In diesem Fall akzeptieren wir nur 0 als gültigen Wert für votesToUse
+      if (remainingVotes.value === 0) {
+        if (newValue !== 0) {
+          // console.log("[DEBUG:VOTING] Watch votesToUse: Setze Wert auf 0, da keine Stimmen mehr übrig");
+          formData.votesToUse = 0;
+        }
+        // Checkbox auf true setzen, da 0 von 0 = 100%
+        if (!formData.useAllAvailableVotes) {
+          formData.useAllAvailableVotes = true;
+        }
+        return;
+      }
+
+      let correctedValue = newValue;
+
+      // Korrigiere den Wert, wenn er außerhalb des gültigen Bereichs liegt
+      if (newValue < 1) {
+        correctedValue = 1;
+      } else if (newValue > remainingVotes.value) {
+        correctedValue = remainingVotes.value;
+      }
+
+      // Aktualisiere nur, wenn sich der Wert nach der Korrektur tatsächlich geändert hat
+      if (correctedValue !== newValue) {
+        // console.log("[DEBUG:VOTING] Watch votesToUse: Korrigiere Wert von", newValue, "zu", correctedValue);
+        formData.votesToUse = correctedValue;
+      }
+
+      // Synchronisiere die "Alle Stimmen verwenden" Checkbox
+      // aber nur wenn sich der Wert tatsächlich geändert hat
+      const shouldUseAllVotes = correctedValue === remainingVotes.value;
+      if (formData.useAllAvailableVotes !== shouldUseAllVotes) {
+        // console.log("[DEBUG:VOTING] Watch votesToUse: Checkbox-Synchronisierung auf", shouldUseAllVotes);
+        formData.useAllAvailableVotes = shouldUseAllVotes;
+      }
+    } finally {
+      // Wichtig: Flag zurücksetzen, auch wenn ein Fehler auftritt
+      isUpdatingProgrammatically = false;
+    }
+  },
+  { flush: 'post' }
+); // Verzögere die Ausführung bis nach dem DOM-Update
 
 // Bei Änderung des abstain-Status nur die Formularvalidierung aktualisieren,
 // aber keine automatische Änderung an der Stimmenzahl vornehmen
-watch(() => formData.abstain, () => {
-  // Nur Validierung neu auslösen, keine automatische Änderung der Stimmzahl
-});
+watch(
+  () => formData.abstain,
+  () => {
+    // Nur Validierung neu auslösen, keine automatische Änderung der Stimmzahl
+  }
+);
 
 const rules = computed(() => {
   return {
     singleAnswer: {
       or: or(
         // Not the correct voting type, so skip validation for this property.
-        objectPropertyIsNotEqual("value", voteType, VOTE_TYPE_SINGLE),
+        objectPropertyIsNotEqual('value', voteType, VOTE_TYPE_SINGLE),
         // Min vote = 1 and max vote = 1 (Required to pick 1 answer).
         and(
-          objectPropertyIsEqual("minVotes", props.poll, 1),
-          objectPropertyIsEqual("maxVotes", props.poll, 1),
-          required,
+          objectPropertyIsEqual('minVotes', props.poll, 1),
+          objectPropertyIsEqual('maxVotes', props.poll, 1),
+          required
         ),
         // Min vote = 0 and max vote = 1 (Can pick 1 answer).
         and(
-          objectPropertyIsEqual("minVotes", props.poll, 0),
-          objectPropertyIsEqual("maxVotes", props.poll, 1),
-        ),
+          objectPropertyIsEqual('minVotes', props.poll, 0),
+          objectPropertyIsEqual('maxVotes', props.poll, 1)
+        )
       ),
     },
     multipleAnswers: {
       or: or(
         // Not the correct voting type, so skip validation for this property.
-        objectPropertyIsNotEqual("value", voteType, VOTE_TYPE_MULTIPLE_ALL),
+        objectPropertyIsNotEqual('value', voteType, VOTE_TYPE_MULTIPLE_ALL),
         // Min vote = 0 and max vote = 0 (Do what you want)
         and(
-          objectPropertyIsEqual("minVotes", props.poll, 0),
-          objectPropertyIsEqual("maxVotes", props.poll, 0),
+          objectPropertyIsEqual('minVotes', props.poll, 0),
+          objectPropertyIsEqual('maxVotes', props.poll, 0)
         ),
         // Min vote = 0 and max vote > 0 (can not be greater than max vote)
         and(
-          objectPropertyIsEqual("minVotes", props.poll, 0),
-          objectPropertyIsGreaterThan("maxVotes", props.poll, 0),
-          maxLength(props.poll.maxVotes),
+          objectPropertyIsEqual('minVotes', props.poll, 0),
+          objectPropertyIsGreaterThan('maxVotes', props.poll, 0),
+          maxLength(props.poll.maxVotes)
         ),
         // Min vote > 0 and max vote = 0 (must be at least the length of min vote)
         and(
-          objectPropertyIsGreaterThan("minVotes", props.poll, 0),
-          objectPropertyIsEqual("maxVotes", props.poll, 0),
-          minLength(props.poll.minVotes),
+          objectPropertyIsGreaterThan('minVotes', props.poll, 0),
+          objectPropertyIsEqual('maxVotes', props.poll, 0),
+          minLength(props.poll.minVotes)
         ),
         // Min vote > 0 and max vote > 0
         // (must be at least the length of min vote but can not be greater than max vote)
         and(
-          objectPropertyIsGreaterThan("minVotes", props.poll, 0),
-          objectPropertyIsGreaterThan("maxVotes", props.poll, 0),
+          objectPropertyIsGreaterThan('minVotes', props.poll, 0),
+          objectPropertyIsGreaterThan('maxVotes', props.poll, 0),
           maxLength(props.poll.maxVotes),
-          minLength(props.poll.minVotes),
+          minLength(props.poll.minVotes)
         ),
         // Allow to abstain.
         and(
-          objectPropertyIsEqual("allowAbstain", props.poll, true),
-          objectPropertyIsEqual("abstain", formData, true),
-        ),
+          objectPropertyIsEqual('allowAbstain', props.poll, true),
+          objectPropertyIsEqual('abstain', formData, true)
+        )
       ),
     },
     votesToUse: {
@@ -881,17 +1027,20 @@ async function onSubmit() {
   if (isSubmitting.value) {
     return;
   }
-  
+
   try {
     // Verbesserte explizite Prüfung auf gültige Auswahl
     // Wenn Enthaltung gewählt wurde, dann ist das eine gültige Auswahl
     if (formData.abstain) {
       // Bei Enthaltung sind keine weiteren Prüfungen nötig
-    } else if (!formData.singleAnswer && (!formData.multipleAnswers || formData.multipleAnswers.length === 0)) {
+    } else if (
+      !formData.singleAnswer &&
+      (!formData.multipleAnswers || formData.multipleAnswers.length === 0)
+    ) {
       alert('Bitte treffen Sie eine Auswahl');
       return;
     }
-    
+
     // Prüfe, ob ein Radio-Button ausgewählt wurde bei Single-Choice-Abstimmungen
     // Überspringen wenn Enthaltung gewählt ist
     if (voteType.value === VOTE_TYPE_SINGLE && !formData.singleAnswer && !formData.abstain) {
@@ -899,33 +1048,32 @@ async function onSubmit() {
       alert('Bitte wählen Sie eine Antwort aus.');
       return;
     }
-    
+
     // Sicher gehen, dass votesToUse einen gültigen Wert hat
     if (typeof formData.votesToUse !== 'number' || formData.votesToUse < 1) {
       formData.votesToUse = 1;
     }
-    
+
     // Validierung
     const result = await v$.value.$validate();
     if (!result) {
       console.error(`[ERROR:FORM] Validierungsfehler:`, v$.value.$errors);
-      
+
       // Stelle sicher, dass wir den Nutzer gut informieren
-      const errorMessages = v$.value.$errors.map(e => e.$message).join(', ');
+      const errorMessages = v$.value.$errors.map((e) => e.$message).join(', ');
       alert(`Bitte überprüfen Sie Ihre Eingaben: ${errorMessages}`);
       return;
     }
-    
+
     isSubmitting.value = true;
-    
+
     formData.type = voteType.value;
-    emit("submit", {...formData}); // Kopie des Objekts übergeben
-    
+    emit('submit', { ...formData }); // Kopie des Objekts übergeben
+
     // Status wird durch pollAnswerLifeCycle-Event oder Fehlerbehandlung zurückgesetzt
     // Explizites Zurücksetzen geschieht in SyncEventDashboard.vue, nicht hier
-    
   } catch (error) {
-    console.error("Fehler beim Absenden:", error);
+    console.error('Fehler beim Absenden:', error);
     // Bei Fehler lokal zurücksetzen
     isSubmitting.value = false;
   }
@@ -934,7 +1082,7 @@ async function onSubmit() {
 // Es gibt zwei Arten von Reset: Entweder nur den Submitting-Status oder alles
 function resetSubmitState() {
   isSubmitting.value = false;
-  
+
   // Stelle sicher, dass auch der Button-Text und die Overlay-Anzeige aktualisiert werden
   // Sofort nochmal setzen, um eine bessere Reaktivität zu gewährleisten
   isSubmitting.value = false;
@@ -958,7 +1106,7 @@ function reset(keepSelection = false) {
     formData.abstain = false;
 
     // KRITISCH: Reihenfolge ist wichtig - zuerst useAllAvailableVotes, dann erst votesToUse
-    // Dadurch wird verhindert, dass die watch-Funktion für votesToUse 
+    // Dadurch wird verhindert, dass die watch-Funktion für votesToUse
     // den useAllAvailableVotes-Wert zurücksetzt
     formData.useAllAvailableVotes = true;
 
@@ -968,11 +1116,11 @@ function reset(keepSelection = false) {
       // Dies wird die verbesserte Synchronisierung auslösen
       const currentRemainingVotes = remainingVotes.value;
       // console.log("[DEBUG:VOTING] Reset mit remainingVotes:", currentRemainingVotes);
-      
+
       // Sicherstellen, dass votesToUse einen gültigen Wert hat
       if (typeof currentRemainingVotes !== 'number' || currentRemainingVotes < 1) {
         // Fallback, wenn remainingVotes ungültig ist
-        console.warn("[DEBUG:VOTING] Ungültiger remainingVotes-Wert:", currentRemainingVotes);
+        console.warn('[DEBUG:VOTING] Ungültiger remainingVotes-Wert:', currentRemainingVotes);
         const fallbackValue = props.eventUser?.voteAmount || 1;
         formData.votesToUse = fallbackValue;
       } else {
@@ -980,23 +1128,23 @@ function reset(keepSelection = false) {
         formData.votesToUse = currentRemainingVotes;
       }
     }, 50);
-    
+
     // Zweimal setzen für garantierte Reaktivität
     setTimeout(() => {
       // Nochmal garantieren, dass diese Werte korrekt gesetzt sind
       formData.useAllAvailableVotes = true;
       formData.votesToUse = remainingVotes.value;
-      
+
       // Nach der RadioInput-Gruppe suchen und manuell zurücksetzen
       const radioInputs = document.querySelectorAll('input[type="radio"]');
-      radioInputs.forEach(input => {
+      radioInputs.forEach((input) => {
         input.checked = false;
       });
-      
+
       // console.log("[DEBUG:VOTING] Nach Reset: votesToUse =", formData.votesToUse, "useAllAvailableVotes =", formData.useAllAvailableVotes);
     }, 50);
   }
-  
+
   // Stelle sicher, dass auch der Button-Text und die Overlay-Anzeige aktualisiert werden
   // Sofort nochmal setzen, um eine bessere Reaktivität zu gewährleisten
   isSubmitting.value = false;
@@ -1015,7 +1163,7 @@ function formatTimestamp(timestamp) {
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
     });
   } catch (e) {
     console.warn('Fehler beim Formatieren des Timestamps:', e);
@@ -1026,6 +1174,6 @@ function formatTimestamp(timestamp) {
 defineExpose({
   isSubmitting,
   reset,
-  resetSubmitState
+  resetSubmitState,
 });
 </script>

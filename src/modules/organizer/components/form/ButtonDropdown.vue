@@ -9,9 +9,7 @@
         aria-haspopup="true"
         aria-expanded="false"
       >
-        <span :class="['me-2', 'nav-icon', 'bi', icon]" /><span class="me-2">{{
-          label
-        }}</span>
+        <span :class="['me-2', 'nav-icon', 'bi', icon]" /><span class="me-2">{{ label }}</span>
       </button>
       <div class="dropdown-menu" aria-labelledby="btnGroupDropdown">
         <a
@@ -38,5 +36,5 @@ defineProps({
     required: true,
   },
 });
-const icon = "bi-download";
+const icon = 'bi-download';
 </script>

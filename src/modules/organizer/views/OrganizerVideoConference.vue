@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerVideoConference')">
     <template #title>
-      {{ $t("navigation.views.organizerVideoConference") }}
+      {{ $t('navigation.views.organizerVideoConference') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -14,13 +14,10 @@
           </option>
         </select>
         <div class="input-group-text p-0">
-          <router-link
-            :to="{ name: RouteOrganizerVideoConferenceNew }"
-            class="btn btn-secondary"
-          >
+          <router-link :to="{ name: RouteOrganizerVideoConferenceNew }" class="btn btn-secondary">
             <i class="bi-plus bi--1xl align-middle" />
             <span class="align-middle">
-              {{ $t("view.videoConference.addNew") }}
+              {{ $t('view.videoConference.addNew') }}
             </span>
           </router-link>
         </div>
@@ -44,26 +41,22 @@
             >
               <i class="bi-pencil bi--xl" />
             </router-link>
-            <button
-              type="button"
-              class="btn btn-danger"
-              @click.prevent="onDelete(item.id)"
-            >
+            <button type="button" class="btn btn-danger" @click.prevent="onDelete(item.id)">
               <i class="bi-trash bi--xl" />
             </button>
           </div>
         </template>
       </EasyDataTable>
       <AlertBox v-else type="info">
-        {{ $t("view.videoConference.noRecords") }}
+        {{ $t('view.videoConference.noRecords') }}
       </AlertBox>
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -76,21 +69,21 @@ import {
   RouteOrganizerVideoConference,
   RouteOrganizerVideoConferenceNew,
   RouteOrganizerVideoConferenceEdit,
-} from "@/router/routes";
+} from '@/router/routes';
 
-import { computed } from "vue";
-import { useCore } from "@/core/store/core";
-import { useMutation } from "@vue/apollo-composable";
-import { DELETE_ZOOM_MEETING } from "@/modules/organizer/graphql/mutation/delete-zoom-meeting";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import AlertBox from "@/core/components/AlertBox.vue";
+import { computed } from 'vue';
+import { useCore } from '@/core/store/core';
+import { useMutation } from '@vue/apollo-composable';
+import { DELETE_ZOOM_MEETING } from '@/modules/organizer/graphql/mutation/delete-zoom-meeting';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import AlertBox from '@/core/components/AlertBox.vue';
 
 const headers = [
-  { text: t("view.videoConference.title"), value: "title", sortable: true },
-  { text: "", value: "id" },
+  { text: t('view.videoConference.title'), value: 'title', sortable: true },
+  { text: '', value: 'id' },
 ];
 
 const coreStore = useCore();
@@ -107,21 +100,19 @@ const routes = getRoutesByName([
   RouteOrganizerGlobalSettings,
 ]);
 
-const zoomvideoConferences = computed(
-  () => coreStore.getOrganizer?.zoomMeetings ?? [],
-);
+const zoomvideoConferences = computed(() => coreStore.getOrganizer?.zoomMeetings ?? []);
 
 // Currently we only support zoom. So this is static
 const meetingTypes = [
   {
     id: 1,
-    title: "Zoom Meeting",
+    title: 'Zoom Meeting',
   },
 ];
 
 async function onDelete(id) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.videoConference.confirmDelete"),
+    message: t('view.videoConference.confirmDelete'),
   });
   dialog.onConfirm(async () => {
     // Update new zoom meeting.
@@ -135,8 +126,8 @@ async function onDelete(id) {
     coreStore.queryOrganizer();
 
     // Show success message.
-    toast(t("success.organizer.videoConference.deletedSuccessfully"), {
-      type: "success",
+    toast(t('success.organizer.videoConference.deletedSuccessfully'), {
+      type: 'success',
     });
   });
 

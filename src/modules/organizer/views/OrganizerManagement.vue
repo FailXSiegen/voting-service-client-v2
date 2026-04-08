@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerManagement')">
     <template #title>
-      {{ $t("navigation.views.organizerManagement") }}
+      {{ $t('navigation.views.organizerManagement') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -13,16 +13,13 @@
           <div class="d-flex justify-content-between align-items-center">
             <div v-if="organizers?.length > 0" class="flex-grow-1">
               <label for="organizer-filter">
-                {{ $t("view.organizers.filter.label") }}
+                {{ $t('view.organizers.filter.label') }}
               </label>
             </div>
             <div>
-              <button 
-                class="btn btn-primary"
-                @click="showCreateModal = true"
-              >
+              <button class="btn btn-primary" @click="showCreateModal = true">
                 <i class="bi-plus-circle me-2"></i>
-                {{ $t("view.organizers.create.button") }}
+                {{ $t('view.organizers.create.button') }}
               </button>
             </div>
           </div>
@@ -37,7 +34,7 @@
               />
               <div class="input-group-text p-0">
                 <button class="btn btn-transparent" @click.prevent="onResetFilter">
-                  {{ $t("view.organizers.filter.reset") }}
+                  {{ $t('view.organizers.filter.reset') }}
                 </button>
               </div>
             </div>
@@ -63,10 +60,10 @@
           </template>
           <template #item-verified="item">
             <span v-if="item.verified" class="text-success text-uppercase">
-              {{ $t("view.organizers.verified") }}
+              {{ $t('view.organizers.verified') }}
             </span>
             <span v-else class="text-danger text-uppercase">
-              <strong>{{ $t("view.organizers.denied") }}</strong>
+              <strong>{{ $t('view.organizers.denied') }}</strong>
             </span>
           </template>
           <template #item-id="item">
@@ -111,15 +108,12 @@
       </div>
     </template>
   </PageLayout>
-  
+
   <!-- Organizer Events Modal -->
-  <OrganizerEventsModal 
-    :organizer="selectedOrganizer" 
-    :show="showModal"
-  />
-  
+  <OrganizerEventsModal :organizer="selectedOrganizer" :show="showModal" />
+
   <!-- Create Organizer Modal -->
-  <CreateOrganizerModal 
+  <CreateOrganizerModal
     v-if="showCreateModal"
     @close="showCreateModal = false"
     @created="onOrganizerCreated"
@@ -127,10 +121,10 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
-import OrganizerEventsModal from "@/modules/organizer/components/OrganizerEventsModal.vue";
-import CreateOrganizerModal from "@/modules/organizer/components/CreateOrganizerModal.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import OrganizerEventsModal from '@/modules/organizer/components/OrganizerEventsModal.vue';
+import CreateOrganizerModal from '@/modules/organizer/components/CreateOrganizerModal.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -141,21 +135,21 @@ import {
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings,
   RouteOrganizerVideoConference,
-} from "@/router/routes";
-import { useMutation, useQuery, useLazyQuery } from "@vue/apollo-composable";
-import { ORGANIZERS } from "@/modules/organizer/graphql/queries/organizers";
-import { ALL_EVENTS_WITH_ORIGINAL_OWNER } from "@/modules/organizer/graphql/queries/all-events-with-original-owner";
-import { computed, ref } from "vue";
-import t from "@/core/util/l18n";
-import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
-import { UPDATE_ORGANIZER } from "@/modules/organizer/graphql/mutation/update-organizer";
-import { toast } from "vue3-toastify";
-import { handleError } from "@/core/error/error-handler";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import { DELETE_ORGANIZER } from "@/modules/organizer/graphql/mutation/delete-organizer";
-import { useCore } from "@/core/store/core";
-import { Modal } from "bootstrap";
+} from '@/router/routes';
+import { useMutation, useQuery, useLazyQuery } from '@vue/apollo-composable';
+import { ORGANIZERS } from '@/modules/organizer/graphql/queries/organizers';
+import { ALL_EVENTS_WITH_ORIGINAL_OWNER } from '@/modules/organizer/graphql/queries/all-events-with-original-owner';
+import { computed, ref } from 'vue';
+import t from '@/core/util/l18n';
+import { createFormattedDateFromTimeStamp } from '@/core/util/time-stamp';
+import { UPDATE_ORGANIZER } from '@/modules/organizer/graphql/mutation/update-organizer';
+import { toast } from 'vue3-toastify';
+import { handleError } from '@/core/error/error-handler';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
+import { DELETE_ORGANIZER } from '@/modules/organizer/graphql/mutation/delete-organizer';
+import { useCore } from '@/core/store/core';
+import { Modal } from 'bootstrap';
 
 const coreStore = useCore();
 const currentOrganizerSessionId = computed(() => coreStore?.user?.id);
@@ -174,30 +168,30 @@ const routes = getRoutesByName([
 ]);
 
 const headers = [
-  { text: t("view.organizers.user"), value: "username", sortable: true },
+  { text: t('view.organizers.user'), value: 'username', sortable: true },
   {
-    text: t("view.organizers.createDatetime"),
-    value: "createDatetime",
+    text: t('view.organizers.createDatetime'),
+    value: 'createDatetime',
     sortable: true,
   },
   {
-    text: t("view.organizers.organisation"),
-    value: "publicOrganisation",
+    text: t('view.organizers.organisation'),
+    value: 'publicOrganisation',
     sortable: true,
   },
-  { text: t("view.organizers.email"), value: "email", sortable: true },
+  { text: t('view.organizers.email'), value: 'email', sortable: true },
   {
-    text: t("view.organizers.confirmedEmail"),
-    value: "confirmedEmail",
+    text: t('view.organizers.confirmedEmail'),
+    value: 'confirmedEmail',
     sortable: true,
   },
-  { text: t("view.organizers.verified"), value: "verified", sortable: true },
-  { text: t("view.organizers.actions"), value: "id" },
+  { text: t('view.organizers.verified'), value: 'verified', sortable: true },
+  { text: t('view.organizers.actions'), value: 'id' },
 ];
 
 const organizers = ref([]);
 const organizersCopy = ref(null);
-const searchFilter = ref("");
+const searchFilter = ref('');
 const organizersWithEvents = ref([]);
 const selectedOrganizer = ref(null);
 const showModal = ref(false);
@@ -208,13 +202,13 @@ const organizersFiltered = computed(() =>
 );
 
 const { onResult, refetch } = useQuery(ORGANIZERS, null, {
-  fetchPolicy: "no-cache",
+  fetchPolicy: 'no-cache',
 });
 onResult(({ data }) => {
   organizers.value = (data?.organizers ?? []).sort((a, b) => {
     return new Date(b.createDatetime) - new Date(a.createDatetime);
   });
-  
+
   // Check which organizers have events
   checkOrganizersWithEvents();
 });
@@ -223,32 +217,25 @@ onResult(({ data }) => {
 async function checkOrganizersWithEvents() {
   // Wenn Superadmin, verwenden wir die allEvents-Abfrage, um auch original_organizer zu berücksichtigen
   if (isSuperAdmin.value) {
-    const { load, onResult } = useLazyQuery(
-      ALL_EVENTS_WITH_ORIGINAL_OWNER,
-      null,
-      { fetchPolicy: "network-only" }
-    );
-    
+    const { load, onResult } = useLazyQuery(ALL_EVENTS_WITH_ORIGINAL_OWNER, null, {
+      fetchPolicy: 'network-only',
+    });
+
     load();
-    
+
     onResult(({ data }) => {
       if (data) {
-        const allEvents = [
-          ...(data.allUpcomingEvents || []),
-          ...(data.allPastEvents || [])
-        ];
-        
+        const allEvents = [...(data.allUpcomingEvents || []), ...(data.allPastEvents || [])];
+
         // Für jeden Organizer prüfen, ob er Veranstaltungen besitzt oder der original_organizer ist
         for (const organizer of organizers.value) {
-          const hasDirectEvents = allEvents.some(event => 
-            event.organizer?.id === organizer.id
+          const hasDirectEvents = allEvents.some((event) => event.organizer?.id === organizer.id);
+
+          const hasOriginalEvents = allEvents.some(
+            (event) =>
+              event.originalOrganizer?.id === organizer.id && event.organizer?.id !== organizer.id
           );
-          
-          const hasOriginalEvents = allEvents.some(event => 
-            event.originalOrganizer?.id === organizer.id && 
-            event.organizer?.id !== organizer.id
-          );
-          
+
           if (hasDirectEvents || hasOriginalEvents) {
             if (!organizersWithEvents.value.includes(organizer.id)) {
               organizersWithEvents.value.push(organizer.id);
@@ -257,37 +244,32 @@ async function checkOrganizersWithEvents() {
         }
       }
     });
-  } 
+  }
   // Für normale Admins prüfen wir trotzdem auf original_organizer
   else {
     // Load all events to check for both direct ownership and original ownership
     const { load: loadAllEvents, onResult: onAllEventsResult } = useLazyQuery(
       ALL_EVENTS_WITH_ORIGINAL_OWNER,
       null,
-      { fetchPolicy: "network-only" }
+      { fetchPolicy: 'network-only' }
     );
-    
+
     loadAllEvents();
-    
+
     onAllEventsResult(({ data }) => {
       if (data) {
-        const allEvents = [
-          ...(data.allUpcomingEvents || []),
-          ...(data.allPastEvents || [])
-        ];
-        
+        const allEvents = [...(data.allUpcomingEvents || []), ...(data.allPastEvents || [])];
+
         for (const organizer of organizers.value) {
           // Check for direct ownership
-          const hasDirectEvents = allEvents.some(event => 
-            event.organizer?.id === organizer.id
-          );
-          
+          const hasDirectEvents = allEvents.some((event) => event.organizer?.id === organizer.id);
+
           // Check for original ownership
-          const hasOriginalEvents = allEvents.some(event => 
-            event.originalOrganizer?.id === organizer.id && 
-            event.organizer?.id !== organizer.id
+          const hasOriginalEvents = allEvents.some(
+            (event) =>
+              event.originalOrganizer?.id === organizer.id && event.organizer?.id !== organizer.id
           );
-          
+
           if (hasDirectEvents || hasOriginalEvents) {
             if (!organizersWithEvents.value.includes(organizer.id)) {
               organizersWithEvents.value.push(organizer.id);
@@ -303,7 +285,7 @@ async function checkOrganizersWithEvents() {
 function showEventsModal(organizer) {
   selectedOrganizer.value = organizer;
   showModal.value = true;
-  
+
   // Use Bootstrap modal API to show the modal
   // Short timeout to ensure the DOM is ready
   setTimeout(() => {
@@ -311,7 +293,7 @@ function showEventsModal(organizer) {
     if (modalElement) {
       const modal = new Modal(modalElement);
       modal.show();
-      
+
       // Reset showModal when modal is hidden
       modalElement.addEventListener('hidden.bs.modal', () => {
         showModal.value = false;
@@ -324,24 +306,24 @@ function showEventsModal(organizer) {
 
 function onFilter() {
   const searchTerm = searchFilter.value ? searchFilter.value.toLowerCase() : '';
-  
-  organizersCopy.value = organizers.value.filter(
-    (organizer) => {
-      if (!organizer) return false;
-      
-      const username = organizer.username ? organizer.username.toLowerCase() : '';
-      const email = organizer.email ? organizer.email.toLowerCase() : '';
-      const publicOrg = organizer.publicOrganisation ? organizer.publicOrganisation.toLowerCase() : '';
-      
-      return username.includes(searchTerm) || 
-             email.includes(searchTerm) || 
-             publicOrg.includes(searchTerm);
-    }
-  );
+
+  organizersCopy.value = organizers.value.filter((organizer) => {
+    if (!organizer) return false;
+
+    const username = organizer.username ? organizer.username.toLowerCase() : '';
+    const email = organizer.email ? organizer.email.toLowerCase() : '';
+    const publicOrg = organizer.publicOrganisation
+      ? organizer.publicOrganisation.toLowerCase()
+      : '';
+
+    return (
+      username.includes(searchTerm) || email.includes(searchTerm) || publicOrg.includes(searchTerm)
+    );
+  });
 }
 
 function onResetFilter() {
-  searchFilter.value = "";
+  searchFilter.value = '';
   organizersCopy.value = null;
 }
 
@@ -359,8 +341,8 @@ function onVerify({ id }, verified) {
       return refetch();
     })
     .then(() => {
-      toast(t("success.organizer.organizers.updatedSuccessfully"), {
-        type: "success",
+      toast(t('success.organizer.organizers.updatedSuccessfully'), {
+        type: 'success',
       });
     })
     .catch((error) => handleError(error));
@@ -368,7 +350,7 @@ function onVerify({ id }, verified) {
 
 function onDelete({ id }) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.organizers.confirmDelete"),
+    message: t('view.organizers.confirmDelete'),
   });
   dialog.onConfirm(() => {
     // Delete organizer
@@ -382,8 +364,8 @@ function onDelete({ id }) {
         return refetch();
       })
       .then(() => {
-        toast(t("success.organizer.organizers.deletedSuccessfully"), {
-          type: "success",
+        toast(t('success.organizer.organizers.deletedSuccessfully'), {
+          type: 'success',
         });
       })
       .catch((error) => handleError(error));
@@ -396,8 +378,8 @@ function onDelete({ id }) {
 function onOrganizerCreated() {
   showCreateModal.value = false;
   refetch();
-  toast(t("view.organizers.create.success"), {
-    type: "success",
+  toast(t('view.organizers.create.success'), {
+    type: 'success',
   });
 }
 </script>

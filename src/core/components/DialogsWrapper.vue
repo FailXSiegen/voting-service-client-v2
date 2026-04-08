@@ -6,10 +6,10 @@
       <div class="alert alert-info alert-dismissible fade show" role="alert">
         <strong>Verbindung aktualisiert</strong>
         <p>Ihre Sitzung wurde erfolgreich aktualisiert.</p>
-        <button 
-          type="button" 
-          class="btn-close" 
-          aria-label="Close" 
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
           @click="showTokenRefreshNotification = false"
         ></button>
       </div>
@@ -38,17 +38,20 @@ if (tokenRefreshEventBus) {
 // Watch lastTokenRefresh changes to detect token refreshes
 const lastRefreshTimestamp = ref(coreStore.getLastTokenRefresh);
 
-watch(() => coreStore.getLastTokenRefresh, (newTimestamp) => {
-  if (newTimestamp && newTimestamp !== lastRefreshTimestamp.value) {
-    // A token refresh occurred
-    lastRefreshTimestamp.value = newTimestamp;
-    showNotification();
+watch(
+  () => coreStore.getLastTokenRefresh,
+  (newTimestamp) => {
+    if (newTimestamp && newTimestamp !== lastRefreshTimestamp.value) {
+      // A token refresh occurred
+      lastRefreshTimestamp.value = newTimestamp;
+      showNotification();
+    }
   }
-});
+);
 
 function showNotification() {
   showTokenRefreshNotification.value = true;
-  
+
   // Auto-hide after 5 seconds
   setTimeout(() => {
     showTokenRefreshNotification.value = false;
@@ -70,7 +73,13 @@ function showNotification() {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

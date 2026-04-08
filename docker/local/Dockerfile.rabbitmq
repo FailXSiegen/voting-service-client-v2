@@ -5,4 +5,4 @@ RUN mkdir -p /var/log/rabbitmq && \
     chmod -R 777 /var/log/rabbitmq
 
 # Copy configuration
-COPY docker/local/rabbitmq/config/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf
+COPY voting-service-client-v2/docker/local/rabbitmq/config/rabbitmq.conf /etc/rabbitmq/rabbitmq.conf

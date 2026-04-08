@@ -3,11 +3,9 @@
     <td scope="row" class="pb-3">
       <b>{{ event.title }}</b> <br />
       <small
-        ><u
-          class="btn p-0"
-          @click="copyTextToClipboard(getEventInvitationLink(event.slug))"
-          >{{ event.slug }}</u
-        ></small
+        ><u class="btn p-0" @click="copyTextToClipboard(getEventInvitationLink(event.slug))">{{
+          event.slug
+        }}</u></small
       ><br />
       <hr v-if="event.description" />
       <small>{{ event.description }}</small>
@@ -45,8 +43,8 @@
         {{ event.organizer.email }}<br />
       </template>
       <template v-else>
-        Event ID: {{ event.id || "Unknown" }} <br />
-        Organizer ID: {{ event.organizer || "Unknown" }}
+        Event ID: {{ event.id || 'Unknown' }} <br />
+        Organizer ID: {{ event.organizer || 'Unknown' }}
       </template>
     </td>
     <td class="align-middle">
@@ -64,22 +62,17 @@
         v-if="showOrganizer"
         :class="[
           'd-block',
-          getDaysSinceScheduledDateTime > 180 && showOrganizer
-            ? 'text-white'
-            : 'text-muted',
+          getDaysSinceScheduledDateTime > 180 && showOrganizer ? 'text-white' : 'text-muted',
         ]"
         >({{ getDaysSinceScheduledDateTime }} Tage)</small
       >
     </td>
-    <td
-      v-if="event.active"
-      class="text-center text-success text-uppercase align-middle"
-    >
-      {{ $t("view.event.listing.stateActive") }}
+    <td v-if="event.active" class="text-center text-success text-uppercase align-middle">
+      {{ $t('view.event.listing.stateActive') }}
     </td>
 
     <td v-else class="text-center text-danger text-uppercase align-middle">
-      {{ $t("view.event.listing.stateLocked") }}
+      {{ $t('view.event.listing.stateLocked') }}
     </td>
 
     <td v-if="eventsDetail" class="align-middle">
@@ -116,22 +109,19 @@
 </template>
 
 <script setup>
-import { createFormattedDateFromTimeStamp } from "@/core/util/time-stamp";
-import { computed } from "vue";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { handleError } from "@/core/error/error-handler";
-import { useCore } from "@/core/store/core";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
-import {
-  RouteOrganizerEventsEdit,
-  RouteOrganizerMemberRoom,
-} from "@/router/routes";
+import { createFormattedDateFromTimeStamp } from '@/core/util/time-stamp';
+import { computed } from 'vue';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { handleError } from '@/core/error/error-handler';
+import { useCore } from '@/core/store/core';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
+import { RouteOrganizerEventsEdit, RouteOrganizerMemberRoom } from '@/router/routes';
 
 const coreStore = useCore();
 
-const emit = defineEmits(["delete", "toggleActive"]);
+const emit = defineEmits(['delete', 'toggleActive']);
 const props = defineProps({
   event: {
     type: Object,
@@ -161,14 +151,14 @@ const props = defineProps({
   },
 });
 
-const location = window.location.protocol + "//" + window.location.host;
+const location = window.location.protocol + '//' + window.location.host;
 
 // computed values.
 const getCreateDatetime = computed(() =>
-  createFormattedDateFromTimeStamp(props.event.createDatetime),
+  createFormattedDateFromTimeStamp(props.event.createDatetime)
 );
 const getScheduledDatetime = computed(() =>
-  createFormattedDateFromTimeStamp(props.event.scheduledDatetime),
+  createFormattedDateFromTimeStamp(props.event.scheduledDatetime)
 );
 const getDaysSinceScheduledDateTime = computed(() => {
   const $todayUnixTimeDate = Math.floor(Date.now() / 1000);
@@ -178,14 +168,14 @@ const getDaysSinceScheduledDateTime = computed(() => {
 
 function onDelete(eventId, organizerId) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.event.listing.confirm.deleteQuestion"),
+    message: t('view.event.listing.confirm.deleteQuestion'),
   });
   dialog.onConfirm(() => {
     if (props.showOrganizer && organizerId) {
-      emit("delete", { eventId, organizerId });
+      emit('delete', { eventId, organizerId });
       return;
     }
-    emit("delete", {
+    emit('delete', {
       eventId,
       organizerId: coreStore.user?.id ?? 0,
     });
@@ -197,10 +187,10 @@ function onDelete(eventId, organizerId) {
 
 function onToggleActivate(eventId, status) {
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.event.listing.confirm.updateActiveStateQuestion"),
+    message: t('view.event.listing.confirm.updateActiveStateQuestion'),
   });
   dialog.onConfirm(() => {
-    emit("toggleActive", { eventId, status });
+    emit('toggleActive', { eventId, status });
   });
 
   // Show confirm dialog.
@@ -209,18 +199,18 @@ function onToggleActivate(eventId, status) {
 
 function fallbackCopyTextToClipboard(text) {
   // @todo move to service
-  const textArea = document.createElement("textarea");
+  const textArea = document.createElement('textarea');
   textArea.value = text;
   // Avoid scrolling to bottom
-  textArea.style.top = "0";
-  textArea.style.left = "0";
-  textArea.style.position = "fixed";
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
   document.body.appendChild(textArea);
   textArea.focus();
   textArea.select();
   try {
-    document.execCommand("copy");
-    toast(t("view.event.listing.textCopiedToClipboard"), { type: "success" });
+    document.execCommand('copy');
+    toast(t('view.event.listing.textCopiedToClipboard'), { type: 'success' });
   } catch (error) {
     handleError(error);
   }
@@ -235,15 +225,15 @@ function copyTextToClipboard(text) {
   navigator.clipboard.writeText(text).then(
     function () {
       // @todo show copied text?
-      toast(t("view.event.listing.textCopiedToClipboard"), { type: "success" });
+      toast(t('view.event.listing.textCopiedToClipboard'), { type: 'success' });
     },
     function (error) {
       handleError(error);
-    },
+    }
   );
 }
 
 function getEventInvitationLink(slug) {
-  return location + "/event/" + slug;
+  return location + '/event/' + slug;
 }
 </script>

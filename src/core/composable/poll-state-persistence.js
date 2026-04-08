@@ -1,7 +1,7 @@
 export function usePollStatePersistence() {
   // Sichere Wrapper-Funktionen für localStorage-Zugriffe
   let persistence = {
-    getItem: function(key) {
+    getItem: function (key) {
       try {
         return window.localStorage.getItem(key);
       } catch (e) {
@@ -9,7 +9,7 @@ export function usePollStatePersistence() {
         return null;
       }
     },
-    setItem: function(key, value) {
+    setItem: function (key, value) {
       try {
         window.localStorage.setItem(key, value);
         return true;
@@ -18,7 +18,7 @@ export function usePollStatePersistence() {
         return false;
       }
     },
-    removeItem: function(key) {
+    removeItem: function (key) {
       try {
         window.localStorage.removeItem(key);
         return true;
@@ -27,7 +27,7 @@ export function usePollStatePersistence() {
         return false;
       }
     },
-    key: function(index) {
+    key: function (index) {
       try {
         return window.localStorage.key(index);
       } catch (e) {
@@ -42,9 +42,9 @@ export function usePollStatePersistence() {
         console.error(`[Storage] Fehler beim Zugriff auf length:`, e);
         return 0;
       }
-    }
+    },
   };
-  
+
   // Bei Initialisierung prüfen, ob localStorage verfügbar ist
   let storageAvailable = true;
   try {
@@ -54,28 +54,28 @@ export function usePollStatePersistence() {
     console.warn('[Storage] localStorage nicht verfügbar, verwende Memory-Fallback:', e);
     storageAvailable = false;
   }
-  
+
   // Wenn localStorage nicht verfügbar ist, verwende In-Memory-Speicher als Fallback
   if (!storageAvailable) {
     const memoryStorage = {};
     persistence = {
-      getItem: function(key) {
+      getItem: function (key) {
         return memoryStorage[key] || null;
       },
-      setItem: function(key, value) {
+      setItem: function (key, value) {
         memoryStorage[key] = value;
         return true;
       },
-      removeItem: function(key) {
+      removeItem: function (key) {
         delete memoryStorage[key];
         return true;
       },
-      key: function(index) {
+      key: function (index) {
         return Object.keys(memoryStorage)[index] || null;
       },
       get length() {
         return Object.keys(memoryStorage).length;
-      }
+      },
     };
   }
 
@@ -86,7 +86,7 @@ export function usePollStatePersistence() {
   /**
    * Generiert eine eindeutige Kennung für den Vote-State unter Berücksichtigung der Event-ID
    * Dies stellt sicher, dass Vote-States nicht über Events hinweg übertragen werden
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {number} eventId
    * @returns {string}
    */
@@ -104,17 +104,17 @@ export function usePollStatePersistence() {
       console.warn('[Storage] canVote: Ungültige Parameter', { pollId, eventUser, event });
       return true; // Im Zweifelsfall erlauben wir die Abstimmung
     }
-    
+
     // Sichere Extraktion der Event-ID
     const eventId = event.id || (typeof event === 'object' && event.value ? event.value.id : null);
     if (!eventId) {
       console.warn('[Storage] canVote: Keine Event-ID gefunden', { event });
       return true; // Im Zweifelsfall erlauben wir die Abstimmung
     }
-    
+
     // Verwende die Event-ID + Poll-ID als Schlüssel für bessere Isolierung zwischen Abstimmungen
     const stateKey = generateVoteStateKey(pollId, eventId);
-    
+
     // Daten mit sicherer JSON-Parsing-Logik abrufen
     let voteState = { used: 0 };
     try {
@@ -126,17 +126,14 @@ export function usePollStatePersistence() {
       console.error(`[Storage] canVote: Fehler beim Parsen von ${stateKey}:`, e);
       // Bei Fehler trotzdem weitermachen mit Standardwerten
     }
-    
+
     // Sichere Extraktion der voteAmount mit explizitem Fallback auf 1
     const voteAmount = parseInt(eventUser.voteAmount || 1, 10);
     const multivoteType = parseInt(event.multivoteType || 0, 10);
     const usedVotes = parseInt(voteState.used || 0, 10);
 
     // Logik für die Abstimmungsfähigkeit
-    if (
-      usedVotes >= voteAmount ||
-      (usedVotes > 0 && multivoteType === 2)
-    ) {
+    if (usedVotes >= voteAmount || (usedVotes > 0 && multivoteType === 2)) {
       return false;
     }
 
@@ -156,7 +153,6 @@ export function usePollStatePersistence() {
    * @param {number} maxVotesToUse - Optional maximale Stimmen für diese Session
    */
   function upsertPollState(pollId, votes, usedVotes = null, eventId = null, maxVotesToUse = null) {
-
     // Legacy-Unterstützung für ältere Implementierung
     persistence.setItem(generateIdentifier(pollId), votes);
 
@@ -174,7 +170,7 @@ export function usePollStatePersistence() {
       } catch (e) {
         console.error(`[DEBUG:STORAGE] Fehler beim Lesen des vorherigen Zustands:`, e);
       }
-      
+
       // Bei votes=99999 ist besondere Vorsicht geboten
       let computedUsedVotes;
       if (votes === 99999) {
@@ -184,10 +180,12 @@ export function usePollStatePersistence() {
         // Standardfall: used = votes - 1 oder expliziter Wert
         computedUsedVotes = usedVotes !== null ? usedVotes : votes - 1;
       }
-      
+
       // SICHERHEITSMAßNAHME: Stelle sicher, dass wir niemals mehr als die erlaubten Stimmen zählen
       if (previousState.voteAmount !== undefined && computedUsedVotes > previousState.voteAmount) {
-        console.warn(`[DEBUG:STORAGE] Begrenze gespeicherte Stimmen auf maximal erlaubte Anzahl: ${previousState.voteAmount}`);
+        console.warn(
+          `[DEBUG:STORAGE] Begrenze gespeicherte Stimmen auf maximal erlaubte Anzahl: ${previousState.voteAmount}`
+        );
         computedUsedVotes = previousState.voteAmount;
       }
 
@@ -196,7 +194,7 @@ export function usePollStatePersistence() {
         used: computedUsedVotes, // Entweder expliziter Wert oder berechnet
         maxVotesToUse: maxVotesToUse, // Speichere die maximal zu verwendenden Stimmen
         updatedAt: Date.now(),
-        voteAmount: previousState.voteAmount // Behalte die maximale Stimmanzahl bei, falls vorhanden
+        voteAmount: previousState.voteAmount, // Behalte die maximale Stimmanzahl bei, falls vorhanden
       };
 
       persistence.setItem(stateKey, JSON.stringify(voteState));
@@ -220,7 +218,6 @@ export function usePollStatePersistence() {
     // WICHTIG: Wenn keine Event-ID vorhanden ist, versuchen wir zuerst, sie aus dem localStorage abzuleiten
     // Dies kann helfen, Inkonsistenzen bei fehlender Event-ID zu vermeiden
     if (!eventId) {
-
       // Suche nach allen Schlüsseln, die zu dieser Poll gehören könnten
       const possibleKeys = [];
       for (let i = 0; i < persistence.length; i++) {
@@ -273,7 +270,7 @@ export function usePollStatePersistence() {
 
   /**
    * Gibt die maximal zu verwendenden Stimmen für einen Poll zurück
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {number} eventId
    * @param {number} defaultValue - Standardwert, wenn keine maxVotesToUse gesetzt sind
    * @returns {number|null}
@@ -288,7 +285,7 @@ export function usePollStatePersistence() {
 
   /**
    * Speichert die maximal zu verwendenden Stimmen für einen Poll
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {number} eventId
    * @param {number} maxVotesToUse
    */
@@ -300,14 +297,14 @@ export function usePollStatePersistence() {
     const voteState = {
       ...existingState,
       maxVotesToUse: maxVotesToUse,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
     persistence.setItem(stateKey, JSON.stringify(voteState));
   }
 
   /**
    * Gibt die Anzahl der bisher verwendeten Stimmen für einen Poll zurück
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {number} eventId
    * @returns {number}
    */
@@ -315,9 +312,10 @@ export function usePollStatePersistence() {
     // WICHTIG: Wenn keine Event-ID vorhanden ist, versuchen wir zuerst, sie aus dem localStorage abzuleiten
     // Dies ist analog zur Implementierung in restoreVoteCounter
     if (!eventId || !pollId) {
-
       if (!pollId) {
-        console.warn(`[DEBUG:STORAGE] getUsedVotes: Keine Poll-ID vorhanden, kann keine Stimmen abrufen`);
+        console.warn(
+          `[DEBUG:STORAGE] getUsedVotes: Keine Poll-ID vorhanden, kann keine Stimmen abrufen`
+        );
         return 0;
       }
 
@@ -340,7 +338,9 @@ export function usePollStatePersistence() {
         console.warn(`[DEBUG:STORAGE] getUsedVotes: Keine passenden Schlüssel gefunden`);
         return 0;
       } else {
-        console.warn(`[DEBUG:STORAGE] getUsedVotes: Mehrere passende Schlüssel (${possibleKeys.length}) gefunden, verwende den neuesten`);
+        console.warn(
+          `[DEBUG:STORAGE] getUsedVotes: Mehrere passende Schlüssel (${possibleKeys.length}) gefunden, verwende den neuesten`
+        );
 
         // Bei mehreren Schlüsseln versuchen wir, den neuesten zu finden
         let newestKey = null;
@@ -381,7 +381,7 @@ export function usePollStatePersistence() {
 
   /**
    * Setzt den Vote-State für einen neuen Poll komplett zurück
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {number} eventId
    */
   function resetVoteState(pollId, eventId) {
@@ -392,14 +392,14 @@ export function usePollStatePersistence() {
       counter: 1,
       used: 0,
       maxVotesToUse: null, // Auch die gespeicherte maximale Stimmanzahl zurücksetzen
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
     persistence.setItem(stateKey, JSON.stringify(voteState));
   }
 
   /**
    * Setzt den Vote-State für einen Poll zurück, behält aber die maximale Stimmanzahl bei
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {number} eventId
    * @param {number|null} existingMaxVotes Die zu behaltende maximale Stimmanzahl
    */
@@ -411,14 +411,14 @@ export function usePollStatePersistence() {
       counter: 1,
       used: 0,
       maxVotesToUse: existingMaxVotes, // Behalte die gespeicherte maximale Stimmanzahl
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
     persistence.setItem(stateKey, JSON.stringify(voteState));
   }
 
   /**
    * Markiert eine Abstimmung als abgeschlossen und speichert den finalen Vote-State
-   * @param {number} pollId 
+   * @param {number} pollId
    * @param {object} eventUser - Der Event-User der abgestimmt hat
    * @param {object} event - Das Event zu dem die Abstimmung gehört
    */
@@ -436,7 +436,7 @@ export function usePollStatePersistence() {
 
     const stateKey = generateVoteStateKey(pollId, eventId);
     const voteAmount = parseInt(eventUser.voteAmount || 1, 10);
-    
+
     // Markiere alle Stimmen als verwendet (vollständige Abstimmung)
     const voteState = {
       counter: 99999, // Spezialwert für "vollständig abgestimmt"
@@ -444,9 +444,9 @@ export function usePollStatePersistence() {
       maxVotesToUse: voteAmount,
       voteAmount: voteAmount,
       completed: true, // Markiere als abgeschlossen
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
-    
+
     persistence.setItem(stateKey, JSON.stringify(voteState));
   }
 
@@ -456,9 +456,9 @@ export function usePollStatePersistence() {
     restoreVoteCounter,
     getUsedVotes,
     resetVoteState,
-    resetVoteStateButKeepMaxVotes,  // Neue Funktion zum Export hinzufügen
+    resetVoteStateButKeepMaxVotes, // Neue Funktion zum Export hinzufügen
     getMaxVotesToUse,
     setMaxVotesToUse,
-    saveVote  // Neue saveVote Funktion hinzufügen
+    saveVote, // Neue saveVote Funktion hinzufügen
   };
 }

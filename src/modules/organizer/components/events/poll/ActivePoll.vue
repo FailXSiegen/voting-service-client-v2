@@ -3,7 +3,7 @@
     <div class="card active-poll mb-3">
       <div class="card-header">
         <h2 class="h4">
-          {{ $t("view.polls.active.title") }}
+          {{ $t('view.polls.active.title') }}
         </h2>
       </div>
       <div class="card-body">
@@ -32,12 +32,8 @@
         />
       </div>
       <div class="card-footer">
-        <button
-          type="button"
-          class="btn btn-danger pull-right"
-          @click="onCloseActivePoll"
-        >
-          {{ $t("view.polls.active.close") }}
+        <button type="button" class="btn btn-danger pull-right" @click="onCloseActivePoll">
+          {{ $t('view.polls.active.close') }}
         </button>
       </div>
     </div>
@@ -45,34 +41,29 @@
     <div class="card active-poll-details mb-3">
       <div class="card-header d-flex justify-content-between align-items-center">
         <h2 v-if="activePollEventUser" class="h4 mb-0">
-          {{ t("view.polls.active.details") }}
+          {{ t('view.polls.active.details') }}
         </h2>
-        <button 
-          type="button" 
-          class="btn btn-secondary btn-sm" 
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm"
           :disabled="isRefreshing"
           @click="onRefresh"
         >
-          {{ $t("view.polls.active.refresh") || "Aktualisieren" }}
+          {{ $t('view.polls.active.refresh') || 'Aktualisieren' }}
         </button>
       </div>
 
       <div class="card-body">
-        <div
-          v-if="activePollEventUser && activePollEventUser.pollUser"
-          class="row"
-        >
+        <div v-if="activePollEventUser && activePollEventUser.pollUser" class="row">
           <div class="col-12 col-md-auto">
-            <h4>{{ t("navigation.views.organizerMemberRoom") }}</h4>
+            <h4>{{ t('navigation.views.organizerMemberRoom') }}</h4>
             <ul class="list-group">
               <li
                 v-for="(pollUser, index) in activePollEventUser.pollUser"
                 :key="index"
                 class="list-group-item d-flex justify-content-between align-items-center align-content-center"
               >
-                {{ index + 1 }} - {{ pollUser.publicName }} [{{
-                  pollUser.eventUserId
-                }}]
+                {{ index + 1 }} - {{ pollUser.publicName }} [{{ pollUser.eventUserId }}]
                 <i
                   class="bi h2 mb-0"
                   :class="{
@@ -85,18 +76,14 @@
           </div>
 
           <div class="col-12 col-md-auto">
-            <h4>{{ t("view.polls.active.alreadyVoted") }}</h4>
+            <h4>{{ t('view.polls.active.alreadyVoted') }}</h4>
             <ul class="list-group">
               <li
-                v-for="(
-                  pollUserVoted, index
-                ) in activePollEventUser.pollUserVoted"
+                v-for="(pollUserVoted, index) in activePollEventUser.pollUserVoted"
                 :key="index"
                 class="list-group-item d-flex justify-content-between align-items-center align-content-center"
               >
-                {{ index + 1 }} - {{ pollUserVoted.publicName }} [{{
-                  pollUserVoted.eventUserId
-                }}]
+                {{ index + 1 }} - {{ pollUserVoted.publicName }} [{{ pollUserVoted.eventUserId }}]
               </li>
             </ul>
           </div>
@@ -107,12 +94,12 @@
 </template>
 
 <script setup>
-import t from "@/core/util/l18n";
-import { computed, ref } from "vue";
+import t from '@/core/util/l18n';
+import { computed, ref } from 'vue';
 
 const isRefreshing = ref(false);
 
-const emit = defineEmits(["close", "refresh"]);
+const emit = defineEmits(['close', 'refresh']);
 const props = defineProps({
   activePoll: {
     type: Object,
@@ -148,20 +135,17 @@ const safeVotedCount = computed(() => parseInt(props.pollUserVotedCount, 10) || 
 
 function hasVoted(pollUser) {
   return props.activePollEventUser?.pollUserVoted?.find((pollUserVoted) => {
-    return (
-      parseInt(pollUserVoted?.eventUserId, 10) ===
-      parseInt(pollUser?.eventUserId, 10)
-    );
+    return parseInt(pollUserVoted?.eventUserId, 10) === parseInt(pollUser?.eventUserId, 10);
   });
 }
 
 function onCloseActivePoll() {
-  emit("close");
+  emit('close');
 }
 
 function onRefresh() {
   isRefreshing.value = true;
-  emit("refresh");
+  emit('refresh');
 }
 
 // Expose isRefreshing to parent component

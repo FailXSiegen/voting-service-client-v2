@@ -1,27 +1,27 @@
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
 import {
   apolloClient,
   AUTH_TOKEN,
   EVENT_USER_AUTH_TOKEN,
   resetClient,
   terminateClient,
-} from "@/apollo-client";
-import { decodeJsonWebToken } from "@/core/auth/jwt-util";
-import { getCurrentUnixTimeStamp } from "@/core/util/time-stamp";
+} from '@/apollo-client';
+import { decodeJsonWebToken } from '@/core/auth/jwt-util';
+import { getCurrentUnixTimeStamp } from '@/core/util/time-stamp';
 import {
   loginByEventUserAuthToken,
   refreshLogin,
   logout,
   USER_TYPE_EVENT_USER,
   USER_TYPE_ORGANIZER,
-} from "@/core/auth/login";
-import { provideApolloClient } from "@vue/apollo-composable";
-import { ORGANIZER } from "@/modules/organizer/graphql/queries/organizer";
-import { EVENT_USER } from "@/modules/eventUser/graphql/queries/event-user";
-import { reactive, ref } from "vue";
-import { getCookie } from "../util/cookie";
-import { handleError } from "../error/error-handler";
-import { EventUserNotFoundError } from "@/core/error/EventUserNotFoundError";
+} from '@/core/auth/login';
+import { provideApolloClient } from '@vue/apollo-composable';
+import { ORGANIZER } from '@/modules/organizer/graphql/queries/organizer';
+import { EVENT_USER } from '@/modules/eventUser/graphql/queries/event-user';
+import { reactive, ref } from 'vue';
+import { getCookie } from '../util/cookie';
+import { handleError } from '../error/error-handler';
+import { EventUserNotFoundError } from '@/core/error/EventUserNotFoundError';
 import gql from 'graphql-tag';
 
 class StyleManager {
@@ -49,13 +49,13 @@ class StyleManager {
   }
 
   static resetStyles(styles) {
-    Object.keys(styles).forEach(key => {
+    Object.keys(styles).forEach((key) => {
       document.documentElement.style.removeProperty(`--${key}`);
     });
   }
 }
 
-export const useCore = defineStore("core", {
+export const useCore = defineStore('core', {
   state: () => ({
     user: {
       type: null,
@@ -76,7 +76,7 @@ export const useCore = defineStore("core", {
     // Konfigurationsoptionen für statische Seiten (werden vom Server geladen)
     systemSettings: {
       useDirectStaticPaths: false,
-      useDbFooterNavigation: false
+      useDbFooterNavigation: false,
     },
   }),
   getters: {
@@ -96,12 +96,11 @@ export const useCore = defineStore("core", {
     getEventUser: (state) => state.eventUser.value,
     getEvent: (state) => state.event,
     isSuperOrganizer: (state) => {
-      const isSuper = state.user?.type === USER_TYPE_ORGANIZER &&
-        state.organizer.value?.superAdmin === true;
+      const isSuper =
+        state.user?.type === USER_TYPE_ORGANIZER && state.organizer.value?.superAdmin === true;
       return isSuper;
     },
-    isEventUserAuthorizedViaToken: (state) =>
-      state.eventUserAuthorizedViaToken === true,
+    isEventUserAuthorizedViaToken: (state) => state.eventUserAuthorizedViaToken === true,
     getAuthToken: () => {
       const token = localStorage.getItem(AUTH_TOKEN);
       return token;
@@ -138,9 +137,9 @@ export const useCore = defineStore("core", {
 
     async init() {
       // Check if window.localStorage is available.
-      if (typeof window.localStorage === "undefined") {
-        console.error("Missing LocalStorage object, but it is required.");
-        throw new Error("Missing LocalStorage object, but it is required.");
+      if (typeof window.localStorage === 'undefined') {
+        console.error('Missing LocalStorage object, but it is required.');
+        throw new Error('Missing LocalStorage object, but it is required.');
       }
 
       // Lade die globalen Systemeinstellungen
@@ -178,13 +177,13 @@ export const useCore = defineStore("core", {
                   return;
                 }
               } catch (refreshError) {
-                console.error("Failed to refresh token:", refreshError);
+                console.error('Failed to refresh token:', refreshError);
                 // Clear invalid token
                 localStorage.removeItem(AUTH_TOKEN);
               }
             }
           } catch (tokenError) {
-            console.error("Invalid token format:", tokenError);
+            console.error('Invalid token format:', tokenError);
             // Clear invalid token
             localStorage.removeItem(AUTH_TOKEN);
           }
@@ -200,7 +199,7 @@ export const useCore = defineStore("core", {
               await this.loginUser(token);
             }
           } catch (authTokenError) {
-            console.error("Failed to login with event user auth token:", authTokenError);
+            console.error('Failed to login with event user auth token:', authTokenError);
           }
         }
       } catch (error) {
@@ -219,13 +218,13 @@ export const useCore = defineStore("core", {
      */
     async loginUser(token, isTokenRefresh = false) {
       // Validate token.
-      if (typeof token !== "string" || token.length === 0) {
-        throw new Error("Token can not be empty!");
+      if (typeof token !== 'string' || token.length === 0) {
+        throw new Error('Token can not be empty!');
       }
 
       // Store token in local storage.
       localStorage.setItem(AUTH_TOKEN, token);
-      
+
       // If this is a token refresh, update the timestamp
       if (isTokenRefresh) {
         this.lastTokenRefresh = new Date().toISOString();
@@ -251,7 +250,7 @@ export const useCore = defineStore("core", {
           try {
             await this.queryOrganizer();
           } catch (error) {
-            console.error("Failed to fetch organizer data:", error);
+            console.error('Failed to fetch organizer data:', error);
             // Don't clear user session here, better to have partial data than none
           }
         }
@@ -261,7 +260,7 @@ export const useCore = defineStore("core", {
           try {
             await this.queryEventUser();
           } catch (error) {
-            console.error("Failed to fetch event user data:", error);
+            console.error('Failed to fetch event user data:', error);
             // Don't clear user session here, better to have partial data than none
           }
         }
@@ -310,30 +309,27 @@ export const useCore = defineStore("core", {
 
         try {
           // Use the direct Apollo client query to avoid Vue composition API issues
-          apolloClient.query({
-            query: ORGANIZER,
-            variables: { organizerId: this.user?.id },
-            fetchPolicy: "no-cache"
-          })
-            .then(result => {
+          apolloClient
+            .query({
+              query: ORGANIZER,
+              variables: { organizerId: this.user?.id },
+              fetchPolicy: 'no-cache',
+            })
+            .then((result) => {
               const organizer = result?.data?.organizer || null;
               if (organizer) {
                 this.organizer.value = organizer;
                 resolve(organizer);
                 return;
               }
-              reject(
-                new EventUserNotFoundError(
-                  `Organizer with id "${this.user?.id}" not found`,
-                ),
-              );
+              reject(new EventUserNotFoundError(`Organizer with id "${this.user?.id}" not found`));
             })
-            .catch(error => {
-              console.error("Error fetching organizer data:", error);
+            .catch((error) => {
+              console.error('Error fetching organizer data:', error);
               reject(error);
             });
         } catch (error) {
-          console.error("Error in queryOrganizer:", error);
+          console.error('Error in queryOrganizer:', error);
           reject(error);
         }
       });
@@ -358,30 +354,27 @@ export const useCore = defineStore("core", {
 
         try {
           // Use the direct Apollo client query to avoid Vue composition API issues
-          apolloClient.query({
-            query: EVENT_USER,
-            variables: { id: this.user?.id },
-            fetchPolicy: "no-cache"
-          })
-            .then(result => {
+          apolloClient
+            .query({
+              query: EVENT_USER,
+              variables: { id: this.user?.id },
+              fetchPolicy: 'no-cache',
+            })
+            .then((result) => {
               const eventUser = result?.data?.eventUser || null;
               if (eventUser) {
                 this.eventUser.value = eventUser;
                 resolve(eventUser);
                 return;
               }
-              reject(
-                new EventUserNotFoundError(
-                  `Event user with id "${this.user?.id}" not found`,
-                ),
-              );
+              reject(new EventUserNotFoundError(`Event user with id "${this.user?.id}" not found`));
             })
-            .catch(error => {
-              console.error("Error fetching event user data:", error);
+            .catch((error) => {
+              console.error('Error fetching event user data:', error);
               reject(error);
             });
         } catch (error) {
-          console.error("Error in queryEventUser:", error);
+          console.error('Error in queryEventUser:', error);
           reject(error);
         }
       });
@@ -451,7 +444,7 @@ export const useCore = defineStore("core", {
               }
             }
           `,
-          fetchPolicy: 'network-only' // Immer vom Server laden
+          fetchPolicy: 'network-only', // Immer vom Server laden
         });
 
         if (result.data?.systemSettings) {
@@ -486,8 +479,8 @@ export const useCore = defineStore("core", {
             }
           `,
           variables: {
-            input: settings
-          }
+            input: settings,
+          },
         });
 
         if (result.data?.updateSystemSettings) {

@@ -1,7 +1,7 @@
 .ReactModalPortal,
 #zmmtg-root {
   button {
-    &[aria-expanded="true"] + ul {
+    &[aria-expanded='true'] + ul {
       display: block !important;
       z-index: 1200 !important;
 
