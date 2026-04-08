@@ -70,7 +70,7 @@
       <button class="btn btn-primary mt-5 mb-3">
         <i class="bi-play bi--2xl align-middle" />
         <span class="align-middle">
-          {{ $t("view.event.create.labels.eventUser.submit") }}
+          {{ $t('view.event.create.labels.eventUser.submit') }}
         </span>
       </button>
     </form>
@@ -78,15 +78,15 @@
 </template>
 
 <script setup>
-import { computed, reactive } from "vue";
-import { required, requiredIf } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import BaseInput from "@/core/components/form/BaseInput.vue";
+import { computed, reactive } from 'vue';
+import { required, requiredIf } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import BaseInput from '@/core/components/form/BaseInput.vue';
 
-const emit = defineEmits(["submit"]);
+const emit = defineEmits(['submit']);
 const props = defineProps({
   prefillData: {
     type: Object,
@@ -99,8 +99,8 @@ const props = defineProps({
 const formData = reactive({
   verified: props.prefillData?.verified ?? false,
   allowToVote: props.prefillData?.allowToVote ?? false,
-  username: props.prefillData?.username ?? "",
-  publicName: props.prefillData?.publicName ?? "",
+  username: props.prefillData?.username ?? '',
+  publicName: props.prefillData?.publicName ?? '',
   voteAmount: props.prefillData?.voteAmount ?? 1,
 });
 const rules = computed(() => {
@@ -126,7 +126,7 @@ async function onSubmit() {
     formData.voteAmount = 0;
   }
 
-  emit("submit", formData);
+  emit('submit', formData);
 }
 </script>
 

@@ -10,9 +10,9 @@
 
 <script>
 export default {
-  emits: ["loaded"],
+  emits: ['loaded'],
   mounted() {
-    this.$emit("loaded", this.htmlContent);
+    this.$emit('loaded', this.htmlContent);
   },
 };
 </script>

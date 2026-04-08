@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const UPDATE_ZOOM_MEETING = gql`
   mutation CreateZoomMeeting($input: UpdateZoomMeetingInput!) {

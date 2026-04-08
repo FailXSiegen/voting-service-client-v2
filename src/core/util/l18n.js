@@ -1,4 +1,4 @@
-import i18n from "@/l18n";
+import i18n from '@/l18n';
 
 const { t } = i18n.global;
 

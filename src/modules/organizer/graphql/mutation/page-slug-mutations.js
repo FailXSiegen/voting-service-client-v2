@@ -25,36 +25,6 @@ export const DELETE_PAGE_SLUG = gql`
 `;
 
 /**
- * GraphQL query to fetch all page slugs
- */
-export const FETCH_PAGE_SLUGS = gql`
-  query FetchPageSlugs {
-    pageSlugs {
-      id
-      pageKey
-      slug
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-/**
- * GraphQL query to fetch a page slug by page key
- */
-export const FETCH_PAGE_SLUG_BY_KEY = gql`
-  query FetchPageSlugByKey($pageKey: String!) {
-    pageSlugByPageKey(pageKey: $pageKey) {
-      id
-      pageKey
-      slug
-      createdAt
-      updatedAt
-    }
-  }
-`;
-
-/**
  * GraphQL query to fetch a page slug by slug
  */
 export const FETCH_PAGE_SLUG_BY_SLUG = gql`

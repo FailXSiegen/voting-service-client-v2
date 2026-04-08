@@ -1,0 +1,17 @@
+{
+  "threshold": 5,
+  "reporters": ["console"],
+  "ignore": [
+    "_obsolete",
+    "node_modules",
+    "dist",
+    "build",
+    "public/vendor",
+    "**/*.min.js",
+    "**/*.min.css",
+    "package-lock.json"
+  ],
+  "absolute": false,
+  "gitignore": true,
+  "format": ["javascript", "vue", "css", "scss"]
+}

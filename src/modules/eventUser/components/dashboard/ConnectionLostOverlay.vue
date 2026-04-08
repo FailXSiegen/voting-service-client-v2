@@ -4,21 +4,15 @@
     class="h-100 w-100 position-fixed d-flex align-items-center align-content-center justify-content-center text-center"
   >
     <span class="content alert alert-danger">
-      <h1>{{ $t("error.network.connectionLost") }}</h1>
+      <h1>{{ $t('error.network.connectionLost') }}</h1>
       <div class="d-flex justify-content-center gap-3">
-        <button
-          class="btn-lg btn btn-secondary py-2 d-print-none"
-          @click="onReloadPage"
-        >
+        <button class="btn-lg btn btn-secondary py-2 d-print-none" @click="onReloadPage">
           <i class="me-3 bi bi-arrow-repeat bi--1xl" />
-          {{ $t("navigation.reload") }}
+          {{ $t('navigation.reload') }}
         </button>
-        <button
-          class="btn-lg btn btn-danger py-2 d-print-none"
-          @click="onLogout"
-        >
+        <button class="btn-lg btn btn-danger py-2 d-print-none" @click="onLogout">
           <i class="me-3 bi bi-x-square bi--1xl" />
-          {{ $t("navigation.logOut") }}
+          {{ $t('navigation.logOut') }}
         </button>
       </div>
     </span>
@@ -26,8 +20,8 @@
 </template>
 
 <script setup>
-import { logout } from "@/core/auth/login";
-import { useCore } from "@/core/store/core";
+import { logout } from '@/core/auth/login';
+import { useCore } from '@/core/store/core';
 
 const store = useCore();
 
@@ -45,7 +39,7 @@ async function onLogout() {
     // Nach Logout einfach die Seite neu laden
     location.reload();
   } catch (error) {
-    console.error("Fehler beim Logout:", error);
+    console.error('Fehler beim Logout:', error);
     // Im Fehlerfall trotzdem LocalStorage löschen und Seite neu laden
     localStorage.clear();
     location.reload();

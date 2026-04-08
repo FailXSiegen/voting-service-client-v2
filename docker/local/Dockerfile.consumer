@@ -5,13 +5,13 @@ WORKDIR /app
 # Install dependencies including monitoring and diagnostic tools
 RUN apk add --no-cache curl tini netcat-openbsd
 COPY voting-service-api/package*.json ./
-RUN npm install
+RUN HUSKY=0 npm install
 
 # Copy source code, health check script and entrypoint
 COPY voting-service-api/ ./
-COPY docker/local/healthcheck-simplified.js ./healthcheck.js
-COPY docker/local/docker-entrypoint.sh /docker-entrypoint.sh
-COPY docker/local/scripts/wait-for-it.sh /app/scripts/wait-for-it.sh
+COPY voting-service-client-v2/docker/local/healthcheck-simplified.js ./healthcheck.js
+COPY voting-service-client-v2/docker/local/docker-entrypoint.sh /docker-entrypoint.sh
+COPY voting-service-client-v2/docker/local/scripts/wait-for-it.sh /app/scripts/wait-for-it.sh
 RUN chmod +x /app/scripts/wait-for-it.sh
 
 # Build the application

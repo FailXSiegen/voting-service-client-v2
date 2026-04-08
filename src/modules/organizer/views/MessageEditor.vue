@@ -60,12 +60,20 @@
             <div class="card-body">
               <ul class="nav nav-tabs mb-4">
                 <li class="nav-item">
-                  <button class="nav-link" :class="{ active: activeTab === 'editor' }" @click="activeTab = 'editor'">
+                  <button
+                    class="nav-link"
+                    :class="{ active: activeTab === 'editor' }"
+                    @click="activeTab = 'editor'"
+                  >
                     Editor
                   </button>
                 </li>
                 <li class="nav-item">
-                  <button class="nav-link" :class="{ active: activeTab === 'structure' }" @click="activeTab = 'structure'">
+                  <button
+                    class="nav-link"
+                    :class="{ active: activeTab === 'structure' }"
+                    @click="activeTab = 'structure'"
+                  >
                     JSON Struktur
                   </button>
                 </li>
@@ -76,7 +84,12 @@
                 <div class="row mb-4">
                   <div class="col-md-6">
                     <div class="form-check form-switch">
-                      <input id="showModifiedOnly" v-model="showOnlyModified" class="form-check-input" type="checkbox">
+                      <input
+                        id="showModifiedOnly"
+                        v-model="showOnlyModified"
+                        class="form-check-input"
+                        type="checkbox"
+                      />
                       <label class="form-check-label" for="showModifiedOnly">
                         {{ $t('view.messageEditor.showOnlyModified') }}
                       </label>
@@ -98,7 +111,7 @@
                             type="text"
                             class="form-control"
                             placeholder="Suchen..."
-                          >
+                          />
                         </div>
                       </div>
                     </div>
@@ -110,7 +123,9 @@
                     <thead>
                       <tr>
                         <th style="width: 25%">{{ $t('view.messageEditor.table.path') }}</th>
-                        <th style="width: 30%">{{ $t('view.messageEditor.table.defaultValue') }}</th>
+                        <th style="width: 30%">
+                          {{ $t('view.messageEditor.table.defaultValue') }}
+                        </th>
                         <th style="width: 30%">{{ $t('view.messageEditor.table.customValue') }}</th>
                         <th style="width: 15%">{{ $t('view.messageEditor.table.actions') }}</th>
                       </tr>
@@ -148,7 +163,11 @@
                               title="Auf Standardwert zurücksetzen"
                               @click="resetMessage(item)"
                             >
-                              <span v-if="item.resetting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                              <span
+                                v-if="item.resetting"
+                                class="spinner-border spinner-border-sm me-1"
+                                role="status"
+                              ></span>
                               <i v-else class="bi bi-arrow-counterclockwise me-1"></i>
                               {{ $t('view.messageEditor.reset') }}
                             </button>
@@ -166,8 +185,8 @@
 
                 <div v-if="filteredMessages.length > 0" class="mt-2 text-muted">
                   {{ filteredMessages.length }} von {{ messages.length }} Einträgen angezeigt
-                  <span v-if="messages.filter(m => m.modified).length > 0">
-                    ({{ messages.filter(m => m.modified).length }} bearbeitet)
+                  <span v-if="messages.filter((m) => m.modified).length > 0">
+                    ({{ messages.filter((m) => m.modified).length }} bearbeitet)
                   </span>
                 </div>
               </div>
@@ -207,8 +226,8 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import defaultMessages from '@/messages.js';
 import { toast } from 'vue3-toastify';
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
 import { reloadTranslations } from '@/l18n';
@@ -225,7 +244,7 @@ import {
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings,
   RouteOrganizerVideoConference,
-} from "@/router/routes";
+} from '@/router/routes';
 
 // Define navigation items
 const routes = getRoutesByName([
@@ -251,8 +270,9 @@ const jsonSearchQuery = ref('');
 const currentLocale = ref('de');
 
 // Recursively extract all leaf nodes from the messages object
-const extractLeafNodes = (obj, locale = 'de', path = '') => {
-  console.debug("Extracting messages for locale:", locale);
+// eslint-disable-next-line no-unused-vars
+const _extractLeafNodes = (obj, locale = 'de', path = '') => {
+  console.debug('Extracting messages for locale:', locale);
 
   // Special case for the top level object with locale keys
   if (path === '' && obj[locale]) {
@@ -262,7 +282,7 @@ const extractLeafNodes = (obj, locale = 'de', path = '') => {
   function extractMessages(objToExtract, locale, currentPath) {
     const extractedItems = [];
 
-    Object.keys(objToExtract).forEach(key => {
+    Object.keys(objToExtract).forEach((key) => {
       const keyPath = currentPath ? `${currentPath}.${key}` : key;
 
       if (typeof objToExtract[key] === 'object' && objToExtract[key] !== null) {
@@ -276,22 +296,25 @@ const extractLeafNodes = (obj, locale = 'de', path = '') => {
 
         // Benutzerdefinierten Wert aus localMessages holen
         // localMessages enthält nur die benutzerdefinierten Übersetzungen
-        const customValue = getNestedValue(localMessages.value, [locale, ...keyPath.split('.')]) || '';
+        const customValue =
+          getNestedValue(localMessages.value, [locale, ...keyPath.split('.')]) || '';
 
         // Wenn der benutzerdefinierte Wert existiert und nicht leer ist, gilt der Eintrag als geändert
         const isModified = customValue !== '';
 
         // Debugging ausgeben
         if (isModified) {
-          console.debug(`Found modified translation: ${keyPath}, default="${defaultValue}", custom="${customValue}"`);
+          console.debug(
+            `Found modified translation: ${keyPath}, default="${defaultValue}", custom="${customValue}"`
+          );
         }
 
         extractedItems.push({
           path: keyPath,
-          defaultValue: defaultValue,  // Der originale Standardwert aus messages.json
-          customValue: customValue,    // Der benutzerdefinierte Wert (oder leer, wenn nicht vorhanden)
-          modified: isModified,        // Nur als geändert markieren, wenn ein benutzerdefinierter Wert existiert
-          resetting: false             // Zusätzliches Flag für den Reset-Vorgang
+          defaultValue: defaultValue, // Der originale Standardwert aus messages.json
+          customValue: customValue, // Der benutzerdefinierte Wert (oder leer, wenn nicht vorhanden)
+          modified: isModified, // Nur als geändert markieren, wenn ein benutzerdefinierter Wert existiert
+          resetting: false, // Zusätzliches Flag für den Reset-Vorgang
         });
       }
     });
@@ -305,7 +328,7 @@ const extractLeafNodes = (obj, locale = 'de', path = '') => {
 // Helper function to get a nested value from an object using a path array
 const getNestedValue = (obj, path) => {
   if (!obj) return undefined;
-  return path.reduce((o, key) => (o && o[key] !== undefined) ? o[key] : undefined, obj);
+  return path.reduce((o, key) => (o && o[key] !== undefined ? o[key] : undefined), obj);
 };
 
 // Helper function to set a nested value in an object using a path array
@@ -330,7 +353,6 @@ const setNestedValue = (obj, path, value) => {
 const loadMessages = async (locale = currentLocale.value) => {
   loading.value = true;
   try {
-
     // Alle Variablen zurücksetzen
     localMessages.value = {};
     messages.value = [];
@@ -349,14 +371,14 @@ const loadMessages = async (locale = currentLocale.value) => {
           }
         `,
         variables: { locale },
-        fetchPolicy: 'network-only'
+        fetchPolicy: 'network-only',
       });
 
       if (response.data?.translationsByLocale) {
         customMessages = JSON.parse(response.data.translationsByLocale);
       }
     } catch (error) {
-      console.error("Fehler beim Laden der benutzerdefinierten Übersetzungen:", error);
+      console.error('Fehler beim Laden der benutzerdefinierten Übersetzungen:', error);
     }
 
     // Die benutzerdefinierten Übersetzungen speichern
@@ -367,7 +389,7 @@ const loadMessages = async (locale = currentLocale.value) => {
 
     // Rekursive Funktion zum Durchlaufen der Originalmeldungen
     const processMessages = (obj, path = '') => {
-      Object.keys(obj).forEach(key => {
+      Object.keys(obj).forEach((key) => {
         const currentPath = path ? `${path}.${key}` : key;
 
         if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -404,7 +426,7 @@ const loadMessages = async (locale = currentLocale.value) => {
             defaultValue: originalValue,
             customValue: customValue,
             modified: modified,
-            resetting: false // Zusätzliches Flag für den Reset-Vorgang
+            resetting: false, // Zusätzliches Flag für den Reset-Vorgang
           });
         }
       });
@@ -413,21 +435,25 @@ const loadMessages = async (locale = currentLocale.value) => {
     // Bearbeitung starten und Ergebnis speichern
     processMessages(originalMessages);
     messages.value = result;
-
   } catch (error) {
-    console.error("Fehler beim Laden der Übersetzungen:", error);
-    toast.error("Fehler beim Laden der Übersetzungen");
+    console.error('Fehler beim Laden der Übersetzungen:', error);
+    toast.error('Fehler beim Laden der Übersetzungen');
   } finally {
     loading.value = false;
   }
 };
 
 // Hilfsfunktion: Prüft, ob ein verschachtelter Pfad in einem Objekt existiert
-function getNestedPropertyExists(obj, pathArray) {
+// eslint-disable-next-line no-unused-vars
+function _getNestedPropertyExists(obj, pathArray) {
   let current = obj;
 
   for (const key of pathArray) {
-    if (current === undefined || current === null || !Object.prototype.hasOwnProperty.call(current, key)) {
+    if (
+      current === undefined ||
+      current === null ||
+      !Object.prototype.hasOwnProperty.call(current, key)
+    ) {
       return false;
     }
     current = current[key];
@@ -453,13 +479,13 @@ const saveChanges = async () => {
     const translationsToSave = [];
 
     // Nur Einträge mit Änderungen berücksichtigen
-    messages.value.forEach(item => {
+    messages.value.forEach((item) => {
       // Nur speichern, wenn ein benutzerdefinierter Wert gesetzt wurde
       if (item.customValue) {
         translationsToSave.push({
           locale: currentLocale.value,
           key: item.path,
-          value: item.customValue
+          value: item.customValue,
         });
       }
     });
@@ -475,19 +501,18 @@ const saveChanges = async () => {
     const response = await apolloClient.mutate({
       mutation: SAVE_TRANSLATIONS_MUTATION,
       variables: {
-        translations: translationsToSave
-      }
+        translations: translationsToSave,
+      },
     });
 
     // Antwort prüfen
     if (response.data?.saveTranslations) {
-
       // Lokale Übersetzungen aktualisieren
       const locale = currentLocale.value;
       const currentCustom = localMessages.value[locale] || {};
 
       // Für jede gespeicherte Übersetzung den Pfad im localMessages-Objekt aktualisieren
-      translationsToSave.forEach(translation => {
+      translationsToSave.forEach((translation) => {
         const path = translation.key.split('.');
         setNestedValue(currentCustom, path, translation.value);
       });
@@ -495,11 +520,11 @@ const saveChanges = async () => {
       // Lokalen Status aktualisieren
       localMessages.value = {
         ...localMessages.value,
-        [locale]: currentCustom
+        [locale]: currentCustom,
       };
 
       // Jedes Item mit seiner modified-Eigenschaft aktualisieren
-      messages.value.forEach(item => {
+      messages.value.forEach((item) => {
         if (item.customValue) {
           item.modified = true;
         }
@@ -517,7 +542,9 @@ const saveChanges = async () => {
         await loadMessages(currentLocale.value);
       } catch (reloadError) {
         console.error('Fehler beim Neuladen der Übersetzungen:', reloadError);
-        toast.warning('Übersetzungen wurden gespeichert, aber die Anwendung muss neu geladen werden');
+        toast.warning(
+          'Übersetzungen wurden gespeichert, aber die Anwendung muss neu geladen werden'
+        );
 
         // Im Fehlerfall Seite nach kurzer Verzögerung neu laden
         setTimeout(() => {
@@ -553,8 +580,8 @@ const resetMessage = async (item) => {
         mutation: DELETE_TRANSLATION_MUTATION,
         variables: {
           locale: currentLocale.value,
-          key: item.path
-        }
+          key: item.path,
+        },
       });
 
       if (response.data?.deleteTranslation) {
@@ -629,14 +656,18 @@ const filteredMessages = computed(() => {
     return messages.value;
   }
 
-  return messages.value.filter(item => {
+  return messages.value.filter((item) => {
     // Always check if search should match
     let matchesSearch = true;
     if (query) {
       matchesSearch =
         item.path.toLowerCase().includes(query) ||
-        (item.defaultValue && typeof item.defaultValue === 'string' && item.defaultValue.toLowerCase().includes(query)) ||
-        (item.customValue && typeof item.customValue === 'string' && item.customValue.toLowerCase().includes(query));
+        (item.defaultValue &&
+          typeof item.defaultValue === 'string' &&
+          item.defaultValue.toLowerCase().includes(query)) ||
+        (item.customValue &&
+          typeof item.customValue === 'string' &&
+          item.customValue.toLowerCase().includes(query));
     }
 
     // Always check if we should filter by modified state
@@ -647,7 +678,7 @@ const filteredMessages = computed(() => {
 });
 
 const hasChanges = computed(() => {
-  return messages.value.some(item => item.customValue);
+  return messages.value.some((item) => item.customValue);
 });
 
 // Function to filter messages.json based on locale and search query

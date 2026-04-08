@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const TRANSFER_EVENT = gql`
   mutation transferEvent($eventId: ID!, $newOrganizerId: ID!) {

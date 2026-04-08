@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerEventUserEdit')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerEventUserEdit") }} -
+        {{ $t('navigation.views.organizerEventUserEdit') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -10,35 +10,27 @@
       <EventNavigation :routes="routes" />
     </template>
     <template #content>
-      <EventUserForm
-        v-if="loaded"
-        :prefill-data="prefillData"
-        @submit="onSubmit"
-      />
+      <EventUserForm v-if="loaded" :prefill-data="prefillData" @submit="onSubmit" />
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import EventUserForm from "@/modules/organizer/components/events/event-user/EventUserForm.vue";
-import {
-  RouteOrganizerDashboard,
-  RouteOrganizerMemberRoom,
-} from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { reactive, ref } from "vue";
-import { useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { useMutation } from "@vue/apollo-composable";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { EVENT_USER } from "@/modules/organizer/graphql/queries/event-user";
-import { UPDATE_EVENT_USER } from "@/modules/organizer/graphql/mutation/update-event-user";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import EventUserForm from '@/modules/organizer/components/events/event-user/EventUserForm.vue';
+import { RouteOrganizerDashboard, RouteOrganizerMemberRoom } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { reactive, ref } from 'vue';
+import { useQuery, useMutation } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { EVENT_USER } from '@/modules/organizer/graphql/queries/event-user';
+import { UPDATE_EVENT_USER } from '@/modules/organizer/graphql/mutation/update-event-user';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -51,8 +43,8 @@ const eventUser = ref(null);
 const prefillData = reactive({
   verified: false,
   allowToVote: false,
-  username: "",
-  publicName: "",
+  username: '',
+  publicName: '',
   voteAmount: 1,
 });
 let eventUserQuery;
@@ -61,7 +53,7 @@ let eventUserQuery;
 const eventQuery = useQuery(
   EVENT,
   { id: eventId, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // Check if the event could be fetched successfully. redirect to list if not.
@@ -73,11 +65,7 @@ eventQuery.onResult(({ data }) => {
   event.value = data?.event;
 
   // Fetch event user to edit.
-  eventUserQuery = useQuery(
-    EVENT_USER,
-    { id: eventUserId },
-    { fetchPolicy: "no-cache" },
-  );
+  eventUserQuery = useQuery(EVENT_USER, { id: eventUserId }, { fetchPolicy: 'no-cache' });
   eventUserQuery.onResult(({ data }) => {
     // Check if the event could be fetched successfully. redirect to list if not.
     if (null === data?.eventUser) {
@@ -88,20 +76,14 @@ eventQuery.onResult(({ data }) => {
     eventUser.value = data?.eventUser ?? null;
     prefillData.verified = eventUser.value?.verified ?? false;
     prefillData.allowToVote = eventUser.value?.allowToVote ?? false;
-    prefillData.username = eventUser.value?.username ?? "";
-    prefillData.publicName = eventUser.value?.publicName ?? "";
+    prefillData.username = eventUser.value?.username ?? '';
+    prefillData.publicName = eventUser.value?.publicName ?? '';
     prefillData.voteAmount = eventUser.value?.voteAmount ?? 1;
     loaded.value = true;
   });
 });
 
-async function onSubmit({
-  username,
-  verified,
-  allowToVote,
-  publicName,
-  voteAmount,
-}) {
+async function onSubmit({ username, verified, allowToVote, publicName, voteAmount }) {
   // Update Event user.
   const { mutate: updateEventUser } = useMutation(UPDATE_EVENT_USER, {
     variables: {
@@ -122,8 +104,8 @@ async function onSubmit({
   await router.push({ name: RouteOrganizerMemberRoom });
 
   // Show success message.
-  toast(t("success.organizer.eventUser.updatedSuccessfully"), {
-    type: "success",
+  toast(t('success.organizer.eventUser.updatedSuccessfully'), {
+    type: 'success',
   });
 }
 </script>

@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(["play"]);
+const emit = defineEmits(['play']);
 const props = defineProps({
   polls: {
     type: Array,
@@ -40,7 +40,7 @@ const props = defineProps({
   completedPolls: {
     type: Array,
     default: () => [],
-    deprecated: "Use userVoteCycle from poll data instead"
+    deprecated: 'Use userVoteCycle from poll data instead',
   },
 });
 
@@ -49,15 +49,13 @@ function isDisabled(poll) {
   if (poll.userVoteCycle && poll.userVoteCycle.voteCycle > 0) {
     return true; // User hat bereits abgestimmt
   }
-  
+
   // Fallback für Kompatibilität mit alter completedPolls Logic
   if (props.completedPolls && props.completedPolls.length > 0) {
-    const hits = props.completedPolls.filter(
-      (completedPoll) => completedPoll.id === poll.id,
-    );
+    const hits = props.completedPolls.filter((completedPoll) => completedPoll.id === poll.id);
     return hits.length > 0;
   }
-  
+
   return false; // Button ist aktiv
 }
 </script>

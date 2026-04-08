@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
 function dbQuery(sql) {
   try {
     return execSync(
-      `echo "${sql.replace(/"/g, '\\"')}" | docker exec -i db mysql -u root -p1234 application 2>/dev/null`,
+      `echo "${sql.replace(/"/g, '\\"')}" | docker exec -i voting_db mysql -u root -prootpassword application 2>/dev/null`,
       { encoding: 'utf8' }
     ).trim();
   } catch (e) {
@@ -23,7 +23,7 @@ function dbQuery(sql) {
 }
 
 function resetTestState() {
-  dbQuery("UPDATE event_user SET password = '', online = 0, last_activity = NULL WHERE event_id = 1055");
+  dbQuery("UPDATE event_user SET password = '', online = 0, verified = 1, allow_to_vote = 1, vote_amount = 100, last_activity = NULL WHERE event_id = 1055");
 }
 
 async function loginUser(browser, username, publicName) {
@@ -224,6 +224,7 @@ test('Bulk-Vote Szenarien', async ({ browser }) => {
   resetTestState();
 
   let t0 = performance.now();
+  // Login users BEFORE organizer navigates, so PollForm query sees them as online
   const organizerPage = await loginOrganizer(browser);
   const user1Page = await loginUser(browser, 'user1-windows', 'Windows User');
   const user2Page = await loginUser(browser, 'user2-apple', 'Apple User');

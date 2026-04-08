@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerLobbyRoom')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerLobbyRoom") }} -
+        {{ $t('navigation.views.organizerLobbyRoom') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -22,25 +22,24 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import PendingEventUserList from "@/modules/organizer/components/events/PendingEventUserList.vue";
-import { RouteOrganizerDashboard } from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { computed, ref } from "vue";
-import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
-import { UPDATE_EVENT_USER_TO_PARTICIPANT } from "@/modules/organizer/graphql/mutation/update-event-user-to-participant";
-import { UPDATE_EVENT_USER_TO_GUEST } from "@/modules/organizer/graphql/mutation/update-event-user-to-guest";
-import { DELETE_EVENT_USER } from "@/modules/organizer/graphql/mutation/delete-event-user";
-import { useSubscription } from "@vue/apollo-composable";
-import { NEW_EVENT_USER } from "@/modules/organizer/graphql/subscription/new-event-user";
-import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from "@/modules/organizer/graphql/subscription/update-event-user-access-rights";
-import { EVENT_USER_LIFE_CYCLE } from "@/modules/organizer/graphql/subscription/event-user-life-cycle";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import PendingEventUserList from '@/modules/organizer/components/events/PendingEventUserList.vue';
+import { RouteOrganizerDashboard } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { useMutation, useQuery, useSubscription } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { computed, ref } from 'vue';
+import { EVENT_USERS } from '@/modules/organizer/graphql/queries/event-users';
+import { UPDATE_EVENT_USER_TO_PARTICIPANT } from '@/modules/organizer/graphql/mutation/update-event-user-to-participant';
+import { UPDATE_EVENT_USER_TO_GUEST } from '@/modules/organizer/graphql/mutation/update-event-user-to-guest';
+import { DELETE_EVENT_USER } from '@/modules/organizer/graphql/mutation/delete-event-user';
+import { NEW_EVENT_USER } from '@/modules/organizer/graphql/subscription/new-event-user';
+import { UPDATE_EVENT_USER_ACCESS_RIGHTS } from '@/modules/organizer/graphql/subscription/update-event-user-access-rights';
+import { EVENT_USER_LIFE_CYCLE } from '@/modules/organizer/graphql/subscription/event-user-life-cycle';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -50,7 +49,7 @@ const loaded = ref(false);
 const event = ref(null);
 const eventUsers = ref([]);
 const pendingEventUsers = computed(() =>
-  (eventUsers.value || []).filter((eventUser) => !eventUser.verified),
+  (eventUsers.value || []).filter((eventUser) => !eventUser.verified)
 );
 let eventUsersQuery;
 
@@ -58,7 +57,7 @@ let eventUsersQuery;
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // Check if the event could be fetched successfully. redirect to list if not.
@@ -74,7 +73,7 @@ eventQuery.onResult(({ data }) => {
   eventUsersQuery = useQuery(
     EVENT_USERS,
     { eventId: event.value?.id },
-    { fetchPolicy: "cache-and-network" },
+    { fetchPolicy: 'cache-and-network' }
   );
   eventUsersQuery.onResult(({ data }) => {
     if (data?.eventUsers) {
@@ -85,7 +84,7 @@ eventQuery.onResult(({ data }) => {
 
 // Handle new users.
 const newEventUserSubscription = useSubscription(NEW_EVENT_USER, {
-  eventId: id
+  eventId: id,
 });
 newEventUserSubscription.onResult(({ data }) => {
   if (parseInt(data?.newEventUser?.eventId, 10) !== parseInt(id, 10)) {
@@ -102,9 +101,7 @@ newEventUserSubscription.onResult(({ data }) => {
 });
 
 // Handle update of event user access rights.
-const updateEventUserAccessRightsSubscription = useSubscription(
-  UPDATE_EVENT_USER_ACCESS_RIGHTS,
-);
+const updateEventUserAccessRightsSubscription = useSubscription(UPDATE_EVENT_USER_ACCESS_RIGHTS);
 updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   const { eventUserId, eventId, verified, allowToVote, voteAmount } =
     data.updateEventUserAccessRights;
@@ -134,59 +131,52 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
 
 // Handle event user life cycle updates.
 const eventUserLifeCycleSubscription = useSubscription(EVENT_USER_LIFE_CYCLE, {
-  eventId: id
+  eventId: id,
 });
 eventUserLifeCycleSubscription.onResult(({ data }) => {
-
   if (!data || !data.eventUserLifeCycle) {
     if (import.meta.env.DEV) {
       console.warn('[ORGANIZER DEBUG] LobbyRoom - No valid data in eventUserLifeCycle event');
     }
     return;
   }
-    
+
   // We have to make a copy to add a new entry to the event users array.
   // Ensure eventUsers.value is an array before copying
-  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || [])); 
+  const copyOfEventUsers = JSON.parse(JSON.stringify(eventUsers.value || []));
   const eventUser = copyOfEventUsers.find((user) => {
-    return (
-      parseInt(user.id, 10) ===
-      parseInt(data?.eventUserLifeCycle?.eventUserId, 10)
-    );
+    return parseInt(user.id, 10) === parseInt(data?.eventUserLifeCycle?.eventUserId, 10);
   });
-  
+
   if (!eventUser) {
     if (import.meta.env.DEV) {
-      console.warn('[ORGANIZER DEBUG] LobbyRoom - No matching user found for ID:', data.eventUserLifeCycle.eventUserId);
+      console.warn(
+        '[ORGANIZER DEBUG] LobbyRoom - No matching user found for ID:',
+        data.eventUserLifeCycle.eventUserId
+      );
     }
     return;
-  }  
+  }
   eventUser.online = data?.eventUserLifeCycle?.online;
   eventUsers.value = copyOfEventUsers;
 });
 
 async function onUpdateToParticipant(eventUserId) {
-  const { mutate: updateEventUserToParticipant } = useMutation(
-    UPDATE_EVENT_USER_TO_PARTICIPANT,
-    {
-      variables: {
-        eventUserId,
-      },
+  const { mutate: updateEventUserToParticipant } = useMutation(UPDATE_EVENT_USER_TO_PARTICIPANT, {
+    variables: {
+      eventUserId,
     },
-  );
+  });
   await updateEventUserToParticipant();
   await eventUsersQuery.refetch();
 }
 
 async function onUpdateToGuest(eventUserId) {
-  const { mutate: updateEventUserToGuest } = useMutation(
-    UPDATE_EVENT_USER_TO_GUEST,
-    {
-      variables: {
-        eventUserId,
-      },
+  const { mutate: updateEventUserToGuest } = useMutation(UPDATE_EVENT_USER_TO_GUEST, {
+    variables: {
+      eventUserId,
     },
-  );
+  });
   await updateEventUserToGuest();
   await eventUsersQuery.refetch();
 }

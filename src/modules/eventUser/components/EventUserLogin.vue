@@ -2,10 +2,10 @@
   <PageLayout>
     <template #logo>
       <div class="container text-center">
-        <img 
-          v-if="event.logo" 
-          :src="event.logo" 
-          alt="Event Logo" 
+        <img
+          v-if="event.logo"
+          :src="event.logo"
+          alt="Event Logo"
           class="event-logo img img-fluid"
         />
       </div>
@@ -15,11 +15,7 @@
     </template>
     <template #subtitle>
       {{
-        $t(
-          event.active
-            ? "view.login.headline.userWelcomeTo"
-            : "view.login.headline.inactiveEvent",
-        )
+        $t(event.active ? 'view.login.headline.userWelcomeTo' : 'view.login.headline.inactiveEvent')
       }}
     </template>
     <template #content>
@@ -35,9 +31,7 @@
               :errors="v$.username?.$errors"
               :has-errors="v$.username?.$errors?.length > 0"
               :value="formData.username"
-              :help-text="
-                !readOnlyUsername ? $t('view.login.label.usernameHelp') : ''
-              "
+              :help-text="!readOnlyUsername ? $t('view.login.label.usernameHelp') : ''"
               :autocomplete="off"
               :readonly="readOnlyUsername"
               :classes="[readOnlyUsername ? 'form-control-plaintext' : '']"
@@ -89,36 +83,32 @@
             />
           </div>
           <button class="btn btn-primary btn-block float-end">
-            {{ $t("view.login.submitToEvent") }}
+            {{ $t('view.login.submitToEvent') }}
           </button>
         </form>
       </div>
-      <AlertBox
-        v-else
-        type="info"
-        :message="$t('view.login.inactiveEventText')"
-      />
+      <AlertBox v-else type="info" :message="$t('view.login.inactiveEventText')" />
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from "@/modules/eventUser/components/PageLayout.vue";
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import AlertBox from "@/core/components/AlertBox.vue";
-import { computed, reactive } from "vue";
-import { required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { loginEventUser } from "@/core/auth/login";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { useCore } from "@/core/store/core";
-import { hashString } from "@/core/util/hashString";
+import PageLayout from '@/modules/eventUser/components/PageLayout.vue';
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import AlertBox from '@/core/components/AlertBox.vue';
+import { computed, reactive } from 'vue';
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import { loginEventUser } from '@/core/auth/login';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { useCore } from '@/core/store/core';
+import { hashString } from '@/core/util/hashString';
 // Data.
 
-const emit = defineEmits(["exit"]);
+const emit = defineEmits(['exit']);
 const props = defineProps({
   event: {
     type: Object,
@@ -129,18 +119,20 @@ const coreStore = useCore();
 const urlParams = new URLSearchParams(window.location.search);
 
 // Set username readonly, if it is set in the url.
-const readOnlyUsername = urlParams.get("username") !== null ?? false;
+const readOnlyUsername = urlParams.get('username') !== null ?? false;
 // Set publicName readonly if event setting is enabled AND parameter is passed
-const publicNameFromUrl = urlParams.get("publicname") || urlParams.get("publicName") || "";
-const readOnlyPublicName = (props.event?.publicnameReadonly === true || props.event?.publicnameReadonly === 1) && publicNameFromUrl !== "";
+const publicNameFromUrl = urlParams.get('publicname') || urlParams.get('publicName') || '';
+const readOnlyPublicName =
+  (props.event?.publicnameReadonly === true || props.event?.publicnameReadonly === 1) &&
+  publicNameFromUrl !== '';
 // Form and validation setup.
 const formData = reactive({
-  username: urlParams.get("username") ?? "",
+  username: urlParams.get('username') ?? '',
   password:
     readOnlyUsername && props.event.allowMagicLink
-      ? hashString(urlParams.get("username") + props.event.createDatetime)
-      : "",
-  publicName: publicNameFromUrl || "",
+      ? hashString(urlParams.get('username') + props.event.createDatetime)
+      : '',
+  publicName: publicNameFromUrl || '',
 });
 const rules = computed(() => {
   return {
@@ -164,11 +156,11 @@ async function onSubmit() {
   loginEventUser(username, password, publicName, props.event?.id ?? 0)
     .then(({ token }) => coreStore.loginUser(token))
     .then(() =>
-      toast(t("success.login.eventUser", { userName: publicName }), {
-        type: "success",
-      }),
+      toast(t('success.login.eventUser', { userName: publicName }), {
+        type: 'success',
+      })
     )
-    .then(() => emit("exit"))
+    .then(() => emit('exit'))
     .catch((error) => {
       handleError(error, { autoClose: false });
     });

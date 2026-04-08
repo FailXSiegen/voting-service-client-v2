@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerAllEvents')">
     <template #title>
-      {{ $t("navigation.views.organizerAllEvents") }}
+      {{ $t('navigation.views.organizerAllEvents') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -30,7 +30,7 @@
       />
       <template v-if="noMorePastEventsFound">
         <AlertBox type="info">
-          {{ $t("view.results.noMoreResults") }}
+          {{ $t('view.results.noMoreResults') }}
         </AlertBox>
       </template>
       <button
@@ -39,17 +39,17 @@
         @click.prevent="onShowMorePastEvents"
       >
         <i class="me-3 bi bi-plus-square-fill bi--2xl" />
-        {{ $t("view.results.showMore") }}
+        {{ $t('view.results.showMore') }}
       </button>
     </template>
   </PageLayout>
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
-import EventListing from "@/modules/organizer/components/events/EventListing.vue";
-import { ref } from "vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import EventListing from '@/modules/organizer/components/events/EventListing.vue';
+import { ref } from 'vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -60,17 +60,17 @@ import {
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings,
   RouteOrganizerVideoConference,
-} from "@/router/routes";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { useCore } from "@/core/store/core";
-import t from "@/core/util/l18n";
-import { toast } from "vue3-toastify";
-import { REMOVE_EVENT } from "@/modules/organizer/graphql/mutation/remove-event";
-import { ALL_UPCOMING_EVENTS } from "@/modules/organizer/graphql/queries/all-upcoming-events";
-import { ALL_PAST_EVENTS } from "@/modules/organizer/graphql/queries/all-past-events";
-import AlertBox from "@/core/components/AlertBox.vue";
-import l18n from "@/l18n";
-import { UPDATE_EVENT_STATUS } from "@/modules/organizer/graphql/queries/update-event-status";
+} from '@/router/routes';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { useCore } from '@/core/store/core';
+import t from '@/core/util/l18n';
+import { toast } from 'vue3-toastify';
+import { REMOVE_EVENT } from '@/modules/organizer/graphql/mutation/remove-event';
+import { ALL_UPCOMING_EVENTS } from '@/modules/organizer/graphql/queries/all-upcoming-events';
+import { ALL_PAST_EVENTS } from '@/modules/organizer/graphql/queries/all-past-events';
+import AlertBox from '@/core/components/AlertBox.vue';
+import l18n from '@/l18n';
+import { UPDATE_EVENT_STATUS } from '@/modules/organizer/graphql/queries/update-event-status';
 
 const coreStore = useCore();
 
@@ -94,7 +94,7 @@ const allPastEvents = ref([]);
 
 // Query upcoming event.
 const allUpcomingEventsQuery = useQuery(ALL_UPCOMING_EVENTS, null, {
-  fetchPolicy: "cache-and-network",
+  fetchPolicy: 'cache-and-network',
 });
 allUpcomingEventsQuery.onResult(({ data }) => {
   allUpcomingEvents.value = data?.allUpcomingEvents ?? [];
@@ -107,7 +107,7 @@ const allPastEventsQuery = useQuery(
     page: page.value,
     pageSize: pageSize.value,
   },
-  { fetchPolicy: "cache-and-network" },
+  { fetchPolicy: 'cache-and-network' }
 );
 allPastEventsQuery.onResult(({ data }) => {
   allPastEvents.value = data?.allPastEvents ?? [];
@@ -123,16 +123,13 @@ function onShowMorePastEvents() {
     updateQuery: (previousResult, { fetchMoreResult }) => {
       if (!fetchMoreResult?.allPastEvents) {
         noMorePastEventsFound.value = true;
-        toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
+        toast(l18n.global.tc('view.results.noMoreResults'), { type: 'info' });
         return previousResult;
       }
 
       return {
         ...previousResult,
-        allPastEvents: [
-          ...previousResult.allPastEvents,
-          ...fetchMoreResult.allPastEvents,
-        ],
+        allPastEvents: [...previousResult.allPastEvents, ...fetchMoreResult.allPastEvents],
       };
     },
   });
@@ -156,7 +153,7 @@ async function onDelete({ eventId, organizerId }) {
   allPastEventsQuery.refetch();
 
   // Show success message.
-  toast(t("success.organizer.events.deletedSuccessfully"), { type: "success" });
+  toast(t('success.organizer.events.deletedSuccessfully'), { type: 'success' });
 }
 
 async function onToggleActive({ eventId, status }) {
@@ -179,6 +176,6 @@ async function onToggleActive({ eventId, status }) {
   allPastEventsQuery.refetch();
 
   // Show success message.
-  toast(t("success.organizer.events.updatedSuccessfully"), { type: "success" });
+  toast(t('success.organizer.events.updatedSuccessfully'), { type: 'success' });
 }
 </script>

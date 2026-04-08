@@ -1,36 +1,27 @@
-import {
-  ApolloClient,
-  split,
-  InMemoryCache,
-  HttpLink,
-  ApolloLink,
-  gql,
-} from "@apollo/client/core";
-import { getMainDefinition } from "@apollo/client/utilities";
-import { onError } from "@apollo/client/link/error";
-import { logErrorMessages } from "@vue/apollo-util";
-import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
-import { createClient } from "graphql-ws";
-import { decodeJsonWebToken } from "@/core/auth/jwt-util";
-import { getCurrentUnixTimeStamp } from "@/core/util/time-stamp";
-import { refreshLogin } from "@/core/auth/login";
-import { handleError } from "@/core/error/error-handler";
-import { setContext } from "apollo-link-context";
-import { useCore } from "@/core/store/core";
-import { NetworkError } from "@/core/error/NetworkError";
-import { UnauthorizedError } from "@/core/error/UnauthorizedError";
-import { GraphQLError } from "@/core/error/GraphQLError";
-import { ExpiredSessionError } from "@/core/error/ExpiredSessionError";
-import { URLS } from "@/urls";
-import { logout } from "@/core/auth/login";
+import { ApolloClient, split, InMemoryCache, HttpLink, ApolloLink, gql } from '@apollo/client/core';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { onError } from '@apollo/client/link/error';
+import { logErrorMessages } from '@vue/apollo-util';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
+import { decodeJsonWebToken } from '@/core/auth/jwt-util';
+import { getCurrentUnixTimeStamp } from '@/core/util/time-stamp';
+import { refreshLogin, logout } from '@/core/auth/login';
+import { handleError } from '@/core/error/error-handler';
+import { setContext } from 'apollo-link-context';
+import { useCore } from '@/core/store/core';
+import { NetworkError } from '@/core/error/NetworkError';
+import { UnauthorizedError } from '@/core/error/UnauthorizedError';
+import { GraphQLError } from '@/core/error/GraphQLError';
+import { ExpiredSessionError } from '@/core/error/ExpiredSessionError';
+import { URLS } from '@/urls';
 
-export const AUTH_TOKEN = "apollo-token";
-export const EVENT_USER_AUTH_TOKEN = "eventUserAuthToken";
-export const REFRESH_TOKEN = "refreshToken";
+export const AUTH_TOKEN = 'apollo-token';
+export const EVENT_USER_AUTH_TOKEN = 'eventUserAuthToken';
 
 function getAccessToken() {
-  if (typeof window.localStorage === "undefined") {
-    throw new Error("Missing LocalStorage object, but it is required.");
+  if (typeof window.localStorage === 'undefined') {
+    throw new Error('Missing LocalStorage object, but it is required.');
   }
   return localStorage.getItem(AUTH_TOKEN);
 }
@@ -65,7 +56,7 @@ const refreshTokenLink = setContext(async () => {
     }
   } catch (error) {
     // We do not have to catch the error here because if we have an error, the access token is invalid any ways.
-    console.error("RefreshTokenLink - Error decoding token:", error);
+    console.error('RefreshTokenLink - Error decoding token:', error);
   }
 
   try {
@@ -76,7 +67,7 @@ const refreshTokenLink = setContext(async () => {
     const coreStore = useCore();
     await coreStore.loginUser(token, true);
   } catch (error) {
-    console.error("RefreshTokenLink - Failed to refresh token:", error);
+    console.error('RefreshTokenLink - Failed to refresh token:', error);
     // If refresh fails, remove the token
     localStorage.removeItem(AUTH_TOKEN);
   }
@@ -114,7 +105,7 @@ const wsLink = new GraphQLWsLink(
       // Verwende JWT aus localStorage für die Authentifizierung
       let authParams = {
         connectionPresence: true,
-        forceReconnect: true
+        forceReconnect: true,
       };
 
       try {
@@ -131,8 +122,8 @@ const wsLink = new GraphQLWsLink(
       }
 
       return authParams;
-    }
-  }),
+    },
+  })
 );
 
 // VERBESSERT: Detailliertere WebSocket-Ereignisbehandlung mit Retry-Logik
@@ -141,14 +132,14 @@ const MAX_WS_RECONNECT_ATTEMPTS = 10;
 // FIX: Flag für Logout-Status um 4499-Toasts zu vermeiden
 let isLogoutInProgress = false;
 
-wsLink.client.on("connecting", () => {
+wsLink.client.on('connecting', () => {
   // Sicherstellen, dass der Zähler die Grenze nicht überschreitet
   if (wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
     wsReconnectCount++;
   }
 });
 
-wsLink.client.on("connected", () => {
+wsLink.client.on('connected', () => {
   // Zurücksetzen des Reconnect-Zählers bei erfolgreicher Verbindung
   wsReconnectCount = 0;
 
@@ -160,7 +151,7 @@ wsLink.client.on("connected", () => {
       coreStore.setEventUserOnlineState(true);
     }
   } catch (err) {
-    console.warn("[Websocket] Store noch nicht initialisiert:", err.message);
+    console.warn('[Websocket] Store noch nicht initialisiert:', err.message);
   }
 
   // Start eines Ping-Intervalls zum Halten der Verbindung
@@ -169,27 +160,32 @@ wsLink.client.on("connected", () => {
 });
 
 // VERBESSERT: Zusätzliche Ereignisbehandlung für Fehler
-wsLink.client.on("error", (error) => {
-  console.error("[Websocket] Fehler bei der Verbindung:", error);
+wsLink.client.on('error', (error) => {
+  console.error('[Websocket] Fehler bei der Verbindung:', error);
 
   // Bei Verbindungsfehlern automatisch versuchen, wieder zu verbinden
   if (wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
-    console.info(`[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`);
-    setTimeout(() => {
-      try {
-        // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
-        if (typeof wsLink.client.connect === 'function') {
-          // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
-          wsLink.client.connect();
+    console.info(
+      `[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`
+    );
+    setTimeout(
+      () => {
+        try {
+          // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
+          if (typeof wsLink.client.connect === 'function') {
+            // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
+            wsLink.client.connect();
+          }
+        } catch (e) {
+          console.error('[Websocket] Fehler beim Neustart der Verbindung:', e);
         }
-      } catch (e) {
-        console.error("[Websocket] Fehler beim Neustart der Verbindung:", e);
-      }
-    }, Math.min(wsReconnectCount * 1000, 5000)); // Exponentielles Backoff
+      },
+      Math.min(wsReconnectCount * 1000, 5000)
+    ); // Exponentielles Backoff
   }
 });
 
-wsLink.client.on("closed", (event) => {
+wsLink.client.on('closed', (event) => {
   // Mark current event user as offline.
   try {
     // Vorsichtshalber prüfen, ob der Store verfügbar ist
@@ -198,32 +194,36 @@ wsLink.client.on("closed", (event) => {
       coreStore.setEventUserOnlineState(false);
     }
   } catch (err) {
-    console.warn("[Websocket] Store noch nicht initialisiert:", err.message);
+    console.warn('[Websocket] Store noch nicht initialisiert:', err.message);
   }
 
   // Stoppe das Ping-Intervall, wenn die Verbindung geschlossen wird
   stopWebSocketKeepAlive();
 
   // FIX: Erweiterte Prüfung für kontrollierte Schließung (inkl. Code 4499 vom Logout)
-  const isControlledClosure = !event || 
-    event.code === 1000 ||  // Normal closure
-    event.code === 1001 ||  // Going away
-    event.code === 4499 ||  // UNSERE kontrollierte Terminierung beim Logout
-    isLogoutInProgress;     // Logout-Flag gesetzt
+  const isControlledClosure =
+    !event ||
+    event.code === 1000 || // Normal closure
+    event.code === 1001 || // Going away
+    event.code === 4499 || // UNSERE kontrollierte Terminierung beim Logout
+    isLogoutInProgress; // Logout-Flag gesetzt
 
   // Nur bei wirklich abnormaler Schließung versuchen, neu zu verbinden
   if (!isControlledClosure && wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
-    setTimeout(() => {
-      try {
-        // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
-        if (typeof wsLink.client.connect === 'function') {
-          // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
-          wsLink.client.connect();
+    setTimeout(
+      () => {
+        try {
+          // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
+          if (typeof wsLink.client.connect === 'function') {
+            // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
+            wsLink.client.connect();
+          }
+        } catch (e) {
+          console.error('[Websocket] Fehler beim Neustart der Verbindung nach Schließung:', e);
         }
-      } catch (e) {
-        console.error("[Websocket] Fehler beim Neustart der Verbindung nach Schließung:", e);
-      }
-    }, Math.min(wsReconnectCount * 1000, 5000)); // Exponentielles Backoff
+      },
+      Math.min(wsReconnectCount * 1000, 5000)
+    ); // Exponentielles Backoff
   }
 });
 
@@ -243,39 +243,41 @@ function startWebSocketKeepAlive() {
       if (typeof apolloClient !== 'undefined') {
         // Da wsLink.client.ping() nicht existiert, senden wir eine leere GraphQL-Anfrage
         // Die GraphQL-Spezifikation erlaubt eine Ping-Operation mit einer introspection query
-        apolloClient.query({
-          query: gql`
-            query KeepAlive {
-              __typename
-            }
-          `,
-          fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
-          context: {
-            credentials: 'include', // Cookies auch beim Keep-Alive mitsenden
-          }
-        }).then(() => {
-          // Erfolgreicher Keep-Alive, Updates für den Online-Status
-          try {
-            const coreStore = useCore();
-            if (coreStore && coreStore.isActiveEventUserSession) {
-              coreStore.setEventUserOnlineState(true);
+        apolloClient
+          .query({
+            query: gql`
+              query KeepAlive {
+                __typename
+              }
+            `,
+            fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
+            context: {
+              credentials: 'include', // Cookies auch beim Keep-Alive mitsenden
+            },
+          })
+          .then(() => {
+            // Erfolgreicher Keep-Alive, Updates für den Online-Status
+            try {
+              const coreStore = useCore();
+              if (coreStore && coreStore.isActiveEventUserSession) {
+                coreStore.setEventUserOnlineState(true);
 
-              // Nach erfolgreicher Keep-Alive-Anfrage auch die letzte Aktivitätszeit aktualisieren,
-              // um zu verhindern, dass der Inactivity-Cleanup-Service den Benutzer als offline markiert
-              // (Da dieser eine 15-Minuten-Grenze verwendet - siehe inactivity-cleanup.js)
-              const now = Math.floor(Date.now() / 1000); // Unix-Timestamp in Sekunden
-              localStorage.setItem('lastActiveTimestamp', now.toString());
+                // Nach erfolgreicher Keep-Alive-Anfrage auch die letzte Aktivitätszeit aktualisieren,
+                // um zu verhindern, dass der Inactivity-Cleanup-Service den Benutzer als offline markiert
+                // (Da dieser eine 15-Minuten-Grenze verwendet - siehe inactivity-cleanup.js)
+                const now = Math.floor(Date.now() / 1000); // Unix-Timestamp in Sekunden
+                localStorage.setItem('lastActiveTimestamp', now.toString());
+              }
+            } catch (storeError) {
+              console.warn('[Websocket] Keep-Alive Store-Update fehlgeschlagen:', storeError);
             }
-          } catch (storeError) {
-            console.warn("[Websocket] Keep-Alive Store-Update fehlgeschlagen:", storeError);
-          }
-        }).catch((error) => {
-          console.error("[Websocket] Keep-alive Anfrage fehlgeschlagen:", error);
-        });
+          })
+          .catch((error) => {
+            console.error('[Websocket] Keep-alive Anfrage fehlgeschlagen:', error);
+          });
       }
-
     } catch (e) {
-      console.error("[Websocket] Fehler beim Senden des Keep-alive:", e);
+      console.error('[Websocket] Fehler beim Senden des Keep-alive:', e);
     }
   }, 30000); // Alle 30 Sekunden
 }
@@ -331,14 +333,11 @@ export const apolloClient = new ApolloClient({
       // split based on operation type
       ({ query }) => {
         const definition = getMainDefinition(query);
-        return (
-          definition.kind === "OperationDefinition" &&
-          definition.operation === "subscription"
-        );
+        return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
       },
       authLink.concat(refreshTokenLink.concat(wsLink)),
-      authLink.concat(refreshTokenLink.concat(httpLink)),
-    ),
+      authLink.concat(refreshTokenLink.concat(httpLink))
+    )
   ),
 });
 
@@ -391,8 +390,8 @@ export async function terminateWebsocketClient(isLogout = false) {
     }
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("[Websocket] Fehler beim Beenden der WebSocket-Verbindung:", error);
-    
+    console.error('[Websocket] Fehler beim Beenden der WebSocket-Verbindung:', error);
+
     // FIX: Reset auch bei Fehler
     if (isLogout) {
       isLogoutInProgress = false;
@@ -402,7 +401,7 @@ export async function terminateWebsocketClient(isLogout = false) {
 
 export async function reconnectWebsocketClient() {
   try {
-    console.info("[Websocket] Starte vollständige WebSocket-Neuverbindung");
+    console.info('[Websocket] Starte vollständige WebSocket-Neuverbindung');
 
     // 1. Setze den Reconnect-Zähler zurück, damit neue Verbindungsversuche möglich sind
     wsReconnectCount = 0;
@@ -412,19 +411,19 @@ export async function reconnectWebsocketClient() {
       // Zuerst bestehende Verbindung vollständig beenden (WICHTIG!)
       if (wsLink && wsLink.client) {
         await wsLink.client.terminate();
-        console.info("[Websocket] Bestehende Verbindung beendet");
+        console.info('[Websocket] Bestehende Verbindung beendet');
       }
 
       // 3. Verbindung explizit neu aufbauen (das Wichtigste für die Wiederherstellung des Online-Status)
       if (wsLink && wsLink.client && typeof wsLink.client.connect === 'function') {
         await wsLink.client.connect();
-        console.info("[Websocket] Neue Verbindung explizit gestartet");
+        console.info('[Websocket] Neue Verbindung explizit gestartet');
       }
 
       // 4. Warte kurz, damit die WebSocket-Verbindung vollständig aufgebaut werden kann
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (wsError) {
-      console.error("[Websocket] Fehler beim Neuaufbau der WebSocket-Verbindung:", wsError);
+      console.error('[Websocket] Fehler beim Neuaufbau der WebSocket-Verbindung:', wsError);
     }
 
     // 5. Sende sofort ein Keep-Alive-Signal, um den Online-Status zu aktualisieren
@@ -455,15 +454,18 @@ export async function reconnectWebsocketClient() {
 
     // 8. Logge die Cookie-Verfügbarkeit für Debugging-Zwecke
     try {
-      console.info("[Websocket] Cookie-Status:", document.cookie ? "Cookies vorhanden" : "Keine Cookies verfügbar");
+      console.info(
+        '[Websocket] Cookie-Status:',
+        document.cookie ? 'Cookies vorhanden' : 'Keine Cookies verfügbar'
+      );
     } catch (e) {
-      console.warn("[Websocket] Cookie-Status konnte nicht geprüft werden:", e);
+      console.warn('[Websocket] Cookie-Status konnte nicht geprüft werden:', e);
     }
 
     return true;
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error("[Websocket] Allgemeiner Fehler bei der Verbindungswiederherstellung:", error);
+    console.error('[Websocket] Allgemeiner Fehler bei der Verbindungswiederherstellung:', error);
     throw error;
   }
 }

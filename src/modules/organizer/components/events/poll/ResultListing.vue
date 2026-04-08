@@ -1,6 +1,6 @@
 <template>
   <div class="results-listing">
-    <h2>{{ $t("view.results.pastResults") }}</h2>
+    <h2>{{ $t('view.results.pastResults') }}</h2>
     <div v-if="visiblePollResults?.length > 0" class="created-polls">
       <ResultItem
         v-for="pollResult in visiblePollResults"
@@ -15,8 +15,8 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import ResultItem from "@/modules/organizer/components/events/poll/ResultItem.vue";
+import { ref, watch } from 'vue';
+import ResultItem from '@/modules/organizer/components/events/poll/ResultItem.vue';
 
 const props = defineProps({
   eventRecord: {
@@ -30,22 +30,26 @@ const props = defineProps({
   // Show hide/show controls (only for organizers)
   showHiddenControls: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
 // Local copy of poll results that can be filtered
 const visiblePollResults = ref([...props.pollResults]);
 
 // Watch for changes to pollResults prop
-watch(() => props.pollResults, (newResults) => {
-  visiblePollResults.value = [...newResults];
-}, { deep: true });
+watch(
+  () => props.pollResults,
+  (newResults) => {
+    visiblePollResults.value = [...newResults];
+  },
+  { deep: true }
+);
 
 // Handle when a result is hidden
 function onResultHidden(pollResultId) {
   visiblePollResults.value = visiblePollResults.value.filter(
-    result => result.id !== pollResultId
+    (result) => result.id !== pollResultId
   );
 }
 </script>

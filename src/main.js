@@ -1,26 +1,25 @@
-import { createApp, provide, h } from "vue";
-import { DefaultApolloClient } from "@vue/apollo-composable";
-import { apolloClient } from "./apollo-client";
-import App from "./App.vue";
-import { router } from "./router/router";
+import { createApp, provide, h, watch } from 'vue';
+import { DefaultApolloClient } from '@vue/apollo-composable';
+import { apolloClient } from './apollo-client';
+import App from './App.vue';
+import { router } from './router/router';
 import l18n, { reloadTranslations, translationsLoaded } from './l18n';
-import { createHead } from "@vueuse/head";
-import { version } from "./../package";
-import { createApolloProvider } from "@vue/apollo-option";
-import * as ConfirmDialog from "vuejs-confirm-dialog";
-import Vue3EasyDataTable from "vue3-easy-data-table";
-import VueDatePicker from "@vuepic/vue-datepicker";
-import { createPinia } from "pinia";
-import jQuery from "jquery";
+import { createHead } from '@vueuse/head';
+import { version } from './../package';
+import { createApolloProvider } from '@vue/apollo-option';
+import * as ConfirmDialog from 'vuejs-confirm-dialog';
+import Vue3EasyDataTable from 'vue3-easy-data-table';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import { createPinia } from 'pinia';
+import jQuery from 'jquery';
 import Vue3Toastify from 'vue3-toastify';
-import { watch } from 'vue';
 window.$ = window.jQuery = jQuery;
 
-import "vue3-easy-data-table/dist/style.css";
-import "vue3-toastify/dist/index.css";
-import "bootstrap";
-import "./scss/main.scss";
-import "@vuepic/vue-datepicker/dist/main.css";
+import 'vue3-easy-data-table/dist/style.css';
+import 'vue3-toastify/dist/index.css';
+import 'bootstrap';
+import './scss/main.scss';
+import '@vuepic/vue-datepicker/dist/main.css';
 
 const apolloProvider = createApolloProvider({
   defaultClient: apolloClient,
@@ -44,14 +43,14 @@ app.use(Vue3Toastify, {
   autoClose: 3000,
   clearOnUrlChange: true,
   hideProgressBar: false,
-  position: "top-right",
+  position: 'top-right',
   pauseOnHover: true,
-  pauseOnFocusLoss: false
+  pauseOnFocusLoss: false,
 });
 
-app.provide("appVersion", version);
-app.component("EasyDataTable", Vue3EasyDataTable);
-app.component("VueDatePicker", VueDatePicker);
+app.provide('appVersion', version);
+app.component('EasyDataTable', Vue3EasyDataTable);
+app.component('VueDatePicker', VueDatePicker);
 
 // Füge einen globalen Router-Guard hinzu
 router.beforeEach(async (to, from, next) => {

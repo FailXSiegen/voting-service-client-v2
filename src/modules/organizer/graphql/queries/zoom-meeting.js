@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const QUERY_ZOOM_MEETING = gql`
   query zoomMeeting($id: ID!) {

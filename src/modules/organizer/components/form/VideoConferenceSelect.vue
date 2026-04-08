@@ -8,11 +8,7 @@
       :id="id"
       v-model="inputValue"
       :name="name"
-      :class="[
-        'custom-select form-select',
-        hasErrors ? 'is-invalid' : null,
-        ...classes,
-      ]"
+      :class="['custom-select form-select', hasErrors ? 'is-invalid' : null, ...classes]"
       @change="onChange"
     >
       <option value="0" selected="selected">---</option>
@@ -28,21 +24,17 @@
   <div v-if="helpText" class="form-text text-muted">
     {{ helpText }}
   </div>
-  <span
-    v-for="error in errors"
-    :key="error.uid"
-    class="form-field-error text-danger"
-  >
-    {{ $t("error.formValidation." + error.$validator) }}<br />
+  <span v-for="error in errors" :key="error.uid" class="form-field-error text-danger">
+    {{ $t('error.formValidation.' + error.$validator) }}<br />
   </span>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import { storeToRefs } from "pinia";
-import { useCore } from "@/core/store/core";
+import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useCore } from '@/core/store/core';
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(['change']);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -78,7 +70,7 @@ function onChange() {
   // WICHTIGER FIX: Defensive Programmierung - verhindere null reference errors
   const conferences = videoConferences.value || [];
   const foundConference = conferences.find(({ id }) => inputValue.value === id);
-  emit("change", {
+  emit('change', {
     value: foundConference,
   });
 }

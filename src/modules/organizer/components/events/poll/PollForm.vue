@@ -1,12 +1,12 @@
 <template>
   <form v-if="loaded" class="mutate-poll">
-    
     <!-- Warnung für asynchrone Events ohne Teilnehmer -->
     <div v-if="showAsyncEventWarning" class="alert alert-warning mb-3" role="alert">
       <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      <strong>Hinweis:</strong> Für asynchrone Veranstaltungen (Briefwahl) muss mindestens ein Teilnehmer vorhanden sein, um Abstimmungen erstellen zu können.
+      <strong>Hinweis:</strong> Für asynchrone Veranstaltungen (Briefwahl) muss mindestens ein
+      Teilnehmer vorhanden sein, um Abstimmungen erstellen zu können.
     </div>
-    
+
     <div class="mb-3">
       <BaseInput
         :label="$t('view.polls.create.labels.title')"
@@ -21,7 +21,7 @@
         "
       />
     </div>
-    <p>{{ $t("view.polls.headlines.answerOptionsTitle") }}</p>
+    <p>{{ $t('view.polls.headlines.answerOptionsTitle') }}</p>
     <div class="mb-3 card card-body bg-light">
       <RadioInput
         id="poll-answer-options"
@@ -103,7 +103,7 @@
         >
           <i class="bi-plus bi--2xl align-middle" />
           <span class="align-middle">
-            {{ $t("view.polls.create.labels.saveOnly") }}
+            {{ $t('view.polls.create.labels.saveOnly') }}
           </span>
         </button>
       </div>
@@ -117,7 +117,7 @@
         >
           <i class="bi-play bi--2xl align-middle" />
           <span class="align-middle">
-            {{ $t("view.polls.create.labels.saveAndStart") }}
+            {{ $t('view.polls.create.labels.saveAndStart') }}
           </span>
         </button>
       </div>
@@ -126,24 +126,24 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import TextInput from "@/core/components/form/TextInput.vue";
-import RadioInput from "@/core/components/form/RadioInput.vue";
-import NumberInput from "@/core/components/form/NumberInput.vue";
-import { required, requiredIf } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { useRoute } from "vue-router";
-import t from "@/core/util/l18n";
-import { useQuery } from "@vue/apollo-composable";
-import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { useCore } from "@/core/store/core";
+import { computed, onMounted, reactive, ref } from 'vue';
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import TextInput from '@/core/components/form/TextInput.vue';
+import RadioInput from '@/core/components/form/RadioInput.vue';
+import NumberInput from '@/core/components/form/NumberInput.vue';
+import { required, requiredIf } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import { useRoute } from 'vue-router';
+import t from '@/core/util/l18n';
+import { useQuery } from '@vue/apollo-composable';
+import { EVENT_USERS } from '@/modules/organizer/graphql/queries/event-users';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { useCore } from '@/core/store/core';
 
-const emit = defineEmits(["submit", "submitAndStart"]);
+const emit = defineEmits(['submit', 'submitAndStart']);
 const props = defineProps({
   prefillData: {
     type: Object,
@@ -192,18 +192,18 @@ const showAsyncEventWarning = computed(() => {
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   if (data?.event) {
     event.value = data.event;
     console.log('[PollForm] Event loaded:', data.event);
-    
+
     // Load event users
     const eventUsersQuery = useQuery(
       EVENT_USERS,
       { eventId: id },
-      { fetchPolicy: "cache-and-network" },
+      { fetchPolicy: 'cache-and-network' }
     );
     eventUsersQuery.onResult(({ data: usersData }) => {
       if (usersData?.eventUsers) {
@@ -219,10 +219,10 @@ eventQuery.onResult(({ data }) => {
 
 // Form and validation setup.
 const formData = reactive({
-  title: props.prefillData?.title ?? "",
-  type: props.prefillData?.type ?? "SECRET",
-  pollAnswer: props.prefillData?.pollAnswer ?? "yesNoAbstain",
-  list: props.prefillData?.list ?? "",
+  title: props.prefillData?.title ?? '',
+  type: props.prefillData?.type ?? 'SECRET',
+  pollAnswer: props.prefillData?.pollAnswer ?? 'yesNoAbstain',
+  list: props.prefillData?.list ?? '',
   minVotes: props.prefillData?.minVotes ?? 0,
   maxVotes: props.prefillData?.maxVotes ?? 1,
   allowAbstain: props.prefillData?.allowAbstain ?? false,
@@ -235,7 +235,7 @@ const rules = computed(() => {
     type: { required },
     pollAnswer: { required },
     list: {
-      requiredIf: requiredIf(formData.pollAnswer === "custom"),
+      requiredIf: requiredIf(formData.pollAnswer === 'custom'),
     },
     minVotes: { required },
     maxVotes: { required },
@@ -247,26 +247,26 @@ const v$ = useVuelidate(rules, formData);
 
 const answerOptions = [
   {
-    label: t("view.polls.create.labels.yesNo"),
-    value: "yesNo",
+    label: t('view.polls.create.labels.yesNo'),
+    value: 'yesNo',
   },
   {
-    label: t("view.polls.create.labels.yesNoAbstain"),
-    value: "yesNoAbstain",
+    label: t('view.polls.create.labels.yesNoAbstain'),
+    value: 'yesNoAbstain',
   },
   {
-    label: t("view.polls.create.labels.custom"),
-    value: "custom",
+    label: t('view.polls.create.labels.custom'),
+    value: 'custom',
   },
 ];
 const pollTypes = [
   {
-    label: t("view.polls.create.labels.openPoll"),
-    value: "PUBLIC",
+    label: t('view.polls.create.labels.openPoll'),
+    value: 'PUBLIC',
   },
   {
-    label: t("view.polls.create.labels.secretPoll"),
-    value: "SECRET",
+    label: t('view.polls.create.labels.secretPoll'),
+    value: 'SECRET',
   },
 ];
 
@@ -289,7 +289,7 @@ async function onSubmit() {
     return;
   }
 
-  emit("submit", formData);
+  emit('submit', formData);
 }
 
 async function onSubmitAndStart() {
@@ -302,50 +302,50 @@ async function onSubmitAndStart() {
     return;
   }
 
-  emit("submitAndStart", formData);
+  emit('submitAndStart', formData);
 }
 
 // Functions.
 
 function updatePollAnswers() {
   switch (formData.pollAnswer) {
-    case "custom":
+    case 'custom':
       convertListTextToPollAnswers();
       return;
-    case "yesNoAbstain":
+    case 'yesNoAbstain':
       formData.possibleAnswers = [
         {
-          content: "Ja",
+          content: 'Ja',
         },
         {
-          content: "Nein",
+          content: 'Nein',
         },
         {
-          content: "Enthaltung",
+          content: 'Enthaltung',
         },
       ];
-      formData.list = "";
+      formData.list = '';
       formData.allowAbstain = false;
       formData.maxVotes = 1;
       formData.minVotes = 0;
       break;
-    case "yesNo":
+    case 'yesNo':
       formData.possibleAnswers = [
         {
-          content: "Ja",
+          content: 'Ja',
         },
         {
-          content: "Nein",
+          content: 'Nein',
         },
       ];
       break;
     default:
       throw new Error(
-        `Invalid answer type '${formData.pollAnswer}' given. Allowed are: 'yesNoAbstain', 'yesNo', 'custom'`,
+        `Invalid answer type '${formData.pollAnswer}' given. Allowed are: 'yesNoAbstain', 'yesNo', 'custom'`
       );
   }
   // Reset custom answer related properties.
-  formData.list = "";
+  formData.list = '';
   formData.allowAbstain = false;
   formData.maxVotes = 1;
   formData.minVotes = 0;
@@ -353,7 +353,7 @@ function updatePollAnswers() {
 
 function convertListTextToPollAnswers() {
   formData.possibleAnswers = [];
-  const rows = formData.list.split("\n");
+  const rows = formData.list.split('\n');
   for (const row of rows) {
     if (row.trim().length > 0) {
       formData.possibleAnswers.push({ content: row.trim() });

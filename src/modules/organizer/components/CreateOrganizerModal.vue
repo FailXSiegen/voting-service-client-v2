@@ -1,15 +1,10 @@
 <template>
-  <div
-    class="modal fade show d-block"
-    tabindex="-1"
-    role="dialog"
-    @click.self="$emit('close')"
-  >
+  <div class="modal fade show d-block" tabindex="-1" role="dialog" @click.self="$emit('close')">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title">
-            {{ $t("view.organizers.create.title") }}
+            {{ $t('view.organizers.create.title') }}
           </h5>
           <button
             type="button"
@@ -106,21 +101,12 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            @click="$emit('close')"
-          >
-            {{ $t("general.cancel") }}
+          <button type="button" class="btn btn-secondary" @click="$emit('close')">
+            {{ $t('general.cancel') }}
           </button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            :disabled="isSubmitting"
-            @click="onSubmit"
-          >
+          <button type="button" class="btn btn-primary" :disabled="isSubmitting" @click="onSubmit">
             <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
-            {{ $t("view.organizers.create.submit") }}
+            {{ $t('view.organizers.create.submit') }}
           </button>
         </div>
       </div>
@@ -130,26 +116,26 @@
 </template>
 
 <script setup>
-import { reactive, ref, defineEmits } from "vue";
-import { required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import { useMutation } from "@vue/apollo-composable";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import EmailInput from "@/core/components/form/EmailInput.vue";
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import { CREATE_ORGANIZER } from "@/modules/organizer/graphql/mutation/create-organizer";
+import { reactive, ref, defineEmits } from 'vue';
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import { useMutation } from '@vue/apollo-composable';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import EmailInput from '@/core/components/form/EmailInput.vue';
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import { CREATE_ORGANIZER } from '@/modules/organizer/graphql/mutation/create-organizer';
 
-const emit = defineEmits(["close", "created"]);
+const emit = defineEmits(['close', 'created']);
 const isSubmitting = ref(false);
 
 const formData = reactive({
-  username: "",
-  email: "",
-  password: "",
-  publicName: "",
-  publicOrganisation: "",
+  username: '',
+  email: '',
+  password: '',
+  publicName: '',
+  publicOrganisation: '',
   skipEmailVerification: true,
   autoVerify: true,
 });
@@ -188,7 +174,7 @@ async function onSubmit() {
       },
     });
 
-    emit("created");
+    emit('created');
   } catch (error) {
     handleError(error);
   } finally {

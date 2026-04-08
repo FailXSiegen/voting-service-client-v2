@@ -3,11 +3,11 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { setCookie } from "@/core/util/cookie";
-import { fetchSignature } from "@/modules/eventUser/requests/fetch-zoom-signature";
+import { onMounted, ref } from 'vue';
+import { setCookie } from '@/core/util/cookie';
+import { fetchSignature } from '@/modules/eventUser/requests/fetch-zoom-signature';
 
-const emit = defineEmits(["loaded"]);
+const emit = defineEmits(['loaded']);
 const meetConfig = ref({});
 const ZoomMeeting = ref(null);
 
@@ -39,16 +39,16 @@ const props = defineProps({
 });
 
 onMounted(async () => {
-  const { ZoomMtg } = await import("@zoomus/websdk");
+  const { ZoomMtg } = await import('@zoomus/websdk');
   ZoomMeeting.value = ZoomMtg;
-  document.getElementById("zmmtg-root").style.display = "block";
+  document.getElementById('zmmtg-root').style.display = 'block';
   // @see vite.config.js
-  ZoomMeeting.value.setZoomJSLib("/lib/zoom/lib", "/av");
+  ZoomMeeting.value.setZoomJSLib('/lib/zoom/lib', '/av');
   ZoomMeeting.value?.preLoadWasm();
   ZoomMeeting.value?.prepareJssdk();
   // loads language files, also passes any error messages to the ui
-  ZoomMeeting.value?.i18n.load("de-DE");
-  ZoomMeeting.value?.i18n.reload("de-DE");
+  ZoomMeeting.value?.i18n.load('de-DE');
+  ZoomMeeting.value?.i18n.reload('de-DE');
 
   // Meeting config object
   meetConfig.value = {
@@ -59,15 +59,15 @@ onMounted(async () => {
     passWord: props.password,
     leaveUrl: props.returnUrl,
     role: 0,
-    lang: "de-DE",
+    lang: 'de-DE',
     china: false,
-    userEmail: "",
+    userEmail: '',
   };
-  setCookie("meeting_number", props.meetingNumber);
-  setCookie("meeting_pwd", props.password);
+  setCookie('meeting_number', props.meetingNumber);
+  setCookie('meeting_pwd', props.password);
 
   // Mark as loaded here because the overlay already exist at this point.
-  emit("loaded");
+  emit('loaded');
 
   // Generate Signature.
   const { signature } = await fetchSignature(meetConfig.value?.meetingNumber);

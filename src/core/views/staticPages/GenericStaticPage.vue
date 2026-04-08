@@ -8,16 +8,33 @@
         <div v-for="section in contentSections" :key="section.sectionKey" class="mb-4">
           <!-- Titel mit headerClass Unterstützung -->
           <template v-if="section.title && section.headerClass !== 'd-none'">
-            <h1 v-if="section.headerClass === 'h1'" class="content-title h1">{{ section.title }}</h1>
-            <h2 v-else-if="section.headerClass === 'h2'" class="content-title h2">{{ section.title }}</h2>
-            <h3 v-else-if="section.headerClass === 'h3'" class="content-title h3">{{ section.title }}</h3>
-            <h4 v-else-if="section.headerClass === 'h4'" class="content-title h4">{{ section.title }}</h4>
-            <h5 v-else-if="section.headerClass === 'h5'" class="content-title h5">{{ section.title }}</h5>
-            <h2 v-else class="content-title">{{ section.title }}</h2> <!-- Default ist h2 -->
+            <h1 v-if="section.headerClass === 'h1'" class="content-title h1">
+              {{ section.title }}
+            </h1>
+            <h2 v-else-if="section.headerClass === 'h2'" class="content-title h2">
+              {{ section.title }}
+            </h2>
+            <h3 v-else-if="section.headerClass === 'h3'" class="content-title h3">
+              {{ section.title }}
+            </h3>
+            <h4 v-else-if="section.headerClass === 'h4'" class="content-title h4">
+              {{ section.title }}
+            </h4>
+            <h5 v-else-if="section.headerClass === 'h5'" class="content-title h5">
+              {{ section.title }}
+            </h5>
+            <h2 v-else class="content-title">{{ section.title }}</h2>
+            <!-- Default ist h2 -->
           </template>
 
           <!-- Content-Typ-spezifischer Inhalt -->
-          <template v-if="section.contentType === 'multi-column' && section.columnCount && section.columnsContent">
+          <template
+            v-if="
+              section.contentType === 'multi-column' &&
+              section.columnCount &&
+              section.columnsContent
+            "
+          >
             <multi-column-content
               :column-count="section.columnCount"
               :columns-content="section.columnsContent"
@@ -25,9 +42,7 @@
           </template>
 
           <template v-else-if="section.contentType === 'accordion' && section.accordionItems">
-            <accordion-content
-              :accordion-items="section.accordionItems"
-            />
+            <accordion-content :accordion-items="section.accordionItems" />
           </template>
 
           <template v-else>
@@ -35,7 +50,7 @@
           </template>
         </div>
       </div>
-      
+
       <!-- Lade-Indikator -->
       <div v-if="loading" class="text-center py-4">
         <div class="spinner-border text-primary" role="status">
@@ -43,7 +58,7 @@
         </div>
         <p class="mt-2">Inhalte werden geladen...</p>
       </div>
-      
+
       <!-- Fallback für leere Inhalte -->
       <div v-if="!loading && contentSections.length === 0" class="alert alert-info">
         <strong>Noch keine Inhalte vorhanden.</strong>
@@ -54,7 +69,7 @@
 </template>
 
 <script setup>
-import CorePageLayout from "@/core/components/CorePageLayout.vue";
+import CorePageLayout from '@/core/components/CorePageLayout.vue';
 import MultiColumnContent from '@/core/components/MultiColumnContent.vue';
 import AccordionContent from '@/core/components/AccordionContent.vue';
 import { ref, onMounted, defineProps, computed, watch } from 'vue';
@@ -64,12 +79,12 @@ import gql from 'graphql-tag';
 const props = defineProps({
   pageKey: {
     type: String,
-    required: true
+    required: true,
   },
   title: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
 });
 
 // Bei <script setup> werden die Komponenten automatisch registriert
@@ -116,42 +131,55 @@ onMounted(async () => {
 });
 
 // Wenn sich die Route ändert, Inhalte neu laden
-watch(() => route.params, async (newParams, oldParams) => {
-  console.log('Route params changed:', {
-    from: oldParams,
-    to: newParams
-  });
-  
-  if (newParams.pageKey !== oldParams.pageKey || 
-      newParams.directPageKey !== oldParams.directPageKey) {
-    await fetchContentFromDb();
-  }
-}, { deep: true });
+watch(
+  () => route.params,
+  async (newParams, oldParams) => {
+    console.log('Route params changed:', {
+      from: oldParams,
+      to: newParams,
+    });
+
+    if (
+      newParams.pageKey !== oldParams.pageKey ||
+      newParams.directPageKey !== oldParams.directPageKey
+    ) {
+      await fetchContentFromDb();
+    }
+  },
+  { deep: true }
+);
 
 const fetchContentFromDb = async () => {
   loading.value = true;
-  
+
   try {
     // Detailliertes Logging zur Fehlerdiagnose
     console.log('Fetching content for static page:', {
       pageKey: effectivePageKey.value,
       route: route.fullPath,
-      params: route.params
+      params: route.params,
     });
-    
+
     const client = resolveClient();
-    
+
     // Wenn wir eine der Standard statischen Seiten wie "imprint" aufrufen,
     // ist es möglich, dass wir tatsächlich eine eigene Vue-Komponente haben
     // In diesem Fall müssten wir weniger auf DB-Content setzen
     const isPredefinedStaticPage = [
-      'imprint', 'dataProtection', 'faq', 'userAgreement', 'manual', 'functions'
+      'imprint',
+      'dataProtection',
+      'faq',
+      'userAgreement',
+      'manual',
+      'functions',
     ].includes(effectivePageKey.value);
-    
+
     if (isPredefinedStaticPage) {
-      console.log(`Note: ${effectivePageKey.value} is a predefined static page with its own component`);
+      console.log(
+        `Note: ${effectivePageKey.value} is a predefined static page with its own component`
+      );
     }
-    
+
     const result = await client.query({
       query: gql`
         query GetStaticContent($pageKey: String!) {
@@ -176,25 +204,28 @@ const fetchContentFromDb = async () => {
         }
       `,
       variables: {
-        pageKey: effectivePageKey.value
+        pageKey: effectivePageKey.value,
       },
-      fetchPolicy: 'network-only' // Immer frisch vom Server laden
+      fetchPolicy: 'network-only', // Immer frisch vom Server laden
     });
-    
+
     console.log(`Content for ${effectivePageKey.value} loaded:`, result.data);
-    
+
     // Nur veröffentlichte Inhalte anzeigen und nach Reihenfolge sortieren
     const publishedSections = (result.data.staticContentsByPage || [])
-      .filter(section => section.isPublished)
+      .filter((section) => section.isPublished)
       .sort((a, b) => a.ordering - b.ordering);
-      
+
     contentSections.value = publishedSections;
-    
+
     if (publishedSections.length === 0) {
       console.warn(`No published content found for page: ${effectivePageKey.value}`);
     }
   } catch (err) {
-    console.error(`Failed to load content for page "${effectivePageKey.value}" from database:`, err);
+    console.error(
+      `Failed to load content for page "${effectivePageKey.value}" from database:`,
+      err
+    );
     if (err.graphQLErrors) {
       console.error('GraphQL errors:', err.graphQLErrors);
     }

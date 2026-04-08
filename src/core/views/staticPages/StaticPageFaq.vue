@@ -2,38 +2,32 @@
   <CorePageLayout meta-title="Häufige Fragen">
     <div class="faq">
       <h1>Häufige Fragen</h1>
-      
+
       <!-- DB-basierter Modus -->
       <div v-if="useDbContent">
         <div v-for="section in contentSections" :key="section.sectionKey" class="mb-4">
           <h2 v-if="section.title">{{ section.title }}</h2>
           <div v-html="section.content"></div>
         </div>
-        
+
         <!-- Fallback für leere Datenbank -->
         <div v-if="contentSections.length === 0 && !loading">
           <!-- Komponenten-Modus als Fallback -->
           <div v-for="name in componentNames" :key="name">
-            <component
-              :is="name"
-              @loaded="handleContentLoaded(name, $event)"
-            ></component>
+            <component :is="name" @loaded="handleContentLoaded(name, $event)"></component>
             <div class="mb-4" v-html="htmlContents[name]"></div>
           </div>
         </div>
       </div>
-      
+
       <!-- Legacy Komponenten-Modus -->
       <div v-else>
         <div v-for="name in componentNames" :key="name">
-          <component
-            :is="name"
-            @loaded="handleContentLoaded(name, $event)"
-          ></component>
+          <component :is="name" @loaded="handleContentLoaded(name, $event)"></component>
           <div class="mb-4" v-html="htmlContents[name]"></div>
         </div>
       </div>
-      
+
       <div v-if="loading" class="text-center py-4">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Wird geladen...</span>
@@ -45,8 +39,8 @@
 </template>
 
 <script setup>
-import CorePageLayout from "@/core/components/CorePageLayout.vue";
-import { ref, onMounted } from 'vue';
+import CorePageLayout from '@/core/components/CorePageLayout.vue';
+import { ref, onMounted, defineAsyncComponent } from 'vue';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
 
@@ -67,7 +61,7 @@ onMounted(async () => {
 
 const fetchContentFromDb = async () => {
   loading.value = true;
-  
+
   try {
     const client = resolveClient();
     const result = await client.query({
@@ -82,13 +76,13 @@ const fetchContentFromDb = async () => {
           }
         }
       `,
-      fetchPolicy: 'cache-first'
+      fetchPolicy: 'cache-first',
     });
-    
+
     // Sortieren nach Reihenfolge
     contentSections.value = [...(result.data.staticContentsByPage || [])];
     contentSections.value.sort((a, b) => a.ordering - b.ordering);
-    
+
     // Wenn keine Inhalte vorhanden sind, auf Komponenten-Modus zurückfallen
     if (contentSections.value.length === 0) {
       console.log('No content found in database, falling back to component mode');
@@ -104,25 +98,23 @@ const fetchContentFromDb = async () => {
 </script>
 
 <script>
-import { defineAsyncComponent } from "vue";
-
 const componentNames = [
-  "GeneralInfo",
-  "Security",
-  "Registration",
-  "Execution",
-  "Requirements",
-  "Results",
-  "Support",
-  "Legal",
-  "Feedback",
-  "Special",
+  'GeneralInfo',
+  'Security',
+  'Registration',
+  'Execution',
+  'Requirements',
+  'Results',
+  'Support',
+  'Legal',
+  'Feedback',
+  'Special',
 ];
 
 export default {
   components: componentNames.reduce((components, name) => {
     components[name] = defineAsyncComponent(
-      () => import(`@/core/views/staticPages/Faq/${name}.vue`),
+      () => import(`@/core/views/staticPages/Faq/${name}.vue`)
     );
     return components;
   }, {}),
@@ -130,7 +122,7 @@ export default {
   data() {
     return {
       htmlContents: componentNames.reduce((contents, name) => {
-        contents[name] = "";
+        contents[name] = '';
         return contents;
       }, {}),
     };

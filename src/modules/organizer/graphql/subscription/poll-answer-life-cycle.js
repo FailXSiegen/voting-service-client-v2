@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const POLL_ANSWER_LIVE_CYCLE = gql`
   subscription ($eventId: ID) {

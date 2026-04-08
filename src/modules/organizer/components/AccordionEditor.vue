@@ -4,17 +4,13 @@
       <div class="mb-3">
         <h6>Akkordeon-Elemente:</h6>
       </div>
-    
-      <div 
-        v-for="(item, index) in items" 
-        :key="`accordion-item-${index}`"
-        class="card mb-3"
-      >
+
+      <div v-for="(item, index) in items" :key="`accordion-item-${index}`" class="card mb-3">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
           <h6 class="mb-0">Element {{ index + 1 }}</h6>
           <div>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-sm btn-outline-secondary me-1"
               :disabled="index === 0"
               title="Nach oben verschieben"
@@ -22,8 +18,8 @@
             >
               <i class="bi bi-arrow-up"></i>
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-sm btn-outline-secondary me-1"
               :disabled="index === items.length - 1"
               title="Nach unten verschieben"
@@ -31,8 +27,8 @@
             >
               <i class="bi bi-arrow-down"></i>
             </button>
-            <button 
-              type="button" 
+            <button
+              type="button"
               class="btn btn-sm btn-outline-danger"
               title="Element entfernen"
               @click="removeItem(index)"
@@ -44,14 +40,14 @@
         <div class="card-body">
           <div class="mb-3">
             <label :for="'item-title-' + index" class="form-label">Titel</label>
-            <input 
-              :id="'item-title-' + index" 
+            <input
+              :id="'item-title-' + index"
               v-model="item.title"
               type="text"
               class="form-control"
               placeholder="Titel des Akkordeon-Elements"
               @input="updateItem(index)"
-            >
+            />
           </div>
           <div class="mb-2">
             <label :for="'item-content-' + index" class="form-label">Inhalt</label>
@@ -59,22 +55,22 @@
               <button
                 type="button"
                 class="btn btn-outline-primary btn-sm"
-                @click="showMediaManager = true; currentItemIndex = index"
+                @click="
+                  showMediaManager = true;
+                  currentItemIndex = index;
+                "
               >
                 <i class="bi bi-image"></i> Medienverwaltung
               </button>
             </div>
-            <div
-              :id="`accordion-editor-${index}`"
-              class="editor-container"
-            >
+            <div :id="`accordion-editor-${index}`" class="editor-container">
               <div class="editor-container_classic-editor editor-container_include-style">
                 <div class="editor-container__editor">
                   <ckeditor
                     :model-value="item.content"
                     :editor="editorClass"
                     :config="editorConfig"
-                    @update:model-value="value => updateItemContent(index, value)"
+                    @update:model-value="(value) => updateItemContent(index, value)"
                     @ready="onEditorReady($event, index)"
                   />
                 </div>
@@ -84,13 +80,9 @@
         </div>
       </div>
     </div>
-    
+
     <div class="mb-4">
-      <button
-        type="button"
-        class="btn btn-outline-success"
-        @click="addItem"
-      >
+      <button type="button" class="btn btn-outline-success" @click="addItem">
         <i class="bi bi-plus-circle me-1"></i> Element hinzufügen
       </button>
     </div>
@@ -101,15 +93,11 @@
       <div class="modal media-manager-dialog d-block" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
-            <MediaManager
-              @select="insertMedia"
-              @close="showMediaManager = false"
-            />
+            <MediaManager @select="insertMedia" @close="showMediaManager = false" />
           </div>
         </div>
       </div>
     </div>
-    
   </div>
 </template>
 
@@ -121,33 +109,33 @@ export default {
   name: 'AccordionEditor',
   components: {
     MediaManager,
-    ckeditor: Ckeditor
+    ckeditor: Ckeditor,
   },
-  
+
   props: {
     /**
      * The initial value for the accordion items
      */
     value: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
-    
+
     /**
      * CKEditor instance to use
      */
     editorClass: {
       type: Function,
-      required: true
+      required: true,
     },
-    
+
     /**
      * CKEditor configuration
      */
     editorConfig: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
 
   emits: ['input', 'update:modelValue', 'change'],
@@ -157,10 +145,10 @@ export default {
       items: [],
       editors: [],
       showMediaManager: false,
-      currentItemIndex: null
+      currentItemIndex: null,
     };
   },
-  
+
   watch: {
     value: {
       handler(newVal) {
@@ -168,21 +156,21 @@ export default {
           this.initFromValue();
         }
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
-  
+
   mounted() {
     // Initialize with empty items if no value provided
     if (!this.value || !this.value.length) {
       // Add an empty item
       this.items.push({
         title: '',
-        content: ''
+        content: '',
       });
     }
   },
-  
+
   methods: {
     /**
      * Insert media into the editor of the current accordion item
@@ -204,8 +192,8 @@ export default {
         editor.execute('insertImage', {
           source: {
             src: imageUrl,
-            alt: altText
-          }
+            alt: altText,
+          },
         });
 
         // Update content in our data model
@@ -226,9 +214,9 @@ export default {
     initFromValue() {
       if (this.value && Array.isArray(this.value)) {
         // Make a defensive copy of the value array without __typename
-        this.items = this.value.map(item => ({
+        this.items = this.value.map((item) => ({
           title: item.title || '',
-          content: item.content || ''
+          content: item.content || '',
         }));
 
         // Ensure we have at least one item
@@ -237,7 +225,7 @@ export default {
         }
       }
     },
-    
+
     /**
      * Handle editor ready event
      */
@@ -253,7 +241,7 @@ export default {
         editor.setData(this.items[index].content);
       }
     },
-    
+
     /**
      * Update item content data
      */
@@ -269,21 +257,21 @@ export default {
         });
       }
     },
-    
+
     /**
      * Update item data
      */
     updateItem() {
       this.emitUpdate();
     },
-    
+
     /**
      * Add a new accordion item
      */
     addItem() {
       this.items.push({
         title: '',
-        content: ''
+        content: '',
       });
 
       this.emitUpdate();
@@ -320,7 +308,7 @@ export default {
 
       this.emitUpdate();
     },
-    
+
     /**
      * Emit update events
      */
@@ -334,8 +322,8 @@ export default {
 
       // Force component update to refresh previews
       this.$forceUpdate();
-    }
-  }
+    },
+  },
 };
 </script>
 

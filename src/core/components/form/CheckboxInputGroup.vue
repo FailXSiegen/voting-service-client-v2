@@ -2,12 +2,9 @@
   <div class="check-group">
     <p v-if="maxCheckedItems && leftCheckCount > 0">
       Sie können noch
-      <span class="badge bg-primary">{{ leftCheckCount }}</span> Stimmen
-      abgeben.
+      <span class="badge bg-primary">{{ leftCheckCount }}</span> Stimmen abgeben.
     </p>
-    <p v-else-if="maxCheckedItems && leftCheckCount === 0">
-      Sie können keine Stimmen mehr abgeben
-    </p>
+    <p v-else-if="maxCheckedItems && leftCheckCount === 0">Sie können keine Stimmen mehr abgeben</p>
     <CheckboxInput
       v-for="item in internalItems"
       :id="hash + item.value"
@@ -22,11 +19,11 @@
 </template>
 
 <script setup>
-import CheckboxInput from "@/core/components/form/CheckboxInput.vue";
-import { computed, reactive, ref } from "vue";
-import simpleHash from "@/modules/eventUser/services/simple-hash";
+import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
+import { computed, reactive, ref } from 'vue';
+import simpleHash from '@/modules/eventUser/services/simple-hash';
 
-const emit = defineEmits(["change"]);
+const emit = defineEmits(['change']);
 const props = defineProps({
   classes: {
     type: Array,
@@ -55,13 +52,11 @@ const internalItems = reactive(
     item.checked = false;
     item.disabled = false;
     return item;
-  }),
+  })
 );
 
 const checkedItemsCount = ref(0);
-const leftCheckCount = computed(
-  () => props.maxCheckedItems - checkedItemsCount.value,
-);
+const leftCheckCount = computed(() => props.maxCheckedItems - checkedItemsCount.value);
 
 function onChange(item) {
   item.checked = !item.checked;
@@ -71,21 +66,15 @@ function onChange(item) {
   const disabledItems = internalItems.filter((item) => item.disabled);
 
   checkedItemsCount.value = checkedItems.length;
-  if (
-    props.maxCheckedItems &&
-    checkedItemsCount.value >= props.maxCheckedItems
-  ) {
+  if (props.maxCheckedItems && checkedItemsCount.value >= props.maxCheckedItems) {
     uncheckedItems.forEach((item) => (item.disabled = true));
-  } else if (
-    disabledItems.length > 0 &&
-    checkedItemsCount.value < props.maxCheckedItems
-  ) {
+  } else if (disabledItems.length > 0 && checkedItemsCount.value < props.maxCheckedItems) {
     disabledItems.forEach((item) => (item.disabled = false));
   }
 
   emit(
-    "change",
-    internalItems.filter((item) => item.checked).map((item) => item.value),
+    'change',
+    internalItems.filter((item) => item.checked).map((item) => item.value)
   );
 }
 </script>

@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const UPDATE_POLL = gql`
   mutation updatePoll($input: UpdatePollInput!, $instantStart: Boolean!) {

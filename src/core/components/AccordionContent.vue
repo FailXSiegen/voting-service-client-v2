@@ -1,29 +1,25 @@
 <template>
   <div class="accordion-content">
     <div :id="accordionId" class="accordion">
-      <div 
-        v-for="(item, index) in accordionItems" 
-        :key="index"
-        class="accordion-item"
-      >
+      <div v-for="(item, index) in accordionItems" :key="index" class="accordion-item">
         <h2 :id="getHeadingId(index)" class="accordion-header">
-          <button 
-            class="accordion-button" 
-            :class="{ collapsed: !isItemOpen(index) }" 
-            type="button" 
-            data-bs-toggle="collapse" 
-            :data-bs-target="`#${getCollapseId(index)}`" 
-            :aria-expanded="isItemOpen(index)" 
+          <button
+            class="accordion-button"
+            :class="{ collapsed: !isItemOpen(index) }"
+            type="button"
+            data-bs-toggle="collapse"
+            :data-bs-target="`#${getCollapseId(index)}`"
+            :aria-expanded="isItemOpen(index)"
             :aria-controls="getCollapseId(index)"
           >
             {{ item.title }}
           </button>
         </h2>
-        <div 
-          :id="getCollapseId(index)" 
-          class="accordion-collapse collapse" 
-          :class="{ show: isItemOpen(index) }" 
-          :aria-labelledby="getHeadingId(index)" 
+        <div
+          :id="getCollapseId(index)"
+          class="accordion-collapse collapse"
+          :class="{ show: isItemOpen(index) }"
+          :aria-labelledby="getHeadingId(index)"
           :data-bs-parent="`#${accordionId}`"
         >
           <div class="accordion-body" v-html="item.content"></div>
@@ -36,7 +32,7 @@
 <script>
 export default {
   name: 'AccordionContent',
-  
+
   props: {
     /**
      * Array of accordion items with title and content
@@ -44,43 +40,43 @@ export default {
     accordionItems: {
       type: Array,
       required: true,
-      validator: items => items.every(item => item.title && item.content)
+      validator: (items) => items.every((item) => item.title && item.content),
     },
-    
+
     /**
      * Optional - index of the item to be initially opened (0-based)
      * Default is 0 (first item)
      */
     defaultOpenIndex: {
       type: Number,
-      default: 0
+      default: 0,
     },
-    
+
     /**
      * Optional - unique identifier for this accordion
      * Default is a random string
      */
     id: {
       type: String,
-      default: () => `accordion-${Math.random().toString(36).substring(2, 10)}`
-    }
+      default: () => `accordion-${Math.random().toString(36).substring(2, 10)}`,
+    },
   },
-  
+
   data() {
     return {
-      openIndex: this.defaultOpenIndex
+      openIndex: this.defaultOpenIndex,
     };
   },
-  
+
   computed: {
     /**
      * Unique accordion ID to avoid conflicts with multiple accordions on the same page
      */
     accordionId() {
       return this.id;
-    }
+    },
   },
-  
+
   /**
    * After the component is mounted, initialize the Bootstrap accordion
    */
@@ -96,7 +92,7 @@ export default {
       });
     }
   },
-  
+
   /**
    * Remove event listeners when component is destroyed
    */
@@ -106,7 +102,7 @@ export default {
       accordionElement.removeEventListener('shown.bs.collapse');
     }
   },
-  
+
   methods: {
     /**
      * Generate a unique ID for the accordion heading
@@ -114,21 +110,21 @@ export default {
     getHeadingId(index) {
       return `heading-${this.accordionId}-${index}`;
     },
-    
+
     /**
      * Generate a unique ID for the accordion collapse element
      */
     getCollapseId(index) {
       return `collapse-${this.accordionId}-${index}`;
     },
-    
+
     /**
      * Check if a specific accordion item is open
      */
     isItemOpen(index) {
       return index === this.openIndex;
-    }
-  }
+    },
+  },
 };
 </script>
 

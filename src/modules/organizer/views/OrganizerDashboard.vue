@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerDashboard')">
     <template #title>
-      {{ $t("navigation.views.organizerDashboard") }}
+      {{ $t('navigation.views.organizerDashboard') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -16,32 +16,25 @@
             <dl class="mb-1">
               <dt>Asynchrone Abstimmungen</dt>
               <dd>
-                Definieren Sie einen Start- und Endzeitpunkt für Ihre
-                Veranstaltung. Alle Teilnehmer können dann innerhalb dieses
-                Zeitraums abstimmen. Die Ergebnisse werden erst nach Ablauf des
-                Endzeitpunkts angezeigt.
+                Definieren Sie einen Start- und Endzeitpunkt für Ihre Veranstaltung. Alle Teilnehmer
+                können dann innerhalb dieses Zeitraums abstimmen. Die Ergebnisse werden erst nach
+                Ablauf des Endzeitpunkts angezeigt.
               </dd>
-              <dt>
-                Neue Pseudonymisierte Zugriffsart für Teilnehmer:
-                Token-basierter Zugang
-              </dt>
+              <dt>Neue Pseudonymisierte Zugriffsart für Teilnehmer: Token-basierter Zugang</dt>
               <dd>
-                Als Organisator tragen Sie bei den Teilnehmern E-Mail Adressen
-                ein. Die Teilnehmer erhalten dann einen Link per E-Mail, mit dem
-                sie sich anmelden können. Bei der Anmeldung wird ein Schlüssel
-                (Token) auf dem verwendeten Endgerät gespeichert. Es wird kein
-                Zusammenhang zwischen E-Mail Adresse und Token vom System
-                gespeichert. Der Token wird als Zugangsschlüssel zur
-                Veranstaltung verwendet.<br />
+                Als Organisator tragen Sie bei den Teilnehmern E-Mail Adressen ein. Die Teilnehmer
+                erhalten dann einen Link per E-Mail, mit dem sie sich anmelden können. Bei der
+                Anmeldung wird ein Schlüssel (Token) auf dem verwendeten Endgerät gespeichert. Es
+                wird kein Zusammenhang zwischen E-Mail Adresse und Token vom System gespeichert. Der
+                Token wird als Zugangsschlüssel zur Veranstaltung verwendet.<br />
                 <u>Wichtig:</u><br />
-                Teilnehmer müssen das gleiche Endgerät verwenden, mit dem sie
-                sich angemeldet haben. Ansonsten ist der Zugang nicht möglich.
+                Teilnehmer müssen das gleiche Endgerät verwenden, mit dem sie sich angemeldet haben.
+                Ansonsten ist der Zugang nicht möglich.
               </dd>
               <dt>Technisches Update</dt>
               <dd>
-                Dank einem technischen Update ist die Anwendung nun noch
-                schneller und stabiler. Einige Funktionen wurden verbessert und
-                Fehler behoben.
+                Dank einem technischen Update ist die Anwendung nun noch schneller und stabiler.
+                Einige Funktionen wurden verbessert und Fehler behoben.
               </dd>
             </dl>
             <hr />
@@ -51,24 +44,18 @@
             </p>
             <p>
               Der komplette Quellcode ist öffentlich verfügbar unter: <br />
-              <a
-                href="https://github.com/FailXSiegen/voting-service-client-v2"
-                target="_blank"
-              >
+              <a href="https://github.com/FailXSiegen/voting-service-client-v2" target="_blank">
                 https://github.com/FailXSiegen/voting-service-client-v2
               </a>
               <br />
-              <a
-                href="https://github.com/FailXSiegen/voting-service-api"
-                target="_blank"
-              >
+              <a href="https://github.com/FailXSiegen/voting-service-api" target="_blank">
                 https://github.com/FailXSiegen/voting-service-api
               </a>
             </p>
             <p>
-              Der Quellcode und die Funktion wurden von der Firma amexus
-              Informationstechnik GmbH & Co. KG geprüft. Stand 23.12.2021. Auf
-              Anfrage können Sie das Ergebnis per E-Mail als PDF erhalten.
+              Der Quellcode und die Funktion wurden von der Firma amexus Informationstechnik GmbH &
+              Co. KG geprüft. Stand 23.12.2021. Auf Anfrage können Sie das Ergebnis per E-Mail als
+              PDF erhalten.
             </p>
           </div>
         </div>
@@ -84,7 +71,7 @@
                   :title="$t('navigation.views.' + RouteOrganizerProfile)"
                 />
                 <span class="nav-title mt-1 px-2">
-                  {{ $t("navigation.views." + RouteOrganizerProfile) }}
+                  {{ $t('navigation.views.' + RouteOrganizerProfile) }}
                 </span>
               </router-link>
             </div>
@@ -94,10 +81,7 @@
                 target="_blank"
                 class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100 px-xl-4"
               >
-                <span
-                  class="nav-icon bi--6xl bi-question-circle mb-auto"
-                  title="Anleitungen"
-                />
+                <span class="nav-icon bi--6xl bi-question-circle mb-auto" title="Anleitungen" />
                 <span class="nav-title mt-1 px-2"> Anleitungen </span>
               </router-link>
             </div>
@@ -106,16 +90,12 @@
                 :to="{ name: RouteOrganizerVideoConference }"
                 class="btn btn-primary btn-block py-3 px-0 d-flex flex-column align-items-center h-100 px-xl-4"
               >
-                <span
-                  class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100"
-                >
+                <span class="btn btn-primary btn-block py-3 px-0 d-flex flex-column h-100">
                   <span
                     class="nav-icon bi--6xl bi-camera-video-fill mb-auto"
                     title="Videokonferenzsystem einrichten"
                   />
-                  <span class="nav-title mt-1 px-2">
-                    Videokonferenzsysteme einrichten
-                  </span>
+                  <span class="nav-title mt-1 px-2"> Videokonferenzsysteme einrichten </span>
                 </span>
               </router-link>
             </div>
@@ -135,13 +115,10 @@
             </div>
             <div class="card-body">
               <p>
-                Hier können Sie die System-Texte anpassen und überschreiben.
-                Die Änderungen werden in einer separaten Datei gespeichert und überschreiben die Standard-Texte.
+                Hier können Sie die System-Texte anpassen und überschreiben. Die Änderungen werden
+                in einer separaten Datei gespeichert und überschreiben die Standard-Texte.
               </p>
-              <router-link
-                :to="{ name: RouteOrganizerMessageEditor }"
-                class="btn btn-primary"
-              >
+              <router-link :to="{ name: RouteOrganizerMessageEditor }" class="btn btn-primary">
                 <i class="bi bi-translate me-2"></i>
                 {{ $t('navigation.views.organizerMessageEditor') }} öffnen
               </router-link>
@@ -154,8 +131,8 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {
   getRoutesByName,
   RouteOrganizerDashboard,
@@ -168,8 +145,8 @@ import {
   RouteOrganizerMessageEditor,
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings,
-} from "@/router/routes";
-import { useCore } from "@/core/store/core";
+} from '@/router/routes';
+import { useCore } from '@/core/store/core';
 
 const coreStore = useCore();
 

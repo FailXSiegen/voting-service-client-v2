@@ -17,7 +17,7 @@ export class Route {
     redirect = null,
     props = null,
     children = null,
-    beforeEnter = null,
+    beforeEnter = null
   ) {
     this.path = path;
     this.name = name;

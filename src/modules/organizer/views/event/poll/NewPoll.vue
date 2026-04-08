@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerPollsNew')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerPollsNew") }} -
+        {{ $t('navigation.views.organizerPollsNew') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -10,13 +10,13 @@
       <EventNavigation />
     </template>
     <template #content>
-      
       <!-- Warnung für asynchrone Events ohne Teilnehmer -->
       <div v-if="showAsyncWarning" class="alert alert-warning mb-3" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        <strong>Hinweis:</strong> Für asynchrone Veranstaltungen (Briefwahl) muss mindestens ein Teilnehmer vorhanden sein, um Abstimmungen erstellen zu können.
+        <strong>Hinweis:</strong> Für asynchrone Veranstaltungen (Briefwahl) muss mindestens ein
+        Teilnehmer vorhanden sein, um Abstimmungen erstellen zu können.
       </div>
-      
+
       <PollForm
         :show-submit-and-start-button="showSubmitAndStartButton"
         :is-submitting="!canSubmit || showAsyncWarning"
@@ -28,23 +28,23 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import PollForm from "@/modules/organizer/components/events/poll/PollForm.vue";
-import { RouteOrganizerDashboard, RouteOrganizerPolls } from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { EVENT_USERS } from "@/modules/organizer/graphql/queries/event-users";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { ref, computed } from "vue";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { CREATE_POLL } from "@/modules/organizer/graphql/mutation/create-poll";
-import { createConfirmDialog } from "vuejs-confirm-dialog";
-import ConfirmModal from "@/core/components/ConfirmModal.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import PollForm from '@/modules/organizer/components/events/poll/PollForm.vue';
+import { RouteOrganizerDashboard, RouteOrganizerPolls } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { EVENT_USERS } from '@/modules/organizer/graphql/queries/event-users';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { ref, computed } from 'vue';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { CREATE_POLL } from '@/modules/organizer/graphql/mutation/create-poll';
+import { createConfirmDialog } from 'vuejs-confirm-dialog';
+import ConfirmModal from '@/core/components/ConfirmModal.vue';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -64,7 +64,7 @@ const showAsyncWarning = computed(() => {
 const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
-  { fetchPolicy: "no-cache" },
+  { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
   // check if the event could be fetched successfully. redirect to list if not.
@@ -75,20 +75,20 @@ eventQuery.onResult(({ data }) => {
   }
   event.value = data?.event;
   loaded.value = true;
-  
+
   // Debug logging for async event detection
   if (import.meta.env.DEV) {
     console.log('[DEBUG] NewPoll - Event data:', data?.event);
     console.log('[DEBUG] NewPoll - Is async event?', data?.event?.async);
   }
-  
+
   // Immer event users laden für asynchrone Events
   if (data?.event?.async === true) {
     console.log('[NewPoll] Async event detected, loading users...');
     const eventUsersQuery = useQuery(
       EVENT_USERS,
       { eventId: data.event.id },
-      { fetchPolicy: "cache-and-network" }
+      { fetchPolicy: 'cache-and-network' }
     );
     eventUsersQuery.onResult(({ data: usersData }) => {
       if (usersData?.eventUsers) {
@@ -107,30 +107,36 @@ eventQuery.onResult(({ data }) => {
 async function onSubmit(formData) {
   // Prevent submission for async events without participants
   if (showAsyncWarning.value) {
-    toast("Abstimmungen können in asynchronen Veranstaltungen nur erstellt werden, wenn mindestens ein Teilnehmer vorhanden ist.", { type: "error" });
+    toast(
+      'Abstimmungen können in asynchronen Veranstaltungen nur erstellt werden, wenn mindestens ein Teilnehmer vorhanden ist.',
+      { type: 'error' }
+    );
     return;
   }
-  
+
   canSubmit.value = false;
   // Create new poll.
   await createNewPoll(formData, false);
   // Back to polls view.
   await router.push({ name: RouteOrganizerPolls });
   // Show success message.
-  toast(t("success.organizer.poll.createdSuccessfully"), { type: "success" });
+  toast(t('success.organizer.poll.createdSuccessfully'), { type: 'success' });
   canSubmit.value = true;
 }
 
 async function onSubmitAndStart(formData) {
   // Prevent submission for async events without participants
   if (showAsyncWarning.value) {
-    toast("Abstimmungen können in asynchronen Veranstaltungen nur erstellt werden, wenn mindestens ein Teilnehmer vorhanden ist.", { type: "error" });
+    toast(
+      'Abstimmungen können in asynchronen Veranstaltungen nur erstellt werden, wenn mindestens ein Teilnehmer vorhanden ist.',
+      { type: 'error' }
+    );
     return;
   }
-  
+
   canSubmit.value = false;
   const dialog = createConfirmDialog(ConfirmModal, {
-    message: t("view.polls.listing.startConfirm"),
+    message: t('view.polls.listing.startConfirm'),
   });
 
   dialog.onConfirm(async () => {
@@ -139,8 +145,8 @@ async function onSubmitAndStart(formData) {
     // Back to polls view.
     await router.push({ name: RouteOrganizerPolls });
     // Show success message.
-    toast(t("success.organizer.poll.createdAndStartedSuccessfully"), {
-      type: "success",
+    toast(t('success.organizer.poll.createdAndStartedSuccessfully'), {
+      type: 'success',
     });
     canSubmit.value = true;
   });

@@ -14,20 +14,16 @@
     <div v-if="helpText" class="form-text text-muted">
       <span v-html="helpText" />
     </div>
-    <span
-      v-for="error in errors"
-      :key="error.uid"
-      class="form-field-error text-danger"
-    >
-      {{ $t("error.formValidation." + error.$validator) }}<br />
+    <span v-for="error in errors" :key="error.uid" class="form-field-error text-danger">
+      {{ $t('error.formValidation.' + error.$validator) }}<br />
     </span>
   </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed } from 'vue';
 
-defineEmits(["update:checked"]);
+defineEmits(['update:checked']);
 
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
@@ -63,8 +59,12 @@ const checkboxId = computed(() => {
     return props.id;
   }
   // Generate a unique ID based on label or fallback to random
-  const baseId = props.label 
-    ? props.label.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+  const baseId = props.label
+    ? props.label
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
     : 'checkbox';
   return `${baseId}-${Math.random().toString(36).substr(2, 9)}`;
 });

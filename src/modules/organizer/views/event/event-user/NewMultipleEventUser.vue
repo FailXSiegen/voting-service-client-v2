@@ -1,15 +1,13 @@
 <template>
-  <PageLayout
-    :meta-title="$t('navigation.views.organizerEventUserMultipleNew')"
-  >
+  <PageLayout :meta-title="$t('navigation.views.organizerEventUserMultipleNew')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerEventUserMultipleNew") }} -
+        {{ $t('navigation.views.organizerEventUserMultipleNew') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
     <template #header>
-      <EventNavigation :routes="routes"/>
+      <EventNavigation :routes="routes" />
     </template>
     <template #content>
       <MultipleNewEventUserForm
@@ -20,11 +18,11 @@
       <!-- Error Summary -->
       <div v-if="errorSummary.show" class="alert alert-warning mt-3">
         <h5>
-          {{ $t("view.event.create.labels.eventUser.errorSummary.title") }}
+          {{ $t('view.event.create.labels.eventUser.errorSummary.title') }}
         </h5>
         <p>
           {{
-            $t("view.event.create.labels.eventUser.errorSummary.description", {
+            $t('view.event.create.labels.eventUser.errorSummary.description', {
               total: errorSummary.total,
               success: errorSummary.success,
               failed: errorSummary.failed,
@@ -42,24 +40,21 @@
 </template>
 
 <script setup>
-import {ref, reactive} from "vue";
-import {useRouter, useRoute} from "vue-router";
-import {useMutation, useQuery} from "@vue/apollo-composable";
-import {toast} from "vue3-toastify";
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import MultipleNewEventUserForm from "@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue";
-import {
-  RouteOrganizerDashboard,
-  RouteOrganizerMemberRoom,
-} from "@/router/routes";
-import {useCore} from "@/core/store/core";
-import {EVENT} from "@/modules/organizer/graphql/queries/event";
-import {CREATE_EVENT_USER} from "@/modules/organizer/graphql/mutation/create-event-user";
-import {CREATE_EVENT_USER_AUTH_TOKEN} from "@/modules/organizer/graphql/mutation/create-event-user-auth-token";
-import {handleError} from "@/core/error/error-handler";
-import {NetworkError} from "@/core/error/NetworkError";
-import t from "@/core/util/l18n";
+import { ref, reactive } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { toast } from 'vue3-toastify';
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import MultipleNewEventUserForm from '@/modules/organizer/components/events/event-user/MultipleNewEventUserForm.vue';
+import { RouteOrganizerDashboard, RouteOrganizerMemberRoom } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { CREATE_EVENT_USER } from '@/modules/organizer/graphql/mutation/create-event-user';
+import { CREATE_EVENT_USER_AUTH_TOKEN } from '@/modules/organizer/graphql/mutation/create-event-user-auth-token';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import t from '@/core/util/l18n';
 
 // Store and Router setup
 const coreStore = useCore();
@@ -88,20 +83,18 @@ const errorSummary = reactive({
 // Event query
 const eventQuery = useQuery(
   EVENT,
-  {id, organizerId: coreStore.user.id},
-  {fetchPolicy: "no-cache"},
+  { id, organizerId: coreStore.user.id },
+  { fetchPolicy: 'no-cache' }
 );
 
 // Mutations setup - declare these at the component level
-const {mutate: createEventUserStandard} = useMutation(CREATE_EVENT_USER);
-const {mutate: createEventUserToken} = useMutation(
-  CREATE_EVENT_USER_AUTH_TOKEN,
-);
+const { mutate: createEventUserStandard } = useMutation(CREATE_EVENT_USER);
+const { mutate: createEventUserToken } = useMutation(CREATE_EVENT_USER_AUTH_TOKEN);
 
-eventQuery.onResult(({data}) => {
+eventQuery.onResult(({ data }) => {
   if (null === data?.event) {
     handleError(new NetworkError());
-    router.push({name: RouteOrganizerDashboard});
+    router.push({ name: RouteOrganizerDashboard });
     return;
   }
   event.value = data?.event;
@@ -120,10 +113,10 @@ function extractErrorMessage(error) {
   if (error.networkError?.message) {
     return error.networkError.message;
   }
-  if (typeof error === "string") {
+  if (typeof error === 'string') {
     return error;
   }
-  return error.message || "Ein unbekannter Fehler ist aufgetreten";
+  return error.message || 'Ein unbekannter Fehler ist aufgetreten';
 }
 
 // Process a single user with retry logic
@@ -132,40 +125,32 @@ async function processUser(userData, isTokenBased, maxRetries = 3) {
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const mutate = isTokenBased
-        ? createEventUserToken
-        : createEventUserStandard;
-      const result = await mutate({input: userData});
+      const mutate = isTokenBased ? createEventUserToken : createEventUserStandard;
+      const result = await mutate({ input: userData });
 
       if (import.meta.env.DEV) {
-        console.info(
-          `User created successfully: ${userData.username || userData.email}`,
-        );
+        console.info(`User created successfully: ${userData.username || userData.email}`);
       }
 
-      return {success: true, data: result};
+      return { success: true, data: result };
     } catch (error) {
       lastError = error;
 
       if (import.meta.env.DEV) {
         console.error(
-          `Attempt ${attempt + 1} failed for user: ${
-            userData.username || userData.email
-          }`,
-          error,
+          `Attempt ${attempt + 1} failed for user: ${userData.username || userData.email}`,
+          error
         );
       }
 
       // Wenn der Nutzer bereits existiert, brechen wir sofort ab
-      if (error.graphQLErrors?.[0]?.message?.includes("already exists")) {
+      if (error.graphQLErrors?.[0]?.message?.includes('already exists')) {
         break;
       }
 
       // Bei anderen Fehlern versuchen wir es nochmal, wenn wir noch Versuche haben
       if (attempt < maxRetries - 1) {
-        await new Promise((resolve) =>
-          setTimeout(resolve, Math.pow(2, attempt) * 1000),
-        );
+        await new Promise((resolve) => setTimeout(resolve, Math.pow(2, attempt) * 1000));
         continue;
       }
     }
@@ -255,20 +240,22 @@ async function onSubmit({
 
   try {
     // Use the extended user data to create users with individual settings
-    const userDataList = usersWithData ? usersWithData.map((user) => ({
-      eventId: id,
-      verified: true,
-      allowToVote: user.allowToVote,
-      voteAmount: user.voteAmount !== null ? user.voteAmount : 0,
-      publicName: user.publicName || '',
-      [tokenBasedLogin ? "email" : "username"]: user.identifier,
-    })) : usernames.map((username) => ({
-      eventId: id,
-      verified: true,
-      allowToVote: false,
-      voteAmount: 0,
-      [tokenBasedLogin ? "email" : "username"]: username,
-    }));
+    const userDataList = usersWithData
+      ? usersWithData.map((user) => ({
+          eventId: id,
+          verified: true,
+          allowToVote: user.allowToVote,
+          voteAmount: user.voteAmount !== null ? user.voteAmount : 0,
+          publicName: user.publicName || '',
+          [tokenBasedLogin ? 'email' : 'username']: user.identifier,
+        }))
+      : usernames.map((username) => ({
+          eventId: id,
+          verified: true,
+          allowToVote: false,
+          voteAmount: 0,
+          [tokenBasedLogin ? 'email' : 'username']: username,
+        }));
 
     const results = await createUsersInBatches(userDataList, tokenBasedLogin);
 
@@ -285,28 +272,28 @@ async function onSubmit({
     // Show appropriate messages
     if (results.successful.length > 0) {
       toast.success(
-        t("success.organizer.eventUser.createdSuccessfully", {
+        t('success.organizer.eventUser.createdSuccessfully', {
           count: results.successful.length,
-        }),
+        })
       );
     }
 
     if (results.failed.length > 0) {
       toast.warning(
-        t("warning.organizer.eventUser.someUsersFailed", {
+        t('warning.organizer.eventUser.someUsersFailed', {
           failed: results.failed.length,
           total: usernames.length,
-        }),
+        })
       );
     }
 
     // Nur weiterleiten wenn alle erfolgreich waren
     if (results.failed.length === 0) {
-      await router.push({name: RouteOrganizerMemberRoom});
+      await router.push({ name: RouteOrganizerMemberRoom });
     }
   } catch (error) {
     handleError(error);
-    toast.error(t("error.organizer.eventUser.processingFailed"));
+    toast.error(t('error.organizer.eventUser.processingFailed'));
   } finally {
     isProcessing.value = false;
   }

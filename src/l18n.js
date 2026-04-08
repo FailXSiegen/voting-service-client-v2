@@ -1,7 +1,7 @@
-import { createI18n } from "vue-i18n";
-import defaultMessages from "@/messages.js";
-import gql from "graphql-tag";
-import { ref } from "vue";
+import { createI18n } from 'vue-i18n';
+import defaultMessages from '@/messages.js';
+import gql from 'graphql-tag';
+import { ref } from 'vue';
 
 // GraphQL query to get all translations
 const TRANSLATIONS_QUERY = gql`
@@ -17,19 +17,19 @@ let i18nInstance = null;
 export const translationsLoaded = ref(false);
 
 // Factory-Funktion um die i18n-Instanz zu erhalten
-export function getI18n() {
+function getI18n() {
   if (!i18nInstance) {
     // Klonen der defaultMessages, um später zusammenführen zu können
     const clonedMessages = JSON.parse(JSON.stringify(defaultMessages));
 
     i18nInstance = createI18n({
-      locale: "de",
-      fallbackLocale: "de",
+      locale: 'de',
+      fallbackLocale: 'de',
       messages: clonedMessages,
-      legacy: false,  // Legacy-Modus für Vue 2 API-Kompatibilität
+      legacy: false, // Legacy-Modus für Vue 2 API-Kompatibilität
       globalInjection: true, // Wichtig für $t im Template
-      missingWarn: false,    // Keine Warnungen für fehlende Übersetzungen
-      fallbackWarn: false    // Keine Warnungen für Fallback-Übersetzungen
+      missingWarn: false, // Keine Warnungen für fehlende Übersetzungen
+      fallbackWarn: false, // Keine Warnungen für Fallback-Übersetzungen
     });
   }
   return i18nInstance;
@@ -52,9 +52,13 @@ function safeMerge(target, source) {
   const result = { ...target };
 
   // Merge alle Properties von source nach result
-  Object.keys(source).forEach(key => {
-    if (source[key] && typeof source[key] === 'object' &&
-      result[key] && typeof result[key] === 'object') {
+  Object.keys(source).forEach((key) => {
+    if (
+      source[key] &&
+      typeof source[key] === 'object' &&
+      result[key] &&
+      typeof result[key] === 'object'
+    ) {
       // Rekursiver Merge für verschachtelte Objekte
       result[key] = safeMerge(result[key], source[key]);
     } else {
@@ -78,12 +82,12 @@ export async function reloadTranslations() {
   loadingPromise = (async () => {
     try {
       // Dynamisches Importieren des apolloClient
-      const { apolloClient } = await import("@/apollo-client");
+      const { apolloClient } = await import('@/apollo-client');
 
       // Lade Übersetzungen
       const response = await apolloClient.query({
         query: TRANSLATIONS_QUERY,
-        fetchPolicy: 'network-only'
+        fetchPolicy: 'network-only',
       });
 
       if (response.data && response.data.translations) {
@@ -96,11 +100,13 @@ export async function reloadTranslations() {
           const baseEN = JSON.parse(JSON.stringify(defaultMessages.en || {}));
 
           // Zusammenführen mit Server-Übersetzungen
-          const mergedDE = serverTranslations.de ?
-            safeMerge(baseDE, serverTranslations.de) : baseDE;
+          const mergedDE = serverTranslations.de
+            ? safeMerge(baseDE, serverTranslations.de)
+            : baseDE;
 
-          const mergedEN = serverTranslations.en ?
-            safeMerge(baseEN, serverTranslations.en) : baseEN;
+          const mergedEN = serverTranslations.en
+            ? safeMerge(baseEN, serverTranslations.en)
+            : baseEN;
 
           // Aktualisiere die Nachrichten
           l18n.global.setLocaleMessage('de', mergedDE);
@@ -110,11 +116,11 @@ export async function reloadTranslations() {
           translationsLoaded.value = true;
           return true;
         } catch (parseError) {
-          console.error("[i18n] Failed to parse or merge translations:", parseError.message);
+          console.error('[i18n] Failed to parse or merge translations:', parseError.message);
         }
       }
     } catch (apiError) {
-      console.warn("[i18n] Could not load translations from API");
+      console.warn('[i18n] Could not load translations from API');
     }
 
     // Bei Fehlern: Sicherstellen, dass die Standardübersetzungen funktionieren
@@ -142,20 +148,9 @@ export async function reloadTranslations() {
   }
 }
 
-// Prüfhilfsfunktion für Übersetzungen (für Debugging)
-export function checkTranslation(key) {
-  if (!l18n.global) {
-    return { exists: false, value: null };
-  }
-
-  const exists = l18n.global.te(key);
-  const value = exists ? l18n.global.t(key) : null;
-  return { exists, value };
-}
-
 // Lade Übersetzungen erst NACH der Initialisierung von l18n
-reloadTranslations().catch(error => {
-  console.error("[i18n] Error initializing translations:", error.message);
+reloadTranslations().catch((error) => {
+  console.error('[i18n] Error initializing translations:', error.message);
   translationsLoaded.value = true;
 });
 

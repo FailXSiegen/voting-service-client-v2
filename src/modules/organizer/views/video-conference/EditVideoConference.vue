@@ -1,14 +1,14 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerVideoConferenceEdit')">
     <template #title>
-      {{ $t("navigation.views.organizerVideoConferenceEdit") }}
+      {{ $t('navigation.views.organizerVideoConferenceEdit') }}
       <router-link
         :to="{ name: RouteOrganizerVideoConference }"
         class="btn btn-secondary mb-3 mt-2 float-end d-none d-md-inline-block"
       >
         <i class="bi-arrow-left bi--1xl me-1" />
         <span class="align-middle">
-          {{ $t("view.videoConference.backToListView") }}
+          {{ $t('view.videoConference.backToListView') }}
         </span>
       </router-link>
     </template>
@@ -16,11 +16,7 @@
       <PageNavigation :routes="routes" />
     </template>
     <template #content>
-      <form
-        v-if="loaded"
-        class="video-conference-edit"
-        @submit.prevent="onSubmit"
-      >
+      <form v-if="loaded" class="video-conference-edit" @submit.prevent="onSubmit">
         <div class="mb-3">
           <BaseInput
             :label="$t('view.videoConference.formData.title')"
@@ -61,7 +57,7 @@
           />
         </div>
         <button type="submit" class="btn btn-primary">
-          {{ $t("view.videoConference.formData.submitEdit") }}
+          {{ $t('view.videoConference.formData.submitEdit') }}
         </button>
       </form>
     </template>
@@ -69,8 +65,8 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -78,21 +74,20 @@ import {
   RouteOrganizerEvents,
   RouteOrganizerManagement,
   RouteOrganizerVideoConference,
-} from "@/router/routes";
-import { computed, reactive, ref } from "vue";
-import { required } from "@vuelidate/validators";
-import { useVuelidate } from "@vuelidate/core";
-import BaseInput from "@/core/components/form/BaseInput.vue";
-import { handleError } from "@/core/error/error-handler";
-import { InvalidFormError } from "@/core/error/InvalidFormError";
-import { useMutation } from "@vue/apollo-composable";
-import { UPDATE_ZOOM_MEETING } from "@/modules/organizer/graphql/mutation/update-zoom-meeting";
-import { toast } from "vue3-toastify";
-import t from "@/core/util/l18n";
-import { useCore } from "@/core/store/core";
-import { useRouter, useRoute } from "vue-router";
-import { useQuery } from "@vue/apollo-composable";
-import { QUERY_ZOOM_MEETING } from "@/modules/organizer/graphql/queries/zoom-meeting";
+} from '@/router/routes';
+import { computed, reactive, ref } from 'vue';
+import { required } from '@vuelidate/validators';
+import { useVuelidate } from '@vuelidate/core';
+import BaseInput from '@/core/components/form/BaseInput.vue';
+import { handleError } from '@/core/error/error-handler';
+import { InvalidFormError } from '@/core/error/InvalidFormError';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import { UPDATE_ZOOM_MEETING } from '@/modules/organizer/graphql/mutation/update-zoom-meeting';
+import { toast } from 'vue3-toastify';
+import t from '@/core/util/l18n';
+import { useCore } from '@/core/store/core';
+import { useRouter, useRoute } from 'vue-router';
+import { QUERY_ZOOM_MEETING } from '@/modules/organizer/graphql/queries/zoom-meeting';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -111,9 +106,9 @@ const routes = getRoutesByName([
 
 // Form and validation setup.
 const formData = reactive({
-  title: "",
-  sdkKey: "",
-  sdkSecret: "",
+  title: '',
+  sdkKey: '',
+  sdkSecret: '',
 });
 const rules = computed(() => {
   return {
@@ -126,11 +121,7 @@ const rules = computed(() => {
 const v$ = useVuelidate(rules, formData);
 
 // Fetch video conference system to edit.
-const { onResult } = useQuery(
-  QUERY_ZOOM_MEETING,
-  { id },
-  { fetchPolicy: "no-cache" },
-);
+const { onResult } = useQuery(QUERY_ZOOM_MEETING, { id }, { fetchPolicy: 'no-cache' });
 onResult(({ data }) => {
   const { title, sdkKey, sdkSecret } = data.zoomMeeting;
   formData.title = title;
@@ -166,8 +157,8 @@ async function onSubmit() {
   await router.push({ name: RouteOrganizerVideoConference });
 
   // Show success message.
-  toast(t("success.organizer.videoConference.updatedSuccessfully"), {
-    type: "success",
+  toast(t('success.organizer.videoConference.updatedSuccessfully'), {
+    type: 'success',
   });
 }
 </script>

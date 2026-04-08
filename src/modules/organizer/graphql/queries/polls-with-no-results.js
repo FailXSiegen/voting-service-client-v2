@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const POLLS_WITH_NO_RESULTS = gql`
   query pollsWithNoResults($eventId: ID) {

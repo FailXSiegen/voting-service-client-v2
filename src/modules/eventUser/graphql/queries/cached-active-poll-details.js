@@ -34,33 +34,3 @@ export const CACHED_ACTIVE_POLL_DETAILS_QUERY = gql`
     }
   }
 `;
-
-/**
- * Fallback Query - falls der Cache-Server noch nicht läuft
- */
-export const ACTIVE_POLL_DETAILS_FALLBACK_QUERY = gql`
-  query ActivePollDetailsFallback($eventId: ID!) {
-    activePollEventUser(eventId: $eventId) {
-      pollResultId
-      pollAnswers {
-        id
-        pollUserId
-        answerContent
-      }
-      pollUser {
-        id
-        eventUserId
-        publicName
-      }
-      pollUserVoted {
-        id
-        eventUserId
-      }
-      poll {
-        id
-        title
-        type
-      }
-    }
-  }
-`;

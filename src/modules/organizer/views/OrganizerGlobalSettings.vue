@@ -1,7 +1,7 @@
 <template>
   <PageLayout :meta-title="$t('navigation.views.organizerGlobalSettings')">
     <template #title>
-      {{ $t("navigation.views.organizerGlobalSettings") }}
+      {{ $t('navigation.views.organizerGlobalSettings') }}
     </template>
     <template #header>
       <PageNavigation :routes="routes" />
@@ -14,9 +14,9 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import PageNavigation from "@/modules/organizer/components/PageNavigation.vue";
-import SystemSettingsManager from "@/modules/organizer/components/SystemSettingsManager.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
+import SystemSettingsManager from '@/modules/organizer/components/SystemSettingsManager.vue';
 import {
   getRoutesByName,
   RouteOrganizerAllEvents,
@@ -27,7 +27,7 @@ import {
   RouteOrganizerStaticContentEditor,
   RouteOrganizerGlobalSettings,
   RouteOrganizerVideoConference,
-} from "@/router/routes";
+} from '@/router/routes';
 
 // Define navigation items for superadmins
 const routes = getRoutesByName([

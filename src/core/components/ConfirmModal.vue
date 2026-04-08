@@ -3,17 +3,17 @@
     <div class="cd-popup-container p-3 border-info">
       <p>{{ message }}</p>
       <button class="btn btn-danger me-3" @click="emit('confirm')">
-        {{ $t("general.confirm") }}
+        {{ $t('general.confirm') }}
       </button>
       <button class="btn btn-secondary" @click="emit('cancel')">
-        {{ $t("general.cancel") }}
+        {{ $t('general.cancel') }}
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-const emit = defineEmits(["confirm", "cancel"]);
+const emit = defineEmits(['confirm', 'cancel']);
 defineProps({
   message: {
     type: String,
@@ -87,7 +87,7 @@ defineProps({
 }
 
 .cd-popup-container .cd-buttons:after {
-  content: "";
+  content: '';
   display: table;
   clear: both;
 }
@@ -136,7 +136,7 @@ defineProps({
 
 .cd-popup-container .cd-popup-close::before,
 .cd-popup-container .cd-popup-close::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 12px;
   width: 14px;

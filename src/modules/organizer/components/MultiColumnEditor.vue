@@ -57,7 +57,10 @@
                 <button
                   type="button"
                   class="btn btn-outline-primary btn-sm"
-                  @click="showMediaManager = true; currentColumnIndex = index"
+                  @click="
+                    showMediaManager = true;
+                    currentColumnIndex = index;
+                  "
                 >
                   <i class="bi bi-image"></i> Medienverwaltung
                 </button>
@@ -68,7 +71,7 @@
                     :model-value="column.content"
                     :editor="editorClass"
                     :config="editorConfig"
-                    @update:model-value="value => updateColumnDirectly(index, value)"
+                    @update:model-value="(value) => updateColumnDirectly(index, value)"
                     @ready="onEditorReady($event, index)"
                   />
                 </div>
@@ -80,11 +83,7 @@
     </div>
 
     <div v-if="columns.length < 4" class="mt-2 mb-4">
-      <button
-        type="button"
-        class="btn btn-outline-success"
-        @click="addColumn"
-      >
+      <button type="button" class="btn btn-outline-success" @click="addColumn">
         <i class="bi bi-plus-circle me-1"></i> Spalte hinzufügen
       </button>
     </div>
@@ -95,15 +94,11 @@
       <div class="modal media-manager-dialog d-block" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
-            <MediaManager
-              @select="insertMedia"
-              @close="showMediaManager = false"
-            />
+            <MediaManager @select="insertMedia" @close="showMediaManager = false" />
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -115,7 +110,7 @@ export default {
   name: 'MultiColumnEditor',
   components: {
     ckeditor: Ckeditor,
-    MediaManager
+    MediaManager,
   },
 
   props: {
@@ -124,7 +119,7 @@ export default {
      */
     value: {
       type: Array,
-      default: () => []
+      default: () => [],
     },
 
     /**
@@ -133,7 +128,7 @@ export default {
     initialColumnCount: {
       type: Number,
       default: 2,
-      validator: val => [2, 3, 4].includes(val)
+      validator: (val) => [2, 3, 4].includes(val),
     },
 
     /**
@@ -141,7 +136,7 @@ export default {
      */
     editorClass: {
       type: Function,
-      required: true
+      required: true,
     },
 
     /**
@@ -149,9 +144,11 @@ export default {
      */
     editorConfig: {
       type: Object,
-      required: true
-    }
+      required: true,
+    },
   },
+
+  emits: ['input', 'update:modelValue', 'change'],
 
   data() {
     return {
@@ -159,17 +156,17 @@ export default {
       columns: [],
       editorInstances: [],
       showMediaManager: false,
-      currentColumnIndex: null
+      currentColumnIndex: null,
     };
   },
-  
+
   watch: {
     value: {
       handler(newVal, oldVal) {
         // Avoid infinite update loops by checking if the values are significantly different
         const newLength = newVal && Array.isArray(newVal) ? newVal.length : 0;
         const oldLength = oldVal && Array.isArray(oldVal) ? oldVal.length : -1;
-        
+
         // Only update if this is the initial value or the array length has changed
         if (oldVal === undefined || newLength !== oldLength) {
           if (newVal && Array.isArray(newVal)) {
@@ -177,10 +174,10 @@ export default {
           }
         }
       },
-      immediate: true
-    }
+      immediate: true,
+    },
   },
-  
+
   mounted() {
     // Initialize with empty columns if no value provided
     if (!this.value || !this.value.length) {
@@ -188,17 +185,17 @@ export default {
       for (let i = 0; i < this.columnCount; i++) {
         this.columns.push({ content: '' });
       }
-      
+
       // Initial emit to ensure parent component has data
       this.$emit('input', [...this.columns]);
       this.$emit('update:modelValue', [...this.columns]);
       this.$emit('change', {
         columnCount: this.columnCount,
-        columns: [...this.columns]
+        columns: [...this.columns],
       });
     }
   },
-  
+
   methods: {
     /**
      * Insert media into the editor at the current column
@@ -222,8 +219,8 @@ export default {
         editor.execute('insertImage', {
           source: {
             src: imageUrl,
-            alt: altText
-          }
+            alt: altText,
+          },
         });
 
         // Update content in our data model
@@ -260,21 +257,21 @@ export default {
     initFromValue() {
       if (this.value && Array.isArray(this.value)) {
         // Make a clean copy of the value without __typename
-        this.columns = this.value.map(column => ({
-          content: column.content || ''
+        this.columns = this.value.map((column) => ({
+          content: column.content || '',
         }));
-        
+
         // Ensure we have at least 2 columns
         if (this.columns.length < 2) {
           for (let i = this.columns.length; i < 2; i++) {
             this.columns.push({ content: '' });
           }
         }
-        
+
         this.columnCount = Math.min(Math.max(this.columns.length, 2), 4);
       } else {
         console.warn('MultiColumnEditor: Invalid value provided:', this.value);
-        
+
         // Create default columns
         this.columns = [];
         for (let i = 0; i < this.columnCount; i++) {
@@ -282,7 +279,7 @@ export default {
         }
       }
     },
-    
+
     /**
      * Update column content from CKEditor
      */
@@ -296,20 +293,20 @@ export default {
         this.$emit('update:modelValue', [...this.columns]);
         this.$emit('change', {
           columnCount: this.columnCount,
-          columns: [...this.columns]
+          columns: [...this.columns],
         });
       }
     },
-    
+
     /**
      * Set the number of columns
      */
     async setColumnCount(count) {
       if (![2, 3, 4].includes(count)) return;
       if (this.columnCount === count) return; // No change, skip processing
-      
+
       this.columnCount = count;
-      
+
       // Adjust columns array if needed
       if (this.columns.length < count) {
         // Add columns
@@ -320,40 +317,40 @@ export default {
         // Remove extra columns
         this.columns = this.columns.slice(0, count);
       }
-      
+
       this.$emit('input', [...this.columns]);
       this.$emit('update:modelValue', [...this.columns]);
       this.$emit('change', { columnCount: count, columns: [...this.columns] });
     },
-    
+
     /**
      * Add a new column
      */
     async addColumn() {
       if (this.columns.length >= 4) return; // Max 4 columns
-      
+
       this.columns.push({ content: '' });
       this.columnCount = this.columns.length;
-      
+
       this.$emit('input', [...this.columns]);
       this.$emit('update:modelValue', [...this.columns]);
       this.$emit('change', { columnCount: this.columnCount, columns: [...this.columns] });
     },
-    
+
     /**
      * Remove a column
      */
     async removeColumn(index) {
       if (this.columns.length <= 2) return; // Min 2 columns
-      
+
       this.columns.splice(index, 1);
       this.columnCount = this.columns.length;
-      
+
       this.$emit('input', [...this.columns]);
       this.$emit('update:modelValue', [...this.columns]);
       this.$emit('change', { columnCount: this.columnCount, columns: [...this.columns] });
     },
-    
+
     /**
      * Calculate the Bootstrap column class based on column count
      */
@@ -367,8 +364,8 @@ export default {
         default:
           return 'col-md-6';
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

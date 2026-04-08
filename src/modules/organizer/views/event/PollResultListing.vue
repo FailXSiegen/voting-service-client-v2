@@ -2,7 +2,7 @@
   <PageLayout :meta-title="$t('navigation.views.organizerPollResults')">
     <template #title>
       <div class="events-new-title">
-        {{ $t("navigation.views.organizerPollResults") }} -
+        {{ $t('navigation.views.organizerPollResults') }} -
         <span v-if="event?.title">{{ event?.title }}</span>
       </div>
     </template>
@@ -17,14 +17,14 @@
       <!-- Loading State -->
       <div v-if="isLoading" class="d-flex justify-content-center my-5">
         <div class="spinner-border" role="status">
-          <span class="visually-hidden">{{ $t("common.loading") }}</span>
+          <span class="visually-hidden">{{ $t('common.loading') }}</span>
         </div>
-        <span class="ms-3">{{ $t("common.loading") }}</span>
+        <span class="ms-3">{{ $t('common.loading') }}</span>
       </div>
 
       <!-- Error State -->
       <div v-else-if="error" class="alert alert-danger" role="alert">
-        {{ $t("common.error.loading") }}
+        {{ $t('common.error.loading') }}
       </div>
 
       <!-- Results -->
@@ -46,20 +46,16 @@
               @click="showMorePollResults"
             >
               <i class="me-3 bi bi-plus-square-fill bi--2xl" />
-              {{
-                isLoadingMore
-                  ? $t("common.loading")
-                  : $t("view.results.showMore")
-              }}
+              {{ isLoadingMore ? $t('common.loading') : $t('view.results.showMore') }}
             </button>
 
             <p v-if="!showMoreEnabled" class="alert alert-light mx-auto my-5">
-              {{ $t("view.results.noMoreResults") }}
+              {{ $t('view.results.noMoreResults') }}
             </p>
           </template>
 
           <p v-else class="alert alert-info mx-auto my-5">
-            {{ $t("view.results.noResults") }}
+            {{ $t('view.results.noResults') }}
           </p>
         </div>
       </template>
@@ -68,22 +64,22 @@
 </template>
 
 <script setup>
-import PageLayout from "@/modules/organizer/components/PageLayout.vue";
-import EventNavigation from "@/modules/organizer/components/EventNavigation.vue";
-import { RouteOrganizerDashboard } from "@/router/routes";
-import { useCore } from "@/core/store/core";
-import { useRoute, useRouter } from "vue-router";
-import { useQuery } from "@vue/apollo-composable";
-import { EVENT } from "@/modules/organizer/graphql/queries/event";
-import { handleError } from "@/core/error/error-handler";
-import { NetworkError } from "@/core/error/NetworkError";
-import { ref, computed, watch, nextTick } from "vue";
-import ResultListing from "@/modules/organizer/components/events/poll/ResultListing.vue";
-import { POLLS_RESULTS } from "@/modules/organizer/graphql/queries/poll-results";
-import { toast } from "vue3-toastify";
-import l18n from "@/l18n";
-import { exportPollResultsCsv } from "@/modules/organizer/requests/export-results-csv";
-import ButtonDropdown from "@/modules/organizer/components/form/ButtonDropdown.vue";
+import PageLayout from '@/modules/organizer/components/PageLayout.vue';
+import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
+import { RouteOrganizerDashboard } from '@/router/routes';
+import { useCore } from '@/core/store/core';
+import { useRoute, useRouter } from 'vue-router';
+import { useQuery } from '@vue/apollo-composable';
+import { EVENT } from '@/modules/organizer/graphql/queries/event';
+import { handleError } from '@/core/error/error-handler';
+import { NetworkError } from '@/core/error/NetworkError';
+import { ref, computed, watch, nextTick } from 'vue';
+import ResultListing from '@/modules/organizer/components/events/poll/ResultListing.vue';
+import { POLLS_RESULTS } from '@/modules/organizer/graphql/queries/poll-results';
+import { toast } from 'vue3-toastify';
+import l18n from '@/l18n';
+import { exportPollResultsCsv } from '@/modules/organizer/requests/export-results-csv';
+import ButtonDropdown from '@/modules/organizer/components/form/ButtonDropdown.vue';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -101,29 +97,27 @@ const showMoreEnabled = ref(true);
 const isEventLoading = ref(true);
 const isPollResultsLoading = ref(true);
 const isLoadingMore = ref(false);
-const isLoading = computed(
-  () => isEventLoading.value || isPollResultsLoading.value,
-);
+const isLoading = computed(() => isEventLoading.value || isPollResultsLoading.value);
 
 const exportButtons = [
   {
-    label: "Übersicht",
+    label: 'Übersicht',
     onClick: exportPollOverview,
   },
   {
-    label: "Ergebnisse",
+    label: 'Ergebnisse',
     onClick: exportPollResults,
   },
   {
-    label: "Ergebnisse mit Details",
+    label: 'Ergebnisse mit Details',
     onClick: exportPollResultsDetail,
   },
   {
-    label: "Teilnehmer mit abgegebener Stimmenanzahl",
+    label: 'Teilnehmer mit abgegebener Stimmenanzahl',
     onClick: exportPollEventUsersVoted,
   },
   {
-    label: "Stimmen-Anpassungen Log",
+    label: 'Stimmen-Anpassungen Log',
     onClick: exportVoteAdjustments,
   },
 ];
@@ -135,9 +129,9 @@ const eventQuery = useQuery(
   EVENT,
   { id, organizerId: coreStore.user.id },
   {
-    fetchPolicy: "network-only",
+    fetchPolicy: 'network-only',
     notifyOnNetworkStatusChange: true,
-  },
+  }
 );
 
 // Update loading state for event
@@ -145,7 +139,7 @@ watch(
   () => eventQuery.loading.value,
   (loading) => {
     isEventLoading.value = loading;
-  },
+  }
 );
 
 // Handle event query errors
@@ -176,8 +170,8 @@ function setupPollResultsQuery() {
       includeHidden: true, // Organizers see all results including hidden ones
     },
     {
-      fetchPolicy: "network-only",
-    },
+      fetchPolicy: 'network-only',
+    }
   );
 
   // Update loading state for poll results
@@ -185,7 +179,7 @@ function setupPollResultsQuery() {
     () => pollResultsQuery.loading.value,
     (loading) => {
       isPollResultsLoading.value = loading;
-    },
+    }
   );
 
   // Handle poll results
@@ -213,9 +207,8 @@ async function showMorePollResults() {
 
   isLoadingMore.value = true;
   const nextPage = page.value + 1;
-  const loadMoreButton = document.querySelector(".poll-results-container");
-  const buttonPosition =
-    loadMoreButton?.getBoundingClientRect().bottom + window.pageYOffset;
+  const loadMoreButton = document.querySelector('.poll-results-container');
+  const buttonPosition = loadMoreButton?.getBoundingClientRect().bottom + window.pageYOffset;
 
   try {
     await pollResultsQuery.fetchMore({
@@ -228,7 +221,7 @@ async function showMorePollResults() {
       updateQuery: (prev, { fetchMoreResult }) => {
         if (!fetchMoreResult?.pollResult?.length) {
           showMoreEnabled.value = false;
-          toast(l18n.global.tc("view.results.noMoreResults"), { type: "info" });
+          toast(l18n.global.tc('view.results.noMoreResults'), { type: 'info' });
           return prev;
         }
 
@@ -238,8 +231,7 @@ async function showMorePollResults() {
 
         pollResults.value = updatedResults.pollResult;
         page.value = nextPage;
-        showMoreEnabled.value =
-          fetchMoreResult.pollResult.length >= pageSize.value;
+        showMoreEnabled.value = fetchMoreResult.pollResult.length >= pageSize.value;
 
         return updatedResults;
       },
@@ -248,12 +240,12 @@ async function showMorePollResults() {
     nextTick(() => {
       window.scrollTo({
         top: buttonPosition,
-        behavior: "auto",
+        behavior: 'auto',
       });
     });
   } catch (error) {
-    console.error("Error loading more results:", error);
-    toast(l18n.global.tc("common.error.loading"), { type: "error" });
+    console.error('Error loading more results:', error);
+    toast(l18n.global.tc('common.error.loading'), { type: 'error' });
   } finally {
     isLoadingMore.value = false;
   }
@@ -261,36 +253,33 @@ async function showMorePollResults() {
 
 // Export functions
 async function exportPollOverview() {
-  const response = await exportPollResultsCsv(id, "pollOverview");
-  await downloadCsv(await response.text(), "pollOverview.csv");
+  const response = await exportPollResultsCsv(id, 'pollOverview');
+  await downloadCsv(await response.text(), 'pollOverview.csv');
 }
 
 async function exportPollResults() {
-  const response = await exportPollResultsCsv(id, "pollResults");
-  await downloadCsv(await response.text(), "pollResults.csv");
+  const response = await exportPollResultsCsv(id, 'pollResults');
+  await downloadCsv(await response.text(), 'pollResults.csv');
 }
 
 async function exportPollResultsDetail() {
-  const response = await exportPollResultsCsv(id, "pollResultsDetail");
-  await downloadCsv(await response.text(), "pollResultsDetail.csv");
+  const response = await exportPollResultsCsv(id, 'pollResultsDetail');
+  await downloadCsv(await response.text(), 'pollResultsDetail.csv');
 }
 
 async function exportPollEventUsersVoted() {
-  const response = await exportPollResultsCsv(id, "pollEventUsersVoted");
-  await downloadCsv(await response.text(), "pollEventUsersVoted.csv");
+  const response = await exportPollResultsCsv(id, 'pollEventUsersVoted');
+  await downloadCsv(await response.text(), 'pollEventUsersVoted.csv');
 }
 
 async function exportVoteAdjustments() {
   try {
-    const response = await fetch(
-      `/api/event/${id}/export-vote-adjustments`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${coreStore.authToken}`,
-        },
-      }
-    );
+    const response = await fetch(`/api/event/${id}/export-vote-adjustments`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${coreStore.authToken}`,
+      },
+    });
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -308,23 +297,23 @@ async function exportVoteAdjustments() {
     }
 
     const blob = await response.blob();
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    toast(l18n.global.tc("common.success"), { type: "success" });
+    toast(l18n.global.tc('common.success'), { type: 'success' });
   } catch (error) {
     console.error('Export error:', error);
-    toast(error.message || l18n.global.tc("common.error"), { type: "error" });
+    toast(error.message || l18n.global.tc('common.error'), { type: 'error' });
   }
 }
 
 async function downloadCsv(responseText, filename) {
-  const blob = new Blob([responseText], { type: "text/csv" });
-  const link = document.createElement("a");
+  const blob = new Blob([responseText], { type: 'text/csv' });
+  const link = document.createElement('a');
   link.href = window.URL.createObjectURL(blob);
   link.download = filename;
   document.body.appendChild(link);

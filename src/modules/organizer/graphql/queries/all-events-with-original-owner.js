@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const ALL_EVENTS_WITH_ORIGINAL_OWNER = gql`
   query allEventsWithOriginalOwner {

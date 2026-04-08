@@ -2,6 +2,8 @@
 # Automatisches Build und Deploy bei Push auf main Branch
 
 stages:
+  - lint
+  - quality
   - build
   - deploy
   - test-prepare
@@ -19,6 +21,85 @@ variables:
   # Deployment Path auf dem gleichen Server
   DEPLOY_PATH: "/var/www/html/voting-tool"
   DOMAIN: "voting.failx.de"
+
+# ============================================
+# LINT STAGE - Code Quality Checks
+# ============================================
+
+.node_job:
+  image: node:18-alpine
+  before_script:
+    - npm ci
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}-node
+    paths:
+      - node_modules/
+
+# ESLint Check
+eslint:
+  extends: .node_job
+  stage: lint
+  script:
+    - echo "Running ESLint..."
+    - npm run lint:check
+  only:
+    - main
+    - merge_requests
+
+# Prettier Format Check
+prettier:
+  extends: .node_job
+  stage: lint
+  script:
+    - echo "Running Prettier check..."
+    - npm run format:check
+  only:
+    - main
+    - merge_requests
+
+# Forbidden Words Check (console.log, debugger, etc.)
+find-forbidden-words:
+  extends: .node_job
+  stage: lint
+  script:
+    - apk add --no-cache bash
+    - echo "Checking for forbidden debug words..."
+    - bash bin/find-forbidden-words.sh
+  only:
+    - main
+    - merge_requests
+
+# ============================================
+# QUALITY STAGE - Static Analysis
+# ============================================
+
+# Copy-Paste Detection (like PHPMD)
+jscpd:
+  extends: .node_job
+  stage: quality
+  script:
+    - echo "Running copy-paste detection..."
+    - npm run qa:cpd
+  only:
+    - main
+    - merge_requests
+  allow_failure: true
+
+# Unused Code/Dependencies Detection (like Rector dead code)
+knip:
+  extends: .node_job
+  stage: quality
+  script:
+    - echo "Running unused code detection..."
+    - npm run qa:unused
+  only:
+    - main
+    - merge_requests
+  allow_failure: true
+
+# ============================================
+# BUILD STAGE
+# ============================================
 
 # Basis-Job-Konfiguration
 .docker_job:

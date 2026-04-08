@@ -1,4 +1,4 @@
-import { gql } from "graphql-tag";
+import { gql } from 'graphql-tag';
 
 export const POLLS_WITH_VOTE_STATUS = gql`
   query pollsWithVoteStatus($eventId: ID!, $eventUserId: ID!) {

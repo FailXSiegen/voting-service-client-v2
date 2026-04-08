@@ -1,10 +1,6 @@
 <template>
   <div v-if="!isDev && recaptchaEnabled && recaptchaSiteKey" class="recaptcha-wrapper">
-    <div
-      id="recaptcha-container"
-      class="g-recaptcha"
-      :data-sitekey="recaptchaSiteKey"
-    ></div>
+    <div id="recaptcha-container" class="g-recaptcha" :data-sitekey="recaptchaSiteKey"></div>
   </div>
   <div v-else-if="isDev" class="dev-mode-recaptcha">
     <small class="text-muted">reCAPTCHA auto-verified in dev mode</small>
@@ -18,11 +14,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed } from 'vue';
 import { useQuery } from '@vue/apollo-composable';
 import { SYSTEM_SETTINGS_QUERY } from '@/modules/organizer/graphql/queries/system-settings';
 
-const emit = defineEmits(["verified", "expired"]);
+const emit = defineEmits(['verified', 'expired']);
 const env = import.meta.env;
 const recaptchaResponse = ref(null);
 const recaptchaVerified = ref(false);
@@ -48,13 +44,13 @@ const recaptchaEnabled = computed(() => {
 function onCaptchaVerified(response) {
   recaptchaResponse.value = response;
   recaptchaVerified.value = true;
-  emit("verified");
+  emit('verified');
 }
 
 function onCaptchaExpired() {
   recaptchaResponse.value = null;
   recaptchaVerified.value = false;
-  emit("expired");
+  emit('expired');
 }
 
 onMounted(() => {
@@ -74,8 +70,8 @@ onMounted(() => {
       return;
     }
 
-    const script = document.createElement("script");
-    script.src = "https://www.google.com/recaptcha/api.js?render=explicit";
+    const script = document.createElement('script');
+    script.src = 'https://www.google.com/recaptcha/api.js?render=explicit';
     script.async = true;
     script.defer = true;
     document.head.appendChild(script);
@@ -88,20 +84,19 @@ onMounted(() => {
 
       window.grecaptcha.ready(() => {
         try {
-          window.grecaptcha.render("recaptcha-container", {
+          window.grecaptcha.render('recaptcha-container', {
             sitekey: recaptchaSiteKey.value,
             callback: onCaptchaVerified,
-            "expired-callback": onCaptchaExpired,
+            'expired-callback': onCaptchaExpired,
           });
         } catch (error) {
-          console.error("Error rendering reCAPTCHA:", error);
+          console.error('Error rendering reCAPTCHA:', error);
         }
       });
     }
 
     script.onload = tryToRenderRecaptcha;
-    script.onerror = (error) =>
-      console.error("Failed to load reCAPTCHA script:", error);
+    script.onerror = (error) => console.error('Failed to load reCAPTCHA script:', error);
   }
 
   // Wait for settings to load or timeout after 5 seconds
@@ -109,7 +104,8 @@ onMounted(() => {
     let attempts = 0;
     const checkSettings = () => {
       attempts++;
-      if (!settingsLoading.value || attempts > 50) { // 50 * 100ms = 5 seconds max
+      if (!settingsLoading.value || attempts > 50) {
+        // 50 * 100ms = 5 seconds max
         initializeRecaptcha();
       } else {
         setTimeout(checkSettings, 100);

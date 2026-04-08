@@ -9,7 +9,7 @@ const { execSync } = require('child_process');
 function dbQuery(sql) {
   try {
     return execSync(
-      `echo "${sql.replace(/"/g, '\\"')}" | docker exec -i db mysql -u root -p1234 application 2>/dev/null`,
+      `echo "${sql.replace(/"/g, '\\"')}" | docker exec -i voting_db mysql -u root -prootpassword application 2>/dev/null`,
       { encoding: 'utf8' }
     ).trim();
   } catch (e) { return ''; }

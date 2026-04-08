@@ -20,12 +20,12 @@
       >
         <template v-if="dashboardForeground">
           <i class="bi bi bi-fullscreen me-2" /><span>{{
-            $t("view.event.meeting.backToMeeting")
+            $t('view.event.meeting.backToMeeting')
           }}</span>
         </template>
         <template v-else>
           <i class="bi bi-fullscreen-exit me-2" /><span>{{
-            $t("view.event.meeting.backToDashboard")
+            $t('view.event.meeting.backToDashboard')
           }}</span>
         </template>
       </div>
@@ -34,8 +34,8 @@
 </template>
 
 <script setup>
-import ZoomFrame from "@/modules/eventUser/components/dashboard/meeting/frame/ZoomFrame.vue";
-import { ref } from "vue";
+import ZoomFrame from '@/modules/eventUser/components/dashboard/meeting/frame/ZoomFrame.vue';
+import { ref } from 'vue';
 
 defineProps({
   event: {
@@ -55,21 +55,21 @@ const meetingLoaded = ref(false);
 // Events.
 
 function onToggleVideoConference() {
-  const bodyElement = document.querySelector("body");
-  const zoomRootElement = document.querySelector("#zmmtg-root");
+  const bodyElement = document.querySelector('body');
+  const zoomRootElement = document.querySelector('#zmmtg-root');
 
   if (bodyElement && zoomRootElement && !dashboardForeground.value) {
-    bodyElement.classList.add("zoom-hidden");
-    bodyElement.classList.remove("zoom-show");
+    bodyElement.classList.add('zoom-hidden');
+    bodyElement.classList.remove('zoom-show');
 
-    zoomRootElement.classList.add("hidden");
-    zoomRootElement.style.display = "none";
+    zoomRootElement.classList.add('hidden');
+    zoomRootElement.style.display = 'none';
   } else {
-    bodyElement.classList.add("zoom-show");
-    bodyElement.classList.remove("zoom-hidden");
+    bodyElement.classList.add('zoom-show');
+    bodyElement.classList.remove('zoom-hidden');
 
-    zoomRootElement.classList.remove("hidden");
-    zoomRootElement.style.display = "block";
+    zoomRootElement.classList.remove('hidden');
+    zoomRootElement.style.display = 'block';
   }
 
   dashboardForeground.value = !dashboardForeground.value;

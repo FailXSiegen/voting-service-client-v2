@@ -58,7 +58,7 @@
   padding-bottom: 72px;
 }
 
-.navbar-toggler[aria-expanded="false"] + .navbar-collapse {
+.navbar-toggler[aria-expanded='false'] + .navbar-collapse {
   position: fixed;
   top: 72px;
   left: -75px;
@@ -93,7 +93,7 @@
   }
 }
 
-.navbar-toggler[aria-expanded="true"] + .navbar-collapse {
+.navbar-toggler[aria-expanded='true'] + .navbar-collapse {
   position: fixed;
   max-width: 380px;
   width: 100%;

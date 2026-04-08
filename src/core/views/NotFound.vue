@@ -3,18 +3,14 @@
     <div class="container-fluid min-vh-100">
       <div class="container">
         <h1 class="d-block text-center mb-5 mt-5">
-          {{ $t("error.routing.404Headline") }}
+          {{ $t('error.routing.404Headline') }}
         </h1>
         <div class="d-flex justify-content-center">
           <div class="not-found-wrapper">
             <div class="card">
               <div class="card-body">
                 <div class="card-img">
-                  <img
-                    alt="404"
-                    class="img-fluid"
-                    src="@/assets/images/404-robot.svg"
-                  />
+                  <img alt="404" class="img-fluid" src="@/assets/images/404-robot.svg" />
                 </div>
               </div>
             </div>
@@ -26,7 +22,7 @@
 </template>
 
 <script setup>
-import CorePageLayout from "@/core/components/CorePageLayout.vue";
+import CorePageLayout from '@/core/components/CorePageLayout.vue';
 </script>
 
 <style lang="scss" scoped>
