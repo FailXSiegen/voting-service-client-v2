@@ -15,7 +15,7 @@
       <h2>Nutzungsbedingungen</h2>
       <p>
         Die Bedingungen, unter denen digitalwahl.org genutzt werden kann, findest du
-        <a href="/nutzerbedingungen">hier</a>.
+        <a href="/nutzervereinbarung">hier</a>.
       </p>
       <div class="card border-primary p-3">
         <h2 class="mb-3">Unterstützt und gefördert von:</h2>
@@ -95,14 +95,14 @@
           </div>
           <div class="col-sm col-12">
             <figure class="figure">
-              <a href="http://www.saengerjugend.de/" target="_blank" rel="noopener noreferrer">
+              <a href="https://www.chorjugend.nrw/" target="_blank" rel="noopener noreferrer">
                 <img
-                  src="../../../assets/images/logos/sjnrw.png"
+                  src="../../../assets/images/logos/chorjugend-nrw.png"
                   class="figure-img img-fluid"
-                  alt="Sängerjugend im Chorverband NRW e. V."
+                  alt="Chorjugend NRW"
                 />
               </a>
-              <figcaption class="figure-caption">Sängerjugend im Chorverband NRW e. V.</figcaption>
+              <figcaption class="figure-caption">Chorjugend NRW</figcaption>
             </figure>
           </div>
         </div>
