@@ -14,8 +14,8 @@
       <option value="0" selected="selected">---</option>
       <option
         v-for="videoConference in videoConferences"
-        :key="videoConference.id"
-        :value="videoConference.id"
+        :key="videoConference.compositeId"
+        :value="videoConference.compositeId"
       >
         {{ videoConference.title }}
       </option>
@@ -61,30 +61,51 @@ const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
   value: String,
   // eslint-disable-next-line vue/require-default-prop
+  selectedTypename: String,
+  // eslint-disable-next-line vue/require-default-prop
   helpText: String,
 });
 
-const inputValue = ref(props.value);
+function getAllVideoConferences(org) {
+  const zoom = (org?.zoomMeetings ?? []).map((m) => ({
+    ...m,
+    __typename: 'ZoomMeeting',
+    compositeId: `zoom-${m.id}`,
+  }));
+  const jitsi = (org?.jitsiMeetings ?? []).map((m) => ({
+    ...m,
+    __typename: 'JitsiMeeting',
+    compositeId: `jitsi-${m.id}`,
+  }));
+  return [...zoom, ...jitsi];
+}
+
+const coreStore = useCore();
+const { organizer } = storeToRefs(coreStore);
+const videoConferences = ref(getAllVideoConferences(coreStore.getOrganizer));
+
+// Resolve initial value to compositeId
+function resolveInitialValue() {
+  if (!props.value) return '0';
+  const prefix = props.selectedTypename === 'JitsiMeeting' ? 'jitsi' : 'zoom';
+  return `${prefix}-${props.value}`;
+}
+
+const inputValue = ref(resolveInitialValue());
+
+watch(organizer, (newOrganizer) => {
+  videoConferences.value = getAllVideoConferences(newOrganizer);
+});
 
 function onChange() {
-  // WICHTIGER FIX: Defensive Programmierung - verhindere null reference errors
+  if (inputValue.value === '0') {
+    emit('change', { value: undefined });
+    return;
+  }
   const conferences = videoConferences.value || [];
-  const foundConference = conferences.find(({ id }) => inputValue.value === id);
+  const foundConference = conferences.find((c) => c.compositeId === inputValue.value);
   emit('change', {
     value: foundConference,
   });
 }
-
-const coreStore = useCore();
-
-const { organizer } = storeToRefs(coreStore);
-const videoConferences = ref(coreStore.getOrganizer?.zoomMeetings ?? []);
-// WICHTIGER FIX: Watch changes to organizer in the store - mit null safety
-watch(organizer, (newOrganizer) => {
-  if (newOrganizer && newOrganizer.zoomMeetings) {
-    videoConferences.value = newOrganizer.zoomMeetings;
-  } else {
-    videoConferences.value = [];
-  }
-});
 </script>

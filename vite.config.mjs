@@ -28,11 +28,19 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: __dirname + '/node_modules/@zoomus/websdk/dist/lib',
+          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/lib',
           dest: __dirname + '/dist/lib/zoom/',
         },
         {
-          src: __dirname + '/node_modules/@zoomus/websdk/dist/lib',
+          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/lib',
+          dest: __dirname + '/public/lib/zoom/',
+        },
+        {
+          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/ui',
+          dest: __dirname + '/dist/lib/zoom/',
+        },
+        {
+          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/ui',
           dest: __dirname + '/public/lib/zoom/',
         },
         {

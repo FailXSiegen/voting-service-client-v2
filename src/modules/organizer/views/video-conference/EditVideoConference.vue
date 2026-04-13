@@ -30,32 +30,49 @@
             "
           />
         </div>
-        <div class="mb-3">
-          <BaseInput
-            :label="$t('view.videoConference.formData.sdkKey')"
-            :errors="v$.sdkKey?.$errors"
-            :has-errors="v$.sdkKey?.$errors.length > 0"
-            :value="formData.sdkKey"
-            @change="
-              ({ value }) => {
-                formData.sdkKey = value;
-              }
-            "
-          />
-        </div>
-        <div class="mb-3">
-          <BaseInput
-            :label="$t('view.videoConference.formData.sdkSecret')"
-            :errors="v$.sdkSecret?.$errors"
-            :has-errors="v$.sdkSecret?.$errors.length > 0"
-            :value="formData.sdkSecret"
-            @change="
-              ({ value }) => {
-                formData.sdkSecret = value;
-              }
-            "
-          />
-        </div>
+        <template v-if="providerType === 'zoom'">
+          <div class="mb-3">
+            <BaseInput
+              :label="$t('view.videoConference.formData.sdkKey')"
+              :errors="v$.sdkKey?.$errors"
+              :has-errors="v$.sdkKey?.$errors.length > 0"
+              :value="formData.sdkKey"
+              @change="
+                ({ value }) => {
+                  formData.sdkKey = value;
+                }
+              "
+            />
+          </div>
+          <div class="mb-3">
+            <BaseInput
+              :label="$t('view.videoConference.formData.sdkSecret')"
+              :errors="v$.sdkSecret?.$errors"
+              :has-errors="v$.sdkSecret?.$errors.length > 0"
+              :value="formData.sdkSecret"
+              @change="
+                ({ value }) => {
+                  formData.sdkSecret = value;
+                }
+              "
+            />
+          </div>
+        </template>
+        <template v-else>
+          <div class="mb-3">
+            <BaseInput
+              :label="$t('view.videoConference.formData.serverUrl')"
+              :errors="v$.serverUrl?.$errors"
+              :has-errors="v$.serverUrl?.$errors.length > 0"
+              :value="formData.serverUrl"
+              @change="
+                ({ value }) => {
+                  formData.serverUrl = value;
+                }
+              "
+            />
+          </div>
+        </template>
         <button type="submit" class="btn btn-primary">
           {{ $t('view.videoConference.formData.submitEdit') }}
         </button>
@@ -76,23 +93,26 @@ import {
   RouteOrganizerVideoConference,
 } from '@/router/routes';
 import { computed, reactive, ref } from 'vue';
-import { required } from '@vuelidate/validators';
+import { required, requiredIf } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
 import BaseInput from '@/core/components/form/BaseInput.vue';
 import { handleError } from '@/core/error/error-handler';
 import { InvalidFormError } from '@/core/error/InvalidFormError';
 import { useMutation, useQuery } from '@vue/apollo-composable';
 import { UPDATE_ZOOM_MEETING } from '@/modules/organizer/graphql/mutation/update-zoom-meeting';
+import { UPDATE_JITSI_MEETING } from '@/modules/organizer/graphql/mutation/update-jitsi-meeting';
 import { toast } from 'vue3-toastify';
 import t from '@/core/util/l18n';
 import { useCore } from '@/core/store/core';
 import { useRouter, useRoute } from 'vue-router';
 import { QUERY_ZOOM_MEETING } from '@/modules/organizer/graphql/queries/zoom-meeting';
+import { QUERY_JITSI_MEETING } from '@/modules/organizer/graphql/queries/jitsi-meeting';
 
 const coreStore = useCore();
 const router = useRouter();
 const route = useRoute();
 const id = route.params.id;
+const providerType = ref(route.query.type || 'zoom');
 const loaded = ref(false);
 
 // Define navigation items.
@@ -109,26 +129,38 @@ const formData = reactive({
   title: '',
   sdkKey: '',
   sdkSecret: '',
+  serverUrl: '',
 });
 const rules = computed(() => {
   return {
     title: { required },
-    sdkKey: { required },
-    sdkSecret: { required },
+    sdkKey: { requiredIf: requiredIf(() => providerType.value === 'zoom') },
+    sdkSecret: { requiredIf: requiredIf(() => providerType.value === 'zoom') },
+    serverUrl: { requiredIf: requiredIf(() => providerType.value === 'jitsi') },
   };
 });
 
 const v$ = useVuelidate(rules, formData);
 
 // Fetch video conference system to edit.
-const { onResult } = useQuery(QUERY_ZOOM_MEETING, { id }, { fetchPolicy: 'no-cache' });
-onResult(({ data }) => {
-  const { title, sdkKey, sdkSecret } = data.zoomMeeting;
-  formData.title = title;
-  formData.sdkKey = sdkKey;
-  formData.sdkSecret = sdkSecret;
-  loaded.value = true;
-});
+if (providerType.value === 'zoom') {
+  const { onResult } = useQuery(QUERY_ZOOM_MEETING, { id }, { fetchPolicy: 'no-cache' });
+  onResult(({ data }) => {
+    const { title, sdkKey, sdkSecret } = data.zoomMeeting;
+    formData.title = title;
+    formData.sdkKey = sdkKey;
+    formData.sdkSecret = sdkSecret;
+    loaded.value = true;
+  });
+} else {
+  const { onResult } = useQuery(QUERY_JITSI_MEETING, { id }, { fetchPolicy: 'no-cache' });
+  onResult(({ data }) => {
+    const { title, serverUrl } = data.jitsiMeeting;
+    formData.title = title;
+    formData.serverUrl = serverUrl;
+    loaded.value = true;
+  });
+}
 
 async function onSubmit() {
   const result = await v$.value.$validate();
@@ -137,18 +169,30 @@ async function onSubmit() {
     return;
   }
 
-  // Update new zoom meeting.
-  const { mutate: updateZoomMeeting } = useMutation(UPDATE_ZOOM_MEETING, {
-    variables: {
-      input: {
-        id,
-        title: formData.title,
-        sdkKey: formData.sdkKey,
-        sdkSecret: formData.sdkSecret,
+  if (providerType.value === 'zoom') {
+    const { mutate: updateZoomMeeting } = useMutation(UPDATE_ZOOM_MEETING, {
+      variables: {
+        input: {
+          id,
+          title: formData.title,
+          sdkKey: formData.sdkKey,
+          sdkSecret: formData.sdkSecret,
+        },
       },
-    },
-  });
-  await updateZoomMeeting();
+    });
+    await updateZoomMeeting();
+  } else {
+    const { mutate: updateJitsiMeeting } = useMutation(UPDATE_JITSI_MEETING, {
+      variables: {
+        input: {
+          id,
+          title: formData.title,
+          serverUrl: formData.serverUrl,
+        },
+      },
+    });
+    await updateJitsiMeeting();
+  }
 
   // Refetch organizer record.
   coreStore.queryOrganizer();

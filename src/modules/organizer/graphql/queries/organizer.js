@@ -19,6 +19,11 @@ export const ORGANIZER = gql`
         sdkKey
         sdkSecret
       }
+      jitsiMeetings {
+        id
+        title
+        serverUrl
+      }
     }
   }
 `;

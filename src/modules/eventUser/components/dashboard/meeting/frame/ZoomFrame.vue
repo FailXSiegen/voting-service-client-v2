@@ -8,18 +8,31 @@ import { setCookie } from '@/core/util/cookie';
 import { fetchSignature } from '@/modules/eventUser/requests/fetch-zoom-signature';
 
 const emit = defineEmits(['loaded']);
+
+function waitForElement(selector, timeout = 5000) {
+  return new Promise((resolve) => {
+    const el = document.querySelector(selector);
+    if (el) return resolve(el);
+
+    const observer = new MutationObserver(() => {
+      const el = document.querySelector(selector);
+      if (el) {
+        observer.disconnect();
+        resolve(el);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    setTimeout(() => {
+      observer.disconnect();
+      resolve(null);
+    }, timeout);
+  });
+}
 const meetConfig = ref({});
 const ZoomMeeting = ref(null);
 
 const props = defineProps({
-  sdkKey: {
-    type: String,
-    required: true,
-  },
-  sdkSecret: {
-    type: String,
-    required: true,
-  },
   nickname: {
     type: String,
     required: true,
@@ -39,21 +52,24 @@ const props = defineProps({
 });
 
 onMounted(async () => {
-  const { ZoomMtg } = await import('@zoomus/websdk');
+  const { ZoomMtg } = await import('@zoom/meetingsdk');
   ZoomMeeting.value = ZoomMtg;
-  document.getElementById('zmmtg-root').style.display = 'block';
-  // @see vite.config.js
+  // @see vite.config.mjs
   ZoomMeeting.value.setZoomJSLib('/lib/zoom/lib', '/av');
   ZoomMeeting.value?.preLoadWasm();
-  ZoomMeeting.value?.prepareJssdk();
+  ZoomMeeting.value?.prepareWebSDK();
+
+  // prepareWebSDK creates #zmmtg-root asynchronously, wait for it
+  const zmmtgRoot = await waitForElement('#zmmtg-root');
+  if (zmmtgRoot) {
+    zmmtgRoot.style.display = 'block';
+  }
   // loads language files, also passes any error messages to the ui
   ZoomMeeting.value?.i18n.load('de-DE');
   ZoomMeeting.value?.i18n.reload('de-DE');
 
   // Meeting config object
   meetConfig.value = {
-    sdkKey: props.sdkKey,
-    sdkSecret: props.sdkSecret,
     meetingNumber: props.meetingNumber,
     userName: props.nickname,
     passWord: props.password,
@@ -79,12 +95,11 @@ onMounted(async () => {
 function join() {
   ZoomMeeting.value?.init({
     leaveUrl: meetConfig.value?.leaveUrl,
-    webEndpoint: meetConfig.value?.webEndpoint,
+    patchJsMedia: true,
     success: () => {
       ZoomMeeting.value?.i18n.load(meetConfig.value?.lang);
       ZoomMeeting.value?.i18n.reload(meetConfig.value?.lang);
       ZoomMeeting.value?.join({
-        sdkKey: meetConfig.value?.sdkKey,
         signature: meetConfig.value?.signature,
         meetingNumber: meetConfig.value?.meetingNumber,
         passWord: meetConfig.value?.passWord,

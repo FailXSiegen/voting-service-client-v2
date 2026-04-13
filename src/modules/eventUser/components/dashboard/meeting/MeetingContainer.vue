@@ -3,18 +3,24 @@
     <div class="container-zoom">
       <div id="zoom-hook" />
       <ZoomFrame
-        v-if="event.meeting.credentials"
-        :sdk-key="event.meeting.sdkKey"
-        :sdk-secret="event.meeting.sdkSecret"
+        v-if="isZoomMeeting && event.meeting.credentials"
         :nickname="eventUser.publicName"
         :meeting-number="event.meeting.credentials.meetingId"
         :password="event.meeting.credentials.password"
         :return-url="event.slug"
         @loaded="onLoaded"
       />
+      <JitsiFrame
+        v-else-if="isJitsiMeeting && event.meeting.credentials"
+        :server-url="event.meeting.serverUrl"
+        :room-name="event.meeting.credentials.roomName"
+        :nickname="eventUser.publicName"
+        :return-url="event.slug"
+        @loaded="onLoaded"
+      />
       <div
         v-if="meetingLoaded"
-        class="btn btn-primary position-fixed sticky-top mt-2"
+        class="btn btn-primary position-fixed sticky-top mt-2 meeting-toggle-btn"
         :title="$t('view.event.meeting.switchView')"
         @click.prevent="onToggleVideoConference"
       >
@@ -35,9 +41,10 @@
 
 <script setup>
 import ZoomFrame from '@/modules/eventUser/components/dashboard/meeting/frame/ZoomFrame.vue';
-import { ref } from 'vue';
+import JitsiFrame from '@/modules/eventUser/components/dashboard/meeting/frame/JitsiFrame.vue';
+import { ref, computed } from 'vue';
 
-defineProps({
+const props = defineProps({
   event: {
     type: Object,
     required: true,
@@ -48,6 +55,14 @@ defineProps({
   },
 });
 
+const isZoomMeeting = computed(() => {
+  return props.event.meeting && !props.event.meeting.serverUrl;
+});
+
+const isJitsiMeeting = computed(() => {
+  return props.event.meeting && !!props.event.meeting.serverUrl;
+});
+
 // Data.
 const dashboardForeground = ref(false);
 const meetingLoaded = ref(false);
@@ -55,21 +70,29 @@ const meetingLoaded = ref(false);
 // Events.
 
 function onToggleVideoConference() {
-  const bodyElement = document.querySelector('body');
-  const zoomRootElement = document.querySelector('#zmmtg-root');
+  if (isZoomMeeting.value) {
+    toggleOverlayVisibility('#zmmtg-root');
+  } else if (isJitsiMeeting.value) {
+    toggleOverlayVisibility('#jitsi-root');
+  }
+}
 
-  if (bodyElement && zoomRootElement && !dashboardForeground.value) {
+function toggleOverlayVisibility(selector) {
+  const bodyElement = document.querySelector('body');
+  const overlayElement = document.querySelector(selector);
+
+  if (!overlayElement) return;
+
+  if (!dashboardForeground.value) {
+    // Hide meeting, show dashboard
     bodyElement.classList.add('zoom-hidden');
     bodyElement.classList.remove('zoom-show');
-
-    zoomRootElement.classList.add('hidden');
-    zoomRootElement.style.display = 'none';
+    overlayElement.classList.add('hidden');
   } else {
+    // Show meeting, hide dashboard
     bodyElement.classList.add('zoom-show');
     bodyElement.classList.remove('zoom-hidden');
-
-    zoomRootElement.classList.remove('hidden');
-    zoomRootElement.style.display = 'block';
+    overlayElement.classList.remove('hidden');
   }
 
   dashboardForeground.value = !dashboardForeground.value;
@@ -84,5 +107,9 @@ function onLoaded() {
 .container-zoom {
   width: 70%;
   height: 100%;
+}
+
+.meeting-toggle-btn {
+  z-index: 1100;
 }
 </style>
