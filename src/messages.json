@@ -175,10 +175,13 @@
         "noRecords": "Es existieren noch keine Datensätze.",
         "confirmDelete": "Möchten Sie den Datensatz wirklich löschen?.",
         "backToListView": "Zur Listenansicht",
+        "allTypes": "Alle Typen",
         "formData": {
           "title": "Titel",
           "sdkKey": "SDK Key",
           "sdkSecret": "SDK Secret",
+          "serverUrl": "Server URL (z.B. https://jitsi.example.com)",
+          "providerType": "Anbieter",
           "submitNew": "Datensatz anlegen",
           "submitEdit": "Speichern"
         }
@@ -271,6 +274,9 @@
               "zoom": {
                 "meetingId": "Meeting ID",
                 "password": "Passwort"
+              },
+              "jitsi": {
+                "roomName": "Raumname"
               }
             },
             "styles": "Bootstrap Styles",

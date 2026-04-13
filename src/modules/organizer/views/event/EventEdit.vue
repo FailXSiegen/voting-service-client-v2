@@ -44,7 +44,9 @@ import { useMutation, useQuery } from '@vue/apollo-composable';
 import { EVENT } from '@/modules/organizer/graphql/queries/event';
 import { NetworkError } from '@/core/error/NetworkError';
 import { QUERY_ZOOM_MEETING } from '@/modules/organizer/graphql/queries/zoom-meeting';
+import { QUERY_JITSI_MEETING } from '@/modules/organizer/graphql/queries/jitsi-meeting';
 import { UPDATE_EVENT } from '@/modules/organizer/graphql/mutation/update-event';
+import { VideoConferenceType } from '@/modules/organizer/enum';
 
 const coreStore = useCore();
 const router = useRouter();
@@ -86,8 +88,44 @@ const eventQuery = useQuery(
   { id, organizerId: coreStore.user.id },
   { fetchPolicy: 'no-cache' }
 );
+function prefillFormData(eventData) {
+  prefillData.title = eventData?.title ?? '';
+  prefillData.slug = eventData?.slug ?? '';
+  prefillData.description = eventData?.description ?? '';
+  prefillData.styles = eventData?.styles ?? '';
+  prefillData.logo = eventData?.logo ?? '';
+  prefillData.scheduledDatetime = eventData?.scheduledDatetime ?? 0;
+  prefillData.lobbyOpen = eventData?.lobbyOpen ?? false;
+  prefillData.active = eventData?.active ?? false;
+  prefillData.multivoteType = eventData?.multivoteType ?? 1;
+  prefillData.async = eventData?.async ?? false;
+  prefillData.allowMagicLink = eventData?.allowMagicLink ?? false;
+  prefillData.publicVoteVisible = eventData?.publicVoteVisible ?? true;
+  prefillData.endDatetime = eventData?.endDatetime ?? 0;
+  prefillData.publicnameReadonly = eventData?.publicnameReadonly ?? false;
+}
+
+function fetchVideoConferenceProvider(config) {
+  const configType = parseInt(config.type, 10);
+
+  if (configType === VideoConferenceType.JITSI) {
+    const query = useQuery(QUERY_JITSI_MEETING, { id: config.id }, { fetchPolicy: 'no-cache' });
+    query.onResult(({ data }) => {
+      prefillData.videoConference = data.jitsiMeeting ?? null;
+      prefillData.videoConferenceConfig = event.value?.videoConferenceConfig ?? '{}';
+      loaded.value = true;
+    });
+  } else {
+    const query = useQuery(QUERY_ZOOM_MEETING, { id: config.id }, { fetchPolicy: 'no-cache' });
+    query.onResult(({ data }) => {
+      prefillData.videoConference = data.zoomMeeting ?? null;
+      prefillData.videoConferenceConfig = event.value?.videoConferenceConfig ?? '{}';
+      loaded.value = true;
+    });
+  }
+}
+
 eventQuery.onResult(({ data }) => {
-  // check if the event could be fetched successfully. redirect to list if not.
   if (null === data?.event) {
     handleError(new NetworkError());
     router.push({ name: RouteOrganizerEvents });
@@ -95,24 +133,8 @@ eventQuery.onResult(({ data }) => {
   }
 
   event.value = data?.event ?? null;
+  prefillFormData(event.value);
 
-  // Prefill form data with fetched event data.
-  prefillData.title = event.value?.title ?? '';
-  prefillData.slug = event.value?.slug ?? '';
-  prefillData.description = event.value?.description ?? '';
-  prefillData.styles = event.value?.styles ?? '';
-  prefillData.logo = event.value?.logo ?? '';
-  prefillData.scheduledDatetime = event.value?.scheduledDatetime ?? 0;
-  prefillData.lobbyOpen = event.value?.lobbyOpen ?? false;
-  prefillData.active = event.value?.active ?? false;
-  prefillData.multivoteType = event.value?.multivoteType ?? 1;
-  prefillData.async = event.value?.async ?? false;
-  prefillData.allowMagicLink = event.value?.allowMagicLink ?? false;
-  prefillData.publicVoteVisible = event.value?.publicVoteVisible ?? true;
-  prefillData.endDatetime = event.value?.endDatetime ?? 0;
-  prefillData.publicnameReadonly = event.value?.publicnameReadonly ?? false;
-
-  // WICHTIGER FIX: Defensive Programmierung für JSON.parse und null-safety
   let resolvedVideoConferenceConfig;
   try {
     resolvedVideoConferenceConfig = JSON.parse(event.value?.videoConferenceConfig || '{}');
@@ -122,22 +144,11 @@ eventQuery.onResult(({ data }) => {
   }
 
   if (!resolvedVideoConferenceConfig || !resolvedVideoConferenceConfig.id) {
-    // No config exist.
     loaded.value = true;
     return;
   }
 
-  // Fetch video conference system to edit.
-  const queryZoomMeeting = useQuery(
-    QUERY_ZOOM_MEETING,
-    { id: resolvedVideoConferenceConfig.id },
-    { fetchPolicy: 'no-cache' }
-  );
-  queryZoomMeeting.onResult(({ data }) => {
-    prefillData.videoConference = data.zoomMeeting ?? null;
-    prefillData.videoConferenceConfig = event.value?.videoConferenceConfig ?? '{}';
-    loaded.value = true;
-  });
+  fetchVideoConferenceProvider(resolvedVideoConferenceConfig);
 });
 
 async function onSubmit({ formData, action }) {

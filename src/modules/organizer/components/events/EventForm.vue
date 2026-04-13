@@ -200,6 +200,7 @@
                   :errors="v$.videoConference?.$errors"
                   :has-errors="v$.videoConference?.$errors?.length > 0"
                   :value="formData.videoConference?.id"
+                  :selected-typename="formData.videoConference?.__typename"
                   @change="onChangeVideoConference"
                 />
               </div>
@@ -325,6 +326,7 @@ import SlugInput from '@/core/components/form/SlugInput.vue';
 import TextInput from '@/core/components/form/TextInput.vue';
 import DateInput from '@/core/components/form/DateInput.vue';
 import ZoomConfig from '@/modules/organizer/components/events/video-conference-config/ZoomConfig.vue';
+import JitsiConfig from '@/modules/organizer/components/events/video-conference-config/JitsiConfig.vue';
 import VideoConferenceSelect from '@/modules/organizer/components/form/VideoConferenceSelect.vue';
 import RadioInput from '@/core/components/form/RadioInput.vue';
 import BootstrapStylesInput from '@/core/components/form/BootstrapStylesInput.vue';
@@ -435,6 +437,9 @@ function loadVideoConfigByType() {
     case 'ZoomMeeting':
       videoConfigComponent.value = ZoomConfig;
       break;
+    case 'JitsiMeeting':
+      videoConfigComponent.value = JitsiConfig;
+      break;
     default:
       videoConfigComponent.value = null;
   }
@@ -443,20 +448,8 @@ function loadVideoConfigByType() {
 function onChangeVideoConference({ value }) {
   formData.videoConference = value;
 
-  // WICHTIGER FIX: Update video conference id in config string mit null safety
-  let resolvedVideoConfig;
-  try {
-    resolvedVideoConfig = JSON.parse(formData.videoConferenceConfig || '{}');
-  } catch (error) {
-    console.warn('Failed to parse videoConferenceConfig in EventForm:', error);
-    resolvedVideoConfig = {};
-  }
-
-  // Sicher stellen dass das Objekt existiert bevor wir .id setzen
-  if (resolvedVideoConfig) {
-    resolvedVideoConfig.id = formData.videoConference?.id;
-  }
-  formData.videoConferenceConfig = JSON.stringify(resolvedVideoConfig);
+  // Reset config when provider changes — old credentials don't apply to new type.
+  formData.videoConferenceConfig = JSON.stringify(value ? { id: value.id } : {});
 
   loadVideoConfigByType();
 }
