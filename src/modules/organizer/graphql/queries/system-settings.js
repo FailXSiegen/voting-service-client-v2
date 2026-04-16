@@ -10,7 +10,6 @@ export const SYSTEM_SETTINGS_QUERY = gql`
       titleSuffix
       recaptchaEnabled
       recaptchaSiteKey
-      recaptchaSecretKey
       updatedAt
       updatedBy {
         id

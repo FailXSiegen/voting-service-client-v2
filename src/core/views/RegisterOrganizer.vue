@@ -124,8 +124,18 @@
               />
             </div>
             <GoogleRecaptcha
-              @verified="recaptchaVerified = true"
-              @expired="recaptchaVerified = false"
+              @verified="
+                (token) => {
+                  recaptchaVerified = true;
+                  recaptchaToken = token;
+                }
+              "
+              @expired="
+                () => {
+                  recaptchaVerified = false;
+                  recaptchaToken = '';
+                }
+              "
             />
             <button class="btn btn-primary btn-block float-end mt-3" :disabled="!recaptchaVerified">
               {{ $t('view.register.submit') }}
@@ -154,6 +164,7 @@ import GoogleRecaptcha from '@/core/components/form/GoogleRecaptcha.vue';
 
 const submitSuccess = ref(false);
 const recaptchaVerified = ref(false);
+let recaptchaToken = '';
 
 // Form and validation setup.
 const formData = reactive({
@@ -196,6 +207,7 @@ async function onSubmit() {
       password: formData.password,
       publicName: formData.publicName,
       publicOrganisation: formData.publicOrganisation,
+      captchaToken: recaptchaToken,
     });
     submitSuccess.value = true;
   } catch (error) {

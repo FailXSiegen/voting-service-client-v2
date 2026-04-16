@@ -236,7 +236,10 @@ watch(
       formData.titleSuffix = settings.titleSuffix || 'digitalwahl.org';
       formData.recaptchaEnabled = Boolean(settings.recaptchaEnabled);
       formData.recaptchaSiteKey = settings.recaptchaSiteKey || '';
-      formData.recaptchaSecretKey = settings.recaptchaSecretKey || '';
+      // Secret key is never returned by the server for security reasons.
+      // Leave the field empty — the stored value is preserved on save unless
+      // the admin types a new one.
+      formData.recaptchaSecretKey = '';
       console.log('Updated form data:', JSON.stringify(formData, null, 2));
     }
   },
@@ -274,8 +277,14 @@ async function onSave() {
       titleSuffix: formData.titleSuffix,
       recaptchaEnabled: Boolean(formData.recaptchaEnabled),
       recaptchaSiteKey: formData.recaptchaSiteKey || '',
-      recaptchaSecretKey: formData.recaptchaSecretKey || '',
     };
+
+    // Only send the secret when the admin actually typed a new value.
+    // An empty field means "keep existing value" — we omit the key so the
+    // server resolver does not overwrite the stored secret with an empty string.
+    if (formData.recaptchaSecretKey) {
+      inputData.recaptchaSecretKey = formData.recaptchaSecretKey;
+    }
 
     console.log('Input data being sent:', JSON.stringify(inputData, null, 2));
 
