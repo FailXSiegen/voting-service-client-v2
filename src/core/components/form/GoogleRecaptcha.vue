@@ -44,7 +44,7 @@ const recaptchaEnabled = computed(() => {
 function onCaptchaVerified(response) {
   recaptchaResponse.value = response;
   recaptchaVerified.value = true;
-  emit('verified');
+  emit('verified', response);
 }
 
 function onCaptchaExpired() {
