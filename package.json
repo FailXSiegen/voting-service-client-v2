@@ -76,7 +76,9 @@
     "vitest": "^3.2.4"
   },
   "overrides": {
-    "axios": ">=1.15.0"
+    "axios": ">=1.15.0",
+    "unhead": ">=2.1.13",
+    "@unhead/vue": ">=2.1.13"
   },
   "engines": {
     "npm": ">=9.0.0",
