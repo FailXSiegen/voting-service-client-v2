@@ -278,6 +278,11 @@ export default {
               tokenBasedLogin: 'Tokenbasierter-Login',
               tokenBasedLoginHelp:
                 'Nutzer melden sich mit einem im Browser hinterlegtem Schlüssel an (Kein Passwort).',
+              errorSummary: {
+                title: 'Einige Benutzer konnten nicht angelegt werden',
+                description:
+                  'Von {total} Benutzern wurden {success} erfolgreich angelegt, {failed} schlugen fehl.',
+              },
             },
             eventMultipleUser: {
               submit: 'Benutzerliste speichern',

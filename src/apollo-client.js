@@ -290,7 +290,11 @@ function stopWebSocketKeepAlive() {
 }
 
 // Create the Error link.
-const errorLink = onError(async (error) => {
+// IMPORTANT: This callback must NOT be async. Apollo's onError treats any truthy
+// return value as an Observable and calls .subscribe() on it. An async function
+// always returns a Promise, which would trigger "o.subscribe is not a function"
+// during error handling (e.g. when bulk-creating participants and one already exists).
+const errorLink = onError((error) => {
   // Log errors to console in DEV environments.
   if (import.meta.env.DEV) {
     logErrorMessages(error);
@@ -301,7 +305,7 @@ const errorLink = onError(async (error) => {
     for (const graphQLError of error.graphQLErrors) {
       handleError(new GraphQLError(graphQLError));
     }
-    return null;
+    return;
   }
 
   // Handle network errors.
@@ -313,16 +317,17 @@ const errorLink = onError(async (error) => {
     if (error.networkError?.type === ExpiredSessionError.type) {
       // Session is invalid, so return to main login.
       handleError(new NetworkError(error.networkError.message));
-      await logout();
-      return null;
+      // Fire-and-forget: must not return a Promise from onError.
+      logout().catch((e) => console.error('[Apollo] logout failed:', e));
+      return;
     }
 
     handleError(new NetworkError(error.networkError.message));
-    return null;
+    return;
   }
 
   // Handle undefined errors.
-  handleError(new NetworkError(error.networkError.message));
+  handleError(new NetworkError(error?.networkError?.message));
 });
 
 // Create the apollo client.
