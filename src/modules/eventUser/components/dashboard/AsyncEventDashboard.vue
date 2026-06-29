@@ -16,6 +16,7 @@
         :event="event"
         :event-user="eventUser"
         :vote-counter="voteCounter"
+        :voting-process="votingProcess"
         @submit="onSubmitPoll"
       />
     </template>
