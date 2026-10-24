@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { useHead } from '@vueuse/head';
+import { useHead } from '@unhead/vue';
 import LoginFooter from '@/core/components/LoginFooter.vue';
 
 const props = defineProps({

@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { useHead } from '@vueuse/head';
+import { useHead } from '@unhead/vue';
 
 const props = defineProps({
   metaTitle: {

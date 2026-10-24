@@ -2,9 +2,11 @@
 module.exports = {
   env: {
     node: true,
+    browser: true, // setzte früher plugin:vue/vue3-recommended implizit
+    es2022: true,
   },
   root: true,
-  extends: ["eslint:recommended", "plugin:vue/vue3-recommended", "prettier"],
+  extends: ["eslint:recommended", "plugin:vue/recommended", "prettier"],
   overrides: [
     {
       files: ["cypress/e2e/**/*.{cy,spec}.{js,ts,jsx,tsx}"],

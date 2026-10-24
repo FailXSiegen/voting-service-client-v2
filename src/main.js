@@ -4,7 +4,7 @@ import { apolloClient } from './apollo-client';
 import App from './App.vue';
 import { router } from './router/router';
 import l18n, { reloadTranslations, translationsLoaded } from './l18n';
-import { createHead } from '@vueuse/head';
+import { createHead } from '@unhead/vue/client';
 import { version } from './../package';
 import { createApolloProvider } from '@vue/apollo-option';
 import * as ConfirmDialog from 'vuejs-confirm-dialog';

@@ -44,7 +44,7 @@ import { provideApolloClient, useSubscription } from '@vue/apollo-composable';
 import { TOKEN_REFRESH_REQUIRED_SUBSCRIPTION } from '@/core/graphql/subscription/token-refresh-required';
 import { refreshLogin } from '@/core/auth/login';
 import { handleError } from '@/core/error/error-handler';
-import { useHead } from '@vueuse/head';
+import { useHead } from '@unhead/vue';
 import { URLS } from '@/urls';
 
 const loaded = ref(false);
