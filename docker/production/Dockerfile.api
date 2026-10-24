@@ -1,5 +1,5 @@
 # Multi-stage build for production API
-FROM node:18-alpine AS base
+FROM node:22-alpine AS base
 
 # Install dependencies including monitoring and diagnostic tools
 RUN apk add --no-cache curl tini netcat-openbsd dumb-init
@@ -11,10 +11,11 @@ WORKDIR /app
 COPY voting-service-api/package.json voting-service-api/package-lock.json ./
 
 # Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# prepare (husky) braucht devDeps, die hier fehlen
+RUN npm pkg delete scripts.prepare && npm ci --omit=dev && npm cache clean --force
 
 # Development stage for building
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 WORKDIR /app
 COPY voting-service-api/package.json voting-service-api/package-lock.json ./
 RUN npm ci

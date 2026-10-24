@@ -27,7 +27,7 @@ variables:
 # ============================================
 
 .node_job:
-  image: node:18-alpine
+  image: node:22-alpine
   before_script:
     - npm ci
   cache:

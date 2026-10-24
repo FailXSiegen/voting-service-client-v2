@@ -14,7 +14,7 @@ describe('AlertBox', () => {
       },
     });
 
-    expect(wrapper.html()).toContain('alert alert-success');
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['alert', 'alert-success']));
   });
 
   it('Renders properly danger alerts', () => {
@@ -29,7 +29,7 @@ describe('AlertBox', () => {
       },
     });
 
-    expect(wrapper.html()).toContain('alert alert-danger');
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['alert', 'alert-danger']));
   });
 
   it('Renders properly warning alerts', () => {
@@ -44,7 +44,7 @@ describe('AlertBox', () => {
       },
     });
 
-    expect(wrapper.html()).toContain('alert alert-warning');
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['alert', 'alert-warning']));
   });
 
   it('Renders properly info alerts', () => {
@@ -59,6 +59,6 @@ describe('AlertBox', () => {
       },
     });
 
-    expect(wrapper.html()).toContain('alert alert-info');
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['alert', 'alert-info']));
   });
 });

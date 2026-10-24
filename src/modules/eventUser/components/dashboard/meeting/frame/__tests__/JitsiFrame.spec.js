@@ -35,7 +35,7 @@ describe('JitsiFrame', () => {
       },
     });
 
-    expect(wrapper.find('.jitsi-container').exists()).toBe(true);
+    expect(wrapper.find('#jitsi-root').exists()).toBe(true);
   });
 
   it('initializes JitsiMeetExternalAPI with correct domain on mount', async () => {
