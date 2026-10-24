@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { createPinia } from 'pinia';
 import OrganizerLogin from '../OrganizerLogin.vue';
 
 // @todo Find a way to check for validation.
@@ -7,9 +8,11 @@ import OrganizerLogin from '../OrganizerLogin.vue';
 describe('OrganizerLogin', () => {
   const wrapper = mount(OrganizerLogin, {
     global: {
+      plugins: [createPinia()],
       mocks: {
         $t: () => 'Lorem ipsum',
       },
+      stubs: { 'router-link': { template: '<a><slot /></a>' } },
     },
   });
 

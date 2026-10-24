@@ -67,8 +67,8 @@ describe('VideoConferenceSelect', () => {
     const wrapper = createWrapper();
     const select = wrapper.find('select');
 
-    // Select the Jitsi option (id: '3')
-    await select.setValue('3');
+    // Select the Jitsi option (compositeId jitsi-3)
+    await select.setValue('jitsi-3');
 
     const emitted = wrapper.emitted('change');
     expect(emitted).toBeTruthy();
