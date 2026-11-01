@@ -113,15 +113,16 @@
       <p>&nbsp;</p>
       <hr />
       <h2>Auftragsverarbeitung</h2>
-      <p>Das Hosting liegt bei</p>
       <p>
-        PSV Digital GmbH<br />
-        Martinshardt 5<br />
-        57074 Siegen<br /><br />
-        Tel.: <a href="tel:+492717700160">+49 271 770016 - 0</a><br />
-        E-Mail: <a href="mailto:info@psv-neo.de">info@psv-neo.de</a>
+        digitalwahl.org wird von Felix Herrmann (siehe <a href="/impressum">Impressum</a>) auf einem
+        eigenen Server betrieben. Der Server wird gemietet bei
       </p>
-      <p>Der Serverstandort ist in Frankfurt am Main/Deutschland.</p>
+      <p>
+        Hetzner Online GmbH<br />
+        Industriestr. 25<br />
+        91710 Gunzenhausen
+      </p>
+      <p>Der Serverstandort ist in Falkenstein/Vogtland, Deutschland.</p>
       <p>&nbsp;</p>
       <hr />
       <h2>Weitergabe personenbezogener Daten an Dritte</h2>
