@@ -8,8 +8,10 @@ export const UPDATE_SYSTEM_SETTINGS = gql`
       useDbFooterNavigation
       faviconUrl
       titleSuffix
-      recaptchaEnabled
-      recaptchaSiteKey
+      mosparoEnabled
+      mosparoHost
+      mosparoUuid
+      mosparoPublicKey
       updatedAt
       updatedBy {
         id

@@ -74,21 +74,23 @@ export default {
           label: 'Datenbank-Footer-Navigation verwenden',
           help: 'Navigation im Footer aus der Datenbank laden',
         },
-        recaptcha: {
-          label: 'Google reCAPTCHA Einstellungen',
-          siteKey: {
-            label: 'reCAPTCHA Site Key',
-            placeholder: '6Lc1234567890abcdefghijklmnopqrstuvwxyz',
-            help: 'Der öffentliche Site Key von Google reCAPTCHA v2',
+        mosparo: {
+          label: 'mosparo Spam-Schutz',
+          host: { label: 'mosparo-Adresse', help: 'Adresse Ihrer mosparo-Installation' },
+          uuid: { label: 'Projekt-UUID', help: 'Aus den Projekteinstellungen in mosparo' },
+          publicKey: {
+            label: 'Öffentlicher Schlüssel',
+            placeholder: '',
+            help: 'Aus den Projekteinstellungen in mosparo',
           },
-          secretKey: {
-            label: 'reCAPTCHA Secret Key',
-            placeholder: '6Lc1234567890abcdefghijklmnopqrstuvwxyz',
-            help: 'Der geheime Secret Key von Google reCAPTCHA v2 (wird sicher gespeichert)',
+          privateKey: {
+            label: 'Privater Schlüssel',
+            placeholder: '',
+            help: 'Wird nur gespeichert, nicht wieder angezeigt. Leer lassen, um ihn beizubehalten.',
           },
           enabled: {
-            label: 'reCAPTCHA aktivieren',
-            help: 'Aktiviert Google reCAPTCHA für Registrierungsformulare',
+            label: 'mosparo aktivieren',
+            help: 'Schützt die Registrierung von Organisatoren vor Spam',
           },
         },
         save: 'Speichern',
@@ -375,7 +377,7 @@ export default {
             maxVotes: 'Maximal auszuwählen',
             maxVotesInfo: '0 = alle auswählbar',
             minVotes: 'Minimal auszuwählen',
-            minVotesInfo: '0 = leere Abstimmung möglich',
+            minVotesInfo: '0 = keine Mindestanzahl',
             abstention: 'Enthaltungsfeld anzeigen',
             openPoll: 'Offene Abstimmung',
             secretPoll: 'Geheime Abstimmung',
@@ -659,6 +661,7 @@ export default {
         inactiveEventLoginError: 'Login für inaktive Veranstaltungen ist nicht möglich.',
       },
       formValidation: {
+        checked: 'Bitte bestätigen Sie dieses Feld.',
         invalidForm: 'Bitte überprüfen Sie ihre Eingaben.',
         sameAs: 'Die Werte müssen identisch sein.',
         required: 'Dieses Feld muss ausgefüllt werden.',

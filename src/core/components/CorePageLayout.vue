@@ -10,6 +10,7 @@
 <script setup>
 import { useHead } from '@unhead/vue';
 import LoginFooter from '@/core/components/LoginFooter.vue';
+import { SEO_PAGES } from '@/core/seo-pages.mjs';
 
 const props = defineProps({
   metaTitle: {
@@ -17,6 +18,8 @@ const props = defineProps({
     default: 'Einfach die Wahl haben',
   },
 });
+
+const seoPage = SEO_PAGES[location.pathname];
 
 useHead({
   title: props.metaTitle ?? 'Einfach die Wahl haben',
@@ -28,8 +31,10 @@ useHead({
   htmlAttrs: {
     lang: 'de',
   },
+  link: seoPage ? [{ rel: 'canonical', href: location.origin + location.pathname }] : [],
   meta: [
-    { name: 'description', content: 'Einfach die Wahl haben.' },
+    { name: 'description', content: seoPage?.description ?? 'Einfach die Wahl haben.' },
+    { name: 'robots', content: seoPage ? 'index,follow' : 'noindex' },
     { name: 'viewport', content: 'width=device-width, initial-scale=1' },
   ],
 });

@@ -14,11 +14,15 @@
       </div>
       <slot name="content" />
     </main>
+    <LoginFooter />
+    <HelpPanel />
   </div>
 </template>
 
 <script setup>
 import { useHead } from '@unhead/vue';
+import LoginFooter from '@/core/components/LoginFooter.vue';
+import HelpPanel from '@/modules/organizer/components/HelpPanel.vue';
 
 const props = defineProps({
   metaTitle: {

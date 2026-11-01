@@ -119,7 +119,7 @@ const coreStore = useCore();
 const urlParams = new URLSearchParams(window.location.search);
 
 // Set username readonly, if it is set in the url.
-const readOnlyUsername = urlParams.get('username') !== null ?? false;
+const readOnlyUsername = urlParams.get('username') !== null;
 // Set publicName readonly if event setting is enabled AND parameter is passed
 const publicNameFromUrl = urlParams.get('publicname') || urlParams.get('publicName') || '';
 const readOnlyPublicName =

@@ -98,7 +98,7 @@ const props = defineProps({
 
 // Data.
 
-const eventUser = ref(coreStore.getEventUser);
+const eventUser = computed(() => coreStore.getEventUser);
 const meetingFrameIsActive = ref(false);
 const page = ref(0);
 const pageSize = ref(3);
@@ -2344,7 +2344,7 @@ function resetUIAfterSubmission() {
           // Das Modal bleibt einfach offen und der Benutzer kann direkt weitervoten
           // DEAKTIVIERT: Formular zurücksetzen und Modal schließen/neu öffnen
           // Dies verhindert, dass die Auswahl verloren geht und usedVotesCount auf 0 gesetzt wird
-          // eslint-disable-next-line no-constant-condition
+          // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
           if (false && pollModal.value) {
             // DEAKTIVIERT durch if (false)
             pollModal.value.reset(false);
@@ -2461,7 +2461,7 @@ function resetUIAfterSubmission() {
     // DEAKTIVIERT: Notfall-Wiedereröffnung nicht mehr nötig, da Modal bei Split-Voting offen bleibt
     // Zusätzlicher Sicherheitscheck: nach einer Zeit nochmals prüfen,
     // ob der Modal-Dialog tatsächlich geöffnet wurde
-    // eslint-disable-next-line no-constant-condition
+    // eslint-disable-next-line no-constant-condition, no-constant-binary-expression
     if (false && partialVotesUsed) {
       // DEAKTIVIERT durch if (false)
       setTimeout(() => {

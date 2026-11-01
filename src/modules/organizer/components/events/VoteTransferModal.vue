@@ -311,9 +311,8 @@ function onInputBlur() {
 }
 
 function onInputChange() {
-  if (showDropdown.value) {
-    updateDropdownPosition();
-  }
+  showDropdown.value = true;
+  updateDropdownPosition();
 }
 
 function updateDropdownPosition() {
@@ -321,8 +320,8 @@ function updateDropdownPosition() {
   if (inputElement) {
     const rect = inputElement.getBoundingClientRect();
     dropdownStyle.value = {
-      top: `${rect.bottom + window.scrollY}px`,
-      left: `${rect.left + window.scrollX}px`,
+      top: `${rect.bottom}px`,
+      left: `${rect.left}px`,
       width: `${rect.width}px`,
       maxHeight: '200px',
       overflowY: 'auto',

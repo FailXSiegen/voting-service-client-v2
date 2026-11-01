@@ -123,7 +123,7 @@ function onShowMorePastEvents() {
     updateQuery: (previousResult, { fetchMoreResult }) => {
       if (!fetchMoreResult?.allPastEvents) {
         noMorePastEventsFound.value = true;
-        toast(l18n.global.tc('view.results.noMoreResults'), { type: 'info' });
+        toast(l18n.global.t('view.results.noMoreResults'), { type: 'info' });
         return previousResult;
       }
 

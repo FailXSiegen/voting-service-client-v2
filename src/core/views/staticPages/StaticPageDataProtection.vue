@@ -12,9 +12,9 @@
 
       <p>
         Unter
-        <a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a> könnnen Sie gerne eine
-        Anfrage stellen und ausführliche Informationen zu Art, Wege und Speicherdauer der vzu
-        verarbeitenden Daten erhalten.
+        <a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a> können Sie gerne eine Anfrage
+        stellen und ausführliche Informationen zu Art, Wege und Speicherdauer der zu verarbeitenden
+        Daten erhalten.
       </p>
 
       <p>&nbsp;</p>
@@ -54,14 +54,17 @@
       </p>
       <ul>
         <li>
-          Selbst angegebener Name, Benutzername (Abhängig vom Veranstalter: E-Mail Adresse nicht
-          zwingend erfoderlich!) und das verschlüsselte Passwort
+          Selbst angegebener Name, Benutzername (je nach Veranstalter auch eine E-Mail-Adresse oder
+          Mitgliedsnummer) und das als Hash gespeicherte Passwort
         </li>
         <li>Abstimmungsteilnahme</li>
+        <li>Beim tokenbasierten Zugang: E-Mail-Adresse und Zugangsschlüssel (Token)</li>
+        <li>Zugeteilte Stimmen sowie ein Protokoll von Stimmübertragungen und Stimmanpassungen</li>
       </ul>
       <p>
-        Organisator*innen haben nach der Veranstaltung 180 Tage Zugriff auf die Daten der
-        Veranstaltung und den aufgeführten Informationen im Abstimmungsystem. Danach werden die
+        Organisator*innen haben nach dem Veranstaltungsdatum 180 Tage Zugriff auf die Daten der
+        Veranstaltung und die aufgeführten Informationen im Abstimmungssystem. Etwa 3 Tage nach
+        einer Hinweis-E-Mail, also rund 183 Tage nach dem Veranstaltungsdatum, werden die
         Informationen unwiderruflich automatisch gelöscht. Die Pflicht zur Nachhaltung der
         Informationen (Wahlergebnisse, Teilnehmer) obliegt dem/der Organisator*in
       </p>
@@ -82,6 +85,13 @@
         in der "Abstimmungsteilnehmer" erfasst.
       </p>
       <p>
+        Beim tokenbasierten Zugang wird die vom Organisator eingetragene E-Mail-Adresse für den
+        Versand des Aktivierungslinks verwendet und bleibt beim Teilnehmerdatensatz gespeichert, bis
+        die Veranstaltung gelöscht wird. Der Zugangsschlüssel ist diesem Datensatz zugeordnet. Der
+        Zugang ist daher nicht anonym. Bei geheimen Abstimmungen werden die Antworten unabhängig
+        davon ohne Benutzer gespeichert.
+      </p>
+      <p>
         Als Anmeldeprozess zwischen Benutzer und Server werden Tokens verwendet. Die Tokens dienen
         der verschlüsselten Kommunikation zwischen Endgerät und Server.
       </p>
@@ -92,7 +102,7 @@
       </p>
       <p>
         Zur potentiellen Fehleranalyse werden serverseitig ausgeführte Datenbankverarbeitungen
-        (SQL-Queries) protokolliert sowie auftretebde Fehlermeldungen der Server-Anwendung. Die
+        (SQL-Queries) protokolliert sowie auftretende Fehlermeldungen der Server-Anwendung. Die
         Protokoll-Dateien können Nutzerinformationen enthalten. Gespeicherte und archivierte
         Protokoll-Dateien werden 14 Tage lang gespeichert.
       </p>
@@ -115,7 +125,24 @@
       <p>&nbsp;</p>
       <hr />
       <h2>Weitergabe personenbezogener Daten an Dritte</h2>
-      <p>digitalwahl.org bindet keine externen Dienste mit ein.</p>
+      <p>digitalwahl.org bindet folgende externe Dienste ein:</p>
+      <ul>
+        <li>
+          Zoom: Die Anwendung lädt beim Aufruf eine technische Bibliothek von source.zoom.us. Dabei
+          wird Ihre IP-Adresse an Zoom übermittelt. Nutzt ein Organisator eine Zoom-Konferenz,
+          gelten beim Beitritt zusätzlich die Bedingungen von Zoom.
+        </li>
+        <li>
+          Jitsi: Nutzt ein Organisator eine Jitsi-Konferenz, wird beim Beitritt eine Verbindung zu
+          dem von ihm gewählten Jitsi-Server hergestellt.
+        </li>
+        <li>
+          mosparo: Die Registrierung von Organisatoren wird, sofern aktiviert, mit dem selbst
+          betriebenen Spam-Schutz mosparo geprüft (captcha.failx.de). Dabei werden die Eingaben des
+          Registrierungsformulars dorthin übermittelt, nicht aber das Passwort. Es werden keine
+          Daten an Google übertragen.
+        </li>
+      </ul>
       <p>
         Daten, die beim Zugriff auf digitalwahl.org protokolliert werden, werden nur an Dritte
         übermittelt, soweit wir gesetzlich oder durch Gerichtsentscheidung dazu verpflichtet sind:

@@ -95,63 +95,83 @@
           </div>
         </div>
 
-        <!-- Google reCAPTCHA Settings -->
+        <!-- mosparo Settings -->
         <hr class="my-4" />
         <h6 class="mb-3">
           <i class="bi bi-shield-check me-2"></i>
-          {{ $t('view.systemSettings.recaptcha.label') }}
+          {{ $t('view.systemSettings.mosparo.label') }}
         </h6>
 
         <div class="mb-3">
           <div class="form-check">
             <input
-              id="recaptchaEnabled"
-              v-model="formData.recaptchaEnabled"
+              id="mosparoEnabled"
+              v-model="formData.mosparoEnabled"
               class="form-check-input"
               type="checkbox"
               :true-value="true"
               :false-value="false"
-              @change="onRecaptchaEnabledChange"
+              @change="onMosparoEnabledChange"
             />
-            <label class="form-check-label" for="recaptchaEnabled">
-              {{ $t('view.systemSettings.recaptcha.enabled.label') }}
+            <label class="form-check-label" for="mosparoEnabled">
+              {{ $t('view.systemSettings.mosparo.enabled.label') }}
             </label>
           </div>
           <div class="form-text">
-            {{ $t('view.systemSettings.recaptcha.enabled.help') }}
+            {{ $t('view.systemSettings.mosparo.enabled.help') }}
           </div>
         </div>
 
-        <div v-if="formData.recaptchaEnabled" class="ms-3">
+        <div v-if="formData.mosparoEnabled" class="ms-3">
           <div class="mb-3">
             <label class="form-label">
-              {{ $t('view.systemSettings.recaptcha.siteKey.label') }}
+              {{ $t('view.systemSettings.mosparo.host.label') }}
             </label>
-            <input
-              v-model="formData.recaptchaSiteKey"
-              type="text"
-              class="form-control"
-              :placeholder="$t('view.systemSettings.recaptcha.siteKey.placeholder')"
-              @input="onSiteKeyChange"
-            />
+            <input v-model="formData.mosparoHost" type="text" class="form-control" />
             <div class="form-text">
-              {{ $t('view.systemSettings.recaptcha.siteKey.help') }}
+              {{ $t('view.systemSettings.mosparo.host.help') }}
             </div>
           </div>
 
           <div class="mb-3">
             <label class="form-label">
-              {{ $t('view.systemSettings.recaptcha.secretKey.label') }}
+              {{ $t('view.systemSettings.mosparo.uuid.label') }}
+            </label>
+            <input v-model="formData.mosparoUuid" type="text" class="form-control" />
+            <div class="form-text">
+              {{ $t('view.systemSettings.mosparo.uuid.help') }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              {{ $t('view.systemSettings.mosparo.publicKey.label') }}
             </label>
             <input
-              v-model="formData.recaptchaSecretKey"
+              v-model="formData.mosparoPublicKey"
+              type="text"
+              class="form-control"
+              :placeholder="$t('view.systemSettings.mosparo.publicKey.placeholder')"
+              @input="onSiteKeyChange"
+            />
+            <div class="form-text">
+              {{ $t('view.systemSettings.mosparo.publicKey.help') }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">
+              {{ $t('view.systemSettings.mosparo.privateKey.label') }}
+            </label>
+            <input
+              v-model="formData.mosparoPrivateKey"
               type="password"
               class="form-control"
-              :placeholder="$t('view.systemSettings.recaptcha.secretKey.placeholder')"
+              :placeholder="$t('view.systemSettings.mosparo.privateKey.placeholder')"
               @input="onSecretKeyChange"
             />
             <div class="form-text">
-              {{ $t('view.systemSettings.recaptcha.secretKey.help') }}
+              {{ $t('view.systemSettings.mosparo.privateKey.help') }}
             </div>
           </div>
         </div>
@@ -209,9 +229,11 @@ const formData = reactive({
   useDbFooterNavigation: true,
   faviconUrl: null,
   titleSuffix: 'digitalwahl.org',
-  recaptchaEnabled: false,
-  recaptchaSiteKey: '',
-  recaptchaSecretKey: '',
+  mosparoEnabled: false,
+  mosparoHost: 'https://captcha.failx.de',
+  mosparoUuid: '',
+  mosparoPublicKey: '',
+  mosparoPrivateKey: '',
 });
 
 // Query system settings
@@ -234,12 +256,14 @@ watch(
       formData.useDbFooterNavigation = settings.useDbFooterNavigation;
       formData.faviconUrl = settings.faviconUrl;
       formData.titleSuffix = settings.titleSuffix || 'digitalwahl.org';
-      formData.recaptchaEnabled = Boolean(settings.recaptchaEnabled);
-      formData.recaptchaSiteKey = settings.recaptchaSiteKey || '';
+      formData.mosparoEnabled = Boolean(settings.mosparoEnabled);
+      formData.mosparoHost = settings.mosparoHost || 'https://captcha.failx.de';
+      formData.mosparoUuid = settings.mosparoUuid || '';
+      formData.mosparoPublicKey = settings.mosparoPublicKey || '';
       // Secret key is never returned by the server for security reasons.
       // Leave the field empty — the stored value is preserved on save unless
       // the admin types a new one.
-      formData.recaptchaSecretKey = '';
+      formData.mosparoPrivateKey = '';
       console.log('Updated form data:', JSON.stringify(formData, null, 2));
     }
   },
@@ -249,19 +273,19 @@ watch(
 // Save mutation
 const { mutate: updateSystemSettings } = useMutation(UPDATE_SYSTEM_SETTINGS);
 
-function onRecaptchaEnabledChange(event) {
-  console.log('reCAPTCHA enabled changed:', event.target.checked);
-  formData.recaptchaEnabled = event.target.checked;
+function onMosparoEnabledChange(event) {
+  console.log('mosparo enabled changed:', event.target.checked);
+  formData.mosparoEnabled = event.target.checked;
 }
 
 function onSiteKeyChange(event) {
   console.log('Site key changed:', event.target.value);
-  formData.recaptchaSiteKey = event.target.value;
+  formData.mosparoPublicKey = event.target.value;
 }
 
 function onSecretKeyChange(event) {
   console.log('Secret key changed:', event.target.value);
-  formData.recaptchaSecretKey = event.target.value;
+  formData.mosparoPrivateKey = event.target.value;
 }
 
 async function onSave() {
@@ -275,15 +299,17 @@ async function onSave() {
       useDbFooterNavigation: formData.useDbFooterNavigation,
       faviconUrl: formData.faviconUrl,
       titleSuffix: formData.titleSuffix,
-      recaptchaEnabled: Boolean(formData.recaptchaEnabled),
-      recaptchaSiteKey: formData.recaptchaSiteKey || '',
+      mosparoEnabled: Boolean(formData.mosparoEnabled),
+      mosparoHost: formData.mosparoHost || '',
+      mosparoUuid: formData.mosparoUuid || '',
+      mosparoPublicKey: formData.mosparoPublicKey || '',
     };
 
     // Only send the secret when the admin actually typed a new value.
     // An empty field means "keep existing value" — we omit the key so the
     // server resolver does not overwrite the stored secret with an empty string.
-    if (formData.recaptchaSecretKey) {
-      inputData.recaptchaSecretKey = formData.recaptchaSecretKey;
+    if (formData.mosparoPrivateKey) {
+      inputData.mosparoPrivateKey = formData.mosparoPrivateKey;
     }
 
     console.log('Input data being sent:', JSON.stringify(inputData, null, 2));

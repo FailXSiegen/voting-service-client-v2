@@ -6,10 +6,9 @@
     :id="id"
     v-model="inputValue"
     :name="name"
-    :format="format"
-    locale="de"
-    cancel-text="abbrechen"
-    select-text="auswählen"
+    :formats="{ input: format }"
+    :locale="de"
+    :action-row="{ cancelBtnLabel: 'abbrechen', selectBtnLabel: 'auswählen' }"
     @update:model-value="onChange"
   />
   <div v-if="helpText" class="form-text text-muted">
@@ -22,7 +21,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import VueDatePicker from '@vuepic/vue-datepicker';
+import { VueDatePicker } from '@vuepic/vue-datepicker';
+import { de } from 'date-fns/locale';
 
 const emit = defineEmits(['change']);
 
