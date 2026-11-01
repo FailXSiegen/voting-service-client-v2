@@ -1,8 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "project": ["src/**/*.{js,vue}"],
-  "ignore": ["_obsolete/**"],
-  "ignoreDependencies": [
-    "bootstrap-icons"
-  ]
+  "ignore": ["src/core/views/staticPages/Faq/**", "src/core/components/FaqCard.vue", "tests/**"],
+  "ignoreDependencies": ["bootstrap-icons"]
 }

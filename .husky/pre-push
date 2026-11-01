@@ -1,0 +1,7 @@
+# Same checks as .github/workflows/lint.yml, so a push cannot turn CI red.
+# ponytail: lint:debug is left out until the ~200 existing console.log lines are cleaned up.
+set -e
+npm run lint:check
+npm run format:check
+npm run qa:cpd
+npm run qa:unused
