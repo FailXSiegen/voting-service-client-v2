@@ -65,8 +65,9 @@
             beantragen, sofern keine rechtlichen Aufbewahrungspflichten entgegenstehen.
           </li>
           <li>
-            <strong>Anonymität bei der Wahl:</strong> Die Identität der Wähler bleibt während der
-            Abstimmung anonym, um die Privatsphäre zu schützen.
+            <strong>Anonymität bei der Wahl:</strong> Bei geheimen Abstimmungen wird nicht
+            gespeichert, wer wie gestimmt hat. Organisatoren sehen nur, wer abgestimmt hat. Bei
+            offenen Abstimmungen sind Antworten Personen zugeordnet.
           </li>
         </ul>
         <p>

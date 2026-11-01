@@ -3,6 +3,7 @@ import {
   apolloClient,
   AUTH_TOKEN,
   EVENT_USER_AUTH_TOKEN,
+  reconnectWebsocketClient,
   resetClient,
   terminateClient,
 } from '@/apollo-client';
@@ -264,6 +265,9 @@ export const useCore = defineStore('core', {
             // Don't clear user session here, better to have partial data than none
           }
         }
+
+        // The socket may predate this token, and the server authorizes subscriptions by it.
+        await reconnectWebsocketClient();
 
         // Reset apollo client.
         return resetClient();

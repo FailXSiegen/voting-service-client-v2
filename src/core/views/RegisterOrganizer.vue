@@ -22,6 +22,7 @@
             <!-- Form Fields -->
             <div class="mb-3">
               <BaseInput
+                name="username"
                 :label="$t('view.register.label.username')"
                 :errors="v$.username.$errors"
                 :has-errors="v$.username.$errors.length > 0"
@@ -34,6 +35,7 @@
             </div>
             <div class="mb-3">
               <EmailInput
+                name="email"
                 :label="$t('view.register.label.email')"
                 :errors="v$.email.$errors"
                 :has-errors="v$.email.$errors.length > 0"
@@ -72,6 +74,7 @@
             </div>
             <div class="mb-3">
               <BaseInput
+                name="publicName"
                 :label="$t('view.register.label.publicName')"
                 :errors="v$.publicName.$errors"
                 :has-errors="v$.publicName.$errors.length > 0"
@@ -84,6 +87,7 @@
             </div>
             <div class="mb-3">
               <BaseInput
+                name="publicOrganisation"
                 :label="$t('view.register.label.publicOrganisation')"
                 :errors="v$.publicOrganisation.$errors"
                 :has-errors="v$.publicOrganisation.$errors.length > 0"
@@ -123,21 +127,8 @@
                 "
               />
             </div>
-            <GoogleRecaptcha
-              @verified="
-                (token) => {
-                  recaptchaVerified = true;
-                  recaptchaToken = token;
-                }
-              "
-              @expired="
-                () => {
-                  recaptchaVerified = false;
-                  recaptchaToken = '';
-                }
-              "
-            />
-            <button class="btn btn-primary btn-block float-end mt-3" :disabled="!recaptchaVerified">
+            <MosparoCaptcha ref="captcha" @change="captchaVerified = $event" @ready="onSubmit" />
+            <button class="btn btn-primary btn-block float-end mt-3" :disabled="!captchaVerified">
               {{ $t('view.register.submit') }}
             </button>
           </form>
@@ -160,11 +151,11 @@ import BaseInput from '@/core/components/form/BaseInput.vue';
 import EmailInput from '@/core/components/form/EmailInput.vue';
 import CheckboxInput from '@/core/components/form/CheckboxInput.vue';
 import AlertBox from '@/core/components/AlertBox.vue';
-import GoogleRecaptcha from '@/core/components/form/GoogleRecaptcha.vue';
+import MosparoCaptcha from '@/core/components/form/MosparoCaptcha.vue';
 
 const submitSuccess = ref(false);
-const recaptchaVerified = ref(false);
-let recaptchaToken = '';
+const captchaVerified = ref(false);
+const captcha = ref(null);
 
 // Form and validation setup.
 const formData = reactive({
@@ -196,8 +187,11 @@ const v$ = useVuelidate(rules, formData);
 
 async function onSubmit() {
   const result = await v$.value.$validate();
-  if (!result || !recaptchaVerified.value) {
+  if (!result || !captchaVerified.value) {
     handleError(new InvalidFormError());
+    return;
+  }
+  if (captcha.value?.isPending()) {
     return;
   }
   try {
@@ -207,7 +201,7 @@ async function onSubmit() {
       password: formData.password,
       publicName: formData.publicName,
       publicOrganisation: formData.publicOrganisation,
-      captchaToken: recaptchaToken,
+      ...captcha.value?.getTokens(),
     });
     submitSuccess.value = true;
   } catch (error) {

@@ -76,7 +76,7 @@ const props = defineProps({
 });
 
 const coreStore = useCore();
-const eventUser = ref(coreStore.getEventUser);
+const eventUser = computed(() => coreStore.getEventUser);
 const activePoll = ref(null);
 const pollModal = ref(null);
 const highlightStatusChange = ref(false);
@@ -134,7 +134,7 @@ updateEventUserAccessRightsSubscription.onResult(({ data }) => {
   if (data.updateEventUserAccessRights) {
     const { verified, voteAmount, allowToVote, pollHints } = data.updateEventUserAccessRights;
     coreStore.updateEventUserAccessRights(verified, voteAmount, allowToVote, pollHints);
-    toast(l18n.global.tc('view.polls.userUpdate'), {
+    toast(l18n.global.t('view.polls.userUpdate'), {
       type: 'info',
       autoClose: false,
       onOpen: () => (highlightStatusChange.value = true),
@@ -168,7 +168,7 @@ async function onSubmitPoll(pollFormData) {
       await votingProcess.handleFormSubmit(pollFormData, activePoll);
     }
   } catch (error) {
-    toast(l18n.global.tc('view.polls.error.submission'), { type: 'error' });
+    toast(l18n.global.t('view.polls.error.submission'), { type: 'error' });
   }
 }
 

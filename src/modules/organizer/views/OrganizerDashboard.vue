@@ -14,27 +14,38 @@
               <u>Neuigkeiten</u>
             </h2>
             <dl class="mb-1">
-              <dt>Asynchrone Abstimmungen</dt>
+              <dt>Hilfe direkt im Backend</dt>
+              <dd>
+                Oben rechts öffnet „Hilfe“ die passenden Anleitungen zur aktuellen Seite, mit
+                Videos, Suche und Hinweisen, was nicht geht und worauf Sie achten sollten.
+              </dd>
+              <dt>Änderungen an Stimmen sofort sichtbar</dt>
+              <dd>
+                Stimmänderungen und Stimmrechtsübertragungen erscheinen bei den Teilnehmern sofort.
+                Bereits abgegebene Stimmen einer laufenden Abstimmung lassen sich nicht mehr
+                übertragen.
+              </dd>
+              <dt>Briefwahl (asynchrone Abstimmungen)</dt>
               <dd>
                 Definieren Sie einen Start- und Endzeitpunkt für Ihre Veranstaltung. Alle Teilnehmer
-                können dann innerhalb dieses Zeitraums abstimmen. Die Ergebnisse werden erst nach
-                Ablauf des Endzeitpunkts angezeigt.
+                können innerhalb dieses Zeitraums abstimmen. Die Ergebnisse werden erst nach dem
+                Endzeitpunkt angezeigt.
               </dd>
-              <dt>Neue Pseudonymisierte Zugriffsart für Teilnehmer: Token-basierter Zugang</dt>
+              <dt>Tokenbasierter Zugang per E-Mail</dt>
               <dd>
-                Als Organisator tragen Sie bei den Teilnehmern E-Mail Adressen ein. Die Teilnehmer
-                erhalten dann einen Link per E-Mail, mit dem sie sich anmelden können. Bei der
-                Anmeldung wird ein Schlüssel (Token) auf dem verwendeten Endgerät gespeichert. Es
-                wird kein Zusammenhang zwischen E-Mail Adresse und Token vom System gespeichert. Der
-                Token wird als Zugangsschlüssel zur Veranstaltung verwendet.<br />
+                Sie tragen E-Mail-Adressen ein, die Teilnehmer erhalten einen Link und aktivieren
+                damit ihr Endgerät, auf dem ein Zugangsschlüssel (Token) gespeichert wird. Die
+                E-Mail-Adresse bleibt beim Teilnehmer gespeichert, bis die Veranstaltung gelöscht
+                wird. Bei geheimen Abstimmungen wird unabhängig davon nicht gespeichert, wer wie
+                gestimmt hat.<br />
                 <u>Wichtig:</u><br />
-                Teilnehmer müssen das gleiche Endgerät verwenden, mit dem sie sich angemeldet haben.
+                Teilnehmer müssen das Endgerät verwenden, mit dem sie sich angemeldet haben.
                 Ansonsten ist der Zugang nicht möglich.
               </dd>
               <dt>Technisches Update</dt>
               <dd>
-                Dank einem technischen Update ist die Anwendung nun noch schneller und stabiler.
-                Einige Funktionen wurden verbessert und Fehler behoben.
+                Sicherheit und Zuverlässigkeit wurden verbessert, unter anderem bei Zugriffsrechten
+                und der Zählung gleichzeitig abgegebener Stimmen.
               </dd>
             </dl>
             <hr />

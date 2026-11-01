@@ -40,12 +40,16 @@
         </p>
       </FaqCard>
 
-      <FaqCard :id="2" title="Integration von Video-Konferenzen (aktuell Zoom)" name="requirement">
+      <FaqCard
+        :id="2"
+        title="Integration von Video-Konferenzen (aktuell Zoom und Jitsi)"
+        name="requirement"
+      >
         <p>
           digitalwahl.org bietet eine nahtlose und benutzerfreundliche Erfahrung, indem es eine
-          direkte Integration mit Videokonferenz-Systemen (aktuell Zoom) umfasst. Dieser Ansatz ist
-          besonders vorteilhaft für ältere Nutzer oder Personen, die weniger Erfahrung mit
-          Technologie haben. Hier sind einige Highlights dieser Integration:
+          direkte Integration mit Videokonferenz-Systemen (aktuell Zoom und Jitsi) umfasst. Dieser
+          Ansatz ist besonders vorteilhaft für ältere Nutzer oder Personen, die weniger Erfahrung
+          mit Technologie haben. Hier sind einige Highlights dieser Integration:
         </p>
         <ul>
           <li>

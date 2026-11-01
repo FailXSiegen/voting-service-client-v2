@@ -10,7 +10,8 @@
         <ul>
           <li>
             <strong>Unmittelbare Verfügbarkeit:</strong> Nach Abschluss der Wahl sind die Ergebnisse
-            sofort verfügbar und können von den Teilnehmern eingesehen werden.
+            sofort verfügbar. Bei der Briefwahl erscheinen sie erst nach dem Enddatum, und
+            Organisatoren können einzelne Ergebnisse ausblenden.
           </li>
           <li>
             <strong>Detaillierte Auswertung:</strong> Die Ergebnisse auch in Zahlenform präsentiert,

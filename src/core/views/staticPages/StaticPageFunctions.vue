@@ -44,20 +44,19 @@
                 Zwei Anwendungen gleichzeitig sind zu viel? Integrieren Sie die Videokonferenz in
                 digitalwahl.org.
               </p>
-              <small>Aktuell unterstützt: Zoom</small>
+              <small>Aktuell unterstützt: Zoom und Jitsi</small>
             </li>
             <li class="list-group-item">
               <h3 class="mb-1">
                 <i class="bi bi-check-circle bi--2xl"></i>&nbsp;Endgeräte-bezogene Wahl
               </h3>
               <p class="mb-1">
-                Pseudonymisieren Sie alles! Nutzer erhalten einen Link zur Endgeräte-Registrierung,
-                danach kann nicht mehr nachvollzogen werden, wer der Teilnehmer ist. Nur, dass er
-                ein berechtigter Teilnehmer ist.
+                Nutzer erhalten per E-Mail einen Link zur Endgeräte-Registrierung und nehmen danach
+                an ihr Gerät gebunden teil.
               </p>
               <small
-                >E-Mail-Adresse des Teilnehmers wird einmalig benötigt und wird nicht
-                gespeichert.</small
+                >Die E-Mail-Adresse wird beim Teilnehmer gespeichert, bis die Veranstaltung gelöscht
+                wird.</small
               >
             </li>
           </ul>
@@ -94,7 +93,10 @@
         Die Plattform digitalwahl.org kann aktuell als
         <b>Begleit-Anwendung</b> für digitale, analoge oder hybride Versammlungen verwendet werden.
       </p>
-      <p>Mit der Anwendung als asynchrones Wahltool lassen sich auch</p>
+      <p>
+        Mit der Briefwahl lassen sich Abstimmungen auch ohne gemeinsame Sitzung in einem festen
+        Zeitraum durchführen.
+      </p>
     </div>
   </CorePageLayout>
 </template>

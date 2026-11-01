@@ -1,5 +1,7 @@
 import { ref, watch } from 'vue';
 import l18n from '@/l18n';
+import { toast } from 'vue3-toastify';
+import { useCore } from '@/core/store/core';
 import { usePollStatePersistence } from '@/core/composable/poll-state-persistence';
 import { useMutation, useApolloClient } from '@vue/apollo-composable';
 import { CREATE_POLL_SUBMIT_ANSWER } from '@/modules/eventUser/graphql/mutation/create-poll-submit-answer';
@@ -1730,6 +1732,17 @@ export function useVotingProcess(eventUser, event) {
       try {
         const result = await createBulkPollSubmitAnswerMutation.mutate();
         const successCount = result.data?.createBulkPollSubmitAnswer || 0;
+
+        // The server counted fewer votes than shown: this client's vote amount is stale.
+        if (successCount < input.voteCount) {
+          toast(
+            `Es wurden ${successCount} von ${input.voteCount} Stimmen gezählt. Ihre Stimmenanzahl wird aktualisiert.`,
+            { type: 'warning' }
+          );
+          useCore()
+            .queryEventUser()
+            .catch((error) => console.error('Stimmenanzahl nicht aktualisiert:', error));
+        }
 
         // Ende der Zeitmessung
         if (successCount > 0) {

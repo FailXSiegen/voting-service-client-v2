@@ -221,7 +221,7 @@ async function showMorePollResults() {
       updateQuery: (prev, { fetchMoreResult }) => {
         if (!fetchMoreResult?.pollResult?.length) {
           showMoreEnabled.value = false;
-          toast(l18n.global.tc('view.results.noMoreResults'), { type: 'info' });
+          toast(l18n.global.t('view.results.noMoreResults'), { type: 'info' });
           return prev;
         }
 
@@ -245,7 +245,7 @@ async function showMorePollResults() {
     });
   } catch (error) {
     console.error('Error loading more results:', error);
-    toast(l18n.global.tc('common.error.loading'), { type: 'error' });
+    toast(l18n.global.t('common.error.loading'), { type: 'error' });
   } finally {
     isLoadingMore.value = false;
   }
@@ -304,10 +304,10 @@ async function exportVoteAdjustments() {
     link.click();
     document.body.removeChild(link);
 
-    toast(l18n.global.tc('common.success'), { type: 'success' });
+    toast(l18n.global.t('common.success'), { type: 'success' });
   } catch (error) {
     console.error('Export error:', error);
-    toast(error.message || l18n.global.tc('common.error'), { type: 'error' });
+    toast(error.message || l18n.global.t('common.error'), { type: 'error' });
   }
 }
 

@@ -28,31 +28,38 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/lib',
+          src: 'node_modules/@zoom/meetingsdk/dist/lib',
+          rename: { stripBase: 4 },
           dest: __dirname + '/dist/lib/zoom/',
         },
         {
-          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/lib',
+          src: 'node_modules/@zoom/meetingsdk/dist/lib',
+          rename: { stripBase: 4 },
           dest: __dirname + '/public/lib/zoom/',
         },
         {
-          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/ui',
+          src: 'node_modules/@zoom/meetingsdk/dist/ui',
+          rename: { stripBase: 4 },
           dest: __dirname + '/dist/lib/zoom/',
         },
         {
-          src: __dirname + '/node_modules/@zoom/meetingsdk/dist/ui',
+          src: 'node_modules/@zoom/meetingsdk/dist/ui',
+          rename: { stripBase: 4 },
           dest: __dirname + '/public/lib/zoom/',
         },
         {
-          src: __dirname + '/src/assets/pdf',
+          src: 'src/assets/pdf',
+          rename: { stripBase: 2 },
           dest: __dirname + '/dist/download',
         },
         {
-          src: __dirname + '/src/assets/pdf',
+          src: 'src/assets/pdf',
+          rename: { stripBase: 2 },
           dest: __dirname + '/public/download',
         },
         {
-          src: __dirname + '/src/messages.json',
+          src: 'src/messages.json',
+          rename: { stripBase: 1 },
           dest: __dirname + '/dist/src/',
         },
       ],
@@ -69,8 +76,10 @@ export default defineConfig({
     environment: 'happy-dom',
   },
   build: {
+    // vue3-easy-data-table ships CSS that the default lightningcss minifier rejects.
+    cssMinify: 'esbuild',
     commonjsOptions: {
       include: [/node_modules/],
-    }
-  }
+    },
+  },
 });

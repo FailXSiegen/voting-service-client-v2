@@ -58,6 +58,7 @@ import {
   RouteOrganizerEventUserMultipleNew,
 } from '@/router/routes';
 import { useCore } from '@/core/store/core';
+import { toast } from 'vue3-toastify';
 import { useRoute, useRouter } from 'vue-router';
 import { useMutation, useQuery, useSubscription } from '@vue/apollo-composable';
 import { EVENT } from '@/modules/organizer/graphql/queries/event';
@@ -288,12 +289,11 @@ async function onTransferVotes(transferData) {
         target: targetUserName,
       });
 
-      // You can use a toast notification here
-      console.log(successMessage);
+      toast(successMessage, { type: 'success' });
     }
   } catch (error) {
     console.error('Vote transfer failed:', error);
-    // Handle error - show error message to user
+    toast(error.message, { type: 'error' });
   }
 }
 </script>
