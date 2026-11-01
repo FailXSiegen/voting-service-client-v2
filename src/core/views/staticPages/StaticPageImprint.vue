@@ -2,7 +2,7 @@
   <CorePageLayout meta-title="Impressum">
     <div class="imprint">
       <h1>Impressum</h1>
-      <p>Felix Herrmann<br />Hambergstraße 27<br />57074 Siegen</p>
+      <p>Felix Herrmann<br />Am Botschert 10<br />57250 Netphen</p>
       <p><a href="mailto:info@digitalwahl.org">info@digitalwahl.org</a></p>
       <p><strong>Steuernummer</strong></p>
       <p>342/5119/3204</p>
