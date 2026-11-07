@@ -54,7 +54,7 @@
     </div>
 
     <div class="card-body">
-      <div v-if="isCustomPoll" class="row mb-3">
+      <div class="row mb-3">
         <div class="col-12">
           <div class="btn-group d-print-none" role="group">
             <button
@@ -155,7 +155,7 @@
             </ul>
           </div>
 
-          <div v-if="isCustomPoll" class="mt-3">
+          <div class="mt-3">
             <p class="mb-1">
               <strong>{{ $t('view.results.percentageExplanation') }}</strong>
             </p>
@@ -303,7 +303,7 @@ const props = defineProps({
   // Neuer Prop für den initialen Prozentanzeigetyp
   initialPercentageType: {
     type: String,
-    default: 'maxPerOption',
+    default: 'validVotes',
   },
   // Show toggle button and hidden badge (only for organizers)
   showHiddenControls: {
@@ -332,22 +332,8 @@ const hasAbstentions = computed(() => {
   return abstentionCount.value > 0;
 });
 
-// Lokaler State für den Prozenttyp - wird abhängig von hasAbstentions initialisiert
+// Lokaler State für den Prozenttyp - Standard: Mehrheit der gültigen Stimmen (Enthaltungen zählen nicht)
 const localPercentageType = ref(props.initialPercentageType);
-
-// Setze den Anfangswert basierend auf hasAbstentions
-watch(
-  () => hasAbstentions.value,
-  (newHasAbstentions) => {
-    // Bei Enthaltungen 'maxPerOptionNoAbstention' wählen, sonst Standard
-    if (newHasAbstentions) {
-      localPercentageType.value = 'maxPerOptionNoAbstention';
-    } else {
-      localPercentageType.value = 'maxPerOption';
-    }
-  },
-  { immediate: true }
-);
 
 // Beobachte Änderungen am initialPercentageType-Prop
 watch(
@@ -547,8 +533,8 @@ function isAbsoluteMajority(answerLength) {
     return answerLength / maxVotesPerOptionNoAbstention.value > 0.5;
   }
 
-  // Default fallback zum neuen Standard - Maximalstimmen pro Option (ohne Enthaltungen)
-  return answerLength / maxVotesPerOptionNoAbstention.value > 0.5;
+  // Default fallback: gültige Stimmen
+  return answerLength / totalValidVotes.value > 0.5;
 }
 
 // Toggle hidden status
