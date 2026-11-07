@@ -18,33 +18,38 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { resolveShortlink } from '@/modules/shortlink/requests/resolve-shortlink';
+import { loginByShortlink } from '@/core/auth/login';
+import { useCore } from '@/core/store/core';
 import { handleError } from '@/core/error/error-handler';
 
 const route = useRoute();
 const router = useRouter();
+const coreStore = useCore();
 const loading = ref(true);
 const error = ref(null);
 
+function eventPath(slug) {
+  return `/event/${encodeURIComponent(slug)}`;
+}
+
 onMounted(async () => {
-  const shortCode = route.params.shortCode;
+  const shortCode = String(route.params.shortCode ?? '');
 
   try {
+    // SEC-40/MAGIC-1: log in with the shortcode itself. No username/public name in the URL or
+    // history state, no password derived from public event data.
+    const result = await loginByShortlink(shortCode);
+    if (result?.success && result.token && result.eventSlug) {
+      await coreStore.loginUser(result.token);
+      // replace: the shortlink itself should not stay in the browser history.
+      await router.replace(eventPath(result.eventSlug));
+      return;
+    }
+
+    // Magic link not allowed for this event (or event inactive): open the event login page
+    // without any prefilled personal data.
     const data = await resolveShortlink(shortCode);
-
-    // Build query parameters
-    const query = {};
-    if (data.username) {
-      query.username = data.username;
-    }
-    if (data.publicName) {
-      query.publicname = data.publicName;
-    }
-
-    // Redirect to event page
-    await router.push({
-      path: `/event/${data.eventSlug}`,
-      query: query,
-    });
+    await router.replace(eventPath(data.eventSlug));
   } catch (err) {
     handleError(err);
     error.value = 'Der angeforderte Link konnte nicht gefunden werden.';

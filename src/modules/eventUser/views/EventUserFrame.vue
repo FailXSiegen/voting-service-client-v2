@@ -57,8 +57,6 @@ document.addEventListener('visibilitychange', () => {
     console.warn('Tab is inactive. Now terminating websocket connection.');
     terminateWebsocketClient();
   } else {
-    console.log('Tab is active again. Reconnecting websocket client.');
-
     // Setze sofort den lokalen Status auf online (UI-Feedback)
     if (coreStore.isActiveEventUserSession) {
       coreStore.setEventUserOnlineState(true);
@@ -67,8 +65,6 @@ document.addEventListener('visibilitychange', () => {
     // Starte die WebSocket-Reconnect-Prozedur
     reconnectWebsocketClient()
       .then(() => {
-        console.log('WebSocket reconnection completed successfully.');
-
         // Zusätzliche Sicherheit: Erzwinge ein Update des Online-Status nach erfolgreicher Verbindung
         if (coreStore.isActiveEventUserSession) {
           // Stelle erneut sicher, dass der UI-Status korrekt ist
@@ -77,7 +73,6 @@ document.addEventListener('visibilitychange', () => {
           // Erzwinge ein erneutes Update nach kurzer Verzögerung, um sicherzustellen,
           // dass alle WebSocket-Handler geladen sind
           setTimeout(() => {
-            console.log('Forcing additional online status update after delay');
             coreStore.setEventUserOnlineState(true);
           }, 1000);
         }

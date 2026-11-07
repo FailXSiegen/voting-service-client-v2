@@ -138,22 +138,11 @@ eventUsersQuery.onResult(({ data }) => {
 
 const verifiedUsersCount = computed(() => {
   const count = (eventUsers.value || []).filter((eventUser) => eventUser.verified)?.length ?? 0;
-  if (import.meta.env.DEV) {
-    console.log('[ORGANIZER DEBUG] EventNavigation - Verified users count:', count);
-  }
   return count;
 });
 
 const pendingUsersCount = computed(() => {
   const count = (eventUsers.value || []).filter((eventUser) => !eventUser.verified)?.length ?? 0;
-  if (import.meta.env.DEV) {
-    console.log(
-      '[ORGANIZER DEBUG] EventNavigation - Pending users count:',
-      count,
-      'Total users:',
-      (eventUsers.value || []).length
-    );
-  }
   return count;
 });
 
@@ -193,10 +182,6 @@ try {
       });
 
       newEventUserSubscription.onResult(({ data }) => {
-        if (import.meta.env.DEV) {
-          console.log('[ORGANIZER DEBUG] EventNavigation - NEW_EVENT_USER received:', data);
-        }
-
         if (!data?.newEventUser) {
           if (import.meta.env.DEV) {
             console.warn(
@@ -214,13 +199,6 @@ try {
             });
           }
           return;
-        }
-
-        if (import.meta.env.DEV) {
-          console.log(
-            '[ORGANIZER DEBUG] EventNavigation - Adding new user to list:',
-            data?.newEventUser
-          );
         }
 
         // We have to make a copy to add a new entry to the event users array.
@@ -289,10 +267,6 @@ try {
       });
 
       eventUserLifeCycleSubscription.onResult(({ data }) => {
-        if (import.meta.env.DEV) {
-          console.log('[ORGANIZER DEBUG] EventNavigation - EVENT_USER_LIFE_CYCLE received:', data);
-        }
-
         if (!data || !data.eventUserLifeCycle) {
           if (import.meta.env.DEV) {
             console.warn(
@@ -316,13 +290,6 @@ try {
             );
           }
           return;
-        }
-
-        if (import.meta.env.DEV) {
-          console.log('[ORGANIZER DEBUG] EventNavigation - Updating user online status:', {
-            userId: eventUser.id,
-            online: data?.eventUserLifeCycle?.online,
-          });
         }
 
         eventUser.online = data?.eventUserLifeCycle?.online;

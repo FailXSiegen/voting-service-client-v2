@@ -11,8 +11,9 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { useQuery } from '@vue/apollo-composable';
 import { SYSTEM_SETTINGS_QUERY } from '@/modules/organizer/graphql/queries/system-settings';
+import { allowedMosparoHosts, whitelistedHost } from '@/core/util/allowed-hosts';
 
-const DEFAULT_HOST = 'https://captcha.failx.de';
+const DEFAULT_HOST = 'captcha.failx.de';
 const emit = defineEmits(['change', 'ready']);
 const boxId = 'mosparo-box';
 const box = ref(null);
@@ -25,7 +26,17 @@ const settings = computed(() => result.value?.systemSettings);
 const enabled = computed(() => Boolean(settings.value?.mosparoEnabled));
 
 function start() {
-  const host = (settings.value.mosparoHost || DEFAULT_HOST).replace(/\/+$/, '');
+  // The host comes from the system settings: only load the script from whitelisted hosts.
+  const allowedHost = whitelistedHost(
+    settings.value.mosparoHost || DEFAULT_HOST,
+    allowedMosparoHosts()
+  );
+  if (!allowedHost) {
+    console.error('mosparo host is not whitelisted:', settings.value.mosparoHost);
+    loadFailed.value = true;
+    return;
+  }
+  const host = `https://${allowedHost}`;
   scriptTag = document.createElement('script');
   scriptTag.src = `${host}/build/mosparo-frontend.js`;
   scriptTag.onerror = () => (loadFailed.value = true);

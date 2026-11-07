@@ -10,7 +10,7 @@
             {{ $t('view.register.subheadline') }}
           </p>
           <div class="p-5 mb-4 bg-body-tertiary rounded-3">
-            <p class="register__description" v-html="$t('view.register.description')" />
+            <p v-safe-html="$t('view.register.description')" class="register__description" />
           </div>
           <AlertBox v-if="submitSuccess" :message="$t('view.register.success')" />
           <form
@@ -49,6 +49,7 @@
             <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.password')"
+                :help-text="PASSWORD_HINT"
                 :errors="v$.password.$errors"
                 :has-errors="v$.password.$errors.length > 0"
                 type="password"
@@ -105,6 +106,7 @@
               <CheckboxInput
                 v-model:checked="formData.dataProtectionAccepted"
                 :label="$t('view.register.label.dataProtection')"
+                label-html
                 :errors="v$.dataProtectionAccepted.$errors"
                 :has-errors="v$.dataProtectionAccepted.$errors.length > 0"
                 @update="
@@ -118,6 +120,7 @@
               <CheckboxInput
                 v-model:checked="formData.isBetaAccepted"
                 :label="$t('view.register.label.beta')"
+                label-html
                 :errors="v$.isBetaAccepted.$errors"
                 :has-errors="v$.isBetaAccepted.$errors.length > 0"
                 @update="
@@ -139,6 +142,7 @@
 </template>
 
 <script setup>
+import { PASSWORD_HINT, passwordLength } from '@/core/form/validation/password-policy';
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
 import { reactive, ref } from 'vue';
 import { required, sameAs as equal } from '@vuelidate/validators';
@@ -172,7 +176,7 @@ const formData = reactive({
 const rules = {
   username: { required },
   email: { required },
-  password: { required },
+  password: { required, passwordLength },
   passwordRepeated: {
     required,
     sameAs: sameAs('password', formData),

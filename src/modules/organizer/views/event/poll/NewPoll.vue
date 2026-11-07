@@ -76,15 +76,8 @@ eventQuery.onResult(({ data }) => {
   event.value = data?.event;
   loaded.value = true;
 
-  // Debug logging for async event detection
-  if (import.meta.env.DEV) {
-    console.log('[DEBUG] NewPoll - Event data:', data?.event);
-    console.log('[DEBUG] NewPoll - Is async event?', data?.event?.async);
-  }
-
   // Immer event users laden für asynchrone Events
   if (data?.event?.async === true) {
-    console.log('[NewPoll] Async event detected, loading users...');
     const eventUsersQuery = useQuery(
       EVENT_USERS,
       { eventId: data.event.id },
@@ -93,14 +86,10 @@ eventQuery.onResult(({ data }) => {
     eventUsersQuery.onResult(({ data: usersData }) => {
       if (usersData?.eventUsers) {
         eventUsers.value = usersData.eventUsers;
-        console.log('[NewPoll] Event users loaded:', usersData.eventUsers.length);
       } else {
         eventUsers.value = [];
-        console.log('[NewPoll] No event users found');
       }
     });
-  } else {
-    console.log('[NewPoll] Not an async event, skipping user load');
   }
 });
 

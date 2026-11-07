@@ -408,12 +408,10 @@ function resetSubmittingState() {
 onMounted(() => {
   // KRITISCHER FIX: Entferne alle alten "Zombie"-Modal-Elemente beim Mounten
   // Dies verhindert, dass alte Modal-Instanzen im DOM bleiben und Probleme verursachen
-  console.log('[DEBUG:VOTING] PollModal wird gemounted, prüfe auf Zombie-Modals');
   const allModals = document.querySelectorAll('.modal');
   allModals.forEach((oldModal) => {
     // Entferne nur Modal-Elemente, die nicht das aktuelle sind
     if (oldModal !== modal.value) {
-      console.log('[DEBUG:VOTING] Entferne Zombie-Modal:', oldModal.id);
       oldModal.remove();
     }
   });
@@ -421,13 +419,11 @@ onMounted(() => {
   // Entferne auch alle Backdrops
   const allBackdrops = document.querySelectorAll('.modal-backdrop');
   allBackdrops.forEach((backdrop) => {
-    console.log('[DEBUG:VOTING] Entferne Zombie-Backdrop');
     backdrop.remove();
   });
 
   // Entferne modal-open von body
   if (document.body.classList.contains('modal-open')) {
-    console.log('[DEBUG:VOTING] Entferne modal-open von body beim Mount');
     document.body.classList.remove('modal-open');
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
@@ -477,8 +473,6 @@ onMounted(() => {
             if (inSplitVoting) {
               console.error('[DEBUG:VOTING] ❌ KRITISCH: Dies passierte während Split-Voting!');
             }
-          } else if (!lastHadShow && hasShow) {
-            console.log('[DEBUG:VOTING] ✅ show-Klasse wurde HINZUGEFÜGT', { usedVotes, maxVotes });
           }
 
           lastHadShow = hasShow;
@@ -549,21 +543,18 @@ onBeforeUnmount(() => {
   if (modalClassObserver) {
     modalClassObserver.disconnect();
     modalClassObserver = null;
-    console.log('[DEBUG:VOTING] MutationObserver disconnected');
   }
 
   // Sichtbarkeits-Interval stoppen
   if (visibilityCheckInterval) {
     clearInterval(visibilityCheckInterval);
     visibilityCheckInterval = null;
-    console.log('[DEBUG:VOTING] Visibility check interval cleared');
   }
 
   // KRITISCHER FIX: Bootstrap Modal SOFORT zerstören, bevor Component unmounted wird
   if (bootstrapModal) {
     try {
       bootstrapModal.dispose();
-      console.log('[DEBUG:VOTING] Bootstrap Modal disposed');
     } catch (e) {
       console.error('[DEBUG:VOTING] Fehler beim Dispose des Bootstrap Modals:', e);
     }
@@ -572,18 +563,15 @@ onBeforeUnmount(() => {
   // KRITISCHER FIX: Modal-Element DIREKT aus DOM entfernen
   // Dies ist notwendig, weil Bootstrap das Element nicht automatisch entfernt
   if (modal.value && modal.value.parentNode) {
-    console.log('[DEBUG:VOTING] Entferne Modal-Element direkt aus DOM');
     modal.value.parentNode.removeChild(modal.value);
   }
 
   // KRITISCHER FIX: Backdrop entfernen beim Unmounten der Komponente
   // Dies verhindert, dass der Backdrop sichtbar bleibt, wenn das Modal durch v-if=false entfernt wird
-  console.log('[DEBUG:VOTING] PollModal wird unmounted, entferne Backdrop und modal-open');
   const backdrops = document.querySelectorAll('.modal-backdrop');
   backdrops.forEach((backdrop) => {
     if (backdrop && backdrop.parentNode) {
       backdrop.parentNode.removeChild(backdrop);
-      console.log('[DEBUG:VOTING] Backdrop entfernt');
     }
   });
 
@@ -591,7 +579,6 @@ onBeforeUnmount(() => {
   document.body.classList.remove('modal-open');
   document.body.style.overflow = '';
   document.body.style.paddingRight = '';
-  console.log('[DEBUG:VOTING] modal-open von body entfernt');
 });
 
 // KRITISCH: Poll-Closed-Zustand überwachen und Modal schließen
@@ -758,21 +745,9 @@ function showModal() {
   // Verwende document.getElementById für zuverlässige Prüfung
   const modalElement = document.getElementById('pollModal');
   const hasShowClass = modalElement?.classList.contains('show') || false;
-  const computedDisplay = modalElement ? window.getComputedStyle(modalElement).display : 'none';
-  const hasVisibleDisplay = computedDisplay === 'block';
-
-  // NEUE STRATEGIE: Prüfe auch ob die modal-open Klasse auf body gesetzt ist
-  // Dies ist ein zuverlässigerer Indikator dafür, dass ein Modal gerade aktiv ist
-  const bodyHasModalOpen = document.body.classList.contains('modal-open');
 
   // Überprüfe, ob wir in einer Split-Vote-Situation sind (noch Stimmen übrig)
   const totalAllowedVotes = props.eventUser?.voteAmount || 0;
-  console.log(
-    '[DEBUG:VOTING] Lese votingProcess.usedVotesCount.value:',
-    votingProcess.value?.usedVotesCount?.value,
-    'votingProcess exists:',
-    !!votingProcess.value
-  );
   const usedVotes = votingProcess.value?.usedVotesCount?.value || 0;
   const inSplitVoteSituation = usedVotes > 0 && usedVotes < totalAllowedVotes;
 
@@ -781,10 +756,6 @@ function showModal() {
   // bodyHasModalOpen und inSplitVoteSituation alleine bedeuten NICHT, dass das Modal sichtbar ist!
   // Sie bedeuten nur, dass es sichtbar SEIN SOLLTE.
   const isModalAlreadyVisible = hasShowClass;
-
-  console.log(
-    `[DEBUG:VOTING] showModal() aufgerufen: hasShowClass=${hasShowClass}, computedDisplay=${computedDisplay}, hasVisibleDisplay=${hasVisibleDisplay}, bodyHasModalOpen=${bodyHasModalOpen}, inSplitVoteSituation=${inSplitVoteSituation}, usedVotes=${usedVotes}/${totalAllowedVotes}, isModalAlreadyVisible=${isModalAlreadyVisible}`
-  );
 
   // KRITISCH: Wenn bereits alle Stimmen abgegeben wurden, Modal NICHT öffnen
   if (usedVotes >= totalAllowedVotes && totalAllowedVotes > 0) {
@@ -835,9 +806,6 @@ function showModal() {
   // Beim Split-Voting ist das Modal bereits offen, also nicht zurücksetzen
   if (!isModalAlreadyVisible && pollForm.value) {
     pollForm.value.reset(false); // komplett zurücksetzen
-    console.log('[DEBUG:VOTING] Formular zurückgesetzt (Modal war nicht sichtbar)');
-  } else if (isModalAlreadyVisible) {
-    console.log('[DEBUG:VOTING] Formular wird NICHT zurückgesetzt (Modal bereits sichtbar)');
   }
 
   // Erhöhe pollFormKey NUR wenn Modal nicht bereits sichtbar ist
@@ -903,30 +871,9 @@ function showModal() {
       const hasVotesRemaining = usedVotes < totalAllowedVotes;
 
       if (isModalAlreadyVisible && hasVotesRemaining) {
-        console.log(
-          '[DEBUG:VOTING] Modal bereits sichtbar mit verbleibenden Stimmen: bleibt offen'
-        );
-        console.log(
-          '[DEBUG:VOTING] modal.value ist:',
-          modal.value ? 'vorhanden' : 'NULL/UNDEFINED'
-        );
-
         // KRITISCH: Nutze Bootstrap's eigene show() Methode statt manuelle Klassen-Manipulation
-        console.log('[DEBUG:VOTING] Rufe bootstrapModal.show() auf um Modal sichtbar zu machen');
         try {
           bootstrapModal.show();
-          console.log('[DEBUG:VOTING] bootstrapModal.show() erfolgreich aufgerufen');
-
-          // Verify it worked
-          setTimeout(() => {
-            if (modal.value) {
-              const hasShowClassNow = modal.value.classList.contains('show');
-              const computedDisplayNow = window.getComputedStyle(modal.value).display;
-              console.log(
-                `[DEBUG:VOTING] Nach bootstrapModal.show(): hasShowClass=${hasShowClassNow}, computedDisplay: ${computedDisplayNow}`
-              );
-            }
-          }, 100);
         } catch (e) {
           console.error('[DEBUG:VOTING] Fehler beim Aufrufen von bootstrapModal.show():', e);
         }
@@ -935,31 +882,15 @@ function showModal() {
         if (!document.body.classList.contains('modal-open')) {
           document.body.classList.add('modal-open');
           document.body.style.overflow = 'hidden';
-          console.log('[DEBUG:VOTING] modal-open wiederhergestellt');
         }
 
         // KRITISCH: Stelle auch sicher, dass ein Backdrop vorhanden ist
         const existingBackdrop = document.querySelector('.modal-backdrop');
         if (!existingBackdrop) {
-          console.log('[DEBUG:VOTING] Backdrop fehlt, erstelle neuen');
           const backdrop = document.createElement('div');
           backdrop.className = 'modal-backdrop fade show';
           backdrop.style.zIndex = '1050';
           document.body.appendChild(backdrop);
-        } else {
-          console.log('[DEBUG:VOTING] Backdrop bereits vorhanden');
-        }
-
-        // Debug: Prüfe den aktuellen Zustand des Modals NACH Wiederherstellung
-        if (modal.value) {
-          console.log('[DEBUG:VOTING] Modal-Zustand nach Wiederherstellung:', {
-            hasShowClass: modal.value.classList.contains('show'),
-            display: modal.value.style.display,
-            computedDisplay: window.getComputedStyle(modal.value).display,
-            visibility: window.getComputedStyle(modal.value).visibility,
-            opacity: window.getComputedStyle(modal.value).opacity,
-            zIndex: window.getComputedStyle(modal.value).zIndex,
-          });
         }
 
         // DEBUGGING: MutationObserver um zu sehen, ob die show-Klasse entfernt wird
@@ -983,18 +914,15 @@ function showModal() {
           setTimeout(() => observer.disconnect(), 5000);
         }
 
-        console.log('[DEBUG:VOTING] RETURN - showModal() wird hier beendet (Modal bleibt offen)');
         return; // Frühzeitig zurückkehren, kein hide/show
       }
 
       // WICHTIG: Wenn wir hier sind, bedeutet das, dass bootstrapModal existiert,
       // aber das Modal ist NICHT sichtbar oder es sind keine Stimmen übrig.
       // Wir müssen das Modal schließen und neu öffnen.
-      console.log('[DEBUG:VOTING] Modal wird geschlossen und neu geöffnet');
 
       // Stelle sicher, dass das Modal wirklich geschlossen ist, bevor wir es wieder öffnen
       try {
-        console.log('[DEBUG:VOTING] Rufe bootstrapModal.hide() auf');
         // Versuche, das Modal zu verbergen
         bootstrapModal.hide();
         // Kleine Verzögerung, bevor wir es wieder öffnen

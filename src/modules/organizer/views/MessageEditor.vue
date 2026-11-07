@@ -272,8 +272,6 @@ const currentLocale = ref('de');
 // Recursively extract all leaf nodes from the messages object
 // eslint-disable-next-line no-unused-vars
 const _extractLeafNodes = (obj, locale = 'de', path = '') => {
-  console.debug('Extracting messages for locale:', locale);
-
   // Special case for the top level object with locale keys
   if (path === '' && obj[locale]) {
     return extractMessages(obj[locale], locale, '');
@@ -301,13 +299,6 @@ const _extractLeafNodes = (obj, locale = 'de', path = '') => {
 
         // Wenn der benutzerdefinierte Wert existiert und nicht leer ist, gilt der Eintrag als geändert
         const isModified = customValue !== '';
-
-        // Debugging ausgeben
-        if (isModified) {
-          console.debug(
-            `Found modified translation: ${keyPath}, default="${defaultValue}", custom="${customValue}"`
-          );
-        }
 
         extractedItems.push({
           path: keyPath,

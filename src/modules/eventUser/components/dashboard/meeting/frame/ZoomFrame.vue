@@ -4,7 +4,6 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { setCookie } from '@/core/util/cookie';
 import { fetchSignature } from '@/modules/eventUser/requests/fetch-zoom-signature';
 
 const emit = defineEmits(['loaded']);
@@ -37,13 +36,14 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  // Fallbacks only: meeting number and password come from /zoom/auth/token (SEC-41).
   meetingNumber: {
     type: String,
-    required: true,
+    default: '',
   },
   password: {
     type: String,
-    required: true,
+    default: '',
   },
   returnUrl: {
     type: String,
@@ -79,15 +79,16 @@ onMounted(async () => {
     china: false,
     userEmail: '',
   };
-  setCookie('meeting_number', props.meetingNumber);
-  setCookie('meeting_pwd', props.password);
+  // No cookies for meeting number/password (SEC-41): the SDK gets them from meetConfig only.
 
   // Mark as loaded here because the overlay already exist at this point.
   emit('loaded');
 
-  // Generate Signature.
-  const { signature } = await fetchSignature(meetConfig.value?.meetingNumber);
+  // Signature, meeting number and password from the API (only for participants of this event).
+  const { signature, meetingNumber, password } = await fetchSignature();
   meetConfig.value.signature = signature;
+  meetConfig.value.meetingNumber = meetingNumber || meetConfig.value.meetingNumber;
+  meetConfig.value.passWord = password ?? meetConfig.value.passWord;
 
   join();
 });

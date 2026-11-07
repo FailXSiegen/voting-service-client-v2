@@ -262,7 +262,7 @@ export default {
               popover: {
                 title: 'Was ist ein Magic-Link?',
                 description:
-                  'Mit dem Magic-Link können Teilnehmer ohne Passworteingabe an der Veranstaltung teilnehmen.<br>Die Links, welche <br><span class="text-nowrap">?username=#BENUTERZERNAME#</span><br>als <b>Parameter</b> beinhalten, sind von der Passworteingabe befreit.',
+                  'Mit dem Magic-Link können Teilnehmer ohne Passworteingabe an der Veranstaltung teilnehmen.<br>Jeder Teilnehmer hat einen eigenen Link der Form <span class="text-nowrap">/s/#CODE#</span>. Sie erhalten ihn über „Link kopieren“ in der Teilnehmerliste oder im CSV-Export. Den Link nicht weitergeben: Er ersetzt das Passwort.',
               },
             },
             endDatetime: 'Enddatum (Nur für Briefwahl)',
@@ -667,6 +667,7 @@ export default {
         required: 'Dieses Feld muss ausgefüllt werden.',
         requiredIf: 'Dieses Feld muss ausgefüllt werden.',
         valueAlreadyExist: 'Der Wert existiert bereits.',
+        passwordLength: 'Das Passwort muss mindestens 10 Zeichen lang sein.',
       },
       routing: {
         '404Headline': 'Die angeforderte Seite konnte leider nicht gefunden werden.',

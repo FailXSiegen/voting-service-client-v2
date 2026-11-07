@@ -62,6 +62,7 @@
           <div class="mb-3">
             <BaseInput
               :label="$t('view.videoConference.formData.serverUrl')"
+              :help-text="`Freigegebene Jitsi-Server: ${allowedJitsiHosts().join(', ')}`"
               :errors="v$.serverUrl?.$errors"
               :has-errors="v$.serverUrl?.$errors.length > 0"
               :value="formData.serverUrl"
@@ -82,6 +83,7 @@
 </template>
 
 <script setup>
+import { allowedJitsiHosts } from '@/core/util/allowed-hosts';
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {

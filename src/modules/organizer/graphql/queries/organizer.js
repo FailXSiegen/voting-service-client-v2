@@ -6,7 +6,6 @@ export const ORGANIZER = gql`
       id
       username
       email
-      password
       publicName
       publicOrganisation
       confirmedEmail

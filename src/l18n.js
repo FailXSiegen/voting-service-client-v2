@@ -30,6 +30,8 @@ function getI18n() {
       globalInjection: true, // Wichtig für $t im Template
       missingWarn: false, // Keine Warnungen für fehlende Übersetzungen
       fallbackWarn: false, // Keine Warnungen für Fallback-Übersetzungen
+      // Parameter (z. B. Event-Titel) HTML-escapen, Übersetzungen werden teils als HTML gerendert.
+      escapeParameter: true,
     });
   }
   return i18nInstance;

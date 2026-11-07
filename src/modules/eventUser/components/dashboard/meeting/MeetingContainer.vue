@@ -5,8 +5,6 @@
       <ZoomFrame
         v-if="isZoomMeeting && event.meeting.credentials"
         :nickname="eventUser.publicName"
-        :meeting-number="event.meeting.credentials.meetingId"
-        :password="event.meeting.credentials.password"
         :return-url="event.slug"
         @loaded="onLoaded"
       />

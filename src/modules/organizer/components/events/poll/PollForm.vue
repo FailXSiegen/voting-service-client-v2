@@ -197,7 +197,6 @@ const eventQuery = useQuery(
 eventQuery.onResult(({ data }) => {
   if (data?.event) {
     event.value = data.event;
-    console.log('[PollForm] Event loaded:', data.event);
 
     // Load event users
     const eventUsersQuery = useQuery(
@@ -208,7 +207,6 @@ eventQuery.onResult(({ data }) => {
     eventUsersQuery.onResult(({ data: usersData }) => {
       if (usersData?.eventUsers) {
         eventUsers.value = usersData.eventUsers;
-        console.log('[PollForm] Event users loaded:', usersData.eventUsers.length);
       }
       loaded.value = true;
     });

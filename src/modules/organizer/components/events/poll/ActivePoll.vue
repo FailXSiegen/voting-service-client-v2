@@ -10,7 +10,7 @@
         <h3>{{ activePoll.title }}</h3>
         <p
           v-if="activePollMaxAnswer > 0"
-          v-html="
+          v-safe-html="
             t('view.polls.active.voteStatus', {
               votes: safeAnswerCount,
               maxVotes: safeMaxAnswer,
@@ -21,7 +21,7 @@
         />
         <p
           v-if="activePollMaxAnswer === 0"
-          v-html="
+          v-safe-html="
             t('view.polls.active.voteStatus', {
               votes: parseInt(activePoll.answerCount, 10) || 0,
               maxVotes: parseInt(activePoll.maxVotes, 10) || 1,

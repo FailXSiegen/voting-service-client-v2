@@ -179,10 +179,6 @@ activePollQuery.onResult(({ data }) => {
       pollUserCount.value = userCount;
       pollUserVotedCount.value = votedCount;
     }
-
-    if (import.meta.env.DEV) {
-      console.log('[ORGANIZER DEBUG] SyncPollListing - Current activePoll:', activePoll.value);
-    }
   }
 });
 
@@ -424,15 +420,9 @@ const pollLifeCycleSubscription = useSubscription(POLL_LIFE_CYCLE, {
   eventId: props.event.id, // Make sure we specify the correct eventId!
 });
 pollLifeCycleSubscription.onResult(({ data }) => {
-  console.log('[ORGANIZER] Received POLL_LIFE_CYCLE event:', data?.pollLifeCycle);
-
   if (data?.pollLifeCycle?.poll && data?.pollLifeCycle?.state !== 'closed') {
-    console.log('[ORGANIZER] Setting active poll from subscription:', data.pollLifeCycle.poll);
-
     // For a new poll, only reset vote counters (not user counters)
     if (data?.pollLifeCycle?.state === 'new') {
-      console.log('[ORGANIZER] New poll detected, resetting vote counters only');
-
       // We don't reset activePollAnswerCount here anymore
       // Instead, we get its value from the activePoll query
 
@@ -473,7 +463,6 @@ pollLifeCycleSubscription.onResult(({ data }) => {
   }
 
   if (data?.pollLifeCycle?.state === 'closed') {
-    console.log('[ORGANIZER] Poll closed notification received, resetting active poll');
     resetActivePoll();
     // Force refetch all poll data to update UI
     pollResultsQuery.refetch();

@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { Route } from '@/core/model/Route';
 import { toast } from 'vue3-toastify';
 import t from '@/core/util/l18n';
-import { AUTH_TOKEN } from '@/apollo-client';
 import {
   RouteMainLogin,
   RouteOrganizerDashboard,
@@ -95,7 +94,6 @@ const routes = [
   // Debug-Route, um zu prüfen, ob diese Route aktiviert wird
   new Route('/debug-route', 'debugRoute', NotFound, {
     beforeEnter: () => {
-      console.log('Debug route was hit!');
       return true;
     },
   }),
@@ -142,18 +140,11 @@ const routes = [
     async (to) => {
       const pageSlug = await getPageSlugBySlug('impressum');
       if (pageSlug && pageSlug.pageKey) {
-        console.log('Found custom page slug for impressum:', pageSlug);
         // GenericStaticPage-Komponente verwenden, aber URL als /impressum beibehalten
         to.matched[0].components.default = GenericStaticPage;
         to.params.pageKey = pageSlug.pageKey;
-        console.log(
-          'Using GenericStaticPage with pageKey:',
-          pageSlug.pageKey,
-          'but keeping URL as /impressum'
-        );
         return true;
       }
-      console.log('Using default imprint page');
       return true;
     }
   ),
@@ -168,18 +159,11 @@ const routes = [
     async (to) => {
       const pageSlug = await getPageSlugBySlug('datenschutz');
       if (pageSlug && pageSlug.pageKey) {
-        console.log('Found custom page slug for datenschutz:', pageSlug);
         // GenericStaticPage-Komponente verwenden, aber URL als /datenschutz beibehalten
         to.matched[0].components.default = GenericStaticPage;
         to.params.pageKey = pageSlug.pageKey;
-        console.log(
-          'Using GenericStaticPage with pageKey:',
-          pageSlug.pageKey,
-          'but keeping URL as /datenschutz'
-        );
         return true;
       }
-      console.log('Using default data protection page');
       return true;
     }
   ),
@@ -194,18 +178,11 @@ const routes = [
     async (to) => {
       const pageSlug = await getPageSlugBySlug('haeufige-fragen');
       if (pageSlug && pageSlug.pageKey) {
-        console.log('Found custom page slug for faq:', pageSlug);
         // GenericStaticPage-Komponente verwenden, aber URL als /haeufige-fragen beibehalten
         to.matched[0].components.default = GenericStaticPage;
         to.params.pageKey = pageSlug.pageKey;
-        console.log(
-          'Using GenericStaticPage with pageKey:',
-          pageSlug.pageKey,
-          'but keeping URL as /haeufige-fragen'
-        );
         return true;
       }
-      console.log('Using default faq page');
       return true;
     }
   ),
@@ -220,18 +197,11 @@ const routes = [
     async (to) => {
       const pageSlug = await getPageSlugBySlug('nutzervereinbarung');
       if (pageSlug && pageSlug.pageKey) {
-        console.log('Found custom page slug for nutzervereinbarung:', pageSlug);
         // GenericStaticPage-Komponente verwenden, aber URL als /nutzervereinbarung beibehalten
         to.matched[0].components.default = GenericStaticPage;
         to.params.pageKey = pageSlug.pageKey;
-        console.log(
-          'Using GenericStaticPage with pageKey:',
-          pageSlug.pageKey,
-          'but keeping URL as /nutzervereinbarung'
-        );
         return true;
       }
-      console.log('Using default user agreement page');
       return true;
     }
   ),
@@ -246,18 +216,11 @@ const routes = [
     async (to) => {
       const pageSlug = await getPageSlugBySlug('anleitung');
       if (pageSlug && pageSlug.pageKey) {
-        console.log('Found custom page slug for anleitung:', pageSlug);
         // GenericStaticPage-Komponente verwenden, aber URL als /anleitung beibehalten
         to.matched[0].components.default = GenericStaticPage;
         to.params.pageKey = pageSlug.pageKey;
-        console.log(
-          'Using GenericStaticPage with pageKey:',
-          pageSlug.pageKey,
-          'but keeping URL as /anleitung'
-        );
         return true;
       }
-      console.log('Using default manual page');
       return true;
     }
   ),
@@ -271,16 +234,7 @@ const routes = [
     null,
     true, // Prop-based route
     null,
-    (to) => {
-      // Debugging für static-page Route
-      console.log('static-page route triggered with:', to.params.pageKey);
-
-      // WICHTIG: Wenn wir eine bekannte statische Seite aufrufen,
-      // müssen wir sicherstellen, dass wir nicht zur 404-Seite weitergeleitet werden
-      if (to.params.pageKey) {
-        console.log(`Navigating to static page: ${to.params.pageKey}`);
-      }
-
+    () => {
       return true;
     }
   ),
@@ -295,7 +249,6 @@ const routes = [
     true,
     null,
     (to) => {
-      console.log('Static imprint page route triggered directly');
       // Statt einer Umleitung setzen wir hier einen festen Parameter
       to.params = { ...to.params, pageKey: 'imprint' };
       return true;
@@ -339,20 +292,16 @@ const routes = [
 
       // Zusätzliche Überprüfung für Pfade, die mit "static-page/" beginnen
       if (directPageKey.startsWith('static-page/')) {
-        console.log('Path starts with static-page/, skipping direct path handling');
         return true;
       }
 
       // Debug-Log für direkten Pfad-Zugriff
-      console.log(`Direct path access attempted: /${directPageKey}`);
 
       try {
         // Zuerst prüfen, ob es einen entsprechenden PageSlug gibt, unabhängig von der direkten Pfade Einstellung
         const pageSlug = await getPageSlugBySlug(directPageKey);
 
         if (pageSlug && pageSlug.pageKey) {
-          console.log(`Found custom page slug for ${directPageKey}:`, pageSlug);
-
           // Wenn ein PageSlug gefunden wurde, verwenden wir die GenericStaticPage-Komponente,
           // aber behalten die ursprüngliche URL bei
           to.matched[0].components.default = GenericStaticPage;
@@ -370,8 +319,6 @@ const routes = [
 
         // Wenn direkte Pfade aktiviert sind, Parameter direkt setzen statt umzuleiten
         if (coreStore.getUseDirectStaticPaths) {
-          console.log(`No existing page slug found, treating ${directPageKey} as pageKey`);
-
           // Wir geben den Parameter als pageKeyOrSlug weiter und lassen die Komponente entscheiden
           to.params = {
             ...to.params,
@@ -381,7 +328,6 @@ const routes = [
           return true;
         } else {
           // Wenn direkte Pfade nicht aktiviert sind, zur normalen static-page Route umleiten
-          console.log(`Direct paths not enabled, redirecting to /static-page/${directPageKey}`);
           return {
             path: `/static-page/${directPageKey}`,
           };
@@ -442,12 +388,6 @@ const routes = [
       // Wait for authentication to be initialized
       await coreStore.waitForAuth();
 
-      console.log('Member room - User auth status after init:', {
-        isActiveOrganizer: coreStore.isActiveOrganizerSession,
-        userRole: coreStore.getActiveUserRole,
-        userId: coreStore.user?.id,
-        token: !!localStorage.getItem(AUTH_TOKEN),
-      });
       return true; // Always proceed with the navigation
     }
   ),
@@ -619,7 +559,7 @@ const routes = [
         const event = await fetchEventBySlug(slug);
         coreStore.setEvent(event);
       } catch (error) {
-        toast(t('router.redirect.invalidEventSlug', { slug }), {
+        toast(t('router.redirect.invalidEventSlug', { slug }, { escapeParameter: false }), {
           type: 'error',
         });
         return {
@@ -637,12 +577,10 @@ const routes = [
   // Catch-All Route für 404 (muss immer ganz am Ende stehen)
   new Route('/:pathMatch(.*)*', RouteNotFound, NotFound, null, null, false, null, (to) => {
     // Logging für die Catch-All Route
-    console.log('404 Catch-All route triggered for:', to.fullPath);
 
     // Spezielle Prüfung für static-page Routen
     if (to.fullPath.startsWith('/static-page/')) {
       const pageKey = to.fullPath.replace('/static-page/', '');
-      console.log(`Detected static page path in 404 handler: ${pageKey}`);
 
       // Direktes Setzen des Parameters für die statische Seite
       if (pageKey) {
@@ -650,7 +588,6 @@ const routes = [
         to.params = { ...to.params, pageKey };
 
         // Eine statische Seite wird aufgerufen
-        console.log(`StaticContent existence will be checked for: ${pageKey}`);
 
         // Zur GenericStaticPage-Komponente navigieren
         return {

@@ -1,15 +1,16 @@
 import { URLS } from '@/urls';
 import { standaloneRequest } from '@/core/request/standalone-request';
-import { useCore } from '@/core/store/core';
+import { getFreshAccessToken } from '@/apollo-client';
 
 /**
- * @param {string} meetingNumber
- * @returns {Promise<any>}
+ * Zoom signature for the meeting of the current participant's event. The API determines event,
+ * meeting and role itself and returns {signature, meetingNumber, password}.
+ *
+ * @returns {Promise<{signature: string, meetingNumber: string, password: string}>}
  */
-export function fetchSignature(meetingNumber) {
+export async function fetchSignature() {
   const endpoint = URLS.ZOOM_AUTH;
-  const role = 0;
-  const coreStore = useCore();
+  const accessToken = await getFreshAccessToken();
 
   const requestOptions = {
     method: 'POST',
@@ -20,12 +21,9 @@ export function fetchSignature(meetingNumber) {
     mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${coreStore.getAuthToken}`,
+      Authorization: `Bearer ${accessToken}`,
     },
-    body: JSON.stringify({
-      meetingNumber: meetingNumber,
-      role: role,
-    }),
+    body: JSON.stringify({}),
   };
   return standaloneRequest(endpoint, requestOptions);
 }

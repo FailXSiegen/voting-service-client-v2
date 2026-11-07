@@ -7,7 +7,7 @@
       <div v-if="useDbContent">
         <div v-for="section in contentSections" :key="section.sectionKey" class="mb-4">
           <h2 v-if="section.title">{{ section.title }}</h2>
-          <div v-html="section.content"></div>
+          <div v-safe-html="section.content"></div>
         </div>
 
         <!-- Fallback für leere Datenbank -->
@@ -15,7 +15,7 @@
           <!-- Komponenten-Modus als Fallback -->
           <div v-for="name in componentNames" :key="name">
             <component :is="name" @loaded="handleContentLoaded(name, $event)"></component>
-            <div class="mb-4" v-html="htmlContents[name]"></div>
+            <div v-safe-html="htmlContents[name]" class="mb-4"></div>
           </div>
         </div>
       </div>
@@ -24,7 +24,7 @@
       <div v-else>
         <div v-for="name in componentNames" :key="name">
           <component :is="name" @loaded="handleContentLoaded(name, $event)"></component>
-          <div class="mb-4" v-html="htmlContents[name]"></div>
+          <div v-safe-html="htmlContents[name]" class="mb-4"></div>
         </div>
       </div>
 
@@ -82,11 +82,6 @@ const fetchContentFromDb = async () => {
     // Sortieren nach Reihenfolge
     contentSections.value = [...(result.data.staticContentsByPage || [])];
     contentSections.value.sort((a, b) => a.ordering - b.ordering);
-
-    // Wenn keine Inhalte vorhanden sind, auf Komponenten-Modus zurückfallen
-    if (contentSections.value.length === 0) {
-      console.log('No content found in database, falling back to component mode');
-    }
   } catch (err) {
     console.error('Failed to load FAQ content from database:', err);
     // Bei Fehler auf Komponenten-Modus zurückfallen

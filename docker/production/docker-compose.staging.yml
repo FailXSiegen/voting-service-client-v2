@@ -26,7 +26,11 @@ services:
       - logs_volume:/app/logs
     environment:
       - NODE_ENV=staging
-      - JWT_SECRET=${JWT_SECRET:-staging-secret-key}
+      # SEC-36/37/43: kein Default-Secret, JWT-Prüfung an (API bricht sonst beim Start ab)
+      - ENABLE_JWT=1
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET setzen (min. 32 Zeichen)}
+      - COOKIE_SIGN_SECRET=${COOKIE_SIGN_SECRET:?COOKIE_SIGN_SECRET setzen (min. 32 Zeichen)}
+      - CLIENT_BASE_URL=https://${DOMAIN:-staging.voting.failx.de}
       - DATABASE_HOST=db
       - DATABASE_USER=${DATABASE_USER:-staging_user}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-staging_password}

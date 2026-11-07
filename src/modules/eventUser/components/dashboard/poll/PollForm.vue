@@ -743,8 +743,6 @@ onMounted(() => {
 
   // Spezieller Safari-Kompatibilitätsmodus
   if (browser.isSafari) {
-    console.info('Safari erkannt - Prüfe localStorage-Funktionalität');
-
     // Prüfe, ob localStorage funktioniert
     storageFunctional.value = isLocalStorageAvailable();
 

@@ -42,6 +42,7 @@
             <div class="mb-3">
               <BaseInput
                 :label="$t('view.register.label.password')"
+                :help-text="PASSWORD_HINT"
                 :errors="v$.password.$errors"
                 :has-errors="v$.password.$errors.length > 0"
                 type="password"
@@ -116,6 +117,7 @@
 </template>
 
 <script setup>
+import { PASSWORD_HINT, passwordLength } from '@/core/form/validation/password-policy';
 import { reactive, ref, defineEmits } from 'vue';
 import { required } from '@vuelidate/validators';
 import { useVuelidate } from '@vuelidate/core';
@@ -143,7 +145,7 @@ const formData = reactive({
 const rules = {
   username: { required },
   email: { required },
-  password: { required },
+  password: { required, passwordLength },
   publicName: { required },
   publicOrganisation: { required },
 };

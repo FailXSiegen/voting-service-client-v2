@@ -10,11 +10,12 @@
       v-if="event"
       class="d-flex flex-column align-items-center h-100 justify-content-around mt-5 p-3 card activate-auth-token-page mb-5"
     >
+      <!-- eventTitle is HTML-escaped by vue-i18n (escapeParameter), the rest is sanitized. -->
       <h3
+        v-safe-html="$t('view.activateAuthToken.subTitle', { eventTitle: event.title })"
         class="text-center mb-4"
-        v-html="$t('view.activateAuthToken.subTitle', { eventTitle: event.title })"
       ></h3>
-      <p class="description mb-4" v-html="$t('view.activateAuthToken.description')"></p>
+      <p v-safe-html="$t('view.activateAuthToken.description')" class="description mb-4"></p>
 
       <form class="card p-3 border-primary" @submit.prevent="onSubmit">
         <div class="mb-3">
@@ -66,6 +67,7 @@ import BaseInput from '@/core/components/form/BaseInput.vue';
 import { toast } from 'vue3-toastify';
 import t from '@/core/util/l18n';
 import { RouteEventUserFrame } from '@/router/routes';
+import { EVENT_USER_AUTH_TOKEN_DEVICE } from '@/core/store/core';
 
 const route = useRoute();
 const router = useRouter();
@@ -110,6 +112,8 @@ async function onSubmit() {
   activateEventUserAuthToken(token, formData.username, formData.publicName)
     .then((success) => {
       if (success) {
+        // The auth token cookie is httpOnly: remember that this device is activated.
+        localStorage.setItem(EVENT_USER_AUTH_TOKEN_DEVICE, '1');
         toast(t('success.login.activateEventUserAuthToken'), {
           type: 'success',
         });

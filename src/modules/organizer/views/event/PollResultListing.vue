@@ -64,6 +64,7 @@
 </template>
 
 <script setup>
+import { getFreshAccessToken } from '@/apollo-client';
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import EventNavigation from '@/modules/organizer/components/EventNavigation.vue';
 import { RouteOrganizerDashboard } from '@/router/routes';
@@ -277,7 +278,7 @@ async function exportVoteAdjustments() {
     const response = await fetch(`/api/event/${id}/export-vote-adjustments`, {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${coreStore.authToken}`,
+        Authorization: `Bearer ${await getFreshAccessToken()}`,
       },
     });
 

@@ -111,6 +111,7 @@
 </template>
 
 <script setup>
+import { getFreshAccessToken } from '@/apollo-client';
 import { ref, onMounted } from 'vue';
 import { useApolloClient } from '@vue/apollo-composable';
 import gql from 'graphql-tag';
@@ -195,7 +196,7 @@ const uploadFile = async () => {
       method: 'POST',
       body: formData,
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('apollo-token')}`,
+        Authorization: `Bearer ${await getFreshAccessToken()}`,
       },
     });
 

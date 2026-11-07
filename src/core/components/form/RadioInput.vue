@@ -14,7 +14,7 @@
         {{ item.label }}
       </label>
       <div v-if="item.helpText" class="form-text text-muted">
-        <span v-html="item.helpText" />
+        <span v-safe-html="item.helpText" />
       </div>
     </div>
   </template>

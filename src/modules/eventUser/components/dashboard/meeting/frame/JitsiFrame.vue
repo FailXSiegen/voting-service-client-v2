@@ -1,12 +1,17 @@
 <template>
-  <div id="jitsi-root" ref="jitsiContainer" />
+  <div v-if="loadError" class="alert alert-danger m-3" role="alert">
+    {{ loadError }}
+  </div>
+  <div v-else id="jitsi-root" ref="jitsiContainer" />
 </template>
 
 <script setup>
 import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { allowedJitsiHosts, whitelistedHost } from '@/core/util/allowed-hosts';
 
 const emit = defineEmits(['loaded']);
 const jitsiContainer = ref(null);
+const loadError = ref(null);
 let api = null;
 
 const props = defineProps({
@@ -44,12 +49,20 @@ function loadJitsiScript(domain) {
 }
 
 onMounted(async () => {
-  const domain = props.serverUrl.replace(/^https?:\/\//, '');
+  // The server URL is free text of the organizer: only load scripts from whitelisted hosts.
+  const domain = whitelistedHost(props.serverUrl, allowedJitsiHosts());
+  if (!domain) {
+    console.error('Jitsi server is not whitelisted:', props.serverUrl);
+    loadError.value =
+      'Die Videokonferenz kann nicht geladen werden: Der Jitsi-Server ist nicht freigegeben. Bitte wenden Sie sich an den Veranstalter.';
+    return;
+  }
 
   try {
     await loadJitsiScript(domain);
   } catch (error) {
     console.error('Failed to load Jitsi external API:', error);
+    loadError.value = 'Die Videokonferenz konnte nicht geladen werden.';
     return;
   }
 

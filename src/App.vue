@@ -38,7 +38,7 @@
 import ToTop from '@/core/components/ToTop.vue';
 import { useCore } from '@/core/store/core';
 import { apolloClient } from '@/apollo-client';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { checkBrowserCompatibility, detectBrowser } from '@/core/utils/browser-compatibility';
 import { provideApolloClient, useSubscription } from '@vue/apollo-composable';
 import { TOKEN_REFRESH_REQUIRED_SUBSCRIPTION } from '@/core/graphql/subscription/token-refresh-required';
@@ -162,7 +162,6 @@ provideApolloClient(apolloClient);
     // Spezielle Fallback-Logik für Safari
     if (browserInfo.isSafari) {
       // Stelle sicher, dass wir Probleme mit Safari spezifisch behandeln
-      console.info('Safari erkannt - aktiviere erweiterte Fallback-Mechanismen');
 
       // Versuche einen localStorage-Schreibzugriff mit Fehlerbehandlung
       try {
@@ -203,7 +202,8 @@ const tokenRefreshSubscription = useSubscription(
   () => ({
     eventUserId: coreStore.user?.id || null,
   }),
-  { enabled: isAuthReady }
+  // SEC-16: no websocket without login (the API closes anonymous connections with 4403).
+  { enabled: computed(() => isAuthReady.value && coreStore.user?.id > 0) }
 );
 
 // Handle token refresh subscription
@@ -218,14 +218,11 @@ tokenRefreshSubscription.onResult(async (result) => {
     coreStore.user.id == tokenRefreshRequired.userId &&
     coreStore.user.type === tokenRefreshRequired.userType
   ) {
-    console.info('[TokenRefresh] Server requested token refresh:', tokenRefreshRequired.reason);
-
     try {
       // If token is directly provided by the server, use it
       if (tokenRefreshRequired.token) {
         // Login with the new token and indicate it's a token refresh
         await coreStore.loginUser(tokenRefreshRequired.token, true);
-        console.info('[TokenRefresh] Successfully refreshed token from subscription data');
       } else {
         // Fallback to refresh login API call
         const { token } = await refreshLogin();
@@ -233,7 +230,6 @@ tokenRefreshSubscription.onResult(async (result) => {
         if (token) {
           // Login with the new token and indicate it's a token refresh
           await coreStore.loginUser(token, true);
-          console.info('[TokenRefresh] Successfully refreshed token via API');
         }
       }
     } catch (error) {

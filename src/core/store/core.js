@@ -3,7 +3,7 @@ import {
   apolloClient,
   AUTH_TOKEN,
   EVENT_USER_AUTH_TOKEN,
-  reconnectWebsocketClient,
+  restartWebsocket,
   resetClient,
   terminateClient,
 } from '@/apollo-client';
@@ -21,9 +21,22 @@ import { ORGANIZER } from '@/modules/organizer/graphql/queries/organizer';
 import { EVENT_USER } from '@/modules/eventUser/graphql/queries/event-user';
 import { reactive, ref } from 'vue';
 import { getCookie } from '../util/cookie';
+import { fetchEventBySlug } from '@/modules/eventUser/requests/fetch-event-by-slug';
 import { handleError } from '../error/error-handler';
 import { EventUserNotFoundError } from '@/core/error/EventUserNotFoundError';
 import gql from 'graphql-tag';
+
+// SEC-26: The eventUserAuthToken cookie is meant to become httpOnly, so JS cannot see it. The
+// client remembers in localStorage that this device was activated via auth token instead.
+export const EVENT_USER_AUTH_TOKEN_DEVICE = 'eventUserAuthTokenDevice';
+
+function isAuthTokenDevice() {
+  // Migration: as long as the API still sends a JS-readable cookie, remember it as flag.
+  if (getCookie(EVENT_USER_AUTH_TOKEN)) {
+    localStorage.setItem(EVENT_USER_AUTH_TOKEN_DEVICE, '1');
+  }
+  return localStorage.getItem(EVENT_USER_AUTH_TOKEN_DEVICE) === '1';
+}
 
 class StyleManager {
   static setDynamicVariable(name, value) {
@@ -146,8 +159,8 @@ export const useCore = defineStore('core', {
       // Lade die globalen Systemeinstellungen
       await this.loadSystemSettings();
 
-      // Check if the user have an auth token cookie.
-      if (getCookie(EVENT_USER_AUTH_TOKEN)) {
+      // Check if this device was activated via event user auth token (cookie, see above).
+      if (isAuthTokenDevice()) {
         this.eventUserAuthorizedViaToken = true;
       }
 
@@ -190,17 +203,21 @@ export const useCore = defineStore('core', {
           }
         }
 
-        // Try to login the user by "event user auth token", if the related cookie is present.
-        if (getCookie(EVENT_USER_AUTH_TOKEN)) {
+        // Try to login the user by "event user auth token" (httpOnly cookie): on devices known to
+        // be activated, and on event pages (devices activated before the flag existed). Without a
+        // cookie the API simply answers {success: false}.
+        if (isAuthTokenDevice() || window.location.pathname.startsWith('/event/')) {
           try {
-            // Request a new token using the auth cookie
             const { token } = await loginByEventUserAuthToken();
             if (token) {
-              // Login the user with the new token.
+              localStorage.setItem(EVENT_USER_AUTH_TOKEN_DEVICE, '1');
+              this.eventUserAuthorizedViaToken = true;
               await this.loginUser(token);
             }
           } catch (authTokenError) {
-            console.error('Failed to login with event user auth token:', authTokenError);
+            if (isAuthTokenDevice()) {
+              console.warn('Login with event user auth token failed:', authTokenError?.message);
+            }
           }
         }
       } catch (error) {
@@ -222,6 +239,8 @@ export const useCore = defineStore('core', {
       if (typeof token !== 'string' || token.length === 0) {
         throw new Error('Token can not be empty!');
       }
+
+      const previousUser = { ...this.user };
 
       // Store token in local storage.
       localStorage.setItem(AUTH_TOKEN, token);
@@ -246,6 +265,19 @@ export const useCore = defineStore('core', {
 
         this.user = userData;
 
+        // Plain token renewal (JWT lifetime 15 min) for the same user with unchanged claims:
+        // keep the websocket (the server authenticated it on connect) and the Apollo cache,
+        // otherwise every refresh would interrupt a running vote.
+        if (
+          isTokenRefresh &&
+          previousUser?.id === userData.id &&
+          previousUser?.type === userData.type &&
+          previousUser?.verified === userData.verified &&
+          previousUser?.role === userData.role
+        ) {
+          return;
+        }
+
         // Query organizer record, if this is an organizer session.
         if (this.user?.type === USER_TYPE_ORGANIZER) {
           try {
@@ -266,8 +298,8 @@ export const useCore = defineStore('core', {
           }
         }
 
-        // The socket may predate this token, and the server authorizes subscriptions by it.
-        await reconnectWebsocketClient();
+        // The socket may predate this token, and the server authorizes the connection by it.
+        restartWebsocket();
 
         // Reset apollo client.
         return resetClient();
@@ -275,6 +307,26 @@ export const useCore = defineStore('core', {
         console.error(error);
         // Something went wrong, so terminate the user session.
         await logout();
+      }
+    },
+
+    /**
+     * Reloads the current event. The API includes the meeting access data (Zoom/Jitsi) only for
+     * logged-in participants, so this is needed after a login on the event page.
+     * @returns {Promise<void>}
+     */
+    async refreshEvent() {
+      if (!this.event?.slug) {
+        return;
+      }
+      try {
+        const event = await fetchEventBySlug(this.event.slug);
+        if (event && Number(event.id) === Number(this.event.id)) {
+          // Mutate in place: components keep a reference to the reactive event object.
+          Object.assign(this.event, event);
+        }
+      } catch (error) {
+        console.warn('Event could not be reloaded:', error?.message);
       }
     },
 

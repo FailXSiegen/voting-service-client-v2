@@ -17,9 +17,6 @@ vi.mock('@zoom/meetingsdk', () => ({
     getCurrentUser: vi.fn(),
   },
 }));
-vi.mock('@/core/util/cookie', () => ({
-  setCookie: vi.fn(),
-}));
 
 const { default: MeetingContainer } = await import('../MeetingContainer.vue');
 

@@ -128,10 +128,6 @@ async function processUser(userData, isTokenBased, maxRetries = 3) {
       const mutate = isTokenBased ? createEventUserToken : createEventUserStandard;
       const result = await mutate({ input: userData });
 
-      if (import.meta.env.DEV) {
-        console.info(`User created successfully: ${userData.username || userData.email}`);
-      }
-
       return { success: true, data: result };
     } catch (error) {
       lastError = error;

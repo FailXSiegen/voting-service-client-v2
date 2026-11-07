@@ -4,7 +4,6 @@ import { toast } from 'vue3-toastify';
 import { useCore } from '@/core/store/core';
 import { usePollStatePersistence } from '@/core/composable/poll-state-persistence';
 import { useMutation, useApolloClient } from '@vue/apollo-composable';
-import { CREATE_POLL_SUBMIT_ANSWER } from '@/modules/eventUser/graphql/mutation/create-poll-submit-answer';
 import { CREATE_BULK_POLL_SUBMIT_ANSWER } from '@/modules/eventUser/graphql/mutation/create-bulk-poll-submit-answer';
 import { CREATE_MULTI_POLL_SUBMIT_ANSWER } from '@/modules/eventUser/graphql/mutation/create-multi-poll-submit-answer';
 import { USER_VOTE_CYCLE } from '@/modules/eventUser/graphql/queries/user-vote-cycle';
@@ -89,29 +88,9 @@ export function useVotingProcess(eventUser, event) {
   }
 
   function resetVoteCountersForNewPoll(newPollId) {
-    // Speichere die ursprünglichen Werte für Debug-Zwecke
-    const origUsedVotesCount = usedVotesCount.value;
-
-    console.log(
-      `[DEBUG:VOTING] resetVoteCountersForNewPoll aufgerufen: newPollId=${newPollId}, currentPollId=${currentPollId.value}, usedVotesCount=${origUsedVotesCount}`
-    );
-
     if (newPollId !== currentPollId.value) {
-      // WICHTIG: Prüfe, ob wir uns in einer Fortsetzung befinden
-      // Wenn die aktuelle Poll dieselbe ist wie in usedVotesCount/voteCounter, nicht zurücksetzen!
-      const isContinuation = newPollId === currentPollId.value;
-
-      console.log(
-        `[DEBUG:VOTING] Neue Poll erkannt, isContinuation=${isContinuation} (wird immer false sein!)`
-      );
-
-      if (!isContinuation) {
-        console.log(`[DEBUG:VOTING] Setze usedVotesCount von ${origUsedVotesCount} auf 0 zurück`);
-        usedVotesCount.value = 0;
-        voteCounter.value = 1;
-      }
-    } else {
-      console.log(`[DEBUG:VOTING] Gleiche Poll, KEIN Reset`);
+      usedVotesCount.value = 0;
+      voteCounter.value = 1;
     }
 
     // WICHTIG: Speichere die aktuelle Poll-ID, damit wir sie als "gesehen" markieren
@@ -420,9 +399,6 @@ export function useVotingProcess(eventUser, event) {
           });
 
           serverVoteCycle = result.data?.userVoteCycle?.voteCycle || 0;
-          console.log(
-            `[DEBUG:VOTING] Server-Vote-Cycle abgerufen: ${serverVoteCycle} für User ${eventUser.value.id}, Poll ${poll.value.id}`
-          );
         }
       } catch (error) {
         console.error(`[DEBUG:VOTING] Fehler beim Abrufen des Server-Vote-Cycles:`, error);
@@ -1015,10 +991,6 @@ export function useVotingProcess(eventUser, event) {
       // UI-Sperren werden nun SOFORT freigegeben
       deactivateVotingSession();
 
-      console.log(
-        '[DEBUG:VOTING] ALLE UI-Sperren wurden zurückgesetzt nach erfolgreicher Stimmabgabe'
-      );
-
       // NEUE PRÜFUNG: Setze votingFullyCompleted wenn alle Stimmen verbraucht sind
       const totalAllowedVotes = eventUser.value.voteAmount;
       if (usedVotesCount.value >= totalAllowedVotes) {
@@ -1067,12 +1039,6 @@ export function useVotingProcess(eventUser, event) {
 
       // Aktiv die UI entsperren für Benutzer, die Split-Voting machen wollen
       // Nur wenn noch Stimmen übrig sind und wir nicht im "fully completed" Zustand sind
-      if (usedVotesCount.value < eventUser.value.voteAmount && !votingFullyCompleted.value) {
-        console.log(
-          '[DEBUG:VOTING] Noch Stimmen übrig für Split-Voting, alle UI-Sperren garantiert freigegeben'
-        );
-      }
-
       // Aggressiveres Sicherheitsnetz: Schnellerer Timeout und mehrere Versuche
       for (let i = 1; i <= 5; i++) {
         setTimeout(() => {
@@ -1083,7 +1049,6 @@ export function useVotingProcess(eventUser, event) {
             currentlyProcessingBatch.value
           ) {
             // UI-Flags notfalls erneut zurücksetzen
-            console.log(`[DEBUG:VOTING] UI-Flags zurücksetzen (Versuch ${i}/5)`);
             pollFormSubmitting.value = false;
             isProcessingVotes.value = false;
             currentlyProcessingBatch.value = false;
@@ -1443,32 +1408,10 @@ export function useVotingProcess(eventUser, event) {
         voteCount: bulkVoteCount,
       });
     }
-    // Bei mehreren unterschiedlichen Antworten (multipleAnswers) weiter zum normalen Voting-Prozess
-
-    // Für useAllVotes ohne Bulk-Optimierung: Wir senden die Anzahl der verbleibenden Stimmen statt des Zyklus
-    // Sonst senden wir 1 für einzelne Stimmen
-    const votesToSubmit = useAllVotes ? remainingVotes : 1;
-    const isLastAnswerInBallot = votesToSubmit === 1 && pollFormData.multipleAnswers?.length === 0;
-    const baseInput = {
-      eventUserId: eventUser.value.id,
-      pollId: poll.value?.id ?? 0,
-      type: poll.value.type,
-      voteCycle: votesToSubmit, // Anzahl der abzugebenden Stimmen für diesen Request
-      answerItemLength: 1,
-      answerItemCount: 1,
-      multivote: useAllVotes,
-      isLastAnswerInBallot: isLastAnswerInBallot,
-    };
-
+    // Mehrere unterschiedliche Antworten: ein Request für alle Stimmzettel (createMultiPollSubmitAnswer).
+    // Typ, Antworttexte und Kontingent bestimmt der Server aus der Datenbank.
     try {
-      if (pollFormData.abstain) {
-        const input = {
-          ...baseInput,
-          answerContent: l18n.global.t('view.polls.modal.abstain'),
-          possibleAnswerId: null,
-        };
-        await mutateAnswer(input);
-      } else if (pollFormData.multipleAnswers?.length > 0) {
+      if (pollFormData.multipleAnswers?.length > 0) {
         // WICHTIG: Vorprüfung - Stellen wir sicher, dass die possibleAnswers existieren
         // und dass wir alle verwendeten Antwort-IDs auch wirklich finden können
         if (
@@ -1582,125 +1525,15 @@ export function useVotingProcess(eventUser, event) {
             releaseUILocks();
           }
 
-          console.log(
-            `[MULTI_VOTE] ${successCount} Stimmen auf ${answers.length} Antworten verteilt`
-          );
           return successCount > 0;
         } catch (multiError) {
           console.error(`[ERROR:MULTI_VOTE] ${multiError.message}`);
           return false;
         }
-      } else if (pollFormData.singleAnswer) {
-        // Prüfe, ob poll.value.possibleAnswers existiert
-        if (
-          !poll.value ||
-          !poll.value.possibleAnswers ||
-          !Array.isArray(poll.value.possibleAnswers)
-        ) {
-          console.error(
-            `[ERROR:VOTING] possibleAnswers ist nicht verfügbar: ${JSON.stringify(poll.value)}`
-          );
-          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
-          if (poll.value && poll.value.id) {
-            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-          }
-
-          // ALLE UI-Sperren zurücksetzen
-          releaseUILocks();
-          deactivateVotingSession();
-          currentlyProcessingBatch.value = false;
-
-          return false;
-        }
-
-        // RACE-CONDITION-FIX: Prüfe erneut, ob eine neue Poll aktiviert wurde
-        if (window._newPollActive === true) {
-          console.error(
-            '[ERROR:VOTING] Neue Poll wurde aktiviert während singleAnswer verarbeitet wurde!'
-          );
-
-          // UI entsperren und alle aktiven Sessions deaktivieren
-          releaseUILocks();
-          deactivateVotingSession();
-          currentlyProcessingBatch.value = false;
-
-          // Lokalen Speicher löschen
-          if (poll.value && poll.value.id) {
-            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-          }
-
-          return false;
-        }
-
-        // SICHERHEITSCHECK: Prüfe, ob singleAnswer überhaupt ein gültiger Wert ist
-        if (!pollFormData.singleAnswer && pollFormData.singleAnswer !== 0) {
-          console.error(
-            `[ERROR:VOTING] singleAnswer ist nicht definiert oder ungültig: ${pollFormData.singleAnswer}`
-          );
-
-          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
-          if (poll.value && poll.value.id) {
-            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-          }
-
-          // ALLE UI-Sperren zurücksetzen
-          releaseUILocks();
-          deactivateVotingSession();
-          currentlyProcessingBatch.value = false;
-
-          return false;
-        }
-
-        // PRÄ-VALIDIERUNG: Prüfe, ob die einzelne Antwort-ID gültig ist
-        // Behandle singleAnswer sowohl als String als auch als Number korrekt
-        const singleAnswerStr = String(pollFormData.singleAnswer);
-        const answerExists = poll.value.possibleAnswers.some(
-          (x) =>
-            x &&
-            x.id &&
-            (String(x.id) === singleAnswerStr ||
-              parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10))
-        );
-
-        if (!answerExists) {
-          console.error(
-            `[ERROR:VOTING] Ungültige singleAnswer-ID: ${pollFormData.singleAnswer}. Aktuelle possibleAnswers:`,
-            poll.value.possibleAnswers
-          );
-
-          // SICHERHEIT: Form-Daten löschen, da sie ungültig sind
-          if (poll.value && poll.value.id) {
-            localStorage.removeItem(`poll_form_data_${poll.value.id}`);
-          }
-
-          // ALLE UI-Sperren zurücksetzen bei ungültigen Antworten
-          releaseUILocks();
-          deactivateVotingSession();
-          currentlyProcessingBatch.value = false;
-
-          return false;
-        }
-
-        // Jetzt können wir die Antwort sicher abrufen
-        // Wir können singleAnswerStr wiederverwenden, das bereits oben deklariert wurde
-        const answer = poll.value.possibleAnswers.find(
-          (x) =>
-            String(x.id) === singleAnswerStr ||
-            parseInt(x.id, 10) === parseInt(pollFormData.singleAnswer, 10)
-        );
-
-        const input = {
-          ...baseInput,
-          answerContent: answer.content,
-          possibleAnswerId: answer.id,
-        };
-        await mutateAnswer(input);
       } else {
         console.warn('Invalid form data. Submit wird ignoriert!');
         return false;
       }
-
-      return true;
     } catch (error) {
       console.error('Fehler bei der Stimmabgabe:', error);
 
@@ -1754,9 +1587,6 @@ export function useVotingProcess(eventUser, event) {
           // Erhöhe auch voteCounter für konsistente Anzeige
           voteCounter.value += successCount;
 
-          console.log(`CLIENT: BULK VOTE - usedVotesCount aktualisiert: ${usedVotesCount.value}`);
-          console.log(`CLIENT: BULK VOTE - voteCounter aktualisiert: ${voteCounter.value}`);
-
           // Speichere den aktualisierten Status, damit er auch nach einem Page-Reload erhalten bleibt
           // WICHTIG: poll ist ein Parameter aus dem Kontext der aufrufenden Funktion
           // Wir müssen pollId aus input verwenden, da poll hier nicht direkt verfügbar ist
@@ -1766,9 +1596,6 @@ export function useVotingProcess(eventUser, event) {
               voteCounter.value,
               usedVotesCount.value,
               eventUser.value.id
-            );
-            console.log(
-              `CLIENT: BULK VOTE - Status persistiert: ${input.pollId}, ${voteCounter.value}, ${usedVotesCount.value}`
             );
           }
 
@@ -1781,10 +1608,6 @@ export function useVotingProcess(eventUser, event) {
             window._isProcessingVotes = false;
             window._currentlyProcessingBatch = false;
           }
-
-          console.log(
-            `CLIENT: BULK VOTE - Alle UI-Sperren wurden freigegeben nach erfolgreicher Bulk-Abstimmung`
-          );
         } else {
           console.warn(`CLIENT: BULK VOTE - Keine Stimmen erfolgreich verarbeitet`);
 
@@ -1796,10 +1619,6 @@ export function useVotingProcess(eventUser, event) {
         return successCount > 0;
       } catch (mutationError) {
         console.error(`[ERROR:BULK_VOTE] GraphQL Fehler bei der Bulk-Mutation:`, mutationError);
-        console.log(
-          `[ERROR:BULK_VOTE] GraphQL Fehler Details:`,
-          mutationError.graphQLErrors || 'Keine GraphQL-Fehlerdetails'
-        );
         return false;
       }
     } catch (error) {
@@ -1807,19 +1626,12 @@ export function useVotingProcess(eventUser, event) {
         `[ERROR:BULK_VOTE] Fehler bei der Bulk-Mutation für ${input.voteCount} Stimmen:`,
         error
       );
-      console.log(`[ERROR:BULK_VOTE] Stack:`, error.stack || 'Kein Stack verfügbar');
       return false;
     }
   }
 
   function resetVoteCounts() {
     // VOLLSTÄNDIGER Reset aller Zähler und Status-Werte
-    console.log(
-      '[DEBUG:VOTING] In resetVoteCounts - Vor Reset: usedVotesCount =',
-      usedVotesCount.value,
-      'voteCounter =',
-      voteCounter.value
-    );
     usedVotesCount.value = 0;
     voteCounter.value = 1;
 
@@ -1828,13 +1640,6 @@ export function useVotingProcess(eventUser, event) {
       window.votingProcessModule.usedVotesCount = 0;
       window.votingProcessModule.voteCounter = 1;
     }
-
-    console.log(
-      '[DEBUG:VOTING] In resetVoteCounts - Nach Reset: usedVotesCount =',
-      usedVotesCount.value,
-      'voteCounter =',
-      voteCounter.value
-    );
 
     // Alte Poll-ID speichern, um lokale Daten zu löschen
     const oldPollId = currentPollId.value;
@@ -1877,12 +1682,6 @@ export function useVotingProcess(eventUser, event) {
 
   // Eine explizite Methode zum kontrollierten Freigeben der UI
   function releaseUILocks() {
-    console.log(
-      '[DEBUG:VOTING] releaseUILocks aufgerufen - usedVotesCount =',
-      usedVotesCount.value,
-      'voteCounter =',
-      voteCounter.value
-    );
     // VERBESSERT: Explizite Freigabe ALLER UI-Sperren
     isProcessingVotes.value = false;
     pollFormSubmitting.value = false;
@@ -1929,8 +1728,6 @@ export function useVotingProcess(eventUser, event) {
         console.error('[DEBUG:VOTING] Fehler beim Entfernen von Modal-Elementen:', e);
       }
     }
-
-    console.log('[DEBUG:VOTING] UI-Sperren vollständig freigegeben durch releaseUILocks()');
   }
 
   // Bei Änderungen an usedVotesCount immer auch das globale Modul aktualisieren
@@ -1939,10 +1736,6 @@ export function useVotingProcess(eventUser, event) {
     (newValue) => {
       if (typeof window !== 'undefined' && window.votingProcessModule) {
         window.votingProcessModule.usedVotesCount = newValue;
-        console.log(
-          '[DEBUG:VOTING] Globales votingProcessModule aktualisiert: usedVotesCount =',
-          newValue
-        );
       }
     }
   );
@@ -1953,10 +1746,6 @@ export function useVotingProcess(eventUser, event) {
     (newValue) => {
       if (typeof window !== 'undefined' && window.votingProcessModule) {
         window.votingProcessModule.voteCounter = newValue;
-        console.log(
-          '[DEBUG:VOTING] Globales votingProcessModule aktualisiert: voteCounter =',
-          newValue
-        );
       }
     }
   );
@@ -1978,20 +1767,4 @@ export function useVotingProcess(eventUser, event) {
     deactivateVotingSession, // Funktion zum Deaktivieren der Session
     releaseUILocks, // Explizite Methode zum Freigeben der UI
   };
-}
-
-async function mutateAnswer(input) {
-  try {
-    const createPollSubmitAnswerMutation = useMutation(CREATE_POLL_SUBMIT_ANSWER, {
-      variables: { input },
-    });
-    await createPollSubmitAnswerMutation.mutate();
-    return true;
-  } catch (error) {
-    console.error(
-      `Fehler bei der Mutation für Zyklus ${input.voteCycle}/${input.answerItemCount}:`,
-      error
-    );
-    throw error;
-  }
 }

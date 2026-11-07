@@ -10,9 +10,11 @@
       type="checkbox"
       @input="(event) => $emit('update:checked', event.target.checked)"
     />
-    <label class="form-check-label" :for="checkboxId" v-html="label" />
+    <!-- Labels can be user content (poll answers): plain text unless explicitly marked as HTML. -->
+    <label v-if="labelHtml" v-safe-html="label" class="form-check-label" :for="checkboxId" />
+    <label v-else class="form-check-label" :for="checkboxId">{{ label }}</label>
     <div v-if="helpText" class="form-text text-muted">
-      <span v-html="helpText" />
+      <span v-safe-html="helpText" />
     </div>
     <span v-for="error in errors" :key="error.uid" class="form-field-error text-danger">
       {{ $t('error.formValidation.' + error.$validator) }}<br />
@@ -28,6 +30,11 @@ defineEmits(['update:checked']);
 const props = defineProps({
   // eslint-disable-next-line vue/require-default-prop
   label: String,
+  // Render the label as (sanitized) HTML. Only for trusted translations, never for user content.
+  labelHtml: {
+    type: Boolean,
+    default: false,
+  },
   // eslint-disable-next-line vue/require-default-prop
   id: String,
   // eslint-disable-next-line vue/require-default-prop
@@ -45,9 +52,9 @@ const props = defineProps({
   },
   // eslint-disable-next-line vue/require-default-prop
   helpText: String,
-  // eslint-disable-next-line vue/require-default-prop
+
   checked: Boolean,
-  // eslint-disable-next-line vue/require-default-prop
+
   disabled: Boolean,
   // eslint-disable-next-line vue/require-default-prop
   value: [String, Number],

@@ -7,13 +7,11 @@ export const ORGANIZERS = gql`
       createDatetime
       username
       email
-      password
       publicName
       publicOrganisation
       confirmedEmail
       superAdmin
       verified
-      hash
     }
   }
 `;

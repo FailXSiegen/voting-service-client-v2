@@ -130,6 +130,9 @@
             <input v-model="formData.mosparoHost" type="text" class="form-control" />
             <div class="form-text">
               {{ $t('view.systemSettings.mosparo.host.help') }}
+              <br />
+              Aus Sicherheitsgründen werden nur freigegebene Hosts geladen:
+              {{ allowedMosparoHosts().join(', ') }}
             </div>
           </div>
 
@@ -209,6 +212,7 @@
 </template>
 
 <script setup>
+import { allowedMosparoHosts } from '@/core/util/allowed-hosts';
 import { ref, reactive, computed, watch } from 'vue';
 import { useQuery, useMutation } from '@vue/apollo-composable';
 import { toast } from 'vue3-toastify';
@@ -250,7 +254,6 @@ const systemSettings = computed(() => systemSettingsResult.value?.systemSettings
 watch(
   systemSettings,
   (settings) => {
-    console.log('Received system settings:', JSON.stringify(settings, null, 2));
     if (settings) {
       formData.useDirectStaticPaths = settings.useDirectStaticPaths;
       formData.useDbFooterNavigation = settings.useDbFooterNavigation;
@@ -264,7 +267,6 @@ watch(
       // Leave the field empty — the stored value is preserved on save unless
       // the admin types a new one.
       formData.mosparoPrivateKey = '';
-      console.log('Updated form data:', JSON.stringify(formData, null, 2));
     }
   },
   { immediate: true }
@@ -274,17 +276,14 @@ watch(
 const { mutate: updateSystemSettings } = useMutation(UPDATE_SYSTEM_SETTINGS);
 
 function onMosparoEnabledChange(event) {
-  console.log('mosparo enabled changed:', event.target.checked);
   formData.mosparoEnabled = event.target.checked;
 }
 
 function onSiteKeyChange(event) {
-  console.log('Site key changed:', event.target.value);
   formData.mosparoPublicKey = event.target.value;
 }
 
 function onSecretKeyChange(event) {
-  console.log('Secret key changed:', event.target.value);
   formData.mosparoPrivateKey = event.target.value;
 }
 
@@ -292,8 +291,6 @@ async function onSave() {
   saving.value = true;
 
   try {
-    console.log('Saving system settings:', JSON.stringify(formData, null, 2));
-
     const inputData = {
       useDirectStaticPaths: formData.useDirectStaticPaths,
       useDbFooterNavigation: formData.useDbFooterNavigation,
@@ -312,17 +309,12 @@ async function onSave() {
       inputData.mosparoPrivateKey = formData.mosparoPrivateKey;
     }
 
-    console.log('Input data being sent:', JSON.stringify(inputData, null, 2));
-
-    const result = await updateSystemSettings({
+    await updateSystemSettings({
       input: inputData,
     });
 
-    console.log('Mutation result:', result);
-
     try {
       await refetch();
-      console.log('Refetch completed successfully');
     } catch (refetchError) {
       console.error('Refetch error:', refetchError);
       // Continue anyway, the save was successful

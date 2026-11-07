@@ -46,7 +46,7 @@
           </template>
 
           <template v-else>
-            <div v-html="section.content"></div>
+            <div v-safe-html="section.content"></div>
           </template>
         </div>
       </div>
@@ -96,24 +96,20 @@ const route = useRoute();
 const effectivePageKey = computed(() => {
   // Prüfen, welcher Parameter verwendet wird (für beide Route-Typen)
   const pageKey = route.params.pageKey || route.params.directPageKey || props.pageKey;
-  console.log('Loading static page with key:', pageKey, 'Route full path:', route.fullPath);
 
   // Prüfen, ob wir einen direkten pageKey aus dem Parameter haben
   if (pageKey) {
-    console.log('Using explicit pageKey from route params:', pageKey);
     return pageKey;
   }
 
   // Für den Fall, dass wir keinen Parameter haben, versuchen wir ihn aus dem Pfad zu extrahieren
   if (route.fullPath.startsWith('/static-page/')) {
     const extractedKey = route.fullPath.replace('/static-page/', '');
-    console.log('Extracted key from path:', extractedKey);
     return extractedKey;
   }
 
   // Als letzten Ausweg den aktuellen Pfad ohne führenden Schrägstrich verwenden
   const pathAsKey = route.fullPath.replace(/^\//, '');
-  console.log('Using current path as key:', pathAsKey);
   return pathAsKey;
 });
 
@@ -126,7 +122,6 @@ const { resolveClient } = useApolloClient();
 
 // Inhalte aus der Datenbank laden
 onMounted(async () => {
-  console.log('GenericStaticPage mounted with params:', route.params);
   await fetchContentFromDb();
 });
 
@@ -134,11 +129,6 @@ onMounted(async () => {
 watch(
   () => route.params,
   async (newParams, oldParams) => {
-    console.log('Route params changed:', {
-      from: oldParams,
-      to: newParams,
-    });
-
     if (
       newParams.pageKey !== oldParams.pageKey ||
       newParams.directPageKey !== oldParams.directPageKey
@@ -154,31 +144,8 @@ const fetchContentFromDb = async () => {
 
   try {
     // Detailliertes Logging zur Fehlerdiagnose
-    console.log('Fetching content for static page:', {
-      pageKey: effectivePageKey.value,
-      route: route.fullPath,
-      params: route.params,
-    });
 
     const client = resolveClient();
-
-    // Wenn wir eine der Standard statischen Seiten wie "imprint" aufrufen,
-    // ist es möglich, dass wir tatsächlich eine eigene Vue-Komponente haben
-    // In diesem Fall müssten wir weniger auf DB-Content setzen
-    const isPredefinedStaticPage = [
-      'imprint',
-      'dataProtection',
-      'faq',
-      'userAgreement',
-      'manual',
-      'functions',
-    ].includes(effectivePageKey.value);
-
-    if (isPredefinedStaticPage) {
-      console.log(
-        `Note: ${effectivePageKey.value} is a predefined static page with its own component`
-      );
-    }
 
     const result = await client.query({
       query: gql`
@@ -208,8 +175,6 @@ const fetchContentFromDb = async () => {
       },
       fetchPolicy: 'network-only', // Immer frisch vom Server laden
     });
-
-    console.log(`Content for ${effectivePageKey.value} loaded:`, result.data);
 
     // Nur veröffentlichte Inhalte anzeigen und nach Reihenfolge sortieren
     const publishedSections = (result.data.staticContentsByPage || [])

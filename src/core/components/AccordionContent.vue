@@ -22,7 +22,7 @@
           :aria-labelledby="getHeadingId(index)"
           :data-bs-parent="`#${accordionId}`"
         >
-          <div class="accordion-body" v-html="item.content"></div>
+          <div v-safe-html="item.content" class="accordion-body"></div>
         </div>
       </div>
     </div>

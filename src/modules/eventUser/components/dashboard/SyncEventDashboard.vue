@@ -165,10 +165,6 @@ const showVotingModal = computed(() => {
   // Nicht mehr anzeigen, wenn alle Stimmen bereits abgegeben wurden
   const result = hasVotesAvailable && isAllowedToVote && hasRemainingVotes;
 
-  console.log(
-    `[DEBUG:VOTING] showVotingModal berechnet: hasVotesAvailable=${hasVotesAvailable}, isAllowedToVote=${isAllowedToVote}, usedVotes=${usedVotes}, maxVotes=${maxVotes}, hasRemainingVotes=${hasRemainingVotes}, RESULT=${result}`
-  );
-
   // Zeige Modal wenn: (erlaubt zu wählen) UND (noch Stimmen übrig)
   return result;
 });
@@ -176,25 +172,14 @@ const showVotingModal = computed(() => {
 // KRITISCH: Watcher auf usedVotesCount, um zu tracken, wann es sich ändert
 watch(
   usedVotesCount,
-  (newVal, oldVal) => {
-    console.log(`[DEBUG:VOTING] 🔄 usedVotesCount GEÄNDERT von ${oldVal} zu ${newVal}`);
-    console.log(
-      `[DEBUG:VOTING] 🔍 eventUser.voteAmount=${eventUser.value?.voteAmount}, eventUser.allowToVote=${eventUser.value?.allowToVote}`
-    );
-
+  (newVal) => {
     // FIX: Wenn alle Stimmen abgegeben wurden, resetSubmittingState aufrufen BEVOR das Modal aus dem DOM entfernt wird
     const maxVotes = eventUser.value?.voteAmount || 0;
     if (newVal >= maxVotes && maxVotes > 0) {
-      console.log(
-        `[DEBUG:VOTING] 🎯 Alle Stimmen abgegeben (${newVal}/${maxVotes}), setze isSubmitting zurück`
-      );
       // Verwende die resetSubmittingState-Funktion des PollModals
       if (pollModal.value?.resetSubmittingState) {
         try {
           pollModal.value.resetSubmittingState();
-          console.log(
-            '[DEBUG:VOTING] ✅ isSubmitting erfolgreich zurückgesetzt via resetSubmittingState'
-          );
         } catch (e) {
           console.error('[DEBUG:VOTING] ❌ Fehler beim Zurücksetzen von isSubmitting:', e);
         }
@@ -207,19 +192,13 @@ watch(
 // KRITISCH: Watcher auf showVotingModal, um zu tracken, wann es sich ändert
 watch(
   showVotingModal,
-  (newVal, oldVal) => {
-    console.log(`[DEBUG:VOTING] ⚠️ showVotingModal GEÄNDERT von ${oldVal} zu ${newVal}`);
-    if (newVal) {
-      console.log('[DEBUG:VOTING] ✅ Modal SOLLTE jetzt im DOM sein (v-if=true)');
-    } else {
-      console.log('[DEBUG:VOTING] ❌ Modal SOLLTE jetzt AUS dem DOM sein (v-if=false)');
-
+  (newVal) => {
+    if (!newVal) {
       // FIX: Modal explizit schließen, BEVOR es durch v-if=false unmounted wird
       // WICHTIG: Verwende flush: 'sync' im Watch, um sicherzustellen, dass hideModal
       // aufgerufen wird, BEVOR Vue die Komponente aus dem DOM entfernt
       if (pollModal.value?.hideModal) {
         try {
-          console.log('[DEBUG:VOTING] 🔧 Rufe hideModal() auf, bevor Modal unmounted wird');
           pollModal.value.hideModal();
         } catch (e) {
           console.error('[DEBUG:VOTING] Fehler beim Schließen des Modals vor Unmount:', e);
@@ -413,13 +392,6 @@ activePollEventUserQuery.onResult(({ data }) => {
                 // Bei Split-Voting NICHT zurücksetzen, um die Auswahl zu behalten
                 if (serverVoteCycle === 0) {
                   pollModal.value.reset(false);
-                  console.log(
-                    '[DEBUG:VOTING] Neuer Poll (activePollEventUser): Formular wird zurückgesetzt'
-                  );
-                } else {
-                  console.log(
-                    `[DEBUG:VOTING] Split-Voting (activePollEventUser, Zyklus ${serverVoteCycle}): Formular wird NICHT zurückgesetzt`
-                  );
                 }
 
                 // Kurze Verzögerung, um sicherzustellen dass die pollModal-Referenz stabil bleibt
@@ -490,13 +462,6 @@ activePollEventUserQuery.onResult(({ data }) => {
                 const currentUsedVotes = votingProcess.usedVotesCount.value || 0;
                 if (currentUsedVotes === 0) {
                   pollModal.value.reset(false);
-                  console.log(
-                    '[DEBUG:VOTING] Neuer Poll (activePollEventUser Fallback 1): Formular wird zurückgesetzt'
-                  );
-                } else {
-                  console.log(
-                    `[DEBUG:VOTING] Split-Voting (activePollEventUser Fallback 1, ${currentUsedVotes} verwendet): Formular wird NICHT zurückgesetzt`
-                  );
                 }
 
                 // Kurze Verzögerung, um sicherzustellen dass die pollModal-Referenz stabil bleibt
@@ -560,13 +525,6 @@ activePollEventUserQuery.onResult(({ data }) => {
           const currentUsedVotes = votingProcess.usedVotesCount.value || 0;
           if (currentUsedVotes === 0) {
             pollModal.value?.reset(false);
-            console.log(
-              '[DEBUG:VOTING] Neuer Poll (activePollEventUser Fallback 2): Formular wird zurückgesetzt'
-            );
-          } else {
-            console.log(
-              `[DEBUG:VOTING] Split-Voting (activePollEventUser Fallback 2, ${currentUsedVotes} verwendet): Formular wird NICHT zurückgesetzt`
-            );
           }
 
           // Sicherheitscheck: Nochmals prüfen, ob alte localStorage-Daten gelöscht wurden
@@ -1086,9 +1044,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
               // Dies verhindert Race Conditions, wenn der Bulk-Vote noch nicht vom Server verarbeitet wurde
               const currentClientValue = votingProcess.usedVotesCount.value;
               if (finalVoteCycle > currentClientValue) {
-                console.log(
-                  `[DEBUG:VOTING] Server hat höheren Wert (${finalVoteCycle} > ${currentClientValue}), übernehme Server-Wert`
-                );
                 votingProcess.usedVotesCount.value = finalVoteCycle;
               } else if (finalVoteCycle < currentClientValue) {
                 console.warn(
@@ -1096,7 +1051,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                 );
                 // Behalte den höheren Client-Wert
               } else {
-                console.log(`[DEBUG:VOTING] Server und Client sind synchron (${finalVoteCycle})`);
                 votingProcess.usedVotesCount.value = finalVoteCycle;
               }
 
@@ -1125,9 +1079,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                 // EXTRA PRÜFUNG: Nur Modal öffnen, wenn wirklich noch Stimmen übrig sind
                 // ZUSÄTZLICH: Client-seitigen usedVotesCount prüfen, um Race Conditions zu vermeiden
                 const clientUsedVotes = votingProcess.usedVotesCount.value;
-                console.log(
-                  `[DEBUG:VOTING] Modal-Öffnungsprüfung (pollLifeCycle): maxVotes=${maxVotes}, serverVoteCycle=${serverVoteCycle}, clientUsedVotes=${clientUsedVotes}`
-                );
 
                 // KRITISCH: Prüfen, ob gerade ein ResultModal geöffnet wird oder offen ist
                 // Verwende den globalen Tracking-Mechanismus
@@ -1164,11 +1115,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                   // Bei Split-Voting (serverVoteCycle > 0) NICHT zurücksetzen, um die Auswahl zu behalten
                   if (serverVoteCycle === 0) {
                     pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
-                    console.log('[DEBUG:VOTING] Neuer Poll: Formular wird zurückgesetzt');
-                  } else {
-                    console.log(
-                      `[DEBUG:VOTING] Split-Voting (pollLifeCycle, Zyklus ${serverVoteCycle}): Formular wird NICHT zurückgesetzt`
-                    );
                   }
 
                   // 4. Eine Verzögerung einbauen um sicherzustellen dass ResultModal wirklich geschlossen ist
@@ -1183,20 +1129,11 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                     const finalUsedVotes = votingProcess.usedVotesCount.value;
                     // Verwende maxVotes aus dem äußeren Scope (bereits aus Server-Daten oder eventUser geladen)
                     const finalMaxVotes = maxVotes;
-                    console.log(
-                      `[DEBUG:VOTING] Finale Prüfung vor showModal (pollLifeCycleSubscription): finalUsedVotes=${finalUsedVotes}, finalMaxVotes=${finalMaxVotes}`
-                    );
 
                     if (finalUsedVotes >= finalMaxVotes && finalMaxVotes > 0) {
-                      console.log(
-                        `[DEBUG:VOTING] ABBRUCH: Alle Stimmen bereits abgegeben (${finalUsedVotes}/${finalMaxVotes}), Modal wird NICHT geöffnet`
-                      );
                       return;
                     }
 
-                    console.log(
-                      '[DEBUG:VOTING] >>> Rufe pollModal.showModal() auf (pollLifeCycleSubscription)'
-                    );
                     pollModal.value?.showModal();
                   }, 250);
                 } else {
@@ -1236,9 +1173,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                   // Bei Split-Voting (clientUsedVotes > 0) NICHT zurücksetzen, um die Auswahl zu behalten
                   if (clientUsedVotes === 0) {
                     pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
-                    console.log(
-                      '[DEBUG:VOTING] Neuer Poll (Fallback): Formular wird zurückgesetzt'
-                    );
                   } else {
                     // console.log(`[DEBUG:VOTING] Split-Voting (Fallback, ${clientUsedVotes} verwendet): Formular wird NICHT zurückgesetzt`);
                   }
@@ -1254,18 +1188,11 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                     const finalUsedVotes = votingProcess.usedVotesCount.value;
                     // Verwende maxVotes aus dem äußeren Scope
                     const finalMaxVotes = maxVotes;
-                    console.log(
-                      `[DEBUG:VOTING] Finale Prüfung vor showModal (Fallback 1): finalUsedVotes=${finalUsedVotes}, finalMaxVotes=${finalMaxVotes}`
-                    );
 
                     if (finalUsedVotes >= finalMaxVotes && finalMaxVotes > 0) {
-                      console.log(
-                        `[DEBUG:VOTING] ABBRUCH (Fallback): Alle Stimmen bereits abgegeben (${finalUsedVotes}/${finalMaxVotes}), Modal wird NICHT geöffnet`
-                      );
                       return;
                     }
 
-                    console.log('[DEBUG:VOTING] >>> Rufe pollModal.showModal() auf (Fallback 1)');
                     pollModal.value?.showModal();
                   }, 250);
                 } else {
@@ -1307,7 +1234,6 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
               // Bei Split-Voting (clientUsedVotes > 0) NICHT zurücksetzen, um die Auswahl zu behalten
               if (clientUsedVotes === 0) {
                 pollModal.value?.reset(false); // Vollständiges Zurücksetzen erzwingen
-                console.log('[DEBUG:VOTING] Neuer Poll (Fallback 2): Formular wird zurückgesetzt');
               } else {
                 // console.log(`[DEBUG:VOTING] Split-Voting (Fallback 2, ${clientUsedVotes} verwendet): Formular wird NICHT zurückgesetzt`);
               }
@@ -1323,18 +1249,11 @@ pollLifeCycleSubscription.onResult(async ({ data }) => {
                 const finalUsedVotes = votingProcess.usedVotesCount.value;
                 // Verwende maxVotes aus dem äußeren Scope
                 const finalMaxVotes = maxVotes;
-                console.log(
-                  `[DEBUG:VOTING] Finale Prüfung vor showModal (Fallback 2): finalUsedVotes=${finalUsedVotes}, finalMaxVotes=${finalMaxVotes}`
-                );
 
                 if (finalUsedVotes >= finalMaxVotes && finalMaxVotes > 0) {
-                  console.log(
-                    `[DEBUG:VOTING] ABBRUCH (Fallback 2): Alle Stimmen bereits abgegeben (${finalUsedVotes}/${finalMaxVotes}), Modal wird NICHT geöffnet`
-                  );
                   return;
                 }
 
-                console.log('[DEBUG:VOTING] >>> Rufe pollModal.showModal() auf (Fallback 2)');
                 pollModal.value?.showModal();
               }, 250);
             } else {

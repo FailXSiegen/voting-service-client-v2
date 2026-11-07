@@ -19,7 +19,7 @@ export default [
     rules: {
       semi: [2, 'always'],
       'no-multiple-empty-lines': [2, { max: 1, maxEOF: 0 }],
-      'vue/no-v-html': 0,
+      'vue/no-v-html': 'error', // SEC-27: HTML nur über v-safe-html (DOMPurify)
       'vue/multi-word-component-names': 'off',
 
       // Quality rules (equivalent to PHPMD)

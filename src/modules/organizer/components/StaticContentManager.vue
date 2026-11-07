@@ -657,7 +657,7 @@
               <div>Preview Tab: {{ previewTab }}</div>
             </div>
             <template v-if="formData.contentType === 'standard'">
-              <div v-html="formData.content"></div>
+              <div v-safe-html="formData.content"></div>
             </template>
             <template v-else-if="formData.contentType === 'multi-column'">
               <div v-if="formData.columnsContent && formData.columnsContent.length > 0">
@@ -667,7 +667,10 @@
                     :key="index"
                     :class="getColumnClass(formData.columnCount)"
                   >
-                    <div class="border rounded p-2 bg-white h-100" v-html="column.content"></div>
+                    <div
+                      v-safe-html="column.content"
+                      class="border rounded p-2 bg-white h-100"
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -701,7 +704,7 @@
                       :aria-labelledby="'preview-heading-' + index"
                       data-bs-parent="#previewAccordion"
                     >
-                      <div class="accordion-body" v-html="item.content"></div>
+                      <div v-safe-html="item.content" class="accordion-body"></div>
                     </div>
                   </div>
                 </div>
@@ -718,6 +721,7 @@
 </template>
 
 <script setup>
+import { getFreshAccessToken } from '@/apollo-client';
 /**
  * This configuration was generated using the CKEditor 5 Builder. You can modify it anytime using this link:
  * https://ckeditor.com/ckeditor-5/builder/#installation/NoFgNARATAdArDADBSBGA7CKI4E4ToAcAbMSKrounKgMyIF6GHXnnGVS2pwggoQAJgFMUiMMFRgpU8TIC6kXLQDGAM2GoARhHlA=
@@ -992,14 +996,44 @@ const config = computed(() => {
         },
       ],
     },
+    // Only markup the public pages render anyway (see core/util/sanitize-html.js).
+    // No script/style/iframe/form elements, no on* attributes, no javascript: URLs.
     htmlSupport: {
       allow: [
         {
-          name: /^.*$/,
-          styles: true,
-          attributes: true,
+          name: /^(p|div|span|h[1-6]|a|img|figure|figcaption|blockquote|pre|code|hr|br|b|strong|i|em|u|s|del|ins|small|mark|sub|sup|abbr|kbd|ul|ol|li|dl|dt|dd|table|caption|colgroup|col|thead|tbody|tfoot|tr|th|td)$/,
           classes: true,
+          styles: {
+            'text-align': true,
+            'vertical-align': true,
+            width: true,
+            'max-width': true,
+            height: true,
+            float: true,
+            color: true,
+            'background-color': true,
+          },
+          attributes: [
+            {
+              key: /^(id|title|alt|width|height|loading|colspan|rowspan|scope|start|role)$/,
+              value: true,
+            },
+            { key: /^aria-[a-z]+$/, value: true },
+            { key: 'target', value: /^_blank$/ },
+            { key: 'rel', value: true },
+            { key: 'data-bs-toggle', value: /^collapse$/ },
+            { key: /^data-bs-(target|parent)$/, value: /^#[A-Za-z][\w-]*$/ },
+            { key: 'href', value: /^(https?:|mailto:|\/(?!\/)|#|\?|[^:/?#]+(?:[/?#]|$))/i },
+            { key: 'src', value: /^(https:|\/(?!\/)|[^:/?#]+(?:[/?#]|$))/i },
+          ],
         },
+      ],
+      disallow: [
+        {
+          name: /^(script|style|iframe|frame|object|embed|form|input|button|textarea|select|link|meta|base|svg|math|template)$/,
+        },
+        { attributes: [{ key: /^on/i, value: true }] },
+        { attributes: [{ key: /^(srcdoc|srcset|formaction|xlink:href|action)$/i, value: true }] },
       ],
     },
     image: {
@@ -1202,13 +1236,10 @@ const tempSlugs = reactive({}); // Temporäre Speicherung für Slug-Änderungen
 watch(
   () => pageSlugs.value,
   (newSlugs) => {
-    console.log('pageSlugs changed:', newSlugs);
-
     if (newSlugs && newSlugs.length > 0) {
       // Aktualisiere slugs, ohne bestehende Seiten zu entfernen
       newSlugs.forEach((slug) => {
         if (slug && slug.pageKey) {
-          console.log('Updating slug from watcher for', slug.pageKey, 'to', slug.slug);
           tempSlugs[slug.pageKey] = slug.slug || '';
         }
       });
@@ -1781,30 +1812,7 @@ const _getUserContext = async () => {
   try {
     const client = resolveClient();
 
-    // Zunächst prüfen wir die JWT-Token im localStorage
-    const authToken = localStorage.getItem('apollo-token');
-    if (authToken) {
-      try {
-        // Token decodieren (ohne Signaturprüfung)
-        const parts = authToken.split('.');
-        if (parts.length === 3) {
-          const payload = JSON.parse(atob(parts[1]));
-
-          // Prüfen, ob der Token abgelaufen ist
-          const now = Math.floor(Date.now() / 1000);
-          if (payload.exp && payload.exp < now) {
-            console.log('JWT Token ist abgelaufen!', {
-              expiresAt: new Date(payload.exp * 1000).toLocaleString(),
-              currentTime: new Date().toLocaleString(),
-            });
-          }
-        }
-      } catch (e) {
-        console.error('Fehler beim Decodieren des Tokens:', e);
-      }
-    }
-
-    // Jetzt versuchen wir, den aktuellen Benutzer zu laden
+    // Aktuellen Benutzer laden
     const result = await client.query({
       query: gql`
         query GetCurrentUser {
@@ -2018,7 +2026,7 @@ const directApiSaveContent = async (contentData) => {
     const GRAPHQL_ENDPOINT = `${API_URL}/graphql`;
 
     // JWT-Token aus localStorage holen
-    const authToken = localStorage.getItem('apollo-token');
+    const authToken = await getFreshAccessToken();
     if (!authToken) {
       throw new Error('Nicht angemeldet. Bitte melden Sie sich erneut an.');
     }

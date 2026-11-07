@@ -172,12 +172,45 @@ export function loginByEventUserAuthToken() {
 }
 
 /**
+ * Magic-link login with the shortcode of a shortlink (/s/:shortCode). The API sets the refresh
+ * cookie and returns {success, token, expiresAt, eventSlug}; no personal data in the URL.
+ *
+ * @param {string} shortCode
+ * @returns {Promise<{success: boolean, token?: string, eventSlug?: string}>}
+ */
+export function loginByShortlink(shortCode) {
+  const requestOptions = {
+    method: 'POST',
+    body: JSON.stringify({ shortCode }),
+    redirect: 'follow',
+    referrerPolicy: 'no-referrer',
+    cache: 'no-cache',
+    credentials: 'include',
+    mode: 'cors',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+
+  return fetch(URLS.SHORTLINK_LOGIN_ENDPOINT, requestOptions).then((response) => {
+    if (response?.status >= 500) {
+      throw new NetworkError(t('error.network.internalServerError'));
+    }
+    if (response?.status >= 400) {
+      throw new NetworkError(t('error.network.consumerError'));
+    }
+    return response.json();
+  });
+}
+
+/**
  * @returns {Promise<void>}
  */
 export function logout() {
   const endpoint = URLS.LOGOUT_ENDPOINT;
   const requestOptions = {
-    method: 'GET',
+    // SEC-44: state-changing request, never GET.
+    method: 'POST',
     redirect: 'follow',
     referrerPolicy: 'no-referrer',
     cache: 'no-cache',

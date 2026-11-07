@@ -13,6 +13,7 @@ import { VueDatePicker } from '@vuepic/vue-datepicker';
 import { createPinia } from 'pinia';
 import jQuery from 'jquery';
 import Vue3Toastify from 'vue3-toastify';
+import { safeHtmlDirective } from '@/core/util/sanitize-html';
 window.$ = window.jQuery = jQuery;
 
 import 'vue3-easy-data-table/dist/style.css';
@@ -51,6 +52,8 @@ app.use(Vue3Toastify, {
 app.provide('appVersion', version);
 app.component('EasyDataTable', Vue3EasyDataTable);
 app.component('VueDatePicker', VueDatePicker);
+// Sanitized replacement for v-html (DOMPurify whitelist), see core/util/sanitize-html.js.
+app.directive('safe-html', safeHtmlDirective);
 
 // Füge einen globalen Router-Guard hinzu
 router.beforeEach(async (to, from, next) => {

@@ -283,11 +283,16 @@ async function onTransferVotes(transferData) {
       const targetUserName = result.data.transferVotes.targetUser.publicName;
       const transferredVotes = result.data.transferVotes.transferredVotes;
 
-      const successMessage = t('voteTransfer.success', {
-        votes: transferredVotes,
-        source: sourceUserName,
-        target: targetUserName,
-      });
+      const successMessage = t(
+        'voteTransfer.success',
+        {
+          votes: transferredVotes,
+          source: sourceUserName,
+          target: targetUserName,
+        },
+        // Plain-text toast: do not HTML-escape the names.
+        { escapeParameter: false }
+      );
 
       toast(successMessage, { type: 'success' });
     }

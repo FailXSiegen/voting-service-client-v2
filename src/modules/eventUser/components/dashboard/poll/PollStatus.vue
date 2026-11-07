@@ -5,7 +5,7 @@
       class="container-poll-voted text-center alert alert-success"
     >
       <i class="bi-check bi--4xl my-3" />
-      <h2 v-html="$t('view.user.verified.voted')" />
+      <h2 v-safe-html="$t('view.user.verified.voted')" />
     </div>
   </div>
   <div
@@ -14,7 +14,7 @@
     role="alert"
   >
     <i class="bi-arrow-repeat bi--spin bi--4xl my-3" />
-    <p v-html="$t('view.user.verified.activePoll')" />
+    <p v-safe-html="$t('view.user.verified.activePoll')" />
   </div>
   <div
     v-else

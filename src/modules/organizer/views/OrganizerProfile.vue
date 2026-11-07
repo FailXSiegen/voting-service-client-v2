@@ -69,6 +69,7 @@
               <div class="mb-3">
                 <BaseInput
                   :label="$t('view.profile.label.newPassword')"
+                  :help-text="PASSWORD_HINT"
                   :errors="v$.newPassword?.$errors"
                   :has-errors="v$.newPassword?.$errors.length > 0"
                   autocomplete="new-password"
@@ -106,6 +107,7 @@
 </template>
 
 <script setup>
+import { PASSWORD_HINT, passwordLength } from '@/core/form/validation/password-policy';
 import PageLayout from '@/modules/organizer/components/PageLayout.vue';
 import PageNavigation from '@/modules/organizer/components/PageNavigation.vue';
 import {
@@ -162,7 +164,7 @@ const formData = reactive({
 const rules = computed(() => {
   return {
     currentPassword: { required },
-    newPassword: formData.changePassword ? { required } : {},
+    newPassword: formData.changePassword ? { required, passwordLength } : {},
     newPasswordRepeated: formData.changePassword
       ? { required, sameAs: sameAs('newPassword', formData) }
       : {},
@@ -214,6 +216,8 @@ async function onSubmit() {
         publicName: formData.publicName ?? coreStore.getOrganizer?.publicName,
         email: formData.email ?? coreStore.getOrganizer?.email,
         password: formData.changePassword ? formData.newPassword : undefined,
+        // SEC-39: the API requires the current password for password/e-mail changes.
+        currentPassword: formData.currentPassword,
       },
     },
   });

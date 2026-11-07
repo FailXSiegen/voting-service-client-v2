@@ -12,7 +12,7 @@
     @update:model-value="onChange"
   />
   <div v-if="helpText" class="form-text text-muted">
-    <span v-html="helpText" />
+    <span v-safe-html="helpText" />
   </div>
   <span v-for="error in errors" :key="error.uid" class="form-field-error text-danger">
     <!--    {{ $t('error.formValidation.' + error.$validator) }}<br>-->

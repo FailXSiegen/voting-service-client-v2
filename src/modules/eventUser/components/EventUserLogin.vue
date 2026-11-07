@@ -43,13 +43,8 @@
             />
           </div>
           <div class="mb-3">
-            <input
-              v-if="event.allowMagicLink && readOnlyUsername"
-              :value="formData.password"
-              type="hidden"
-            />
+            <!-- Magic links log in via /s/:shortCode (ShortlinkRedirect.vue); a password is always required here. -->
             <BaseInput
-              v-if="!(event.allowMagicLink && readOnlyUsername)"
               :label="$t('view.login.label.password')"
               :errors="v$.password?.$errors"
               :has-errors="v$.password?.$errors?.length > 0"
@@ -105,7 +100,6 @@ import { loginEventUser } from '@/core/auth/login';
 import { toast } from 'vue3-toastify';
 import t from '@/core/util/l18n';
 import { useCore } from '@/core/store/core';
-import { hashString } from '@/core/util/hashString';
 // Data.
 
 const emit = defineEmits(['exit']);
@@ -116,10 +110,12 @@ const props = defineProps({
   },
 });
 const coreStore = useCore();
+// Legacy links with ?username=…&publicname=… still prefill the form (shortlinks log in directly).
 const urlParams = new URLSearchParams(window.location.search);
+const usernameFromLink = urlParams.get('username');
 
 // Set username readonly, if it is set in the url.
-const readOnlyUsername = urlParams.get('username') !== null;
+const readOnlyUsername = usernameFromLink !== null;
 // Set publicName readonly if event setting is enabled AND parameter is passed
 const publicNameFromUrl = urlParams.get('publicname') || urlParams.get('publicName') || '';
 const readOnlyPublicName =
@@ -127,11 +123,8 @@ const readOnlyPublicName =
   publicNameFromUrl !== '';
 // Form and validation setup.
 const formData = reactive({
-  username: urlParams.get('username') ?? '',
-  password:
-    readOnlyUsername && props.event.allowMagicLink
-      ? hashString(urlParams.get('username') + props.event.createDatetime)
-      : '',
+  username: usernameFromLink ?? '',
+  password: '',
   publicName: publicNameFromUrl || '',
 });
 const rules = computed(() => {
@@ -155,8 +148,10 @@ async function onSubmit() {
 
   loginEventUser(username, password, publicName, props.event?.id ?? 0)
     .then(({ token }) => coreStore.loginUser(token))
+    // Meeting access data is only delivered to logged-in participants: reload the event.
+    .then(() => coreStore.refreshEvent())
     .then(() =>
-      toast(t('success.login.eventUser', { userName: publicName }), {
+      toast(t('success.login.eventUser', { userName: publicName }, { escapeParameter: false }), {
         type: 'success',
       })
     )

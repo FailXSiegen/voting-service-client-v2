@@ -163,7 +163,6 @@ function copyUserLink(user) {
     navigator.clipboard
       .writeText(fullUrl)
       .then(() => {
-        console.log('Link kopiert (moderne API):', fullUrl);
         // Toast mit kopiertem Link anzeigen
         toast(`Link in Zwischenablage kopiert: ${fullUrl}`, {
           type: 'success',
@@ -197,7 +196,6 @@ function fallbackCopyText(text) {
     document.body.removeChild(textArea);
 
     if (successful) {
-      console.log('Link kopiert (Fallback):', text);
       // Toast mit kopiertem Link anzeigen
       toast(`Link in Zwischenablage kopiert: ${text}`, {
         type: 'success',

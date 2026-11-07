@@ -7,7 +7,7 @@
         :class="getColumnClass()"
         class="mb-3 mb-md-0"
       >
-        <div class="column-content" v-html="column.content"></div>
+        <div v-safe-html="column.content" class="column-content"></div>
       </div>
     </div>
   </div>

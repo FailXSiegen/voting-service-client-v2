@@ -23,7 +23,7 @@
     <VerifiedEventUserLegend :event-users="eventUsers" />
     <hr />
     <div class="d-flex justify-content-between align-items-center mb-3">
-      <small class="d-inline-block text-muted" v-html="$t('view.event.user.info')" />
+      <small v-safe-html="$t('view.event.user.info')" class="d-inline-block text-muted" />
       <button class="btn btn-primary" :disabled="isExporting" @click="onExportWithShortlinks">
         <span v-if="isExporting">
           <span
@@ -123,6 +123,8 @@ import { RouteOrganizerEventUserEdit } from '@/router/routes';
 import { toast } from 'vue3-toastify';
 import { exportPollResultsCsv } from '@/modules/organizer/requests/export-results-csv';
 import { handleError } from '@/core/error/error-handler';
+import { apolloClient } from '@/apollo-client';
+import { CREATE_EVENT_USER_SHORTLINK } from '@/modules/organizer/graphql/mutation/create-event-user-shortlink';
 
 const emit = defineEmits([
   'updateToGuest',
@@ -236,28 +238,25 @@ async function onExportWithShortlinks() {
   }
 }
 
-function copyUserLink(user) {
-  // Basis-URL erstellen
-  const baseUrl = `${window.location.origin}/event/${props.eventSlug}`;
-
-  // Parameter hinzufügen, falls vorhanden
-  const params = new URLSearchParams();
-  if (user.publicName) {
-    params.append('publicname', user.publicName);
+async function copyUserLink(user) {
+  // MAGIC-1: Einmal-Login-Link über den Shortcode des Teilnehmers (kein Name/Benutzername in der URL).
+  let fullUrl;
+  try {
+    const { data } = await apolloClient.mutate({
+      mutation: CREATE_EVENT_USER_SHORTLINK,
+      variables: { eventUserId: user.id },
+    });
+    fullUrl = `${window.location.origin}/s/${data.createEventUserShortlink}`;
+  } catch (error) {
+    handleError(error);
+    return;
   }
-  if (user.username) {
-    params.append('username', user.username);
-  }
-
-  // Vollständige URL zusammensetzen
-  const fullUrl = params.toString() ? `${baseUrl}?${params.toString()}` : baseUrl;
 
   // Erste Versuch: Moderne Clipboard API
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard
       .writeText(fullUrl)
       .then(() => {
-        console.log('Link kopiert (moderne API):', fullUrl);
         // Toast mit kopiertem Link anzeigen
         toast(`Link in Zwischenablage kopiert: ${fullUrl}`, {
           type: 'success',
@@ -291,7 +290,6 @@ function fallbackCopyText(text) {
     document.body.removeChild(textArea);
 
     if (successful) {
-      console.log('Link kopiert (Fallback):', text);
       // Toast mit kopiertem Link anzeigen
       toast(`Link in Zwischenablage kopiert: ${text}`, {
         type: 'success',

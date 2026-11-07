@@ -1,4 +1,4 @@
-import { ApolloClient, split, InMemoryCache, HttpLink, ApolloLink, gql } from '@apollo/client/core';
+import { ApolloClient, split, InMemoryCache, HttpLink, gql } from '@apollo/client/core';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { onError } from '@apollo/client/link/error';
 import { logErrorMessages } from '@vue/apollo-util';
@@ -8,7 +8,7 @@ import { decodeJsonWebToken } from '@/core/auth/jwt-util';
 import { getCurrentUnixTimeStamp } from '@/core/util/time-stamp';
 import { refreshLogin, logout } from '@/core/auth/login';
 import { handleError } from '@/core/error/error-handler';
-import { setContext } from 'apollo-link-context';
+import { setContext } from '@apollo/client/link/context';
 import { useCore } from '@/core/store/core';
 import { NetworkError } from '@/core/error/NetworkError';
 import { UnauthorizedError } from '@/core/error/UnauthorizedError';
@@ -26,102 +26,93 @@ function getAccessToken() {
   return localStorage.getItem(AUTH_TOKEN);
 }
 
-// Create link to add authorization to the headers.
-const authLink = new ApolloLink((operation, forward) => {
+// Renew the JWT this many seconds before it expires (lifetime is 15 min since SEC-25).
+const TOKEN_RENEWAL_MARGIN = 30;
+let pendingRefresh = null;
+
+function isTokenFresh(token) {
+  try {
+    const { payload } = decodeJsonWebToken(token);
+    return payload?.exp > getCurrentUnixTimeStamp() + TOKEN_RENEWAL_MARGIN;
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * Returns a valid access token, renewing it via the refresh cookie when it is (about to be)
+ * expired. Parallel callers share one refresh request. Returns null without a session.
+ *
+ * @returns {Promise<string|null>}
+ */
+export async function getFreshAccessToken() {
   const accessToken = getAccessToken();
-  operation.setContext({
+  if (!accessToken) {
+    return null;
+  }
+  if (isTokenFresh(accessToken)) {
+    return accessToken;
+  }
+  if (!pendingRefresh) {
+    pendingRefresh = (async () => {
+      try {
+        const { token } = await refreshLogin();
+        if (!token) {
+          return null;
+        }
+        // Same user: only stores the token, keeps websocket and cache (see core.js loginUser).
+        await useCore().loginUser(token, true);
+        return token;
+      } catch (error) {
+        console.error('[Auth] Token refresh failed:', error?.message);
+        localStorage.removeItem(AUTH_TOKEN);
+        return null;
+      } finally {
+        pendingRefresh = null;
+      }
+    })();
+  }
+  return pendingRefresh;
+}
+
+// Adds a fresh access token to every HTTP request.
+const authLink = setContext(async (_, { headers }) => {
+  const accessToken = await getFreshAccessToken();
+  if (!accessToken) {
+    return { headers };
+  }
+  return {
     headers: {
-      authorization: accessToken ? `Bearer ${accessToken}` : null,
+      ...headers,
+      authorization: `Bearer ${accessToken}`,
     },
-  });
-
-  return forward(operation);
-});
-
-const refreshTokenLink = setContext(async () => {
-  // Get the access token.
-  const accessToken = getAccessToken();
-  if (accessToken === null) {
-    // No access token found, so we just forward.
-    return;
-  }
-
-  // Compare access token expiry date time with the current date time.
-  try {
-    const { payload } = decodeJsonWebToken(accessToken);
-    const currentTime = getCurrentUnixTimeStamp();
-    if (payload?.exp > currentTime) {
-      // The access token is still valid, so we just forward.
-      return;
-    }
-  } catch (error) {
-    // We do not have to catch the error here because if we have an error, the access token is invalid any ways.
-    console.error('RefreshTokenLink - Error decoding token:', error);
-  }
-
-  try {
-    // The token is invalid, so we request a new one.
-    const { token } = await refreshLogin();
-
-    // Login the user with the new token and mark as token refresh.
-    const coreStore = useCore();
-    await coreStore.loginUser(token, true);
-  } catch (error) {
-    console.error('RefreshTokenLink - Failed to refresh token:', error);
-    // If refresh fails, remove the token
-    localStorage.removeItem(AUTH_TOKEN);
-  }
+  };
 });
 
 // Create the http link.
 const httpLink = new HttpLink({
   uri: URLS.GRAPHQL_ENDPOINT,
-  fetch: (uri, options) => {
-    // options.headers = getHeaders();
-    return fetch(uri, options);
-  },
 });
 
-// Create the webSocket link with enhanced stability settings.
-// @info Die Server-Authentifizierung wird über den accessToken (JWT) im localStorage gemacht
+// Create the webSocket link.
+// SEC-16: The server authenticates the connection once (connectionParams) and rejects it with
+// 4403 without a valid token. Therefore lazy: the socket only opens when the first subscription
+// starts (after login), and every (re)connect takes a fresh token, so reconnects after the
+// 15-minute JWT lifetime still work during a running poll.
 const wsLink = new GraphQLWsLink(
   createClient({
     url: URLS.SUBSCRIPTION_URL,
-    reconnect: true,
-    // VERBESSERT: Lazy-Loading deaktiviert, um Verbindung sofort herzustellen und zu halten
-    lazy: false,
-    // VERBESSERT: Längere Timeouts für die Stabilität
-    timeout: 60000, // 60 Sekunden statt 30 Sekunden
-    inactivityTimeout: 120000, // 2 Minuten statt 30 Sekunden
-    // VERBESSERT: Robustere Reconnect-Logik
+    lazy: true,
+    // Keep the socket for a moment when the last subscription ends (route changes).
+    lazyCloseTimeout: 3000,
     retryAttempts: 10,
-    retryWait: (retries) => Math.min(retries * 1000, 10000), // Exponentielles Backoff bis max. 10 Sekunden
-    keepAlive: 45000, // 45 Sekunden Ping-Intervall
-    // VERBESSERT: Verbindung auch bei Inaktivität halten
+    retryWait: (retries) =>
+      new Promise((resolve) => setTimeout(resolve, Math.min((retries + 1) * 1000, 10000))),
+    keepAlive: 45000,
     shouldRetry: () => true,
-    // VERBESSERT: Opera-kompatible Authentifizierung über localStorage statt Cookies
-    isFatalConnectionProblem: () => false,
     connectionParams: async () => {
-      // Verwende JWT aus localStorage für die Authentifizierung
-      let authParams = {
-        connectionPresence: true,
-        forceReconnect: true,
-      };
-
-      try {
-        // PRIMÄR: Auth Token aus localStorage verwenden (für alle Browser)
-        const accessToken = localStorage.getItem(AUTH_TOKEN);
-        if (accessToken) {
-          // Standard JWT-Authentifizierungs-Header
-          authParams.authorization = `Bearer ${accessToken}`;
-        } else {
-          console.warn('[Websocket] Kein Auth-Token im localStorage gefunden!');
-        }
-      } catch (e) {
-        console.warn('[Websocket] Fehler beim Abrufen des Auth-Tokens:', e);
-      }
-
-      return authParams;
+      const accessToken = await getFreshAccessToken();
+      return accessToken ? { authorization: `Bearer ${accessToken}` } : {};
     },
   })
 );
@@ -129,8 +120,6 @@ const wsLink = new GraphQLWsLink(
 // VERBESSERT: Detailliertere WebSocket-Ereignisbehandlung mit Retry-Logik
 let wsReconnectCount = 0;
 const MAX_WS_RECONNECT_ATTEMPTS = 10;
-// FIX: Flag für Logout-Status um 4499-Toasts zu vermeiden
-let isLogoutInProgress = false;
 
 wsLink.client.on('connecting', () => {
   // Sicherstellen, dass der Zähler die Grenze nicht überschreitet
@@ -159,33 +148,12 @@ wsLink.client.on('connected', () => {
   // startWebSocketKeepAlive();
 });
 
-// VERBESSERT: Zusätzliche Ereignisbehandlung für Fehler
+// graphql-ws reconnects by itself (retryAttempts/shouldRetry above).
 wsLink.client.on('error', (error) => {
-  console.error('[Websocket] Fehler bei der Verbindung:', error);
-
-  // Bei Verbindungsfehlern automatisch versuchen, wieder zu verbinden
-  if (wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
-    console.info(
-      `[Websocket] Versuche erneut zu verbinden (${wsReconnectCount}/${MAX_WS_RECONNECT_ATTEMPTS})...`
-    );
-    setTimeout(
-      () => {
-        try {
-          // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
-          if (typeof wsLink.client.connect === 'function') {
-            // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
-            wsLink.client.connect();
-          }
-        } catch (e) {
-          console.error('[Websocket] Fehler beim Neustart der Verbindung:', e);
-        }
-      },
-      Math.min(wsReconnectCount * 1000, 5000)
-    ); // Exponentielles Backoff
-  }
+  console.error('[Websocket] Fehler bei der Verbindung:', error?.message ?? error);
 });
 
-wsLink.client.on('closed', (event) => {
+wsLink.client.on('closed', () => {
   // Mark current event user as offline.
   try {
     // Vorsichtshalber prüfen, ob der Store verfügbar ist
@@ -199,32 +167,6 @@ wsLink.client.on('closed', (event) => {
 
   // Stoppe das Ping-Intervall, wenn die Verbindung geschlossen wird
   stopWebSocketKeepAlive();
-
-  // FIX: Erweiterte Prüfung für kontrollierte Schließung (inkl. Code 4499 vom Logout)
-  const isControlledClosure =
-    !event ||
-    event.code === 1000 || // Normal closure
-    event.code === 1001 || // Going away
-    event.code === 4499 || // UNSERE kontrollierte Terminierung beim Logout
-    isLogoutInProgress; // Logout-Flag gesetzt
-
-  // Nur bei wirklich abnormaler Schließung versuchen, neu zu verbinden
-  if (!isControlledClosure && wsReconnectCount < MAX_WS_RECONNECT_ATTEMPTS) {
-    setTimeout(
-      () => {
-        try {
-          // Manueller Reconnect-Versuch mit robuster Fehlerbehandlung
-          if (typeof wsLink.client.connect === 'function') {
-            // Die GraphQL-WS-Bibliothek bietet connect() als primäre Methode
-            wsLink.client.connect();
-          }
-        } catch (e) {
-          console.error('[Websocket] Fehler beim Neustart der Verbindung nach Schließung:', e);
-        }
-      },
-      Math.min(wsReconnectCount * 1000, 5000)
-    ); // Exponentielles Backoff
-  }
 });
 
 // VERBESSERT: Keep-Alive-Mechanismus für die WebSocket-Verbindung
@@ -340,8 +282,8 @@ export const apolloClient = new ApolloClient({
         const definition = getMainDefinition(query);
         return definition.kind === 'OperationDefinition' && definition.operation === 'subscription';
       },
-      authLink.concat(refreshTokenLink.concat(wsLink)),
-      authLink.concat(refreshTokenLink.concat(httpLink))
+      wsLink,
+      authLink.concat(httpLink)
     )
   ),
 });
@@ -350,7 +292,6 @@ export async function resetClient() {
   try {
     await apolloClient.resetStore();
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
   }
 }
@@ -358,119 +299,50 @@ export async function resetClient() {
 // FIX: Erweiterte terminateClient-Funktion mit Logout-Parameter
 export async function terminateClient(isLogout = false) {
   try {
-    await terminateWebsocketClient(isLogout);
-    await apolloClient.clearStore();
+    // Stop queries/subscriptions first, so no subscription reconnects without a token.
     apolloClient.stop();
+    await apolloClient.clearStore();
+    await terminateWebsocketClient(isLogout);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(error);
   }
 }
 
 // FIX: Erweiterte terminateWebsocketClient-Funktion mit Logout-Parameter
+// eslint-disable-next-line no-unused-vars
 export async function terminateWebsocketClient(isLogout = false) {
   try {
-    // FIX: Setze Logout-Flag um Toasts zu vermeiden
-    if (isLogout) {
-      isLogoutInProgress = true;
-    }
-
-    // Stoppe zuerst das Keep-Alive-Intervall
     stopWebSocketKeepAlive();
-
-    // Verhindere weitere Reconnect-Versuche durch Maximierung des Zählers
     wsReconnectCount = MAX_WS_RECONNECT_ATTEMPTS;
-
-    // Der graphql-ws Client hat keine direkte Methode zum Entfernen von Listenern
-    // Stattdessen setzen wir den Zähler hoch und prüfen ihn in den Listener-Callbacks
-
-    // Ordnungsgemäßes Beenden mit speziellem Code (4499 für kontrollierte Terminierung)
-    await wsLink.client.terminate();
-
-    // FIX: Reset Logout-Flag nach kurzer Verzögerung
-    if (isLogout) {
-      setTimeout(() => {
-        isLogoutInProgress = false;
-      }, 1000);
-    }
+    // Close code 4499; graphql-ws reconnects active subscriptions (fresh token via connectionParams).
+    wsLink.client.terminate();
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('[Websocket] Fehler beim Beenden der WebSocket-Verbindung:', error);
-
-    // FIX: Reset auch bei Fehler
-    if (isLogout) {
-      isLogoutInProgress = false;
-    }
   }
 }
 
+/**
+ * Closes the websocket; graphql-ws reopens it for the active subscriptions with the token
+ * from connectionParams (lazy client: otherwise with the next subscription).
+ */
+export function restartWebsocket() {
+  wsReconnectCount = 0;
+  wsLink.client.terminate();
+}
+
+/**
+ * Reconnects the websocket (new connection with a fresh token) and refetches the active
+ * queries. graphql-ws restarts all active subscriptions after terminate() by itself; with no
+ * active subscription (lazy client) the next subscription opens the connection.
+ * Only for real (re)logins and when a tab becomes visible again, not for token renewals.
+ */
 export async function reconnectWebsocketClient() {
   try {
-    console.info('[Websocket] Starte vollständige WebSocket-Neuverbindung');
-
-    // 1. Setze den Reconnect-Zähler zurück, damit neue Verbindungsversuche möglich sind
-    wsReconnectCount = 0;
-
-    // 2. Vollständiger Neuaufbau der WebSocket-Verbindung durch schließen und neu öffnen
-    try {
-      // Zuerst bestehende Verbindung vollständig beenden (WICHTIG!)
-      if (wsLink && wsLink.client) {
-        await wsLink.client.terminate();
-        console.info('[Websocket] Bestehende Verbindung beendet');
-      }
-
-      // 3. Verbindung explizit neu aufbauen (das Wichtigste für die Wiederherstellung des Online-Status)
-      if (wsLink && wsLink.client && typeof wsLink.client.connect === 'function') {
-        await wsLink.client.connect();
-        console.info('[Websocket] Neue Verbindung explizit gestartet');
-      }
-
-      // 4. Warte kurz, damit die WebSocket-Verbindung vollständig aufgebaut werden kann
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    } catch (wsError) {
-      console.error('[Websocket] Fehler beim Neuaufbau der WebSocket-Verbindung:', wsError);
-    }
-
-    // 5. Sende sofort ein Keep-Alive-Signal, um den Online-Status zu aktualisieren
-    // DISABLED: Causes issues on Safari/Mac with race conditions during voting
-    // try {
-    //   await apolloClient.query({
-    //     query: gql`
-    //       query KeepAlive {
-    //         __typename
-    //       }
-    //     `,
-    //     fetchPolicy: 'network-only', // Erzwinge einen Netzwerkaufruf, kein Caching
-    //     context: {
-    //       credentials: 'include', // Sicherstellen, dass Cookies bei der HTTP-Anfrage gesendet werden
-    //     }
-    //   });
-    //   console.info("[Websocket] Sofortiges Keep-Alive nach Verbindungsaufbau gesendet");
-    // } catch (keepAliveError) {
-    //   console.error("[Websocket] Fehler beim Senden des sofortigen Keep-Alive:", keepAliveError);
-    // }
-
-    // 6. Starte ein neues Keep-Alive-Intervall für zukünftige Pings
-    // DISABLED: Causes issues on Safari/Mac with race conditions during voting
-    // startWebSocketKeepAlive();
-
-    // 7. Aktualisiere den Apollo-Store, um sicherzustellen, dass alle Abonnements wieder aktiv sind
+    restartWebsocket();
     await apolloClient.resetStore();
-
-    // 8. Logge die Cookie-Verfügbarkeit für Debugging-Zwecke
-    try {
-      console.info(
-        '[Websocket] Cookie-Status:',
-        document.cookie ? 'Cookies vorhanden' : 'Keine Cookies verfügbar'
-      );
-    } catch (e) {
-      console.warn('[Websocket] Cookie-Status konnte nicht geprüft werden:', e);
-    }
-
     return true;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('[Websocket] Allgemeiner Fehler bei der Verbindungswiederherstellung:', error);
+    console.error('[Websocket] Fehler bei der Verbindungswiederherstellung:', error);
     throw error;
   }
 }

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import JitsiFrame from '../JitsiFrame.vue';
 
@@ -23,8 +23,13 @@ describe('JitsiFrame', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('VITE_JITSI_ALLOWED_HOSTS', 'jitsi.failx.de');
     // Provide JitsiMeetExternalAPI globally so loadJitsiScript resolves immediately
     window.JitsiMeetExternalAPI = MockJitsiMeetExternalAPI;
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('renders the jitsi container element', () => {
@@ -79,6 +84,39 @@ describe('JitsiFrame', () => {
         userInfo: { displayName: 'Test User' },
       })
     );
+  });
+
+  it('does not load a script from a host that is not whitelisted', async () => {
+    const spy = vi.fn();
+    window.JitsiMeetExternalAPI = spy;
+    const appendSpy = vi.spyOn(document.head, 'appendChild');
+
+    const wrapper = mount(JitsiFrame, {
+      props: { ...defaultProps, serverUrl: 'https://evil.example.org' },
+      global: {
+        mocks: { $t: () => '' },
+      },
+    });
+
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(appendSpy).not.toHaveBeenCalled();
+    expect(spy).not.toHaveBeenCalled();
+    expect(wrapper.find('.alert-danger').exists()).toBe(true);
+    expect(wrapper.find('#jitsi-root').exists()).toBe(false);
+    appendSpy.mockRestore();
+  });
+
+  it('rejects server URLs with paths or credentials', async () => {
+    window.JitsiMeetExternalAPI = MockJitsiMeetExternalAPI;
+    for (const serverUrl of ['https://jitsi.failx.de@evil.example.org', 'jitsi.failx.de/x.js#']) {
+      const wrapper = mount(JitsiFrame, {
+        props: { ...defaultProps, serverUrl },
+        global: { mocks: { $t: () => '' } },
+      });
+      await new Promise((r) => setTimeout(r, 10));
+      expect(wrapper.find('.alert-danger').exists()).toBe(true);
+    }
   });
 
   it('disposes API on unmount', async () => {

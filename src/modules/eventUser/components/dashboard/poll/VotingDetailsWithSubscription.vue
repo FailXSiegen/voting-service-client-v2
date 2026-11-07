@@ -32,13 +32,15 @@
             :class="{ 'border-end border-secondary': index < sortedPollUsers.length - 1 }"
           >
             <div class="d-flex align-items-center">
-              <span
-                v-html="
-                  hasVoted(pollUser)
-                    ? '<i class=\'bi bi-check-square text-success\'></i>'
-                    : '<i class=\'bi bi-x-square text-danger\'></i>'
-                "
-              ></span>
+              <span>
+                <i
+                  :class="
+                    hasVoted(pollUser)
+                      ? 'bi bi-check-square text-success'
+                      : 'bi bi-x-square text-danger'
+                  "
+                ></i>
+              </span>
               <span class="mx-2 fw-medium">{{ pollUser.publicName }}</span>
             </div>
             <div class="ms-2">

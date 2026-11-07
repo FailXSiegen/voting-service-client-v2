@@ -15,6 +15,7 @@
               <div class="mb-3">
                 <BaseInput
                   :label="$t('view.profile.label.newPassword')"
+                  :help-text="PASSWORD_HINT"
                   :errors="v$.password.$errors"
                   :has-errors="v$.password.$errors.length > 0"
                   autocomplete="new-password"
@@ -58,6 +59,7 @@
 </template>
 
 <script setup>
+import { PASSWORD_HINT, passwordLength } from '@/core/form/validation/password-policy';
 import CorePageLayout from '@/core/components/CorePageLayout.vue';
 import BaseInput from '@/core/components/form/BaseInput.vue';
 import { reactive, ref } from 'vue';
@@ -88,6 +90,7 @@ const formData = reactive({
 const rules = {
   password: {
     required,
+    passwordLength,
   },
   passwordRepeated: {
     required,
