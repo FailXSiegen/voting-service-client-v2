@@ -1,6 +1,7 @@
 import { NetworkError } from '@/core/error/NetworkError';
 import t from '@/core/util/l18n';
 import { URLS } from '@/urls';
+import { useCore } from '@/core/store/core';
 
 export function exportPollResultsCsv(eventId, exportType) {
   const endpoint = URLS.ORGANIZER_EXPORT_RESULTS;
@@ -14,6 +15,7 @@ export function exportPollResultsCsv(eventId, exportType) {
     mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${useCore().getAuthToken}`,
     },
   };
 
