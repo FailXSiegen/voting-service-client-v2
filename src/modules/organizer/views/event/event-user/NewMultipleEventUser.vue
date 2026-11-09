@@ -92,6 +92,9 @@ const { mutate: createEventUserStandard } = useMutation(CREATE_EVENT_USER);
 const { mutate: createEventUserToken } = useMutation(CREATE_EVENT_USER_AUTH_TOKEN);
 
 eventQuery.onResult(({ data }) => {
+  // Ohne Antwort (Lade-Zwischenstand) nichts tun – sonst starten Folge-Queries ohne eventId
+  // und die API antwortet seit SEC-15 mit "Not authorized.".
+  if (!data) return;
   if (null === data?.event) {
     handleError(new NetworkError());
     router.push({ name: RouteOrganizerDashboard });

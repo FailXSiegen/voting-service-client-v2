@@ -126,6 +126,9 @@ function fetchVideoConferenceProvider(config) {
 }
 
 eventQuery.onResult(({ data }) => {
+  // Ohne Antwort (Lade-Zwischenstand) nichts tun – sonst starten Folge-Queries ohne eventId
+  // und die API antwortet seit SEC-15 mit "Not authorized.".
+  if (!data) return;
   if (null === data?.event) {
     handleError(new NetworkError());
     router.push({ name: RouteOrganizerEvents });

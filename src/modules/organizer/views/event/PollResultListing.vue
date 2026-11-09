@@ -167,6 +167,9 @@ eventQuery.onError((err) => {
 
 // Event query result handler
 eventQuery.onResult(({ data }) => {
+  // Ohne Antwort (Lade-Zwischenstand) nichts tun – sonst starten Folge-Queries ohne eventId
+  // und die API antwortet seit SEC-15 mit "Not authorized.".
+  if (!data) return;
   if (null === data?.event) {
     handleError(new NetworkError());
     router.push({ name: RouteOrganizerDashboard });
@@ -178,6 +181,7 @@ eventQuery.onResult(({ data }) => {
 });
 
 function setupPollResultsQuery() {
+  if (pollResultsQuery || !event.value?.id) return; // nur einmal und nur mit eventId
   pollResultsQuery = useQuery(
     POLLS_RESULTS,
     {

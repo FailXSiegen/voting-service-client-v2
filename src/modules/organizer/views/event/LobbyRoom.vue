@@ -60,6 +60,9 @@ const eventQuery = useQuery(
   { fetchPolicy: 'no-cache' }
 );
 eventQuery.onResult(({ data }) => {
+  // Ohne Antwort (Lade-Zwischenstand) nichts tun – sonst starten Folge-Queries ohne eventId
+  // und die API antwortet seit SEC-15 mit "Not authorized.".
+  if (!data) return;
   // Check if the event could be fetched successfully. redirect to list if not.
   if (null === data?.event) {
     handleError(new NetworkError());
