@@ -1,5 +1,5 @@
 // SEC-38: same policy as the API (assertPasswordPolicy in voting-service-api/src/server/security.js).
-export const PASSWORD_MIN_LENGTH = 10;
+const PASSWORD_MIN_LENGTH = 10;
 
 export const PASSWORD_HINT = `Mindestens ${PASSWORD_MIN_LENGTH} Zeichen.`;
 

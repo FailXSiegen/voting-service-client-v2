@@ -4,8 +4,8 @@
  * must also be allowed in the Content-Security-Policy (docker/production/default.conf).
  */
 
-export const DEFAULT_JITSI_HOSTS = ['meet.jit.si'];
-export const DEFAULT_MOSPARO_HOSTS = ['captcha.failx.de'];
+const DEFAULT_JITSI_HOSTS = ['meet.jit.si'];
+const DEFAULT_MOSPARO_HOSTS = ['captcha.failx.de'];
 
 const HOST_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:\d{1,5})?$/;
 

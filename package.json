@@ -35,7 +35,6 @@
     "@vuelidate/validators": "^2.0.4",
     "@vuepic/vue-datepicker": "^14.0.0",
     "@zoom/meetingsdk": "^6.0.0",
-    "apollo-link-context": "^1.0.20",
     "bootstrap": "^5.3.2",
     "bootstrap-icons": "^1.11.2",
     "ckeditor5": "^49.0.1",
