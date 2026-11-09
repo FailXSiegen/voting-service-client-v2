@@ -623,19 +623,42 @@ async function toggleHidden() {
     width: 100% !important;
   }
 
-  /* Eine Abstimmung möglichst komplett auf einer Seite; zu lange Karten bricht der
-     Browser trotzdem, dann aber nie mitten in einer Zeile oder direkt nach dem Kopf. */
-  .card {
+  /* Frage + Gesamtergebnis bleiben zusammen; Teilnehmer-/Detaillisten dürfen umbrechen.
+     (Ganze Karte "avoid" erzeugte bei langen Listen leere Seiten.) */
+  .card-header {
     break-inside: avoid;
+    break-after: avoid;
   }
 
-  .card-header,
   .card-body > .row > div > p {
     break-after: avoid;
   }
 
+  .result-list,
+  .result-list + .mt-3 {
+    break-inside: avoid;
+  }
+
   .list-group-item {
     break-inside: avoid;
+  }
+
+  /* Teilnehmer- und Detaillisten kompakt in drei Spalten */
+  .collapse .card-body {
+    padding: 0.25rem 0;
+    border: 0;
+  }
+
+  .collapse .list-group {
+    display: block;
+    column-count: 3;
+    column-gap: 1.5rem;
+    font-size: 9pt;
+  }
+
+  .collapse .list-group-item {
+    padding: 0.05rem 0;
+    border: 0;
   }
 
   /* Ausgeblendete Ergebnisse (z. B. Testabstimmungen) gehören nicht in den Bericht */

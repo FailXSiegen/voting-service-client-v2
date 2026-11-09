@@ -128,13 +128,17 @@ const exportButtons = [
   },
 ];
 
-// Lädt alle Seiten nach (sonst fehlen im PDF alles ab Ergebnis 11) und öffnet den Druckdialog.
+// Lädt alle Ergebnisse in einer Abfrage (sonst fehlt im PDF alles ab Ergebnis 11) und druckt.
+// ponytail: feste Obergrenze 1000 Abstimmungen je Event, reicht für jede Versammlung.
 async function printAllResults() {
-  while (showMoreEnabled.value) {
-    const before = pollResults.value.length;
-    await showMorePollResults();
-    if (pollResults.value.length === before) break;
-  }
+  const { data } = await pollResultsQuery.refetch({
+    eventId: event.value?.id,
+    page: 0,
+    pageSize: 1000,
+    includeHidden: true,
+  });
+  pollResults.value = data?.pollResult ?? pollResults.value;
+  showMoreEnabled.value = false;
   await nextTick();
   window.print();
 }
@@ -211,7 +215,8 @@ function setupPollResultsQuery() {
     }
 
     pollResults.value = data.pollResult;
-    showMoreEnabled.value = data.pollResult.length >= pageSize.value;
+    // Nur wenn die letzte geladene Seite voll war, gibt es evtl. mehr (auch nach fetchMore korrekt)
+    showMoreEnabled.value = data.pollResult.length >= pageSize.value * (page.value + 1);
   });
 
   // Handle poll results errors
@@ -342,3 +347,12 @@ async function downloadCsv(responseText, filename) {
   document.body.removeChild(link);
 }
 </script>
+
+<style>
+/* Toasts (z. B. "Keine weiteren Ergebnisse") nicht mitdrucken */
+@media print {
+  .Toastify {
+    display: none !important;
+  }
+}
+</style>
