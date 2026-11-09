@@ -126,3 +126,7 @@ acme.json
 docker-compose.override.yml
 
 # Generated files
+
+# Deployer-Abhängigkeiten (composer install in server_config/)
+server_config/vendor/
+server_config/composer.lock
