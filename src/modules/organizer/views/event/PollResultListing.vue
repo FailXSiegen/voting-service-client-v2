@@ -10,9 +10,10 @@
       <EventNavigation />
     </template>
     <template #content>
-      <ButtonDropdown :buttons="exportButtons" label="Export" />
-
-      <hr />
+      <div class="d-print-none">
+        <ButtonDropdown :buttons="exportButtons" label="Export" />
+        <hr />
+      </div>
 
       <!-- Loading State -->
       <div v-if="isLoading" class="d-flex justify-content-center my-5">
@@ -121,7 +122,22 @@ const exportButtons = [
     label: 'Stimmen-Anpassungen Log',
     onClick: exportVoteAdjustments,
   },
+  {
+    label: 'PDF / Drucken (alle Ergebnisse)',
+    onClick: printAllResults,
+  },
 ];
+
+// Lädt alle Seiten nach (sonst fehlen im PDF alles ab Ergebnis 11) und öffnet den Druckdialog.
+async function printAllResults() {
+  while (showMoreEnabled.value) {
+    const before = pollResults.value.length;
+    await showMorePollResults();
+    if (pollResults.value.length === before) break;
+  }
+  await nextTick();
+  window.print();
+}
 
 let pollResultsQuery;
 

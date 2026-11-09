@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <header>
+    <header class="d-print-none">
       <slot name="header" />
     </header>
     <main class="container-fluid mb-5 pb-5">
@@ -14,7 +14,7 @@
       </div>
       <slot name="content" />
     </main>
-    <LoginFooter />
+    <LoginFooter class="d-print-none" />
     <HelpPanel />
   </div>
 </template>

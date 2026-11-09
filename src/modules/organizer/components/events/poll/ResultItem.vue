@@ -623,21 +623,24 @@ async function toggleHidden() {
     width: 100% !important;
   }
 
+  /* Eine Abstimmung möglichst komplett auf einer Seite; zu lange Karten bricht der
+     Browser trotzdem, dann aber nie mitten in einer Zeile oder direkt nach dem Kopf. */
+  .card {
+    break-inside: avoid;
+  }
+
+  .card-header,
+  .card-body > .row > div > p {
+    break-after: avoid;
+  }
+
   .list-group-item {
-    position: relative;
-    page-break-inside: avoid;
-    page-break-after: always;
+    break-inside: avoid;
   }
 
-  /* Don't show hidden styling when printing */
+  /* Ausgeblendete Ergebnisse (z. B. Testabstimmungen) gehören nicht in den Bericht */
   .hidden-result {
-    opacity: 1;
-    border: 1px solid #dee2e6 !important;
-    background-color: white;
-  }
-
-  .hidden-result .card-body {
-    background-color: white;
+    display: none !important;
   }
 }
 </style>
